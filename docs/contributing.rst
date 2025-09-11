@@ -104,27 +104,50 @@ Release Steps
 -------------
 
 
+**Step 1: Update Version**
+
 .. code-block:: bash
 
-   # 1. Check current version and update manually
    git checkout main && git pull origin main
 
-   # Update version:
+   # Choose one of these version bump commands:
    uv version --bump patch  # for patch release (0.1.2 -> 0.1.3)
    uv version --bump minor  # for minor release (0.1.2 -> 0.2.0)
    uv version --bump major  # for major release (0.1.2 -> 1.0.0)
 
-   # Get current version
+   # Get the new version number
    VERSION=$(uv version | cut -d' ' -f2)
 
-   # 2. Commit version change and tag
+**Step 2: Commit and Push Changes**
+
+.. code-block:: bash
+
    git add -A && git commit -m "Bump version to $VERSION"
    git push origin main
 
-   # 3. Create and push tag (triggers release)
+**Step 3: Create and Push Tag**
+
+.. code-block:: bash
+
    git tag v$VERSION && git push origin v$VERSION
 
-   # 4. Approve deployment in GitHub Actions (PyPI environment)
+**Step 4: Approve PyPI Deployment**
+
+1. **Go to GitHub Actions**: Visit https://github.com/yizhak-lab-ccg/scXpand/actions
+
+2. **Find Your Workflow Run**: Look for the workflow run with your tag (e.g., `v0.1.4`)
+
+3. **Locate the PyPI Job**: Find the `publish-to-pypi` job (it will show "Waiting for approval")
+
+4. **Approve Deployment**:
+   - Click on the `publish-to-pypi` job
+   - Click **"Review deployments"** button
+   - Select the `pypi` environment
+   - Click **"Approve and deploy"**
+
+5. **Monitor Progress**: The job will start running and publish to PyPI
+
+6. **Verify Release**: Check that your package appears at https://pypi.org/project/scxpand/
 
 **Release Branch Process (For Major Releases):**
 
