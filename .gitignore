@@ -24,8 +24,10 @@ docs\build_output.txt
 *.pyd
 *.egg-info
 **.egg-info/**
+**.egg-info
 build/
 dist/
+
 
 # System files
 .DS_Store
