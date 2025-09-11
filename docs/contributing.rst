@@ -13,17 +13,18 @@ For development setup instructions, see :doc:`installation`.
 We support Python 3.11, 3.12, and 3.13. Our CI tests run on all these versions to ensure compatibility.
 
 **Running Tests**
+Tests run automatically on every push to any branch, but you can also run them manually:
 
 .. code-block:: bash
 
-   # Run all tests
-   uv run pytest
+   # Run all tests in parallel (recommended)
+   uv run pytest -n auto
 
    # Run specific test file
    uv run pytest tests/test_specific.py
 
    # Run with coverage
-   uv run pytest --cov=scxpand
+   uv run pytest -n auto --cov=scxpand
 
 
 Commit Guidelines
@@ -77,19 +78,17 @@ We follow `Semantic Versioning <https://semver.org/>`_:
 
 **Version Bumping**
 
-Update versions manually or use UV:
+Use uv's built-in version management:
 
 .. code-block:: bash
 
    # Check current version
-   grep 'version =' pyproject.toml
+   uv version
 
-   # Bump version with UV (updates pyproject.toml only)
+   # Bump version with uv
    uv version --bump patch   # for bug fixes
    uv version --bump minor   # for new features
    uv version --bump major   # for breaking changes
-
-   # Then manually update scxpand/__init__.py to match
 
 
 Trusted Publishing Setup
@@ -154,20 +153,25 @@ Release Process
 
 **For Maintainers Only**
 
+Following the `uv packaging guide <https://docs.astral.sh/uv/guides/package/>`_, we use uv's built-in tools for building and publishing.
+
+.. note::
+   Due to branch protection rules, all changes to ``main`` must go through pull requests.
+
 **Step 1: Prepare Release**
 
 .. code-block:: bash
 
-   # Ensure you're on main and up to date
+   # Create release branch from main
    git checkout main
    git pull origin main
+   git checkout -b release/vX.X.X
 
-   # Run tests locally to ensure everything works
-   uv run pytest
+   # Run tests to ensure everything works
+   uv run pytest -n auto
 
-   # Update version
-   uv version --bump <patch|minor|major>
-   # Then manually update scxpand/__init__.py to match
+   # Update version with uv
+   uv version --bump patch   # or minor/major as needed
 
 **Step 2: Update Changelog**
 
@@ -177,52 +181,75 @@ Update ``CHANGELOG.md`` with:
 - New features, bug fixes, changes
 - Breaking changes (if any)
 
-**Step 3: Commit and Tag**
+**Step 3: Build Package**
 
 .. code-block:: bash
 
-   # Create release branch
-   git checkout -b release/vX.X.X
+   # Build the package
+   uv build
+
+   # Verify the build artifacts in dist/
+   ls -la dist/
+
+**Step 4: Commit and Create PR**
+
+.. code-block:: bash
 
    # Commit version changes
    git add -A
-   git commit -m "Bump version to X.X.X"
+   git commit -m "Bump version to $(uv version)"
 
-   # Push release branch and create PR
+   # Push release branch
    git push origin release/vX.X.X
-   # Open PR to main, get approval, and merge
 
-   # After PR is merged, tag the main branch
+   # Create PR and get approval, then merge to main
+
+**Step 5: Tag and Publish**
+
+.. code-block:: bash
+
+   # Switch to main after PR merge
    git checkout main
    git pull origin main
-   git tag vX.X.X
+
+   # Create and push tag (triggers automated publishing)
+   git tag v$(uv version)
    git push origin --tags
-
-**Step 4: Automated Publishing**
-
-The GitHub Actions workflow automatically:
-
-1. **On every push to any branch**: Publishes to TestPyPI (no approval needed)
-2. **On tagged pushes only**: Publishes to PyPI (requires manual approval via ``pypi`` environment)
-3. **After PyPI publish**: Creates GitHub release with signed artifacts
-
-.. warning::
-   Every push to any branch triggers a TestPyPI publication. This includes feature branches,
-   so be mindful that development versions will be published to TestPyPI automatically.
-
-**Step 5: Manual Approval (PyPI only)**
-
-1. Go to your repository's Actions tab
-2. Find the running workflow for your tag
-3. Click on the "pypi" environment deployment
-4. Click "Review deployments" and approve
 
 **Step 6: Verify Release**
 
-- Check PyPI: https://pypi.org/project/scxpand/
-- Check TestPyPI: https://test.pypi.org/project/scxpand/
-- Test installation: ``pip install scxpand==X.X.X``
+The existing GitHub Actions workflow will automatically:
 
+1. Build the package with ``uv build``
+2. Publish to PyPI (with manual approval)
+3. Create GitHub release
+
+Verify the release at:
+- **PyPI**: https://pypi.org/project/scxpand/
+- **GitHub**: https://github.com/yizhak-lab-ccg/scXpand/releases
+
+**Quick Release Checklist**
+
+.. code-block:: bash
+
+   # 1. Create release branch and update version
+   git checkout main && git pull origin main
+   git checkout -b release/vX.X.X
+   uv run pytest -n auto
+   uv version --bump patch  # or minor/major
+
+   # 2. Build and commit
+   uv build
+   git add -A && git commit -m "Bump version to $(uv version)"
+   git push origin release/vX.X.X
+
+   # 3. Create PR, get approval, merge to main
+
+   # 4. Tag and publish
+   git checkout main && git pull origin main
+   git tag v$(uv version) && git push origin --tags
+
+   # 5. Approve deployment in GitHub Actions
 
 Documentation
 -------------
