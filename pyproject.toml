@@ -37,7 +37,6 @@ dependencies = [
     "igraph>=0.11.4",
     "shap>=0.48.0",
     "bbknn>=1.6.0",
-    "torch>=2.6.0",
     "scrublet>=0.2.3",
     "scirpy>=0.9.3",
     "tabulate>=0.9.0",
@@ -56,6 +55,12 @@ Issues = "https://github.com/yizhak-lab-ccg/scXpand/issues"
 scxpand = "scxpand.main:main"
 
 [project.optional-dependencies]
+# PyTorch backend options
+cuda = [
+    "torch>=2.6.0",
+    "torchvision>=0.19.0",
+    "torchaudio>=2.6.0",
+]
 dev = [
     "vulture>=2.14",
     "pytest>=8.3.4",
@@ -96,6 +101,24 @@ exclude = ["tests*", "docs*", "notebooks*", "temp*", "data*", "results*", "_note
 
 [tool.uv]
 preview = true
+
+# PyTorch index configurations
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+# PyTorch source configurations for CUDA backend
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cu121" },
+]
+torchvision = [
+    { index = "pytorch-cu121" },
+]
+torchaudio = [
+    { index = "pytorch-cu121" },
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

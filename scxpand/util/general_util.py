@@ -7,7 +7,7 @@ import time
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any, Type, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -23,7 +23,7 @@ from scxpand.util.model_type import save_model_type
 
 logger = get_logger()
 
-T = TypeVar("T")
+T = TypeVar("T", bound=BaseParams)
 
 
 def convert_enums_to_values(obj: Any) -> Any:
@@ -564,7 +564,12 @@ def flatten_dict(d, parent_key="", sep="/"):
     return items
 
 
-def load_and_override_params[T](param_class: type[T], config_path: str | None = None, **kwargs) -> T:
+def load_and_override_params[T: BaseParams](
+    param_class: Type[T],
+    config_path: str | None = None,
+    logger: structlog.stdlib.BoundLogger | None = None,
+    **kwargs: Any,
+) -> T:
     """Load parameters from config file or use defaults, then apply overrides.
 
     Args:

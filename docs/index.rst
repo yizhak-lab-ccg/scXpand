@@ -31,11 +31,17 @@ Quick Start
 
 **Installation**:
 
-You need to have Python 3.11 or newer installed on your system.
+For CUDA-enabled systems:
+.. code-block:: bash
 
+    pip install scxpand[cuda]
+
+For other systems (CPU or non-CUDA GPU backends):
 .. code-block:: bash
 
     pip install scxpand
+
+See :doc:`installation` for detailed setup instructions.
 
 .. code-block:: python
 

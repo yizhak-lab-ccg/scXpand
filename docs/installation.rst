@@ -1,11 +1,31 @@
 Installation
 ============
 
-To use scXpand from another project, install it using pip:
+Installation Options
+--------------------
 
+**For CUDA-enabled systems:**
+.. code-block:: bash
+
+    pip install scxpand[cuda]
+
+**For other systems:**
 .. code-block:: bash
 
     pip install scxpand
+
+PyTorch Backend Details
+-----------------------
+
+scXpand requires PyTorch for some of the models. The installation options provide different PyTorch backends:
+
+**CUDA Installation (``scxpand[cuda]``)**
+- Explicitly installs PyTorch with CUDA 12.1 support
+- Recommended for systems with NVIDIA hardware.
+
+**Standard Installation (``scxpand``)**
+- Automatically selects the best PyTorch backend for your platform, but does not support CUDA.
+
 
 Development Version
 -------------------
