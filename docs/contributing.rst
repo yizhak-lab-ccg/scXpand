@@ -115,10 +115,11 @@ Release Steps
    uv version --bump minor  # for minor release (0.1.2 -> 0.2.0)
    uv version --bump major  # for major release (0.1.2 -> 1.0.0)
 
-   uv version  # Check current version
+   # Get current version
+   VERSION=$(uv version | cut -d' ' -f2)
 
    # 2. Commit version change and tag
-   git add -A && git commit -m "Bump version to 0.1.3"
+   git add -A && git commit -m "Bump version to $VERSION"
    git push origin main
 
    # 3. Create and push tag (triggers release)
