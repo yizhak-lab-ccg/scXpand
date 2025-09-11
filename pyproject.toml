@@ -47,10 +47,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ronamit/scxpand"
+Homepage = "https://github.com/yizhak-lab-ccg/scXpand"
 Documentation = "https://scxpand.readthedocs.io"
-Repository = "https://github.com/ronamit/scxpand"
-Issues = "https://github.com/ronamit/scxpand/issues"
+Repository = "https://github.com/yizhak-lab-ccg/scXpand"
+Issues = "https://github.com/yizhak-lab-ccg/scXpand/issues"
 
 [project.scripts]
 scxpand = "scxpand.main:main"
