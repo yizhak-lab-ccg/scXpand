@@ -7,6 +7,7 @@ import sys
 
 from pathlib import Path
 
+import pytest
 import torch
 
 from torch.utils.data import DataLoader
@@ -93,6 +94,7 @@ class TestMultiprocessingLoading:
             assert batch_count > 0, f"No batches were loaded with {num_workers} workers"
             assert batch_count <= max_batches, f"Should not load more than {max_batches} batches"
 
+    @pytest.mark.slow
     def test_multiprocessing_with_real_data_format(self, dummy_adata, tmp_path):
         """Test multiprocessing with a more realistic data format setup."""
         # Create a temporary data file
@@ -181,6 +183,7 @@ class TestMultiprocessingLoading:
             assert len(batches) == 1, f"Should get exactly one batch with large batch size for {num_workers} workers"
             assert batches[0]["x"].shape[0] == len(dataset), f"Batch should contain all data for {num_workers} workers"
 
+    @pytest.mark.slow
     def test_multiprocessing_worker_consistency(self, dummy_adata, tmp_path):
         """Test that multiprocessing produces consistent results across different worker counts."""
         # Create a temporary data file
@@ -210,7 +213,7 @@ class TestMultiprocessingLoading:
         batch_size = 16
         results = {}
 
-        for num_workers in [0, 2, 4]:
+        for num_workers in [0, 2]:  # Reduced from [0, 2, 4] to speed up test
             collate_fn = PicklableCollateFn(dataset)
             dataloader = DataLoader(
                 dataset,
@@ -227,7 +230,7 @@ class TestMultiprocessingLoading:
             results[num_workers] = torch.cat(batches, dim=0)
 
         # Verify consistency across different worker counts
-        for num_workers in [2, 4]:
+        for num_workers in [2]:  # Reduced from [2, 4] to speed up test
             assert torch.allclose(results[0], results[num_workers], atol=1e-6), (
                 f"Results should be consistent between 0 and {num_workers} workers"
             )

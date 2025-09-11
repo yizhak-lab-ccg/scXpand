@@ -13,6 +13,7 @@ For development setup instructions, see :doc:`installation`.
 We support Python 3.11, 3.12, and 3.13. Our CI tests run on all these versions to ensure compatibility.
 
 **Running Tests**
+
 Tests run automatically on every push to any branch, but you can also run them manually:
 
 .. code-block:: bash
@@ -26,11 +27,32 @@ Tests run automatically on every push to any branch, but you can also run them m
    # Run with coverage
    uv run pytest -n auto --cov=scxpand
 
+Contributing Workflow
+---------------------
 
-Commit Guidelines
------------------
+**1. Create Branch**
 
-Write clear, descriptive commit messages that explain what your changes do. Examples:
+.. code-block:: bash
+
+   git checkout -b your-feature-name
+
+**2. Make Changes**
+
+Implement your changes with appropriate tests and documentation updates.
+
+**3. Test Your Changes**
+
+.. code-block:: bash
+
+   # Run all tests
+   uv run pytest -n auto
+
+   # Run specific tests for your changes
+   uv run pytest tests/your_test_file.py
+
+**4. Commit Guidelines**
+
+Write clear, descriptive commit messages:
 
 - ``Add support for batch prediction``
 - ``Fix memory leak in data preprocessing``
@@ -39,18 +61,12 @@ Write clear, descriptive commit messages that explain what your changes do. Exam
 
 Keep commits focused on a single change when possible.
 
+**5. Create Pull Request**
 
-Pull Request Process
---------------------
+.. code-block:: bash
 
-1. **Create Branch**: ``git checkout -b your-feature-name``
-2. **Make Changes**: Implement your changes with appropriate tests
-3. **Test**: Run tests and ensure they pass
-4. **Push**: ``git push origin your-feature-name``
-5. **Create PR**: Open a pull request targeting ``main``
-6. **Wait for CI**: All status checks must pass
-7. **Code Review**: PR requires approval before merging
-8. **Merge**: Use "Squash and merge" for clean history
+   git push origin your-feature-name
+   # Then create PR targeting main branch
 
 **Pull Request Checklist**
 
@@ -61,174 +77,24 @@ Pull Request Process
 - [ ] Branch is up-to-date with main
 
 .. note::
-   Direct pushes to ``main`` are blocked when branch protection is enabled.
-   All changes to ``main`` must go through pull requests.
-
-
-Version Management
-------------------
-
-**Semantic Versioning**
-
-We follow `Semantic Versioning <https://semver.org/>`_:
-
-- **MAJOR**: Incompatible API changes (1.0.0 → 2.0.0)
-- **MINOR**: Backward-compatible functionality additions (1.0.0 → 1.1.0)
-- **PATCH**: Backward-compatible bug fixes (1.0.0 → 1.0.1)
-
-**Version Bumping**
-
-Use uv's built-in version management:
-
-.. code-block:: bash
-
-   # Check current version
-   uv version
-
-   # Bump version with uv
-   uv version --bump patch   # for bug fixes
-   uv version --bump minor   # for new features
-   uv version --bump major   # for breaking changes
-
-
-Trusted Publishing Setup
-=======================
-
-**One-Time Setup for Maintainers**
-
-Before you can publish releases, you need to configure PyPI Trusted Publishing:
-
-**Step 1: Configure PyPI Trusted Publisher**
-
-1. Go to https://pypi.org/manage/account/publishing/
-2. Fill in the form:
-   - **PyPI Project Name**: ``scxpand``
-   - **Owner**: ``yizhak-lab-ccg`` (or your GitHub username/org)
-   - **Repository name**: ``scXpand``
-   - **Workflow filename**: ``release.yml``
-   - **Environment name**: ``pypi``
-3. Click "Add"
-
-**Step 2: Configure TestPyPI Trusted Publisher**
-
-1. Go to https://test.pypi.org/manage/account/publishing/
-2. Repeat step 1, but use environment name: ``testpypi``
-
-**Step 3: Set Up GitHub Environments**
-
-1. Go to your GitHub repository → Settings → Environments
-2. Create environment ``pypi``:
-   - **Required reviewers**: Add yourself (for manual approval)
-   - **Deployment branches**: Only protected branches
-3. Create environment ``testpypi`` (no special settings needed)
-
-.. note::
-   If you don't have a TestPyPI account, create one at https://test.pypi.org/account/register/
-
-
-Publishing Workflow Details
-============================
-The project uses GitHub Actions for automated publishing with the following behavior:
-
-**TestPyPI Publishing (Automatic)**
-- **Trigger**: Every push to any branch (including feature branches)
-- **Purpose**: Development testing and validation
-- **Approval**: None required
-- **URL**: https://test.pypi.org/project/scxpand/
-
-**PyPI Publishing (Manual Approval)**
-- **Trigger**: Only when pushing git tags (e.g., ``git push origin v1.0.0``)
-- **Purpose**: Official releases
-- **Approval**: Manual approval required via GitHub ``pypi`` environment
-- **URL**: https://pypi.org/project/scxpand/
-
-.. note::
-   If you're working on feature branches and don't want to publish development
-   versions to TestPyPI, consider working in a fork instead of pushing directly
-   to the main repository.
-
+   All changes to ``main`` must go through pull requests. Direct pushes are blocked.
 
 Release Process
 ===============
 
 **For Maintainers Only**
 
-Following the `uv packaging guide <https://docs.astral.sh/uv/guides/package/>`_, we use uv's built-in tools for building and publishing.
+We follow the `uv packaging guide <https://docs.astral.sh/uv/guides/package/>`_ for releases.
 
-.. note::
-   Due to branch protection rules, all changes to ``main`` must go through pull requests.
+**Version Management**
 
-**Step 1: Prepare Release**
+We use `Semantic Versioning <https://semver.org/>`_:
 
-.. code-block:: bash
+- **MAJOR**: Incompatible API changes (1.0.0 → 2.0.0)
+- **MINOR**: Backward-compatible functionality additions (1.0.0 → 1.1.0)
+- **PATCH**: Backward-compatible bug fixes (1.0.0 → 1.0.1)
 
-   # Create release branch from main
-   git checkout main
-   git pull origin main
-   git checkout -b release/vX.X.X
-
-   # Run tests to ensure everything works
-   uv run pytest -n auto
-
-   # Update version with uv
-   uv version --bump patch   # or minor/major as needed
-
-**Step 2: Update Changelog**
-
-Update ``CHANGELOG.md`` with:
-
-- Version number and date
-- New features, bug fixes, changes
-- Breaking changes (if any)
-
-**Step 3: Build Package**
-
-.. code-block:: bash
-
-   # Build the package
-   uv build
-
-   # Verify the build artifacts in dist/
-   ls -la dist/
-
-**Step 4: Commit and Create PR**
-
-.. code-block:: bash
-
-   # Commit version changes
-   git add -A
-   git commit -m "Bump version to $(uv version)"
-
-   # Push release branch
-   git push origin release/vX.X.X
-
-   # Create PR and get approval, then merge to main
-
-**Step 5: Tag and Publish**
-
-.. code-block:: bash
-
-   # Switch to main after PR merge
-   git checkout main
-   git pull origin main
-
-   # Create and push tag (triggers automated publishing)
-   git tag v$(uv version)
-   git push origin --tags
-
-**Step 6: Verify Release**
-
-The existing GitHub Actions workflow will automatically:
-
-1. Build the package with ``uv build``
-2. Publish to PyPI (with manual approval)
-3. Create GitHub release
-
-Verify the release at:
-- **PyPI**: https://pypi.org/project/scxpand/
-- **GitHub**: https://github.com/yizhak-lab-ccg/scXpand/releases
-
-**Quick Release Checklist**
+**Release Steps**
 
 .. code-block:: bash
 
@@ -238,7 +104,7 @@ Verify the release at:
    uv run pytest -n auto
    uv version --bump patch  # or minor/major
 
-   # 2. Build and commit
+   # 2. Update CHANGELOG.md and build package
    uv build
    git add -A && git commit -m "Bump version to $(uv version)"
    git push origin release/vX.X.X
@@ -250,6 +116,26 @@ Verify the release at:
    git tag v$(uv version) && git push origin --tags
 
    # 5. Approve deployment in GitHub Actions
+
+**Publishing Workflow**
+
+- **TestPyPI**: Automatic on every push (for development testing)
+- **PyPI**: Manual approval required when pushing git tags (for official releases)
+
+**One-Time Setup for Maintainers**
+
+Configure PyPI Trusted Publishing:
+
+1. **PyPI**: https://pypi.org/manage/account/publishing/
+   - Project: ``scxpand``, Owner: ``yizhak-lab-ccg``, Repository: ``scXpand``
+   - Workflow: ``release.yml``, Environment: ``pypi``
+
+2. **TestPyPI**: https://test.pypi.org/manage/account/publishing/
+   - Same settings, Environment: ``testpypi``
+
+3. **GitHub Environments**: Settings → Environments
+   - Create ``pypi`` environment with required reviewers
+   - Create ``testpypi`` environment (no special settings)
 
 Documentation
 -------------

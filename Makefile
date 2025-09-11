@@ -24,6 +24,10 @@ install-dev:
 test:
 	uv run pytest -n auto
 
+test-fast:
+	@echo "Running fast tests only (skipping slow tests)..."
+	uv run pytest -n auto -m "not slow"
+
 # Run tests with coverage
 test-coverage:
 	uv run pytest -n auto --cov=scxpand --cov-report=html --cov-report=term

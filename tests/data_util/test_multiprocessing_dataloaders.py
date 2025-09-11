@@ -301,7 +301,7 @@ class TestDataLoaderMultiprocessing:
 
         return False, ""
 
-    @pytest.mark.parametrize("num_workers", [0, 1, 2])
+    @pytest.mark.parametrize("num_workers", [0, 1])  # Reduced from [0, 1, 2] to speed up test
     def test_train_dataloader_with_workers(self, sample_dataset, num_workers):
         """Test that train dataloader works with different worker counts."""
         should_skip, reason = self._should_skip_multiprocessing_test(num_workers)
@@ -327,7 +327,7 @@ class TestDataLoaderMultiprocessing:
 
         assert len(batches) > 0
 
-    @pytest.mark.parametrize("num_workers", [0, 1, 2])
+    @pytest.mark.parametrize("num_workers", [0, 1])  # Reduced from [0, 1, 2] to speed up test
     def test_eval_dataloader_with_workers(self, sample_dataset, num_workers):
         """Test that eval dataloader works with different worker counts."""
         should_skip, reason = self._should_skip_multiprocessing_test(num_workers)

@@ -100,6 +100,9 @@ preview = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["--tb=short", "--disable-warnings"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
