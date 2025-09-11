@@ -27,11 +27,11 @@ version = release
 project_copyright = f"{datetime.now():%Y}, {author}"
 bibtex_bibfiles = ["references.bib"]
 # -- HTML context for GitHub integration ------------------------------------
-repository_url = f"https://github.com/ronamit/{project_name}"
+repository_url = f"https://github.com/yizhak-lab-ccg/{project_name}"
 
 html_context = {
     "display_github": True,
-    "github_user": "ronamit",
+    "github_user": "yizhak-lab-ccg",
     "github_repo": project_name,
     "github_version": "main",
     "conf_py_path": "/docs/",

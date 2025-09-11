@@ -104,7 +104,7 @@ Before you can publish releases, you need to configure PyPI Trusted Publishing:
 1. Go to https://pypi.org/manage/account/publishing/
 2. Fill in the form:
    - **PyPI Project Name**: ``scxpand``
-   - **Owner**: ``ronamit`` (or your GitHub username/org)
+   - **Owner**: ``yizhak-lab-ccg`` (or your GitHub username/org)
    - **Repository name**: ``scxpand``
    - **Workflow filename**: ``release.yml``
    - **Environment name**: ``pypi``
