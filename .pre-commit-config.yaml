@@ -39,14 +39,6 @@ repos:
 
   - repo: local
     hooks:
-      - id: protect-main-branch
-        name: protect main branch from direct pushes
-        entry: bash -c 'if [ "$(git rev-parse --abbrev-ref HEAD)" = "main" ]; then echo "❌ Direct pushes to main are not allowed. Please create a feature branch and open a PR."; exit 1; fi'
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]
-        verbose: true
       - id: pytest-all
         name: pytest all tests
         entry: uv run pytest

@@ -109,12 +109,16 @@ Release Steps
 
    # 1. Check current version and update manually
    git checkout main && git pull origin main
+
+   # Update version:
+   uv version --bump patch  # for patch release (0.1.2 -> 0.1.3)
+   uv version --bump minor  # for minor release (0.1.2 -> 0.2.0)
+   uv version --bump major  # for major release (0.1.2 -> 1.0.0)
+
    uv version  # Check current version
-   # Manually edit pyproject.toml to update version number
-   # Example: change version = "0.1.2" to version = "0.1.3"
 
    # 2. Commit version change and tag
-   git add pyproject.toml && git commit -m "Bump version to 0.1.3"
+   git add -A && git commit -m "Bump version to 0.1.3"
    git push origin main
 
    # 3. Create and push tag (triggers release)
