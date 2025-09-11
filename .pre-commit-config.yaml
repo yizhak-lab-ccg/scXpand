@@ -60,7 +60,7 @@ repos:
         args: [-v]
       - id: vulture-dead-code-check
         name: vulture dead code detection (warnings only)
-        entry: bash -c 'echo "Checking for unused code..." && uv run vulture scxpand/ || echo "⚠️  Found potential unused code above (warnings only - not blocking push)"'
+        entry: bash -c 'echo "Checking for unused code..." && uv run vulture scxpand/'
         language: system
         pass_filenames: false
         always_run: true

@@ -61,7 +61,7 @@ Pull Request Process
 
 .. note::
    Direct pushes to ``main`` are blocked when branch protection is enabled.
-   All changes must go through pull requests, even for maintainers.
+   All changes to ``main`` must go through pull requests.
 
 
 Version Management
