@@ -21,6 +21,9 @@ Tests run automatically on every push to any branch, but you can also run them m
    # Run all tests in parallel (recommended)
    uv run pytest -n auto
 
+   # Run fast tests only (skips slow tests)
+   uv run pytest -n auto -m "not slow"
+
    # Run specific test file
    uv run pytest tests/test_specific.py
 

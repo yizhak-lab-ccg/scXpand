@@ -231,9 +231,9 @@ class TestRunInferenceIntegration:
             run_inference(model_path="fake_path")
 
         # Test no model source (should use default registry model)
-        # Mock the model download to avoid network calls
-        with patch("scxpand.pretrained.download_manager.download_model") as mock_download:
-            mock_download.side_effect = Exception("Mocked network error")
+        # Mock the model fetch to avoid network calls
+        with patch("scxpand.core.inference.fetch_model_and_run_inference") as mock_fetch:
+            mock_fetch.side_effect = Exception("Mocked network error")
 
             with pytest.raises(Exception, match="Mocked network error"):
                 run_inference(adata=sample_adata)
