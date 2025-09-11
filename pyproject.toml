@@ -1,7 +1,7 @@
 [project]
 name = "scxpand"
 version = "0.1.9"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 description = "Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing"
 readme = "README.md"
 license = "MIT"
@@ -17,6 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
@@ -57,9 +58,9 @@ scxpand = "scxpand.main:main"
 [project.optional-dependencies]
 # PyTorch backend options
 cuda = [
-    "torch>=2.6.0",
-    "torchvision>=0.19.0",
-    "torchaudio>=2.6.0",
+    "torch>=2.5.0",
+    "torchvision>=0.20.0",
+    "torchaudio>=2.5.0",
 ]
 dev = [
     "vulture>=2.14",

@@ -20,7 +20,7 @@ PyTorch Backend Details
 scXpand requires PyTorch for some of the models. The installation options provide different PyTorch backends:
 
 **CUDA Installation (``scxpand[cuda]``)**
-- Explicitly installs PyTorch with CUDA 12.1 support
+- Explicitly installs PyTorch 2.5+ with CUDA 12.1 support
 - Recommended for systems with NVIDIA hardware.
 
 **Standard Installation (``scxpand``)**
