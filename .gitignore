@@ -24,7 +24,6 @@ docs\build_output.txt
 *.pyd
 *.egg-info
 **.egg-info/**
-**.egg-info
 build/
 dist/
 
