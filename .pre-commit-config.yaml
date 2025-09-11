@@ -40,7 +40,7 @@ repos:
   - repo: local
     hooks:
       - id: pytest-all
-        name: pytest all tests
+        name: pytest all tests (parallel)
         entry: uv run pytest
         language: system
         pass_filenames: false

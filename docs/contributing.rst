@@ -10,12 +10,22 @@ For development setup instructions, see :doc:`installation`.
 
 **Python Version Support**
 
-We support Python 3.11, 3.12, and 3.13. Our CI tests run on all these versions to ensure compatibility.
+We support Python 3.11, 3.12, and 3.13. All tests should pass on these versions before submitting PRs.
 
 **Running Tests**
 
-Tests run automatically on every push to any branch, but you can also run them manually with ``uv run pytest``
+Run tests manually with:
 
+.. code-block:: bash
+
+   # Run all tests (parallel)
+   uv run pytest -n auto
+
+   # Run fast tests only (skip slow tests)
+   uv run pytest -n auto -m "not slow"
+
+   # Run specific test file
+   uv run pytest tests/your_test_file.py
 
 Contributing Workflow
 ---------------------
@@ -35,7 +45,7 @@ Implement your changes with appropriate tests and documentation updates.
 .. code-block:: bash
 
    # Run all tests
-   uv run pytest
+   uv run pytest -n auto
 
    # Run specific tests for your changes
    uv run pytest tests/your_test_file.py
@@ -55,25 +65,17 @@ Keep commits focused on a single change when possible.
 **Pull Request Checklist**
 
 - [ ] Tests added for new functionality
-- [ ] All tests pass locally and in CI
+- [ ] All tests pass locally
 - [ ] Documentation updated if needed
 - [ ] PR description clearly explains changes
 - [ ] Branch is up-to-date with main
 
-.. note::
-   All changes to ``main`` must go through pull requests. Direct pushes are blocked.
-
 Release Process
 ===============
 
 **For Maintainers Only**
 
-We follow the `uv packaging guide <https://docs.astral.sh/uv/guides/package/>`_ for releases.
-
-Release Process
-===============
-
-**For Maintainers Only**
+We follow the `uv packaging guide <https://docs.astral.sh/uv/guides/package/>`_ for manual publishing.
 
 Version Management
 ------------------
@@ -87,22 +89,20 @@ We use `Semantic Versioning <https://semver.org/>`_:
 One-Time Setup
 --------------
 
-Configure PyPI Trusted Publishing:
+**1. PyPI Account Setup**
 
-1. **PyPI**: https://pypi.org/manage/account/publishing/
-   - Project: ``scxpand``, Owner: ``yizhak-lab-ccg``, Repository: ``scXpand``
-   - Workflow: ``release.yml``, Environment: ``pypi``
+- Create account at https://pypi.org/account/register/
+- Generate API token at https://pypi.org/manage/account/token/
+- Set environment variable: ``export UV_PUBLISH_TOKEN=your_token_here``
 
-2. **TestPyPI**: https://test.pypi.org/manage/account/publishing/
-   - Same settings, Environment: ``testpypi``
+**2. TestPyPI Account Setup (Optional)**
 
-3. **GitHub Environments**: Settings → Environments
-   - Create ``pypi`` environment with required reviewers
-   - Create ``testpypi`` environment (no special settings)
+- Create account at https://test.pypi.org/account/register/
+- Generate API token at https://test.pypi.org/manage/account/token/
+- Set environment variable: ``export UV_PUBLISH_TOKEN_TEST=your_test_token_here``
 
 Release Steps
 -------------
-
 
 **Step 1: Update Version**
 
@@ -118,36 +118,43 @@ Release Steps
    # Get the new version number
    VERSION=$(uv version | cut -d' ' -f2)
 
-**Step 2: Commit and Push Changes**
+**Step 2: Test the Build**
+
+.. code-block:: bash
+
+   # Build the package
+   uv build
+
+   # Test installation
+   uv run --with scxpand --no-project -- python -c "import scxpand; print('Import successful')"
+
+**Step 3: Commit and Push Changes**
 
 .. code-block:: bash
 
    git add -A && git commit -m "Bump version to $VERSION"
    git push origin main
 
-**Step 3: Create and Push Tag**
+**Step 4: Create and Push Tag**
 
 .. code-block:: bash
 
    git tag v$VERSION && git push origin v$VERSION
 
-**Step 4: Approve PyPI Deployment**
+**Step 5: Publish to PyPI**
 
-1. **Go to GitHub Actions**: Visit https://github.com/yizhak-lab-ccg/scXpand/actions
+.. code-block:: bash
 
-2. **Find Your Workflow Run**: Look for the workflow run with your tag (e.g., `v0.1.4`)
+   # Publish to PyPI
+   uv publish
 
-3. **Locate the PyPI Job**: Find the `publish-to-pypi` job (it will show "Waiting for approval")
+   # Optional: Publish to TestPyPI first for testing
+   # UV_PUBLISH_TOKEN=$UV_PUBLISH_TOKEN_TEST uv publish --index testpypi
 
-4. **Approve Deployment**:
-   - Click on the `publish-to-pypi` job
-   - Click **"Review deployments"** button
-   - Select the `pypi` environment
-   - Click **"Approve and deploy"**
+**Step 6: Verify Release**
 
-5. **Monitor Progress**: The job will start running and publish to PyPI
-
-6. **Verify Release**: Check that your package appears at https://pypi.org/project/scxpand/
+- Check that your package appears at https://pypi.org/project/scxpand/
+- Test installation: ``pip install scxpand==$VERSION``
 
 **Release Branch Process (For Major Releases):**
 
@@ -168,29 +175,7 @@ Release Steps
    # 4. Tag and publish (after PR merge)
    git checkout main && git pull origin main
    git tag v$VERSION && git push origin v$VERSION
-
-   # 5. Approve deployment in GitHub Actions
-
-Automated Workflows
--------------------
-
-**What Happens Automatically:**
-
-**Every Push to Main:**
-- Runs tests
-- Publishes to TestPyPI (for testing)
-
-**Tag Push (e.g., v0.1.3):**
-- Runs tests
-- Publishes to TestPyPI
-- Publishes to PyPI (with approval)
-- Creates GitHub Release
-
-**Pull Requests:**
-- Runs full test matrix
-- Pre-commit checks
-
-
+   uv publish
 
 Documentation
 -------------
