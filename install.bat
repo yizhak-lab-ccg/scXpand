@@ -2,7 +2,15 @@
 setlocal EnableDelayedExpansion
 
 set REQUIRED_UV_VERSION=0.8.14
-set PYTHON_VERSION=3.13
+
+:: Read Python version from .python-version file
+if exist .python-version (
+    for /f "delims=" %%i in (.python-version) do set PYTHON_VERSION=%%i
+    echo Using Python version from .python-version: !PYTHON_VERSION!
+) else (
+    set PYTHON_VERSION=3.13
+    echo No .python-version file found, using default: !PYTHON_VERSION!
+)
 
 :: Function to compare versions
 set COMPARE_RESULT=0

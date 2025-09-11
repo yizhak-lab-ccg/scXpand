@@ -564,7 +564,10 @@ def flatten_dict(d, parent_key="", sep="/"):
     return items
 
 
-def load_and_override_params[T: BaseParams](
+T = TypeVar("T", bound="BaseParams")
+
+
+def load_and_override_params(
     param_class: Type[T],
     config_path: str | None = None,
     logger: structlog.stdlib.BoundLogger | None = None,

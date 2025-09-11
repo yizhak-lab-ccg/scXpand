@@ -2,7 +2,15 @@
 set -e
 
 REQUIRED_UV_VERSION="0.8.14"
-PYTHON_VERSION="3.13"
+
+# Read Python version from .python-version file
+if [ -f ".python-version" ]; then
+    PYTHON_VERSION=$(cat .python-version | tr -d '\n' | tr -d ' ')
+    echo "Using Python version from .python-version: $PYTHON_VERSION"
+else
+    PYTHON_VERSION="3.13"
+    echo "No .python-version file found, using default: $PYTHON_VERSION"
+fi
 
 function version_ge() {
   # returns 0 if $1 >= $2

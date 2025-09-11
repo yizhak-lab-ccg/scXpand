@@ -181,6 +181,7 @@ ignore = [
 "UP007",   # Use `X | Y` for type annotations instead of `Union[X, Y]`
 "UP017",   # Use `datetime.UTC` instead of deprecated timezone constants
 "UP035",   # Import from `typing` is deprecated
+"UP047",   # Generic function should use type parameters
 
 # D - Docstring Rules (pydocstyle)
 "D100",    # Missing docstring in public module
