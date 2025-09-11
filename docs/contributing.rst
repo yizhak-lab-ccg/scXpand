@@ -89,12 +89,12 @@ We use `Semantic Versioning <https://semver.org/>`_:
    uv version --bump patch  # or minor/major
 
    # Create release branch
-   git checkout -b release/vX.X.X
+   git checkout -b release/v$(uv version)
 
    # 2. Update CHANGELOG.md and build package
    uv build
    git add -A && git commit -m "Bump version to $(uv version)"
-   git push origin release/vX.X.X
+   git push --set-upstream origin release/v$(uv version)
 
    # 3. Create PR, get approval, merge to main
 
