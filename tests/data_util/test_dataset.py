@@ -944,6 +944,7 @@ class TestCellsDataset:
             finally:
                 raw_adata.file.close()
 
+    @pytest.mark.slow
     def test_dataloader_multiple_workers(self, mock_dataset: CellsDataset) -> None:
         if os.cpu_count() is None or os.cpu_count() < 2:
             pytest.skip("Not enough CPU cores available for multiple worker test")

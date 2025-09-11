@@ -57,7 +57,7 @@ repos:
         verbose: true
         require_serial: true
         fail_fast: false
-        args: [-v]
+        args: [-n, auto, -v]
       - id: vulture-dead-code-check
         name: vulture dead code detection (warnings only)
         entry: bash -c 'echo "Checking for unused code..." && uv run vulture scxpand/'

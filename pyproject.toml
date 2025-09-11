@@ -59,6 +59,8 @@ scxpand = "scxpand.main:main"
 dev = [
     "vulture>=2.14",
     "pytest>=8.3.4",
+    "pytest-xdist>=3.6.0",
+    "pytest-cov>=6.0.0",
     "ruff>=0.12.7",
     "pre-commit>=4.2.0",
     "ipykernel>=6.29.5",
@@ -97,6 +99,10 @@ preview = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = ["--tb=short", "--disable-warnings"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",

@@ -223,6 +223,7 @@ class TestRunInferenceIntegration:
             call_kwargs = mock_pipeline.call_args[1]
             np.testing.assert_array_equal(call_kwargs["eval_row_inds"], eval_row_inds)
 
+    @pytest.mark.slow
     def test_run_inference_parameter_validation(self, sample_adata):
         """Test run_inference parameter validation."""
         # Test no data input
@@ -230,15 +231,12 @@ class TestRunInferenceIntegration:
             run_inference(model_path="fake_path")
 
         # Test no model source (should use default registry model)
-        # This should not raise an error anymore - it uses the default model
-        # Just verify it doesn't crash - it will try to fetch the registry model
-        try:
-            run_inference(adata=sample_adata)
-        except Exception as e:
-            # We expect it might fail due to network or model loading issues in tests
-            # but it should NOT fail due to "Must specify one model source"
-            if "Must specify one model source" in str(e):
-                pytest.fail(f"Should not fail with 'Must specify one model source' error, got: {e}")
+        # Mock the model fetch to avoid network calls
+        with patch("scxpand.core.inference.fetch_model_and_run_inference") as mock_fetch:
+            mock_fetch.side_effect = Exception("Mocked network error")
+
+            with pytest.raises(Exception, match="Mocked network error"):
+                run_inference(adata=sample_adata)
 
         # Test multiple model sources
         with pytest.raises(ValueError, match="Cannot specify multiple model sources"):
