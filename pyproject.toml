@@ -1,0 +1,152 @@
+[project]
+name = "scxpand"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing"
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "Ron Amit", email = "ron2amit@gmail.com"},
+    {name = "Ofir Shorer", email = "ofirshorer@campus.technion.ac.il"}
+]
+keywords = ["single-cell", "RNA-seq", "T-cell", "clonal-expansion", "machine-learning", "bioinformatics"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "scanpy>=1.11.1",
+    "plotly>=6.0.1",
+    "matplotlib>=3.10.0",
+    "scikit-learn>=1.5.2",
+    "lightgbm>=4.6.0",
+    "tensorboard>=2.19.0",
+    "fire>=0.7.0",
+    "optuna>=4.3.0",
+    "seaborn>=0.13.2",
+    "pydantic>=2.10.6",
+    "anndata>=0.11.4",
+    "structlog>=24.0.0",
+    "igraph>=0.11.4",
+    "shap>=0.48.0",
+    "bbknn>=1.6.0",
+    "torch>=2.6.0",
+    "scrublet>=0.2.3",
+    "scirpy>=0.9.3",
+    "tabulate>=0.9.0",
+    "requests>=2.31.0",
+    "tqdm>=4.66.0",
+    "pooch>=1.8.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ronamit/scxpand"
+Documentation = "https://scxpand.readthedocs.io"
+Repository = "https://github.com/ronamit/scxpand"
+Issues = "https://github.com/ronamit/scxpand/issues"
+
+[project.scripts]
+scxpand = "scxpand.main:main"
+
+[project.optional-dependencies]
+dev = [
+    "vulture>=2.14",
+    "pytest>=8.3.4",
+    "ruff>=0.12.7",
+    "pre-commit>=4.2.0",
+    "ipykernel>=6.29.5",
+    "ipywidgets>=8.1.5",
+    "jupyter>=1.1.1",
+    "jupyter-client>=8.6.3",
+    "jupyter-core>=5.7.2",
+]
+docs = [
+    "sphinx>=7.1.0",
+    "sphinx-book-theme>=1.1.0",
+    "myst-nb>=1.1.0",
+    "sphinx-copybutton>=0.5.0",
+    "myst-parser>=2.0.0",
+    "docutils>=0.20.1",
+    "sphinxcontrib-bibtex>=2.6.0",
+    "sphinx-autodoc-typehints>=2.4.0",
+    "ipython>=8.0.0",
+    "sphinxext-opengraph>=0.9.0",
+    "sphinx-autobuild>=2024.2.4",
+    "watchdog>=4.0.0",
+    "colorama>=0.4.6",
+]
+
+[build-system]
+requires = ["setuptools>=77.0.3", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["scxpand*"]
+exclude = ["tests*", "docs*", "notebooks*", "temp*", "data*", "results*", "_notebooks*", "examples*", "scripts*"]
+
+[tool.uv]
+preview = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::UserWarning",
+    "ignore::FutureWarning",
+]
+
+
+[tool.vulture]
+# Configuration for vulture: https://github.com/jendrikseipp/vulture
+# Ignore specific functions and variables that are used but not detected by static analysis
+ignore_names = [
+    # Functions that are used but not detected by vulture
+    "encode_categorical_value",
+    "encode_categorical_features_batch",
+    "metrics_dict_to_dataframes",
+    "plot_roc_curves_per_strata",
+    "load_model",
+    "model_config",
+    "deterministic",
+    "benchmark",
+    "run_inference",
+    # InferenceResults methods
+    "n_predictions",
+    "has_metrics",
+    "has_model_info",
+    "get_auroc",
+    "get_harmonic_avg_auroc",
+    "to_dict",
+    # Standard class method parameters
+    "cls",
+    # LightGBM enum values - part of complete API definition
+    "DART",
+    "GOSS",
+    "RF",
+    "MULTICLASS",
+    "REGRESSION",
+    "LAMBDARANK",
+    "MULTICLASS_LOGLOSS",
+    "RMSE",
+    "MAE",
+    "AUC",
+    "NDCG",
+    "download_model",
+    "load_model",
+    "load_sklearn_model",
+    "load_nn_model",
+    "load_ae_model",
+    "load_and_validate_model",
+    "load_model_state_dict",
+]
+paths = ["scxpand"]
+min_confidence = 60

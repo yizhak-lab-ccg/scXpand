@@ -1,0 +1,79 @@
+scXpand Documentation
+=====================
+
+scXpand is a framework for predicting T-cell clonal expansion from single-cell RNA sequencing data. It provides multiple methods for training and inference.
+
+.. image:: _static/images/scXpand_datasets.jpeg
+   :width: 100%
+   :alt: scXpand Datasets Overview
+
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+
+   user_guide
+   tutorials
+   api_reference
+   contributing
+
+..
+   The toctree below is for structuring the landing page, not the sidebar.
+
+Features
+--------
+
+* **Multiple Model Architectures**: Autoencoder, MLP, LightGBM, Logistic Regression, and SVM
+* **Scalable Processing**: Handles millions of cells with memory-efficient data streaming
+* **Hyperparameter Optimization**: Built-in hyperparameter search for model tuning
+
+Quick Start
+-----------
+
+**Installation**:
+
+You need to have Python 3.11 or newer installed on your system.
+
+.. code-block:: bash
+
+    pip install scxpand
+
+.. code-block:: python
+
+   import scxpand
+   # Make sure that "your_data.h5ad" includes only T cells for the results to be meaningful
+   # Ensure that "your_data.var_names" are provided as Ensembl IDs (as the pre-trained models were trained using this gene representation)
+   # Please refer to our documentation for more information
+
+   # List available pre-trained models
+   scxpand.list_pretrained_models()
+
+   # Run inference with automatic model download
+   results = scxpand.run_inference(
+       model_name="pan_cancer_autoencoder",
+       data_path="your_data.h5ad",
+       device=None  # Auto-detect best available device
+   )
+
+   # Or use the command line
+   # scxpand predict --data_path your_data.h5ad --model_name pan_cancer_autoencoder
+
+See :doc:`installation` for different installation methods and :doc:`usage_examples` for more examples.
+
+Tutorials
+------------
+We provide a variety of tutorials to help you get started with scXpand:
+
+- :doc:`Getting Started with scXpand <_notebooks/scxpand_tutorial>`
+- :doc:`Model Inference and Evaluation Pipeline <_notebooks/inference>`
+- :doc:`Autoencoder Embedding Visualization <_notebooks/embeddings>`
+
+Support and Contact
+-------------------
+This project was created in favor of the scientific community worldwide, with a special dedication to the cancer research community.
+We hope you’ll find this repository helpful, and we warmly welcome any requests or suggestions - please don’t hesitate to reach out!
+
+Citation
+--------
+If you use scXpand in your research, please cite our paper:
+
+Under preparation.
