@@ -48,7 +48,7 @@ repos:
         stages: [pre-push]
         verbose: true
       - id: pytest-all
-        name: pytest all tests (parallel)
+        name: pytest all tests
         entry: uv run pytest
         language: system
         pass_filenames: false

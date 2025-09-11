@@ -14,21 +14,8 @@ We support Python 3.11, 3.12, and 3.13. Our CI tests run on all these versions t
 
 **Running Tests**
 
-Tests run automatically on every push to any branch, but you can also run them manually:
+Tests run automatically on every push to any branch, but you can also run them manually with ``uv run pytest``:
 
-.. code-block:: bash
-
-   # Run all tests in parallel (recommended)
-   uv run pytest -n auto
-
-   # Run fast tests only (skips slow tests)
-   uv run pytest -n auto -m "not slow"
-
-   # Run specific test file
-   uv run pytest tests/test_specific.py
-
-   # Run with coverage
-   uv run pytest -n auto --cov=scxpand
 
 Contributing Workflow
 ---------------------
