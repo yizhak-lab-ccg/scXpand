@@ -14,7 +14,7 @@ We support Python 3.11, 3.12, and 3.13. Our CI tests run on all these versions t
 
 **Running Tests**
 
-Tests run automatically on every push to any branch, but you can also run them manually with ``uv run pytest``:
+Tests run automatically on every push to any branch, but you can also run them manually with ``uv run pytest``
 
 
 Contributing Workflow
@@ -35,20 +35,14 @@ Implement your changes with appropriate tests and documentation updates.
 .. code-block:: bash
 
    # Run all tests
-   uv run pytest -n auto
+   uv run pytest
 
    # Run specific tests for your changes
    uv run pytest tests/your_test_file.py
 
 **4. Commit Guidelines**
 
-Write clear, descriptive commit messages:
-
-- ``Add support for batch prediction``
-- ``Fix memory leak in data preprocessing``
-- ``Update installation instructions``
-- ``Add tests for autoencoder training``
-
+Write clear, descriptive commit messages.
 Keep commits focused on a single change when possible.
 
 **5. Create Pull Request**
