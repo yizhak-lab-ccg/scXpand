@@ -1,6 +1,3 @@
-# Based on:https://github.com/theislab/dca/blob/master/dca/network.py
-
-
 import json
 
 from pathlib import Path

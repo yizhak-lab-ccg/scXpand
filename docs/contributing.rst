@@ -46,7 +46,7 @@ Pull Request Process
 2. **Make Changes**: Implement your changes with appropriate tests
 3. **Test**: Run tests and ensure they pass
 4. **Push**: ``git push origin your-feature-name``
-5. **Create PR**: Open a pull request targeting ``master``
+5. **Create PR**: Open a pull request targeting ``main``
 6. **Wait for CI**: All status checks must pass
 7. **Code Review**: PR requires approval before merging
 8. **Merge**: Use "Squash and merge" for clean history
@@ -57,10 +57,10 @@ Pull Request Process
 - [ ] All tests pass locally and in CI
 - [ ] Documentation updated if needed
 - [ ] PR description clearly explains changes
-- [ ] Branch is up-to-date with master
+- [ ] Branch is up-to-date with main
 
 .. note::
-   Direct pushes to ``master`` are blocked when branch protection is enabled.
+   Direct pushes to ``main`` are blocked when branch protection is enabled.
    All changes must go through pull requests, even for maintainers.
 
 
@@ -158,9 +158,9 @@ Release Process
 
 .. code-block:: bash
 
-   # Ensure you're on master and up to date
-   git checkout master
-   git pull origin master
+   # Ensure you're on main and up to date
+   git checkout main
+   git pull origin main
 
    # Run tests locally to ensure everything works
    uv run pytest
@@ -190,11 +190,11 @@ Update ``CHANGELOG.md`` with:
 
    # Push release branch and create PR
    git push origin release/vX.X.X
-   # Open PR to master, get approval, and merge
+   # Open PR to main, get approval, and merge
 
-   # After PR is merged, tag the master branch
-   git checkout master
-   git pull origin master
+   # After PR is merged, tag the main branch
+   git checkout main
+   git pull origin main
    git tag vX.X.X
    git push origin --tags
 
