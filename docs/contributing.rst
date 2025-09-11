@@ -156,27 +156,6 @@ Release Steps
 - Check that your package appears at https://pypi.org/project/scxpand/
 - Test installation: ``pip install scxpand==$VERSION``
 
-**Release Branch Process (For Major Releases):**
-
-.. code-block:: bash
-
-   # 1. Create release branch
-   git checkout main && git pull origin main
-   git checkout -b release/v$VERSION
-
-   # 2. Update version and changelog
-   # Manually edit pyproject.toml to update version number
-   # Edit CHANGELOG.md with new version details
-   git add -A && git commit -m "Bump version to $VERSION"
-   git push --set-upstream origin release/v$VERSION
-
-   # 3. Create PR, get approval, merge to main
-
-   # 4. Tag and publish (after PR merge)
-   git checkout main && git pull origin main
-   git tag v$VERSION && git push origin v$VERSION
-   uv publish
-
 Documentation
 -------------
 
