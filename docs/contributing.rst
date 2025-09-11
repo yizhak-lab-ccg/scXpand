@@ -103,7 +103,6 @@ Configure PyPI Trusted Publishing:
 Release Steps
 -------------
 
-**Simple Release (Recommended):**
 
 .. code-block:: bash
 
@@ -123,7 +122,7 @@ Release Steps
    git push origin main
 
    # 3. Create and push tag (triggers release)
-   git tag v0.1.3 && git push origin v0.1.3
+   git tag v$VERSION && git push origin v$VERSION
 
    # 4. Approve deployment in GitHub Actions (PyPI environment)
 
@@ -133,19 +132,19 @@ Release Steps
 
    # 1. Create release branch
    git checkout main && git pull origin main
-   git checkout -b release/v0.1.3
+   git checkout -b release/v$VERSION
 
    # 2. Update version and changelog
    # Manually edit pyproject.toml to update version number
    # Edit CHANGELOG.md with new version details
-   git add -A && git commit -m "Bump version to 0.1.3"
-   git push --set-upstream origin release/v0.1.3
+   git add -A && git commit -m "Bump version to $VERSION"
+   git push --set-upstream origin release/v$VERSION
 
    # 3. Create PR, get approval, merge to main
 
    # 4. Tag and publish (after PR merge)
    git checkout main && git pull origin main
-   git tag v0.1.3 && git push origin v0.1.3
+   git tag v$VERSION && git push origin v$VERSION
 
    # 5. Approve deployment in GitHub Actions
 
