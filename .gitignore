@@ -1,0 +1,53 @@
+
+# Project specific
+/results
+/data/
+/temp
+/wandb/
+dummy_save_dir/
+_notebooks/
+norm_bug/*
+**/.scxpand_cache/
+docs/_static/images
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+docs/_notebooks/
+_build/
+docs\build_output.txt
+
+# Python
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info
+**.egg-info/**
+build/
+dist/
+
+# System files
+.DS_Store
+**/.DS_Store
+
+# PyCharm
+.idea/
+
+# MyPy
+.mypy_cache/
+
+# PyTest
+.pytest_cache/
+
+# VSCode
+*.code-workspace
+
+# venv
+.venv/
+
+# Ruff
+.ruff_cache
+
+# vscode
+.vscode/
