@@ -4,7 +4,7 @@ A framework for predicting T-cell clonal expansion from single-cell RNA sequenci
 using multiple machine learning approaches including autoencoders, MLPs, LightGBM, and linear models.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Ron Amit, Ofir Shorer"
 __email__ = "ron2amit@gmail.com, ofirshorer@campus.technion.ac.il"
 
