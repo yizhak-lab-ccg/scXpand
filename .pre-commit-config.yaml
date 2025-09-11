@@ -1,0 +1,68 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.11
+    hooks:
+      - id: ruff-check
+        args: [--fix, --config=ruff.toml]
+      - id: ruff-format
+        args: [--config=ruff.toml]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=2500']
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-toml
+      - id: check-yaml
+      - id: check-json
+      - id: check-xml
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-vcs-permalinks
+      - id: debug-statements
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: [--fix=auto]
+      - id: check-illegal-windows-names
+      - id: check-shebang-scripts-are-executable
+      - id: pretty-format-json
+        args: [--autofix, --indent=2]
+        exclude: '\.ipynb$'
+
+
+  - repo: local
+    hooks:
+      - id: protect-master-branch
+        name: protect master branch from direct pushes
+        entry: bash -c 'if [ "$(git rev-parse --abbrev-ref HEAD)" = "master" ]; then echo "❌ Direct pushes to master are not allowed. Please create a feature branch and open a PR."; exit 1; fi'
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+        verbose: true
+      - id: pytest-all
+        name: pytest all tests
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+        verbose: true
+        require_serial: true
+        fail_fast: false
+        args: [-v]
+      - id: vulture-dead-code-check
+        name: vulture dead code detection (warnings only)
+        entry: bash -c 'echo "Checking for unused code..." && uv run vulture scxpand/ || echo "⚠️  Found potential unused code above (warnings only - not blocking push)"'
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+        verbose: true
