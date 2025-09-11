@@ -82,11 +82,14 @@ We use `Semantic Versioning <https://semver.org/>`_:
 
 .. code-block:: bash
 
-   # 1. Create release branch and update version
+   # 1. Switch to main and update version
    git checkout main && git pull origin main
-   git checkout -b release/vX.X.X
-   uv run pytest -n auto
+
+   # Bump version
    uv version --bump patch  # or minor/major
+
+   # Create release branch
+   git checkout -b release/vX.X.X
 
    # 2. Update CHANGELOG.md and build package
    uv build
