@@ -36,7 +36,7 @@ jobs:
         run: |
           uv sync --extra dev
           echo "Checking installed packages:"
-          uv pip list | grep -E "(pytest|vulture)" || echo "pytest/vulture not found"
+          uv pip list | grep pytest || echo "pytest not found"
 
       - name: Install PyTorch (CPU-only for CI)
         run: uv run python install_torch.py
