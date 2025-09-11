@@ -4,10 +4,10 @@ Version: 0.1.0
 Summary: Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing
 Author-email: Ron Amit <ron2amit@gmail.com>, Ofir Shorer <ofirshorer@campus.technion.ac.il>
 License-Expression: MIT
-Project-URL: Homepage, https://github.com/ronamit/scxpand
+Project-URL: Homepage, https://github.com/yizhak-lab-ccg/scXpand
 Project-URL: Documentation, https://scxpand.readthedocs.io
-Project-URL: Repository, https://github.com/ronamit/scxpand
-Project-URL: Issues, https://github.com/ronamit/scxpand/issues
+Project-URL: Repository, https://github.com/yizhak-lab-ccg/scXpand
+Project-URL: Issues, https://github.com/yizhak-lab-ccg/scXpand/issues
 Keywords: single-cell,RNA-seq,T-cell,clonal-expansion,machine-learning,bioinformatics
 Classifier: Development Status :: 4 - Beta
 Classifier: Intended Audience :: Science/Research
@@ -175,12 +175,12 @@ This project was created in favor of the scientific community worldwide, with a 
 We hope you’ll find this repository helpful, and we warmly welcome any requests or suggestions - please don’t hesitate to reach out!
 
 <p align="center">
-  <a href="https://mapmyvisitors.com/web/1byyd">
-     <img src="https://mapmyvisitors.com/map.png?d=yRhTNMKyBcxvPwQsz-rFDDwHhMjSeVYRSYtxm4oUNdY&cl=ffffff">
+  <a href="https://mapmyvisitors.com/web/1bz9s">
+     <img src="https://mapmyvisitors.com/map.png?d=hwaNi7bepoJeL9CYnuB3WjMT-liNG4MvcmwecZk3aNA&cl=ffffff">
    </a>
 </p>
 <p align="center">
   <a href="#">
-     <img src="https://visitor-badge.laobi.icu/badge?page_id=ronamit.scxpand&left_text=scXpand%20Visitors" alt="Visitors" />
+     <img src="https://visitor-badge.laobi.icu/badge?page_id=yizhak-lab-ccg.scXpand&left_text=scXpand%20Visitors" alt="Visitors" />
    </a>
 </p>
