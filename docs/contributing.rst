@@ -70,7 +70,13 @@ Release Process
 
 We follow the `uv packaging guide <https://docs.astral.sh/uv/guides/package/>`_ for releases.
 
-**Version Management**
+Release Process
+===============
+
+**For Maintainers Only**
+
+Version Management
+------------------
 
 We use `Semantic Versioning <https://semver.org/>`_:
 
@@ -78,38 +84,8 @@ We use `Semantic Versioning <https://semver.org/>`_:
 - **MINOR**: Backward-compatible functionality additions (1.0.0 → 1.1.0)
 - **PATCH**: Backward-compatible bug fixes (1.0.0 → 1.0.1)
 
-**Release Steps**
-
-.. code-block:: bash
-
-   # 1. Switch to main and update version
-   git checkout main && git pull origin main
-
-   # Bump version
-   uv version --bump patch  # or minor/major
-
-   # Create release branch
-   git checkout -b release/v$(uv version)
-
-   # 2. Update CHANGELOG.md and build package
-   uv build
-   git add -A && git commit -m "Bump version to $(uv version)"
-   git push --set-upstream origin release/v$(uv version)
-
-   # 3. Create PR, get approval, merge to main
-
-   # 4. Tag and publish
-   git checkout main && git pull origin main
-   git tag v$(uv version) && git push origin --tags
-
-   # 5. Approve deployment in GitHub Actions
-
-**Publishing Workflow**
-
-- **TestPyPI**: Automatic on every push (for development testing)
-- **PyPI**: Manual approval required when pushing git tags (for official releases)
-
-**One-Time Setup for Maintainers**
+One-Time Setup
+--------------
 
 Configure PyPI Trusted Publishing:
 
@@ -123,6 +99,71 @@ Configure PyPI Trusted Publishing:
 3. **GitHub Environments**: Settings → Environments
    - Create ``pypi`` environment with required reviewers
    - Create ``testpypi`` environment (no special settings)
+
+Release Steps
+-------------
+
+**Simple Release (Recommended):**
+
+.. code-block:: bash
+
+   # 1. Check current version and update manually
+   git checkout main && git pull origin main
+   uv version  # Check current version
+   # Manually edit pyproject.toml to update version number
+   # Example: change version = "0.1.2" to version = "0.1.3"
+
+   # 2. Commit version change and tag
+   git add pyproject.toml && git commit -m "Bump version to 0.1.3"
+   git push origin main
+
+   # 3. Create and push tag (triggers release)
+   git tag v0.1.3 && git push origin v0.1.3
+
+   # 4. Approve deployment in GitHub Actions (PyPI environment)
+
+**Release Branch Process (For Major Releases):**
+
+.. code-block:: bash
+
+   # 1. Create release branch
+   git checkout main && git pull origin main
+   git checkout -b release/v0.1.3
+
+   # 2. Update version and changelog
+   # Manually edit pyproject.toml to update version number
+   # Edit CHANGELOG.md with new version details
+   git add -A && git commit -m "Bump version to 0.1.3"
+   git push --set-upstream origin release/v0.1.3
+
+   # 3. Create PR, get approval, merge to main
+
+   # 4. Tag and publish (after PR merge)
+   git checkout main && git pull origin main
+   git tag v0.1.3 && git push origin v0.1.3
+
+   # 5. Approve deployment in GitHub Actions
+
+Automated Workflows
+-------------------
+
+**What Happens Automatically:**
+
+**Every Push to Main:**
+- Runs tests
+- Publishes to TestPyPI (for testing)
+
+**Tag Push (e.g., v0.1.3):**
+- Runs tests
+- Publishes to TestPyPI
+- Publishes to PyPI (with approval)
+- Creates GitHub Release
+
+**Pull Requests:**
+- Runs full test matrix
+- Pre-commit checks
+
+
 
 Documentation
 -------------
