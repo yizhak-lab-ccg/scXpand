@@ -14,7 +14,7 @@ To work with the latest version on GitHub: clone the repository and ``cd`` into 
 
 .. code-block:: bash
 
-    git clone https://github.com/ronamit/scxpand.git
+    git clone https://github.com/yizhak-lab-ccg/scXpand.git
     cd scxpand
 
 scXpand uses `uv <https://docs.astral.sh/uv/>`_ for fast, reliable dependency management. Use the provided install scripts:
