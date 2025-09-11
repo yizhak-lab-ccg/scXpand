@@ -39,9 +39,9 @@ repos:
 
   - repo: local
     hooks:
-      - id: protect-master-branch
-        name: protect master branch from direct pushes
-        entry: bash -c 'if [ "$(git rev-parse --abbrev-ref HEAD)" = "master" ]; then echo "❌ Direct pushes to master are not allowed. Please create a feature branch and open a PR."; exit 1; fi'
+      - id: protect-main-branch
+        name: protect main branch from direct pushes
+        entry: bash -c 'if [ "$(git rev-parse --abbrev-ref HEAD)" = "main" ]; then echo "❌ Direct pushes to main are not allowed. Please create a feature branch and open a PR."; exit 1; fi'
         language: system
         pass_filenames: false
         always_run: true
