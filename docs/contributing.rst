@@ -8,24 +8,6 @@ Development Setup
 
 For development setup instructions, see :doc:`installation`.
 
-**Python Version Support**
-
-We support Python 3.11, 3.12, and 3.13. All tests should pass on these versions before submitting PRs.
-
-**Running Tests**
-
-Run tests manually with:
-
-.. code-block:: bash
-
-   # Run all tests (parallel)
-   uv run pytest -n auto
-
-   # Run fast tests only (skip slow tests)
-   uv run pytest -n auto -m "not slow"
-
-   # Run specific test file
-   uv run pytest tests/your_test_file.py
 
 Contributing Workflow
 ---------------------
