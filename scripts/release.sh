@@ -232,49 +232,41 @@ restore_pyproject() {
     fi
 }
 
-# Function to create CUDA variant of pyproject.toml
+# Function to create CUDA variant of pyproject.toml using Python script
 create_cuda_pyproject() {
-    print_status "Creating CUDA variant configuration..."
+    print_status "Creating CUDA variant configuration using Python script..."
 
-    # Create CUDA version by modifying the original
-    sed \
-        -e 's/name = "scxpand"/name = "scxpand-cuda"/' \
-        -e 's/Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing/Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing (CUDA-enabled)/' \
-        -e 's/"single-cell", "RNA-seq", "T-cell", "clonal-expansion", "machine-learning", "bioinformatics"/"single-cell", "RNA-seq", "T-cell", "clonal-expansion", "machine-learning", "bioinformatics", "cuda", "gpu"/' \
-        -e 's/# PyTorch - will use CPU\/MPS on macOS\/Windows, CUDA on Linux by default/# PyTorch with CUDA support/' \
-        pyproject.toml > pyproject-cuda-temp.toml
-
-    # Find the line number where [tool.uv.sources] starts
-    sources_line=$(grep -n "^\[tool\.uv\.sources\]" pyproject-cuda-temp.toml | cut -d: -f1)
-
-    if [ -n "$sources_line" ]; then
-        # Find the next section after [tool.uv.sources]
-        next_section_line=$(awk -v start="$sources_line" '
-            NR > start && /^\[/ { print NR; exit }
-        ' pyproject-cuda-temp.toml)
-
-        if [ -n "$next_section_line" ]; then
-            # Keep everything before [tool.uv.sources] and after the next section
-            head -n $((sources_line - 1)) pyproject-cuda-temp.toml > pyproject-cuda-temp2.toml
-            tail -n +$next_section_line pyproject-cuda-temp.toml >> pyproject-cuda-temp2.toml
-            mv pyproject-cuda-temp2.toml pyproject-cuda-temp.toml
-
-            # Insert the CUDA-specific PyTorch configuration
-            # This follows the uv PyTorch integration guide approach
-            {
-                head -n $((sources_line - 1)) pyproject-cuda-temp.toml
-                echo ""
-                echo "# Force CUDA PyTorch installation for scxpand-cuda package"
-                echo "[tool.uv.sources]"
-                echo "torch = { index = \"pytorch-cu124\" }"
-                echo "torchvision = { index = \"pytorch-cu124\" }"
-                echo "torchaudio = { index = \"pytorch-cu124\" }"
-                echo ""
-                tail -n +$sources_line pyproject-cuda-temp.toml
-            } > pyproject-cuda-temp3.toml
-            mv pyproject-cuda-temp3.toml pyproject-cuda-temp.toml
-        fi
+    # Safeguard: Check if original pyproject.toml exists
+    if [ ! -f "pyproject.toml" ]; then
+        print_error "Original pyproject.toml not found"
+        return 1
     fi
+
+    # Safeguard: Check if Python script exists
+    if [ ! -f "scripts/create_cuda_pyproject.py" ]; then
+        print_error "Python script scripts/create_cuda_pyproject.py not found"
+        return 1
+    fi
+
+    # Safeguard: Clean up any existing temp files
+    rm -f pyproject-cuda-temp*.toml
+
+    # Run Python script to create CUDA variant
+    if ! python3 scripts/create_cuda_pyproject.py \
+        --input pyproject.toml \
+        --output pyproject-cuda-temp.toml \
+        --verbose; then
+        print_error "Failed to create CUDA variant using Python script"
+        return 1
+    fi
+
+    # Safeguard: Verify the file was created
+    if [ ! -f "pyproject-cuda-temp.toml" ] || [ ! -s "pyproject-cuda-temp.toml" ]; then
+        print_error "CUDA variant file was not created or is empty"
+        return 1
+    fi
+
+    print_success "CUDA variant pyproject.toml created successfully using Python script"
 }
 
 # Function to build standard package
@@ -546,7 +538,7 @@ main() {
 }
 
 # Trap to ensure cleanup on exit
-trap 'restore_pyproject; rm -f pyproject-cuda-temp.toml' EXIT
+trap 'restore_pyproject; rm -f pyproject-cuda-temp*.toml' EXIT
 
 # Run main function
 main "$@"
