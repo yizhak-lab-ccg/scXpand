@@ -41,7 +41,7 @@ A framework for predicting T-cell clonal expansion from single-cell RNA sequenci
 
 **For CUDA-enabled systems:**
 ```bash
-pip install scxpand[cuda] --index-url https://download.pytorch.org/whl/cu121
+pip install scxpand[cuda] --extra-index-url https://download.pytorch.org/whl/cu121
 ```
 
 **For other systems (CPU or non-CUDA GPU backends):**

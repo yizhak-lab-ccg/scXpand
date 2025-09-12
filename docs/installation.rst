@@ -7,7 +7,7 @@ Installation Options
 **For CUDA-enabled systems:**
 .. code-block:: bash
 
-    pip install scxpand[cuda] --index-url https://download.pytorch.org/whl/cu121
+    pip install scxpand[cuda] --extra-index-url https://download.pytorch.org/whl/cu121
 
 **For other systems:**
 .. code-block:: bash
