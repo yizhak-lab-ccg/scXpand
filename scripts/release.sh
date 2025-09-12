@@ -258,11 +258,6 @@ create_cuda_pyproject() {
     cat >> pyproject-cuda-temp.toml << 'EOF'
 
 # Force CUDA PyTorch installation for scxpand-cuda package
-[[tool.uv.index]]
-name = "pytorch-cu124"
-url = "https://download.pytorch.org/whl/cu124"
-explicit = true
-
 [tool.uv.sources]
 torch = { index = "pytorch-cu124" }
 torchvision = { index = "pytorch-cu124" }
