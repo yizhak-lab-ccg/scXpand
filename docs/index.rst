@@ -34,7 +34,11 @@ Quick Start
 For CUDA-enabled systems:
 .. code-block:: bash
 
-    pip install scxpand[cuda] --extra-index-url https://download.pytorch.org/whl/cu121
+    # Install scxpand
+    pip install scxpand
+
+    # Install PyTorch with CUDA support
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 For other systems (CPU or non-CUDA GPU backends):
 .. code-block:: bash
