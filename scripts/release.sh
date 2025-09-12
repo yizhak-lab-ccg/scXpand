@@ -261,13 +261,18 @@ create_cuda_pyproject() {
 
             # Insert the CUDA-specific PyTorch configuration
             # This follows the uv PyTorch integration guide approach
-            sed -i "${sources_line}i\\
-# Force CUDA PyTorch installation for scxpand-cuda package\\
-[tool.uv.sources]\\
-torch = { index = \"pytorch-cu124\" }\\
-torchvision = { index = \"pytorch-cu124\" }\\
-torchaudio = { index = \"pytorch-cu124\" }\\
-" pyproject-cuda-temp.toml
+            {
+                head -n $((sources_line - 1)) pyproject-cuda-temp.toml
+                echo ""
+                echo "# Force CUDA PyTorch installation for scxpand-cuda package"
+                echo "[tool.uv.sources]"
+                echo "torch = { index = \"pytorch-cu124\" }"
+                echo "torchvision = { index = \"pytorch-cu124\" }"
+                echo "torchaudio = { index = \"pytorch-cu124\" }"
+                echo ""
+                tail -n +$sources_line pyproject-cuda-temp.toml
+            } > pyproject-cuda-temp3.toml
+            mv pyproject-cuda-temp3.toml pyproject-cuda-temp.toml
         fi
     fi
 }
