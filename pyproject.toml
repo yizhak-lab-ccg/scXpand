@@ -116,6 +116,14 @@ exclude = ["tests*", "docs*", "notebooks*", "temp*", "data*", "results*", "_note
 [tool.uv]
 preview = true
 
+# Prevent conflicting PyTorch extras from being installed together
+conflicts = [
+    [
+        { extra = "cpu" },
+        { extra = "cuda" },
+    ],
+]
+
 # PyTorch index configuration for different backends
 [[tool.uv.index]]
 name = "pytorch-cpu"
