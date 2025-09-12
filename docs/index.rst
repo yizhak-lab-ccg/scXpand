@@ -37,13 +37,13 @@ scXpand is available in two variants to match your hardware:
 
 .. code-block:: bash
 
-   pip install scxpand-cuda
+   pip install --upgrade scxpand-cuda
 
 **Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):**
 
 .. code-block:: bash
 
-   pip install scxpand
+   pip install --upgrade scxpand
 
 See :doc:`installation` for detailed setup instructions.
 

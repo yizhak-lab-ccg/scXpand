@@ -44,13 +44,13 @@ scXpand is available in two variants to match your hardware:
 **If you have an NVIDIA GPU with CUDA support:**
 
 ```bash
-pip install scxpand-cuda
+pip install --upgrade scxpand-cuda
 ```
 
 **Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):**
 
 ```bash
-pip install scxpand
+pip install --upgrade scxpand
 ```
 
 See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
