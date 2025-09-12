@@ -203,8 +203,8 @@ def main():
         "--output",
         "-o",
         type=Path,
-        default=Path("pyproject-cuda-temp.toml"),
-        help="Output CUDA variant file (default: pyproject-cuda-temp.toml)",
+        default=Path("temp/pyproject-cuda.toml"),
+        help="Output CUDA variant file (default: temp/pyproject-cuda.toml)",
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
 

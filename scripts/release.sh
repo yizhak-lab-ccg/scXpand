@@ -249,19 +249,19 @@ create_cuda_pyproject() {
     fi
 
     # Safeguard: Clean up any existing temp files
-    rm -f pyproject-cuda-temp*.toml
+    rm -f temp/pyproject-cuda*.toml pyproject-cuda-temp*.toml
 
     # Run Python script to create CUDA variant
     if ! python3 scripts/create_cuda_pyproject.py \
         --input pyproject.toml \
-        --output pyproject-cuda-temp.toml \
+        --output temp/pyproject-cuda.toml \
         --verbose; then
         print_error "Failed to create CUDA variant using Python script"
         return 1
     fi
 
     # Safeguard: Verify the file was created
-    if [ ! -f "pyproject-cuda-temp.toml" ] || [ ! -s "pyproject-cuda-temp.toml" ]; then
+    if [ ! -f "temp/pyproject-cuda.toml" ] || [ ! -s "temp/pyproject-cuda.toml" ]; then
         print_error "CUDA variant file was not created or is empty"
         return 1
     fi
@@ -303,7 +303,7 @@ build_cuda_package() {
     create_cuda_pyproject
 
     # Replace the original with CUDA version temporarily
-    mv pyproject-cuda-temp.toml pyproject.toml
+    mv temp/pyproject-cuda.toml pyproject.toml
 
     # Build using CUDA configuration
     if ! uv build; then
@@ -538,7 +538,7 @@ main() {
 }
 
 # Trap to ensure cleanup on exit
-trap 'restore_pyproject; rm -f pyproject-cuda-temp*.toml' EXIT
+trap 'restore_pyproject; rm -f temp/pyproject-cuda*.toml pyproject-cuda-temp*.toml' EXIT
 
 # Run main function
 main "$@"
