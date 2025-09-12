@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from IPython import get_ipython
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 from sklearn.metrics import auc, roc_curve
 
@@ -17,31 +16,9 @@ from scxpand.util.logger import get_logger
 logger = get_logger()
 
 
-def _is_jupyter_environment() -> bool:
-    """Check if we're running in a Jupyter notebook environment."""
-    try:
-        # Check if we're in IPython
-        ipython = get_ipython()
-        if ipython is None:
-            return False
-
-        # Check if it's a notebook kernel
-        return hasattr(ipython, "kernel")
-    except ImportError:
-        return False
-
-
 def _show_plot_safely(show_plot: bool) -> None:
     """Show plot in a way that works in both Jupyter and regular Python environments."""
-    if not show_plot:
-        return
-
-    if _is_jupyter_environment():
-        # In Jupyter, plots are automatically displayed when created
-        # We don't need to call plt.show() explicitly
-        pass
-    else:
-        # In regular Python environment, we need to call plt.show()
+    if show_plot:
         plt.show()
 
 

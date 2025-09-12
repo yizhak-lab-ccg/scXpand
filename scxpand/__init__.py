@@ -17,7 +17,10 @@ from scxpand.pretrained import (
 from scxpand.util.classes import ModelType
 
 
-__version__ = version("scxpand")
+try:
+    __version__ = version("scxpand-cuda")
+except Exception:
+    __version__ = version("scxpand")
 _version_ = __version__  # Alias for compatibility
 
 __all__ = [
