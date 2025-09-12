@@ -190,7 +190,7 @@ check_prerequisites() {
 bump_version() {
     print_status "Bumping $VERSION_TYPE version..."
 
-    # Get current version from main pyproject.toml
+    # Get current version from main pyproject.toml ()
     current_version=$(uv version | cut -d' ' -f2)
     print_status "Current version: $current_version"
 
@@ -243,6 +243,27 @@ create_cuda_pyproject() {
         -e 's/"single-cell", "RNA-seq", "T-cell", "clonal-expansion", "machine-learning", "bioinformatics"/"single-cell", "RNA-seq", "T-cell", "clonal-expansion", "machine-learning", "bioinformatics", "cuda", "gpu"/' \
         -e 's/# PyTorch (CPU\/MPS backend - users can install CUDA variant separately)/# PyTorch with CUDA support/' \
         pyproject.toml > pyproject-cuda-temp.toml
+
+    # Add PyTorch CUDA index configuration to the CUDA variant
+    cat >> pyproject-cuda-temp.toml << 'EOF'
+
+# PyTorch CUDA index configuration
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cu124" },
+]
+torchvision = [
+    { index = "pytorch-cu124" },
+]
+torchaudio = [
+    { index = "pytorch-cu124" },
+]
+EOF
 }
 
 # Function to build standard package
