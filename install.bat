@@ -68,12 +68,17 @@ goto :uv_ok
 
 echo Found uv: !UV_VERSION!
 
-:: error if existing .venv directory is found
+:: Handle existing .venv directory
 if exist .venv (
-    echo Error: Existing .venv directory found. Please remove it before running this script.
-    echo To remove it, run: rmdir .venv /s /q
-    pause
-    exit /b 1
+    echo Warning: Existing .venv directory found.
+    set /p REPLY="Do you want to remove it and create a fresh environment? (y/N): "
+    if /i "!REPLY!"=="y" (
+        echo Removing existing .venv directory...
+        rmdir .venv /s /q
+    ) else (
+        echo Keeping existing .venv directory. Note: This may cause issues if dependencies have changed.
+        echo If you encounter problems, please remove .venv manually and re-run this script.
+    )
 )
 
 :: Install Python using uv
@@ -86,23 +91,29 @@ uv lock
 
 :: Create virtual environment and install dependencies from lock file
 echo Creating virtual environment and installing dependencies with optimal PyTorch backend...
-uv sync --extra dev --extra docs
-
-:: Check if virtual environment was created successfully
-if not exist .venv\Scripts\activate.bat (
-    echo Error: Virtual environment was not created properly.
-    echo Trying to create it manually...
-    uv venv .venv
-    if not exist .venv\Scripts\activate.bat (
-        echo Error: Failed to create virtual environment.
-        pause
-        exit /b 1
-    )
-    echo Re-running sync to install dependencies...
+if exist .venv (
+    echo Using existing virtual environment...
     uv sync --extra dev --extra docs
+) else (
+    echo Creating new virtual environment...
+    uv sync --extra dev --extra docs
+    :: Check if virtual environment was created successfully
+    if not exist .venv\Scripts\activate.bat (
+        echo Error: Virtual environment was not created properly.
+        echo Trying to create it manually...
+        uv venv .venv
+        if not exist .venv\Scripts\activate.bat (
+            echo Error: Failed to create virtual environment.
+            pause
+            exit /b 1
+        )
+        echo Re-running sync to install dependencies...
+        uv sync --extra dev --extra docs
+    )
 )
 
 :: Configure PyTorch backend based on system capabilities
+echo Configuring PyTorch backend...
 uv run python install_torch.py
 
 :: Register Jupyter kernel for this environment

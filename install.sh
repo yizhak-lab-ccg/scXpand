@@ -66,11 +66,18 @@ fi
 
 echo "Found uv: $UV_VERSION"
 
-# Error if existing .venv directory is found
+# Handle existing .venv directory
 if [ -d ".venv" ]; then
-    echo "Error: Existing .venv directory found. Please remove it before running this script."
-    echo "To remove it, run: rm -rf .venv"
-    exit 1
+    echo "Warning: Existing .venv directory found."
+    read -p "Do you want to remove it and create a fresh environment? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "Removing existing .venv directory..."
+        rm -rf .venv
+    else
+        echo "Keeping existing .venv directory. Note: This may cause issues if dependencies have changed."
+        echo "If you encounter problems, please remove .venv manually and re-run this script."
+    fi
 fi
 
 # Install Python using uv
@@ -83,22 +90,25 @@ uv lock
 
 # Create virtual environment and install dependencies with PyTorch backend detection
 echo "Creating virtual environment and installing dependencies with optimal PyTorch backend..."
-uv sync --extra dev --extra docs
-
-# Activate virtual environment for remaining setup
-echo "Activating virtual environment..."
-source .venv/bin/activate
+if [ -d ".venv" ]; then
+    echo "Using existing virtual environment..."
+    uv sync --extra dev --extra docs
+else
+    echo "Creating new virtual environment..."
+    uv sync --extra dev --extra docs
+fi
 
 # Configure PyTorch backend based on system capabilities
+echo "Configuring PyTorch backend..."
 uv run python install_torch.py
 
 # Register Jupyter kernel
 echo "Registering Jupyter kernel..."
-python -m ipykernel install --user --name=scxpand_env --display-name="scXpand (.venv)" --env PYTHONPATH "$(pwd)"
+uv run python -m ipykernel install --user --name=scxpand_env --display-name="scXpand (.venv)" --env PYTHONPATH "$(pwd)"
 
 # Install pre-commit hooks
 echo "Setting up pre-commit hooks..."
-pre-commit install
-pre-commit install --hook-type pre-push
+uv run pre-commit install
+uv run pre-commit install --hook-type pre-push
 
 echo "Installation complete! Activate the environment with: source .venv/bin/activate"
