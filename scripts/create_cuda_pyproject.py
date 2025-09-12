@@ -3,7 +3,7 @@
 Create CUDA variant of pyproject.toml for scXpand dual package release.
 
 This script safely modifies the original pyproject.toml to create a CUDA-enabled variant
-that forces PyTorch installation from the pytorch-cu124 index.
+that forces PyTorch installation from the pytorch-cu128 index.
 """
 
 import argparse
@@ -13,6 +13,12 @@ import tomllib
 
 from pathlib import Path
 from typing import List
+
+
+# Constants for CUDA configuration
+CUDA_VERSION = "cu128"  # Latest supported CUDA version
+PYTORCH_CUDA_INDEX_NAME = f"pytorch-{CUDA_VERSION}"
+PYTORCH_CUDA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 
 
 def load_toml_lines(file_path: Path) -> List[str]:
@@ -133,9 +139,9 @@ def create_cuda_variant(input_path: Path, output_path: Path) -> bool:
 
             # Add CUDA PyTorch configuration
             cuda_config = [
-                'torch = { index = "pytorch-cu124" }\n',
-                'torchvision = { index = "pytorch-cu124" }\n',
-                'torchaudio = { index = "pytorch-cu124" }\n',
+                f'torch = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n',
+                f'torchvision = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n',
+                f'torchaudio = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n',
             ]
             modified_lines.extend(cuda_config)
             print("  ✓ Configured PyTorch sources: torch, torchvision, torchaudio")
@@ -145,8 +151,8 @@ def create_cuda_variant(input_path: Path, output_path: Path) -> bool:
                 "\n",
                 "# PyTorch CUDA index configuration\n",
                 "[[tool.uv.index]]\n",
-                'name = "pytorch-cu124"\n',
-                'url = "https://download.pytorch.org/whl/cu124"\n',
+                f'name = "{PYTORCH_CUDA_INDEX_NAME}"\n',
+                f'url = "{PYTORCH_CUDA_INDEX_URL}"\n',
                 "explicit = true\n",
             ]
             modified_lines.extend(pytorch_index)
@@ -168,14 +174,14 @@ def create_cuda_variant(input_path: Path, output_path: Path) -> bool:
         modified_lines.append("\n")
         modified_lines.append("# Force CUDA PyTorch installation for scxpand-cuda package\n")
         modified_lines.append("[tool.uv.sources]\n")
-        modified_lines.append('torch = { index = "pytorch-cu124" }\n')
-        modified_lines.append('torchvision = { index = "pytorch-cu124" }\n')
-        modified_lines.append('torchaudio = { index = "pytorch-cu124" }\n')
+        modified_lines.append(f'torch = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n')
+        modified_lines.append(f'torchvision = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n')
+        modified_lines.append(f'torchaudio = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n')
         modified_lines.append("\n")
         modified_lines.append("# PyTorch CUDA index configuration\n")
         modified_lines.append("[[tool.uv.index]]\n")
-        modified_lines.append('name = "pytorch-cu124"\n')
-        modified_lines.append('url = "https://download.pytorch.org/whl/cu124"\n')
+        modified_lines.append(f'name = "{PYTORCH_CUDA_INDEX_NAME}"\n')
+        modified_lines.append(f'url = "{PYTORCH_CUDA_INDEX_URL}"\n')
         modified_lines.append("explicit = true\n")
 
     # Save CUDA variant
@@ -196,7 +202,7 @@ def create_cuda_variant(input_path: Path, output_path: Path) -> bool:
             return False
 
         # Check PyTorch sources
-        if 'torch = { index = "pytorch-cu124" }' not in content:
+        if f'torch = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}' not in content:
             print("ERROR: PyTorch sources verification failed")
             return False
 

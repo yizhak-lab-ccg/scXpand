@@ -3,6 +3,11 @@ import subprocess
 import sys
 
 
+# Constants for CUDA configuration
+CUDA_VERSION = "cu128"  # Latest supported CUDA version
+PYTORCH_CUDA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
+
+
 def is_in_virtual_environment():
     """Check if we're running in a virtual environment."""
     return hasattr(sys, "real_prefix") or (
@@ -97,11 +102,13 @@ def print_torch_backend():
         print(f"Number of CUDA devices available: {device_count}")
         print(f"CUDA version: {cuda_version}")
 
-        # Check for CUDA 12.8+ support
+        # Check for CUDA 12.x support
         if cuda_version and "12." in cuda_version:
-            print("✓ CUDA 12.x detected - compatible with latest PyTorch features")
+            print(f"✓ CUDA 12.x detected - compatible with latest PyTorch features (targeting {CUDA_VERSION})")
         else:
-            print("⚠ Older CUDA version detected - consider upgrading for optimal performance")
+            print(
+                f"⚠ Older CUDA version detected - consider upgrading for optimal performance (targeting {CUDA_VERSION})"
+            )
 
     elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
         print("Torch is using MPS (Metal Performance Shaders) backend")
