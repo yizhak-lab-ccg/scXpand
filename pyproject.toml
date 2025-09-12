@@ -83,6 +83,7 @@ dev = [
     "ruff>=0.12.7",
     "pre-commit>=4.2.0",
     "ipykernel>=6.29.5",
+    # jupyter, ipywidgets, jupyter-client, jupyter-core are already in main dependencies
     "jupyter-client>=8.6.3",
     "jupyter-core>=5.7.2",
 ]
