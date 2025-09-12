@@ -156,6 +156,7 @@ def create_cuda_variant(input_path: Path, output_path: Path) -> bool:
                 "[[tool.uv.index]]\n",
                 f'name = "{PYTORCH_CUDA_INDEX_NAME}"\n',
                 f'url = "{PYTORCH_CUDA_INDEX_URL}"\n',
+                "explicit = true\n",
             ]
             modified_lines.extend(pytorch_index)
             print("  ✓ Added PyTorch CUDA index configuration")
@@ -184,6 +185,7 @@ def create_cuda_variant(input_path: Path, output_path: Path) -> bool:
         modified_lines.append("[[tool.uv.index]]\n")
         modified_lines.append(f'name = "{PYTORCH_CUDA_INDEX_NAME}"\n')
         modified_lines.append(f'url = "{PYTORCH_CUDA_INDEX_URL}"\n')
+        modified_lines.append("explicit = true\n")
 
     # Save CUDA variant
     print(f"Saving CUDA variant to {output_path}")
