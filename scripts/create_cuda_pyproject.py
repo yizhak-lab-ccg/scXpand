@@ -138,11 +138,11 @@ def create_cuda_variant(input_path: Path, output_path: Path) -> bool:
             modified_lines.append(line)  # Keep the section header
 
             # Add CUDA PyTorch configuration
-            # Force CUDA installation for scxpand-cuda package with version pinning
+            # Force CUDA installation for scxpand-cuda package
             cuda_config = [
-                f'torch = {{ index = "{PYTORCH_CUDA_INDEX_NAME}", version = ">=2.5.0" }}\n',
-                f'torchvision = {{ index = "{PYTORCH_CUDA_INDEX_NAME}", version = ">=0.20.0" }}\n',
-                f'torchaudio = {{ index = "{PYTORCH_CUDA_INDEX_NAME}", version = ">=2.5.0" }}\n',
+                f'torch = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n',
+                f'torchvision = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n',
+                f'torchaudio = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n',
             ]
             modified_lines.extend(cuda_config)
             print("  ✓ Configured PyTorch sources: torch, torchvision, torchaudio")
@@ -175,9 +175,9 @@ def create_cuda_variant(input_path: Path, output_path: Path) -> bool:
         modified_lines.append("\n")
         modified_lines.append("# Force CUDA PyTorch installation for scxpand-cuda package\n")
         modified_lines.append("[tool.uv.sources]\n")
-        modified_lines.append(f'torch = {{ index = "{PYTORCH_CUDA_INDEX_NAME}", version = ">=2.5.0" }}\n')
-        modified_lines.append(f'torchvision = {{ index = "{PYTORCH_CUDA_INDEX_NAME}", version = ">=0.20.0" }}\n')
-        modified_lines.append(f'torchaudio = {{ index = "{PYTORCH_CUDA_INDEX_NAME}", version = ">=2.5.0" }}\n')
+        modified_lines.append(f'torch = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n')
+        modified_lines.append(f'torchvision = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n')
+        modified_lines.append(f'torchaudio = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n')
         modified_lines.append("\n")
         modified_lines.append("# PyTorch CUDA index configuration\n")
         modified_lines.append("[[tool.uv.index]]\n")
