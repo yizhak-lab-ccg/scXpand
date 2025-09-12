@@ -2,25 +2,24 @@
 
 This guide explains how to publish new versions of scXpand to PyPI.
 
+**scXpand publishes TWO packages:**
+- `scxpand` - Standard version (CPU/MPS support)
+- `scxpand-cuda` - CUDA version (NVIDIA GPU support)
+
 ## Table of Contents
 
 - [Release Script](#release-script)
   - [Prerequisites](#prerequisites)
   - [Usage](#usage)
   - [What the script does](#what-the-script-does)
-  - [Safety Features](#safety-features)
-  - [Example Output](#example-output)
-- [PyPI Cleanup](#pypi-cleanup)
-  - [Quick Usage](#quick-usage)
-  - [Advanced Options](#advanced-options)
-- [Legacy Scripts](#legacy-scripts)
+  - [PyPI Token Requirements](#pypi-token-requirements)
 - [Troubleshooting](#troubleshooting)
 
 ## Release Script
 
-### `release.sh` (Unified Release Script)
+### `release.sh` (Dual Package Release Script)
 
-Automates patch, minor, and major releases following the contributing guide.
+Automates patch, minor, and major releases for both package variants.
 
 ### Prerequisites
 
@@ -38,7 +37,12 @@ Automates patch, minor, and major releases following the contributing guide.
 
    e. Give it a name (e.g., "scXpand releases")
 
-   f. Set the scope to "Entire account" (for publishing to any project)
+   f. **CRITICAL**: Set the scope to "Entire account" (NOT project-specific)
+
+      **Why "Entire account" is required:**
+      - scXpand publishes TWO packages: `scxpand` and `scxpand-cuda`
+      - Project-scoped tokens only work for one package
+      - Account-scoped tokens can publish both packages
 
    g. Click "Add token"
 
@@ -103,8 +107,10 @@ Automates patch, minor, and major releases following the contributing guide.
    - Shows current and new version numbers
    - Supports patch (default), minor, and major version bumps
 
-4. **Build Testing**:
-   - Builds the package with `uv build`
+4. **Package Building**:
+   - Cleans build directories
+   - Builds standard package (`scxpand`)
+   - Builds CUDA package (`scxpand-cuda`) using modified configuration
    - Tests import functionality
 
 5. **Git Operations**:
@@ -113,58 +119,43 @@ Automates patch, minor, and major releases following the contributing guide.
    - Creates and pushes version tag
 
 6. **Publishing**:
-   - Publishes to PyPI using `uv publish`
+   - Publishes both packages to PyPI using `uv publish`
    - Includes confirmation prompt before publishing
+   - Requires "Entire account" scoped token
 
 7. **Verification**:
-   - Tests installation from PyPI
+   - Tests installation of both packages from PyPI
    - Provides links to PyPI and GitHub release
 
-## PyPI Cleanup
+## PyPI Token Requirements
 
-After publishing multiple releases, you may want to clean up old versions from PyPI to avoid confusion and keep your package page tidy.
+**CRITICAL**: scXpand publishes TWO packages and requires specific token configuration.
 
-### Quick Usage
+### Token Scope Requirements
 
-```bash
-# List all published versions
-./scripts/cleanup_pypi.sh list
+- ✅ **"Entire account"** - Required for dual package publishing
+- ❌ **Project-scoped** - Will fail when publishing the second package
 
-# Dry run: see what would be deleted (keeps 3 most recent)
-./scripts/cleanup_pypi.sh clean
+### Why Account Scope is Required
 
-# Keep 5 most recent versions (dry run)
-./scripts/cleanup_pypi.sh clean --keep-latest 5
+1. **Two Packages Published**: `scxpand` and `scxpand-cuda`
+2. **Project-scoped Limitation**: Only works for one package
+3. **403 Forbidden Error**: Occurs when token scope is insufficient
 
-# Actually delete old versions (use with caution!)
-./scripts/cleanup_pypi.sh clean-for-real --keep-latest 3
-```
+### Getting the Right Token
 
-### Advanced Options
-
-```bash
-# Keep versions matching patterns
-python scripts/cleanup_pypi.py --keep-pattern "0.1.15*" --keep-pattern "1.0.*"
-
-# Different package name
-python scripts/cleanup_pypi.py --package-name mypackage
-
-# Keep only 2 most recent and delete everything else
-./scripts/cleanup_pypi.sh clean-for-real --keep-latest 2
-```
-
-**Important Notes:**
-- All operations are dry runs by default for safety
-- Deletion from PyPI is irreversible
-- The same PyPI token used for publishing is required for cleanup
-- See `scripts/CLEANUP_PYPI.md` for detailed documentation
-
-**Recommended Workflow:**
-1. After a successful release, review old versions: `./scripts/cleanup_pypi.sh list`
-2. Test cleanup plan: `./scripts/cleanup_pypi.sh clean --keep-latest 5`
-3. Execute cleanup: `./scripts/cleanup_pypi.sh clean-for-real --keep-latest 5`
+1. Go to https://pypi.org/manage/account/token/
+2. Click "Add API token"
+3. **Set scope to "Entire account"**
+4. Copy the token immediately
 
 ## Troubleshooting
+
+**"403 Forbidden" or "project-scoped token is not valid for project: 'scxpand-cuda'"**:
+- Your token is project-scoped but scXpand publishes TWO packages
+- Go to https://pypi.org/manage/account/token/ and create a new token
+- **Set scope to "Entire account"** (not project-specific)
+- This allows publishing both `scxpand` and `scxpand-cuda` packages
 
 **"Invalid token" or "Authentication failed"**:
 - Check that your token starts with `pypi-`

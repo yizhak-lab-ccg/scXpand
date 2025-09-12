@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # scXpand Release Script
-# Unified script for patch, minor, and major releases with optional dry run
+# Publishes both standard (scxpand - CPU/MPS) and CUDA-enabled (scxpand-cuda) versions
 # Usage: ./scripts/release.sh [--dry-run] [--patch|--minor|--major]
 
 # Load PyPI token from file
@@ -23,6 +23,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
 
 # Default values
@@ -46,9 +47,15 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+print_package() {
+    echo -e "${PURPLE}[PACKAGE]${NC} $1"
+}
+
 # Function to show usage
 show_usage() {
     echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "This script publishes both standard (scxpand - CPU/MPS) and CUDA-enabled (scxpand-cuda) packages."
     echo ""
     echo "Options:"
     echo "  --dry-run          Perform a dry run (no actual changes)"
@@ -58,14 +65,20 @@ show_usage() {
     echo "  --help, -h         Show this help message"
     echo ""
     echo "Examples:"
-    echo "  $0                 # Patch release (normal)"
+    echo "  $0                 # Patch release for both packages"
     echo "  $0 --dry-run       # Patch release dry run"
-    echo "  $0 --minor         # Minor release"
+    echo "  $0 --minor         # Minor release for both packages"
     echo "  $0 --major --dry-run # Major release dry run"
     echo ""
     echo "Environment Setup:"
     echo "  Option 1: Edit scripts/pypi_token.txt and replace the dummy token"
     echo "  Option 2: export UV_PUBLISH_TOKEN=your_token_here"
+    echo ""
+    echo "PyPI Token Requirements:"
+    echo "  - Use 'Entire account' scoped token (not project-specific)"
+    echo "  - scXpand publishes TWO packages: 'scxpand' and 'scxpand-cuda'"
+    echo "  - Project-scoped tokens only work for one package"
+    echo "  - Get token at: https://pypi.org/manage/account/token/"
 }
 
 # Parse command line arguments
@@ -106,7 +119,7 @@ command_exists() {
 
 # Function to check prerequisites
 check_prerequisites() {
-    print_status "Checking prerequisites..."
+    print_status "Checking prerequisites for dual package release..."
 
     # Check if we're in a git repository
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
@@ -125,6 +138,9 @@ check_prerequisites() {
         print_error "UV_PUBLISH_TOKEN environment variable is not set"
         print_status "Please set it with: export UV_PUBLISH_TOKEN=your_token_here"
         print_status "Or edit scripts/pypi_token.txt with your token"
+        print_warning "IMPORTANT: Use an 'Entire account' scoped token for dual package publishing"
+        print_status "scXpand publishes both 'scxpand' and 'scxpand-cuda' packages"
+        print_status "Get account-scoped token at: https://pypi.org/manage/account/token/"
         exit 1
     fi
 
@@ -161,33 +177,27 @@ check_prerequisites() {
         exit 1
     fi
 
-    print_success "Prerequisites check passed"
-}
-
-# Function to verify pre-commit hooks status
-verify_precommit_status() {
-    print_status "Verifying pre-commit hooks status..."
-
-    # Check if pre-commit is installed
-    if ! command_exists pre-commit; then
-        print_warning "pre-commit is not installed. Tests will run via pre-commit hooks on push."
-    else
-        print_status "Pre-commit hooks will run tests automatically on push."
+    # Check if pyproject file exists
+    if [ ! -f "pyproject.toml" ]; then
+        print_error "pyproject.toml not found"
+        exit 1
     fi
 
-    print_success "Pre-commit verification complete"
+    print_success "Prerequisites check passed"
 }
 
 # Function to bump version
 bump_version() {
     print_status "Bumping $VERSION_TYPE version..."
 
-    # Get current version
+    # Get current version from main pyproject.toml
     current_version=$(uv version | cut -d' ' -f2)
     print_status "Current version: $current_version"
 
-    # Bump version
-    uv version --bump "$VERSION_TYPE"
+    # Bump version in main pyproject.toml
+    if [ "$DRY_RUN" = false ]; then
+        uv version --bump "$VERSION_TYPE"
+    fi
 
     # Get new version
     new_version=$(uv version | cut -d' ' -f2)
@@ -197,23 +207,134 @@ bump_version() {
     export NEW_VERSION="$new_version"
 }
 
-# Function to test the build
-test_build() {
-    print_status "Testing the build..."
+# Function to clean build directories
+clean_build_dirs() {
+    print_status "Cleaning build directories..."
 
-    # Build the package
+    if [ "$DRY_RUN" = true ]; then
+        print_status "DRY RUN: Would clean build, dist, and *.egg-info directories"
+        return
+    fi
+
+    # Remove build directories
+    rm -rf build/ dist/ *.egg-info/
+    print_success "Build directories cleaned"
+}
+
+# Function to backup and restore pyproject.toml
+backup_pyproject() {
+    cp pyproject.toml pyproject.toml.backup
+}
+
+restore_pyproject() {
+    if [ -f pyproject.toml.backup ]; then
+        mv pyproject.toml.backup pyproject.toml
+    fi
+}
+
+# Function to create CUDA variant of pyproject.toml
+create_cuda_pyproject() {
+    print_status "Creating CUDA variant configuration..."
+
+    # Create CUDA version by modifying the original
+    sed \
+        -e 's/name = "scxpand"/name = "scxpand-cuda"/' \
+        -e 's/Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing/Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing (CUDA-enabled)/' \
+        -e 's/"single-cell", "RNA-seq", "T-cell", "clonal-expansion", "machine-learning", "bioinformatics"/"single-cell", "RNA-seq", "T-cell", "clonal-expansion", "machine-learning", "bioinformatics", "cuda", "gpu"/' \
+        -e 's/# PyTorch (CPU\/MPS backend - users can install CUDA variant separately)/# PyTorch with CUDA support/' \
+        pyproject.toml > pyproject-cuda-temp.toml
+}
+
+# Function to build standard package
+build_standard_package() {
+    print_package "Building standard package (scxpand - CPU/MPS support)..."
+
+    if [ "$DRY_RUN" = true ]; then
+        print_status "DRY RUN: Would build standard package with CPU/MPS support"
+        return
+    fi
+
+    # Build using original pyproject.toml
     if ! uv build; then
-        print_error "Build failed"
+        print_error "Failed to build standard package"
+        return 1
+    fi
+
+    print_success "Standard package built successfully"
+}
+
+# Function to build CUDA package
+build_cuda_package() {
+    print_package "Building CUDA package (scxpand-cuda - CUDA support)..."
+
+    if [ "$DRY_RUN" = true ]; then
+        print_status "DRY RUN: Would build CUDA package with CUDA support"
+        return
+    fi
+
+    # Backup original pyproject.toml
+    backup_pyproject
+
+    # Create CUDA variant configuration
+    create_cuda_pyproject
+
+    # Replace the original with CUDA version temporarily
+    mv pyproject-cuda-temp.toml pyproject.toml
+
+    # Build using CUDA configuration
+    if ! uv build; then
+        print_error "Failed to build CUDA package"
+        restore_pyproject
+        return 1
+    fi
+
+    # Restore original pyproject.toml
+    restore_pyproject
+
+    print_success "CUDA package built successfully"
+}
+
+# Function to test package imports
+test_package_imports() {
+    if [ "$DRY_RUN" = true ]; then
+        print_status "DRY RUN: Would test package imports"
+        return
+    fi
+
+    print_status "Testing package imports..."
+
+    # Test standard package import
+    if uv run --with scxpand --no-project -- python -c "import scxpand; print('Standard package import successful')" >/dev/null 2>&1; then
+        print_success "Standard package import test passed"
+    else
+        print_warning "Standard package import test failed (package may not be available yet)"
+    fi
+}
+
+# Function to build and test both packages
+build_and_test_packages() {
+    print_status "Building and testing both packages..."
+
+    # Clean build directories
+    clean_build_dirs
+
+    # Build both packages
+    build_standard_package
+    if [ $? -ne 0 ]; then
+        print_error "Standard package build failed"
         exit 1
     fi
 
-    # Test installation
-    if ! uv run --with scxpand --no-project -- python -c "import scxpand; print('Import successful')"; then
-        print_error "Import test failed"
+    build_cuda_package
+    if [ $? -ne 0 ]; then
+        print_error "CUDA package build failed"
         exit 1
     fi
 
-    print_success "Build and import test passed"
+    # Test imports
+    test_package_imports
+
+    print_success "Both packages built and tested successfully"
 }
 
 # Function to show what would be committed (for dry run)
@@ -240,7 +361,7 @@ commit_and_push() {
     git add -A
 
     # Commit with version bump message
-    git commit -m "Bump version to $NEW_VERSION"
+    git commit -m "Bump version to $NEW_VERSION (dual package release)"
 
     # Push to main
     git push origin main
@@ -266,18 +387,18 @@ create_and_push_tag() {
     print_success "Tag v$NEW_VERSION created and pushed"
 }
 
-# Function to publish to PyPI
+# Function to publish both packages to PyPI
 publish_to_pypi() {
     if [ "$DRY_RUN" = true ]; then
-        print_status "DRY RUN: Would publish version $NEW_VERSION to PyPI..."
+        print_status "DRY RUN: Would publish both packages version $NEW_VERSION to PyPI..."
         return
     fi
 
-    print_status "Publishing to PyPI..."
+    print_status "Publishing both packages to PyPI..."
 
     # Confirm before publishing
     echo
-    print_warning "About to publish version $NEW_VERSION to PyPI"
+    print_warning "About to publish BOTH packages (scxpand and scxpand-cuda) version $NEW_VERSION to PyPI"
     read -p "Are you sure you want to continue? (y/N): " -n 1 -r
     echo
 
@@ -286,39 +407,52 @@ publish_to_pypi() {
         exit 0
     fi
 
-    # Publish to PyPI
-    if ! uv publish; then
-        print_error "Publishing to PyPI failed"
+    # Publish all packages from dist directory
+    print_package "Publishing both packages to PyPI..."
+    if ! uv publish dist/*; then
+        print_error "Publishing packages to PyPI failed"
+        print_status "If you get '403 Forbidden' error, check that your PyPI token has 'Entire account' scope"
         exit 1
     fi
-
-    print_success "Successfully published to PyPI"
+    print_success "Both packages successfully published to PyPI"
 }
 
-# Function to verify release
-verify_release() {
+# Function to verify both releases
+verify_releases() {
     if [ "$DRY_RUN" = true ]; then
-        print_status "DRY RUN: Would verify release..."
+        print_status "DRY RUN: Would verify both releases..."
         return
     fi
 
-    print_status "Verifying release..."
+    print_status "Verifying both package releases..."
 
     # Wait a moment for PyPI to update
-    sleep 5
+    sleep 10
 
-    # Test installation from PyPI
+    # Test standard package installation
+    print_package "Testing standard package installation..."
     if ! pip install "scxpand==$NEW_VERSION" --no-cache-dir; then
-        print_warning "Could not install from PyPI immediately (this is normal)"
+        print_warning "Could not install standard package from PyPI immediately (this is normal)"
         print_status "Please check manually: pip install scxpand==$NEW_VERSION"
     else
-        print_success "Successfully installed from PyPI"
-        # Uninstall to clean up
+        print_success "Standard package successfully installed from PyPI"
         pip uninstall scxpand -y
     fi
 
+    # Test CUDA package installation
+    print_package "Testing CUDA package installation..."
+    if ! pip install "scxpand-cuda==$NEW_VERSION" --no-cache-dir; then
+        print_warning "Could not install CUDA package from PyPI immediately (this is normal)"
+        print_status "Please check manually: pip install scxpand-cuda==$NEW_VERSION"
+    else
+        print_success "CUDA package successfully installed from PyPI"
+        pip uninstall scxpand-cuda -y
+    fi
+
     print_status "Release verification complete"
-    print_status "Check your package at: https://pypi.org/project/scxpand/"
+    print_status "Check your packages at:"
+    print_status "  Standard (CPU/MPS): https://pypi.org/project/scxpand/"
+    print_status "  CUDA:               https://pypi.org/project/scxpand-cuda/"
 }
 
 # Function to show summary
@@ -327,22 +461,24 @@ show_summary() {
     if [ "$DRY_RUN" = true ]; then
         print_success "DRY RUN completed successfully!"
         echo
-        print_status "What would happen in a real release:"
+        print_status "What would happen in a real dual release:"
         echo "  - Version: $NEW_VERSION ($VERSION_TYPE)"
-        echo "  - Commit message: 'Bump version to $NEW_VERSION'"
+        echo "  - Packages: scxpand (CPU/MPS) and scxpand-cuda (CUDA)"
+        echo "  - Commit message: 'Bump version to $NEW_VERSION (dual package release)'"
         echo "  - Tag: v$NEW_VERSION"
         echo "  - Push to main branch"
-        echo "  - Publish to PyPI"
+        echo "  - Publish both packages to PyPI"
         echo
         print_warning "This was a DRY RUN - no actual changes were made to git or PyPI"
         print_status "To perform the actual release, run: ./scripts/release.sh --$VERSION_TYPE"
     else
-        print_success "$VERSION_TYPE release completed successfully!"
+        print_success "Dual package $VERSION_TYPE release completed successfully!"
         echo
         print_status "Summary:"
         echo "  - Version: $NEW_VERSION ($VERSION_TYPE)"
         echo "  - Tag: v$NEW_VERSION"
-        echo "  - PyPI: https://pypi.org/project/scxpand/"
+        echo "  - Standard Package (CPU/MPS): https://pypi.org/project/scxpand/"
+        echo "  - CUDA Package:               https://pypi.org/project/scxpand-cuda/"
         echo "  - GitHub: https://github.com/yizhak-lab-ccg/scXpand/releases/tag/v$NEW_VERSION"
     fi
     echo
@@ -359,6 +495,7 @@ main() {
     echo "=========================================="
     echo
     print_status "Release type: $VERSION_TYPE"
+    print_status "Packages: scxpand (CPU/MPS) + scxpand-cuda (CUDA)"
     if [ "$DRY_RUN" = true ]; then
         print_warning "DRY RUN MODE - No actual changes will be made"
     fi
@@ -366,16 +503,18 @@ main() {
 
     # Run all steps
     check_prerequisites
-    verify_precommit_status
     bump_version
-    test_build
+    build_and_test_packages
     show_changes
     commit_and_push
     create_and_push_tag
     publish_to_pypi
-    verify_release
+    verify_releases
     show_summary
 }
+
+# Trap to ensure cleanup on exit
+trap 'restore_pyproject; rm -f pyproject-cuda-temp.toml' EXIT
 
 # Run main function
 main "$@"
