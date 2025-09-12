@@ -53,6 +53,7 @@ Homepage = "https://github.com/yizhak-lab-ccg/scXpand"
 Documentation = "https://scxpand.readthedocs.io"
 Repository = "https://github.com/yizhak-lab-ccg/scXpand"
 Issues = "https://github.com/yizhak-lab-ccg/scXpand/issues"
+Logo = "https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_logo_gray.png"
 
 [project.scripts]
 scxpand = "scxpand.main:main"
