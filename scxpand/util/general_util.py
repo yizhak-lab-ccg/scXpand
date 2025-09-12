@@ -327,14 +327,6 @@ def get_device() -> str:
     if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
         return "mps"
 
-    # Check for XPU (Intel GPU)
-    if hasattr(torch, "xpu") and torch.xpu.is_available():
-        return "xpu"
-
-    # Check for MKLDNN (Intel CPU optimization)
-    if hasattr(torch.backends, "mkldnn") and torch.backends.mkldnn.is_available():
-        return "mkldnn"
-
     # Default to CPU
     return "cpu"
 
