@@ -1,6 +1,6 @@
 [project]
 name = "scxpand"
-version = "0.1.39"
+version = "0.1.40"
 requires-python = ">=3.11,<3.14"
 description = "Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing"
 readme = "README.md"
