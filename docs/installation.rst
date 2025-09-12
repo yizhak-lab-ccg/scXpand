@@ -8,13 +8,13 @@ Install scXpand:
 
 .. code-block:: bash
 
-    pip install scxpand
+   pip install scxpand
 
 For CUDA-enabled systems - also install PyTorch with CUDA support:
 
 .. code-block:: bash
 
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 
 
