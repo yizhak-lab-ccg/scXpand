@@ -137,18 +137,12 @@ def create_cuda_variant(input_path: Path, output_path: Path) -> bool:
             # Replace the entire sources section with CUDA configuration
             modified_lines.append(line)  # Keep the section header
 
-            # Add CUDA PyTorch configuration with platform markers
-            # PyTorch doesn't publish CUDA builds for macOS, so we gate on platform
+            # Add CUDA PyTorch configuration
+            # Force CUDA installation for scxpand-cuda package
             cuda_config = [
-                "torch = [\n",
-                f"  {{ index = \"{PYTORCH_CUDA_INDEX_NAME}\", marker = \"sys_platform == 'linux' or sys_platform == 'win32'\" }},\n",
-                "]\n",
-                "torchvision = [\n",
-                f"  {{ index = \"{PYTORCH_CUDA_INDEX_NAME}\", marker = \"sys_platform == 'linux' or sys_platform == 'win32'\" }},\n",
-                "]\n",
-                "torchaudio = [\n",
-                f"  {{ index = \"{PYTORCH_CUDA_INDEX_NAME}\", marker = \"sys_platform == 'linux' or sys_platform == 'win32'\" }},\n",
-                "]\n",
+                f'torch = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n',
+                f'torchvision = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n',
+                f'torchaudio = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n',
             ]
             modified_lines.extend(cuda_config)
             print("  ✓ Configured PyTorch sources: torch, torchvision, torchaudio")
@@ -160,7 +154,6 @@ def create_cuda_variant(input_path: Path, output_path: Path) -> bool:
                 "[[tool.uv.index]]\n",
                 f'name = "{PYTORCH_CUDA_INDEX_NAME}"\n',
                 f'url = "{PYTORCH_CUDA_INDEX_URL}"\n',
-                "explicit = true\n",
             ]
             modified_lines.extend(pytorch_index)
             print("  ✓ Added PyTorch CUDA index configuration")
@@ -181,27 +174,14 @@ def create_cuda_variant(input_path: Path, output_path: Path) -> bool:
         modified_lines.append("\n")
         modified_lines.append("# Force CUDA PyTorch installation for scxpand-cuda package\n")
         modified_lines.append("[tool.uv.sources]\n")
-        modified_lines.append("torch = [\n")
-        modified_lines.append(
-            f"  {{ index = \"{PYTORCH_CUDA_INDEX_NAME}\", marker = \"sys_platform == 'linux' or sys_platform == 'win32'\" }},\n"
-        )
-        modified_lines.append("]\n")
-        modified_lines.append("torchvision = [\n")
-        modified_lines.append(
-            f"  {{ index = \"{PYTORCH_CUDA_INDEX_NAME}\", marker = \"sys_platform == 'linux' or sys_platform == 'win32'\" }},\n"
-        )
-        modified_lines.append("]\n")
-        modified_lines.append("torchaudio = [\n")
-        modified_lines.append(
-            f"  {{ index = \"{PYTORCH_CUDA_INDEX_NAME}\", marker = \"sys_platform == 'linux' or sys_platform == 'win32'\" }},\n"
-        )
-        modified_lines.append("]\n")
+        modified_lines.append(f'torch = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n')
+        modified_lines.append(f'torchvision = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n')
+        modified_lines.append(f'torchaudio = {{ index = "{PYTORCH_CUDA_INDEX_NAME}" }}\n')
         modified_lines.append("\n")
         modified_lines.append("# PyTorch CUDA index configuration\n")
         modified_lines.append("[[tool.uv.index]]\n")
         modified_lines.append(f'name = "{PYTORCH_CUDA_INDEX_NAME}"\n')
         modified_lines.append(f'url = "{PYTORCH_CUDA_INDEX_URL}"\n')
-        modified_lines.append("explicit = true\n")
 
     # Save CUDA variant
     print(f"Saving CUDA variant to {output_path}")
