@@ -106,10 +106,7 @@ def print_torch_backend():
     elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
         print("Torch is using MPS (Metal Performance Shaders) backend")
         print("Running on Apple Silicon with GPU acceleration")
-    elif hasattr(torch, "xpu") and torch.xpu.is_available():
-        print("Torch is using XPU (Intel GPU) backend")
-    elif hasattr(torch.backends, "mkldnn") and torch.backends.mkldnn.is_available():
-        print("Torch is using MKLDNN backend (Intel CPU optimization)")
+
     else:
         print("Torch is using CPU backend")
 
