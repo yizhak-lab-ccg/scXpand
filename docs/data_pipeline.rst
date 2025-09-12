@@ -360,7 +360,7 @@ The preprocessing happens transparently in the background, ensuring that model t
 Data Augmentation
 ~~~~~~~~~~~~~~~~~
 
-Data augmentation is used **only during training** for neural network models (MLP and Autoencoder) to improve generalization and robustness.
+Data augmentation is used **only during training** for the neural network models (MLP and Autoencoder) and the linear models (Logistic regression and SVM) to improve generalization and robustness.
 
 **Augmentation Pipeline:**
 Data augmentation is applied in two stages during the preprocessing pipeline:
