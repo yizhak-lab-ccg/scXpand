@@ -244,25 +244,32 @@ create_cuda_pyproject() {
         -e 's/# PyTorch - will use CPU\/MPS on macOS\/Windows, CUDA on Linux by default/# PyTorch with CUDA support/' \
         pyproject.toml > pyproject-cuda-temp.toml
 
-    # Remove the existing [tool.uv.sources] section and everything after it
     # Find the line number where [tool.uv.sources] starts
     sources_line=$(grep -n "^\[tool\.uv\.sources\]" pyproject-cuda-temp.toml | cut -d: -f1)
 
     if [ -n "$sources_line" ]; then
-        # Keep everything before [tool.uv.sources]
-        head -n $((sources_line - 1)) pyproject-cuda-temp.toml > pyproject-cuda-temp2.toml
-        mv pyproject-cuda-temp2.toml pyproject-cuda-temp.toml
+        # Find the next section after [tool.uv.sources]
+        next_section_line=$(awk -v start="$sources_line" '
+            NR > start && /^\[/ { print NR; exit }
+        ' pyproject-cuda-temp.toml)
+
+        if [ -n "$next_section_line" ]; then
+            # Keep everything before [tool.uv.sources] and after the next section
+            head -n $((sources_line - 1)) pyproject-cuda-temp.toml > pyproject-cuda-temp2.toml
+            tail -n +$next_section_line pyproject-cuda-temp.toml >> pyproject-cuda-temp2.toml
+            mv pyproject-cuda-temp2.toml pyproject-cuda-temp.toml
+
+            # Insert the CUDA-specific PyTorch configuration
+            # This follows the uv PyTorch integration guide approach
+            sed -i "${sources_line}i\\
+# Force CUDA PyTorch installation for scxpand-cuda package\\
+[tool.uv.sources]\\
+torch = { index = \"pytorch-cu124\" }\\
+torchvision = { index = \"pytorch-cu124\" }\\
+torchaudio = { index = \"pytorch-cu124\" }\\
+" pyproject-cuda-temp.toml
+        fi
     fi
-
-    # Add CUDA-specific configuration that forces CUDA PyTorch
-    cat >> pyproject-cuda-temp.toml << 'EOF'
-
-# Force CUDA PyTorch installation for scxpand-cuda package
-[tool.uv.sources]
-torch = { index = "pytorch-cu124" }
-torchvision = { index = "pytorch-cu124" }
-torchaudio = { index = "pytorch-cu124" }
-EOF
 }
 
 # Function to build standard package
@@ -419,7 +426,7 @@ publish_to_pypi() {
     # Confirm before publishing
     echo
     print_warning "About to publish BOTH packages (scxpand and scxpand-cuda) version $NEW_VERSION to PyPI"
-    read -p "Are you sure you want to continue? (y/N): " -n 1 -r
+    read -p "Are you sure you want to continue? (y/N): " -r
     echo
 
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
