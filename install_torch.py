@@ -44,21 +44,21 @@ def install_torch_with_optimal_backend():
         # Check if CUDA is available on the system
         if has_cuda_support():
             print("CUDA support detected. Installing CUDA-enabled PyTorch...")
-            # Install with CUDA extra
-            subprocess.check_call(["uv", "sync", "--extra", "cuda"])
+            # Install with CUDA extra and preserve dev/docs extras
+            subprocess.check_call(["uv", "sync", "--extra", "cuda", "--extra", "dev", "--extra", "docs"])
             print("✓ PyTorch installation completed with CUDA support.")
         else:
             print("No CUDA support detected. Installing CPU-only PyTorch...")
-            # Install with CPU extra to force CPU-only version
-            subprocess.check_call(["uv", "sync", "--extra", "cpu"])
+            # Install with CPU extra and preserve dev/docs extras
+            subprocess.check_call(["uv", "sync", "--extra", "cpu", "--extra", "dev", "--extra", "docs"])
             print("✓ PyTorch installation completed with CPU/MPS support.")
 
     except subprocess.CalledProcessError as e:
         print(f"❌ Failed to install PyTorch with backend selection: {e}")
         print("Falling back to default PyTorch installation...")
         try:
-            # Fallback to default sync (uses default PyTorch from PyPI)
-            subprocess.check_call(["uv", "sync"])
+            # Fallback to default sync with dev/docs extras preserved
+            subprocess.check_call(["uv", "sync", "--extra", "dev", "--extra", "docs"])
             print("✓ PyTorch installed with default backend (fallback).")
         except subprocess.CalledProcessError as e2:
             print(f"❌ Failed to install PyTorch with fallback method: {e2}")
