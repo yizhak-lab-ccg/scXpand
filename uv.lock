@@ -2245,7 +2245,7 @@ name = "nvidia-cudnn-cu12"
 version = "9.10.2.21"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-cublas-cu12" },
+    { name = "nvidia-cublas-cu12", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fa/41/e79269ce215c857c935fd86bcfe91a451a584dfc27f1e068f568b9ad1ab7/nvidia_cudnn_cu12-9.10.2.21-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:c9132cc3f8958447b4910a1720036d9eff5928cc3179b0a51fb6d167c6cc87d8", size = 705026878, upload-time = "2025-06-06T21:52:51.348Z" },
@@ -2258,7 +2258,7 @@ name = "nvidia-cufft-cu12"
 version = "11.3.3.83"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-nvjitlink-cu12" },
+    { name = "nvidia-nvjitlink-cu12", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/60/bc/7771846d3a0272026c416fbb7e5f4c1f146d6d80704534d0b187dd6f4800/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:848ef7224d6305cdb2a4df928759dca7b1201874787083b6e7550dd6765ce69a", size = 193109211, upload-time = "2025-03-07T01:44:56.873Z" },
@@ -2290,9 +2290,9 @@ name = "nvidia-cusolver-cu12"
 version = "11.7.3.90"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-cublas-cu12" },
-    { name = "nvidia-cusparse-cu12" },
-    { name = "nvidia-nvjitlink-cu12" },
+    { name = "nvidia-cublas-cu12", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
+    { name = "nvidia-cusparse-cu12", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
+    { name = "nvidia-nvjitlink-cu12", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c8/32/f7cd6ce8a7690544d084ea21c26e910a97e077c9b7f07bf5de623ee19981/nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:db9ed69dbef9715071232caa9b69c52ac7de3a95773c2db65bdba85916e4e5c0", size = 267229841, upload-time = "2025-03-07T01:46:54.356Z" },
@@ -2305,7 +2305,7 @@ name = "nvidia-cusparse-cu12"
 version = "12.5.8.93"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "nvidia-nvjitlink-cu12" },
+    { name = "nvidia-nvjitlink-cu12", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/bc/f7/cd777c4109681367721b00a106f491e0d0d15cfa1fd59672ce580ce42a97/nvidia_cusparse_cu12-12.5.8.93-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:9b6c161cb130be1a07a27ea6923df8141f3c295852f4b260c65f18f3e0a091dc", size = 288117129, upload-time = "2025-03-07T01:47:40.407Z" },
@@ -3485,7 +3485,7 @@ wheels = [
 
 [[package]]
 name = "scxpand"
-version = "0.1.40"
+version = "0.1.41"
 source = { editable = "." }
 dependencies = [
     { name = "anndata" },
@@ -4246,10 +4246,10 @@ resolution-markers = [
     "python_full_version < '3.12'",
 ]
 dependencies = [
-    { name = "filelock" },
-    { name = "fsspec" },
-    { name = "jinja2" },
-    { name = "networkx" },
+    { name = "filelock", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
+    { name = "fsspec", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
+    { name = "jinja2", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
+    { name = "networkx", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
     { name = "nvidia-cublas-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-7-scxpand-cpu') or (extra == 'extra-7-scxpand-cpu' and extra == 'extra-7-scxpand-cuda')" },
     { name = "nvidia-cuda-cupti-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-7-scxpand-cpu') or (extra == 'extra-7-scxpand-cpu' and extra == 'extra-7-scxpand-cuda')" },
     { name = "nvidia-cuda-nvrtc-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-7-scxpand-cpu') or (extra == 'extra-7-scxpand-cpu' and extra == 'extra-7-scxpand-cuda')" },
@@ -4265,9 +4265,9 @@ dependencies = [
     { name = "nvidia-nvjitlink-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-7-scxpand-cpu') or (extra == 'extra-7-scxpand-cpu' and extra == 'extra-7-scxpand-cuda')" },
     { name = "nvidia-nvtx-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-7-scxpand-cpu') or (extra == 'extra-7-scxpand-cpu' and extra == 'extra-7-scxpand-cuda')" },
     { name = "setuptools", marker = "(python_full_version >= '3.12' and extra != 'extra-7-scxpand-cpu') or (extra == 'extra-7-scxpand-cpu' and extra == 'extra-7-scxpand-cuda')" },
-    { name = "sympy" },
+    { name = "sympy", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
     { name = "triton", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'extra-7-scxpand-cpu') or (extra == 'extra-7-scxpand-cpu' and extra == 'extra-7-scxpand-cuda')" },
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8f/c4/3e7a3887eba14e815e614db70b3b529112d1513d9dae6f4d43e373360b7f/torch-2.8.0-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:220a06fd7af8b653c35d359dfe1aaf32f65aa85befa342629f716acb134b9710", size = 102073391, upload-time = "2025-08-06T14:53:20.937Z" },
@@ -4362,7 +4362,7 @@ resolution-markers = [
     "python_full_version < '3.12'",
 ]
 dependencies = [
-    { name = "torch", version = "2.8.0", source = { registry = "https://pypi.org/simple" } },
+    { name = "torch", version = "2.8.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/dd/bf/6b01ef3defb8d0a772c863588711e9b2b011c27d6b37c1b9d15a359c8442/torchaudio-2.8.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:c9276857d241c6de257af765c0f51fc011af38cb725401495121b280913007cf", size = 1859094, upload-time = "2025-08-06T14:58:35.078Z" },
@@ -4441,9 +4441,9 @@ resolution-markers = [
     "python_full_version < '3.12'",
 ]
 dependencies = [
-    { name = "numpy" },
-    { name = "pillow" },
-    { name = "torch", version = "2.8.0", source = { registry = "https://pypi.org/simple" } },
+    { name = "numpy", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
+    { name = "pillow", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
+    { name = "torch", version = "2.8.0", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f0/d7/15d3d7bd8d0239211b21673d1bac7bc345a4ad904a8e25bb3fd8a9cf1fbc/torchvision-0.23.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:49aa20e21f0c2bd458c71d7b449776cbd5f16693dd5807195a820612b8a229b7", size = 1856884, upload-time = "2025-08-06T14:58:00.237Z" },
@@ -4533,7 +4533,7 @@ name = "triton"
 version = "3.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "setuptools" },
+    { name = "setuptools", marker = "extra == 'extra-7-scxpand-cuda' or extra != 'extra-7-scxpand-cpu'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7d/39/43325b3b651d50187e591eefa22e236b2981afcebaefd4f2fc0ea99df191/triton-3.4.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:7b70f5e6a41e52e48cfc087436c8a28c17ff98db369447bcaff3b887a3ab4467", size = 155531138, upload-time = "2025-07-30T19:58:29.908Z" },
