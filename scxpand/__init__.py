@@ -17,13 +17,22 @@ from scxpand.pretrained import (
 from scxpand.util.classes import ModelType
 
 
-try:
-    __version__ = version("scxpand-cuda")
-except Exception:
-    try:
-        __version__ = version("scxpand")
-    except Exception:
-        __version__ = "0.1.23"  # fallback version
+def _get_version():
+    """Get the version of the installed scxpand package."""
+    # Try different package names in order of preference
+    package_names = ["scxpand-cuda", "scxpand"]
+
+    for package_name in package_names:
+        try:
+            return version(package_name)
+        except Exception:
+            continue
+
+    # If no package is found, return fallback version
+    return "0.0.0"
+
+
+__version__ = _get_version()
 _version_ = __version__  # Alias for compatibility
 
 __all__ = [
