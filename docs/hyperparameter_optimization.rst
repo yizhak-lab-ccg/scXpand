@@ -132,7 +132,7 @@ scXpand provides multiple ways to inspect and analyze your hyperparameter optimi
 .. code-block:: bash
 
    # Install Optuna Dashboard
-   pip install--upgrade optuna-dashboard
+   pip install optuna-dashboard
 
    # Launch dashboard for your study
    optuna-dashboard sqlite:///results/optuna_studies/mlp_optimization/optuna.db
