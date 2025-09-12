@@ -46,6 +46,10 @@ dependencies = [
     "pooch>=1.8.0",
     "ipywidgets>=8.1.5",
     "jupyter>=1.1.1",
+    # PyTorch (CPU/MPS backend - users can install CUDA variant separately)
+    "torch>=2.5.0",
+    "torchvision>=0.20.0",
+    "torchaudio>=2.5.0",
 ]
 
 [project.urls]
@@ -59,7 +63,7 @@ Logo = "https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/image
 scxpand = "scxpand.main:main"
 
 [project.optional-dependencies]
-# PyTorch backend options
+# PyTorch CUDA variant (for NVIDIA GPU acceleration)
 cuda = [
     "torch>=2.5.0",
     "torchvision>=0.20.0",

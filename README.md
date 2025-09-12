@@ -39,17 +39,21 @@ A framework for predicting T-cell clonal expansion from single-cell RNA sequenci
 
 ## Installation
 
-Install scXpand:
+scXpand is available in two variants:
+
+**Standard Version (CPU/MPS):**
 
 ```bash
 pip install scxpand
 ```
 
-For CUDA-enabled systems - also install PyTorch with CUDA support:
+**CUDA Version (NVIDIA GPU):**
 
 ```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install scxpand-cuda
 ```
+
+> **Note:** The standard version supports CPU and MPS (Apple Silicon), while the CUDA version provides NVIDIA GPU acceleration.
 
 See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
 

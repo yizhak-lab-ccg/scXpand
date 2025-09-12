@@ -4,19 +4,24 @@ Installation
 Installation Options
 --------------------
 
-Install scXpand:
+scXpand is available in two variants to suit different hardware configurations:
+
+**Standard Version (CPU/MPS):**
 
 .. code-block:: bash
 
    pip install scxpand
 
-For CUDA-enabled systems - also install PyTorch with CUDA support:
+**CUDA Version (NVIDIA GPU):**
 
 .. code-block:: bash
 
-   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+   pip install scxpand-cuda
 
+.. note::
 
+   * **Standard version**: CPU and MPS (Apple Silicon) support
+   * **CUDA version**: NVIDIA GPU acceleration with CUDA support
 
 
 Development Version
