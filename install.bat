@@ -85,7 +85,7 @@ echo Updating lock file...
 uv lock
 
 :: Create virtual environment and install dependencies from lock file
-echo Creating virtual environment and installing dependencies from lock file...
+echo Creating virtual environment and installing dependencies with optimal PyTorch backend...
 uv sync --extra dev --extra docs
 
 :: Check if virtual environment was created successfully
@@ -102,7 +102,7 @@ if not exist .venv\Scripts\activate.bat (
     uv sync --extra dev --extra docs
 )
 
-:: Install torch with auto backend selection and update lock file
+:: Configure PyTorch backend based on system capabilities
 uv run python install_torch.py
 
 :: Register Jupyter kernel for this environment

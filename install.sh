@@ -81,16 +81,16 @@ uv python install $PYTHON_VERSION
 echo "Updating lock file..."
 uv lock
 
-# Create virtual environment and install dependencies from lock file
-echo "Creating virtual environment and installing dependencies from lock file..."
+# Create virtual environment and install dependencies with PyTorch backend detection
+echo "Creating virtual environment and installing dependencies with optimal PyTorch backend..."
 uv sync --extra dev --extra docs
 
 # Activate virtual environment for remaining setup
 echo "Activating virtual environment..."
 source .venv/bin/activate
 
-# Install torch with auto backend selection and update lock file
-python install_torch.py
+# Configure PyTorch backend based on system capabilities
+uv run python install_torch.py
 
 # Register Jupyter kernel
 echo "Registering Jupyter kernel..."
