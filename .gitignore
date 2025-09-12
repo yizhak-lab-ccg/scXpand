@@ -10,6 +10,9 @@ norm_bug/*
 **/.scxpand_cache/
 docs/_static/images
 
+# Scripts - ignore token file but track scripts
+scripts/pypi_token.txt
+
 # Documentation builds
 docs/_build/
 docs/.doctrees/
