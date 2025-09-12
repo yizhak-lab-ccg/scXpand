@@ -20,7 +20,10 @@ from scxpand.util.classes import ModelType
 try:
     __version__ = version("scxpand-cuda")
 except Exception:
-    __version__ = version("scxpand")
+    try:
+        __version__ = version("scxpand")
+    except Exception:
+        __version__ = "0.1.23"  # fallback version
 _version_ = __version__  # Alias for compatibility
 
 __all__ = [

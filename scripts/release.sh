@@ -241,49 +241,33 @@ create_cuda_pyproject() {
         -e 's/name = "scxpand"/name = "scxpand-cuda"/' \
         -e 's/Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing/Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing (CUDA-enabled)/' \
         -e 's/"single-cell", "RNA-seq", "T-cell", "clonal-expansion", "machine-learning", "bioinformatics"/"single-cell", "RNA-seq", "T-cell", "clonal-expansion", "machine-learning", "bioinformatics", "cuda", "gpu"/' \
-        -e 's/# PyTorch (CPU\/MPS backend - users can install CUDA variant separately)/# PyTorch with CUDA support/' \
+        -e 's/# PyTorch - will use CPU\/MPS on macOS\/Windows, CUDA on Linux by default/# PyTorch with CUDA support/' \
         pyproject.toml > pyproject-cuda-temp.toml
 
-    # Replace the existing [tool.uv.sources] section with CUDA-specific configuration
+    # Remove the existing [tool.uv.sources] section and everything after it
     # Find the line number where [tool.uv.sources] starts
     sources_line=$(grep -n "^\[tool\.uv\.sources\]" pyproject-cuda-temp.toml | cut -d: -f1)
 
     if [ -n "$sources_line" ]; then
-        # Create a temporary file with everything before [tool.uv.sources]
+        # Keep everything before [tool.uv.sources]
         head -n $((sources_line - 1)) pyproject-cuda-temp.toml > pyproject-cuda-temp2.toml
-
-        # Add the CUDA-specific sources configuration
-        cat >> pyproject-cuda-temp2.toml << 'EOF'
-[tool.uv.sources]
-torch = [
-    { index = "pytorch-cu124" },
-]
-torchvision = [
-    { index = "pytorch-cu124" },
-]
-torchaudio = [
-    { index = "pytorch-cu124" },
-]
-EOF
-
-        # Replace the temp file
         mv pyproject-cuda-temp2.toml pyproject-cuda-temp.toml
-    else
-        # If no [tool.uv.sources] section found, append it
-        cat >> pyproject-cuda-temp.toml << 'EOF'
+    fi
+
+    # Add CUDA-specific configuration that forces CUDA PyTorch
+    cat >> pyproject-cuda-temp.toml << 'EOF'
+
+# Force CUDA PyTorch installation for scxpand-cuda package
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
 
 [tool.uv.sources]
-torch = [
-    { index = "pytorch-cu124" },
-]
-torchvision = [
-    { index = "pytorch-cu124" },
-]
-torchaudio = [
-    { index = "pytorch-cu124" },
-]
+torch = { index = "pytorch-cu124" }
+torchvision = { index = "pytorch-cu124" }
+torchaudio = { index = "pytorch-cu124" }
 EOF
-    fi
 }
 
 # Function to build standard package
