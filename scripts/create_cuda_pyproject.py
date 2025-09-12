@@ -140,6 +140,18 @@ def create_cuda_variant(input_path: Path, output_path: Path) -> bool:
             modified_lines.extend(cuda_config)
             print("  ✓ Configured PyTorch sources: torch, torchvision, torchaudio")
 
+            # Add PyTorch index definition
+            pytorch_index = [
+                "\n",
+                "# PyTorch CUDA index configuration\n",
+                "[[tool.uv.index]]\n",
+                'name = "pytorch-cu124"\n',
+                'url = "https://download.pytorch.org/whl/cu124"\n',
+                "explicit = true\n",
+            ]
+            modified_lines.extend(pytorch_index)
+            print("  ✓ Added PyTorch CUDA index configuration")
+
             # Skip the original sources content
             continue
 
@@ -159,6 +171,12 @@ def create_cuda_variant(input_path: Path, output_path: Path) -> bool:
         modified_lines.append('torch = { index = "pytorch-cu124" }\n')
         modified_lines.append('torchvision = { index = "pytorch-cu124" }\n')
         modified_lines.append('torchaudio = { index = "pytorch-cu124" }\n')
+        modified_lines.append("\n")
+        modified_lines.append("# PyTorch CUDA index configuration\n")
+        modified_lines.append("[[tool.uv.index]]\n")
+        modified_lines.append('name = "pytorch-cu124"\n')
+        modified_lines.append('url = "https://download.pytorch.org/whl/cu124"\n')
+        modified_lines.append("explicit = true\n")
 
     # Save CUDA variant
     print(f"Saving CUDA variant to {output_path}")
