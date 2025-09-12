@@ -4,24 +4,21 @@ Installation
 Installation Options
 --------------------
 
-scXpand is available in two variants to suit different hardware configurations:
+scXpand is available in two variants to match your hardware configuration:
 
-**Standard Version (CPU/MPS):**
-
-.. code-block:: bash
-
-   pip install scxpand
-
-**CUDA Version (NVIDIA GPU):**
+**If you have an NVIDIA GPU with CUDA support:**
 
 .. code-block:: bash
 
    pip install scxpand-cuda
 
-.. note::
+**Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):**
 
-   * **Standard version**: CPU and MPS (Apple Silicon) support
-   * **CUDA version**: NVIDIA GPU acceleration with CUDA support
+.. code-block:: bash
+
+   pip install scxpand
+
+.. note::
 
 
 Development Version
