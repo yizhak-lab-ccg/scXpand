@@ -19,7 +19,18 @@ logger = get_logger()
 def _show_plot_safely(show_plot: bool) -> None:
     """Show plot in a way that works in both Jupyter and regular Python environments."""
     if show_plot:
-        plt.show()
+        try:
+            from IPython import get_ipython  # noqa: PLC0415
+
+            if get_ipython() is not None:
+                # In Jupyter, use display
+                from IPython.display import display  # noqa: PLC0415
+
+                display(plt.gcf())
+            else:
+                plt.show()
+        except ImportError:
+            plt.show()
 
 
 # Global plotting configuration
