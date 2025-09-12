@@ -109,9 +109,10 @@ Automates patch, minor, and major releases for both package variants.
 
 4. **Package Building**:
    - Cleans build directories
-   - Builds standard package (`scxpand`)
-   - Builds CUDA package (`scxpand-cuda`) using modified configuration
-   - Tests import functionality
+   - Builds standard package (`scxpand`) with CPU/MPS PyTorch support
+   - Creates CUDA variant configuration using Python script (`scripts/create_cuda_pyproject.py`)
+   - Builds CUDA package (`scxpand-cuda`) with CUDA 12.8 PyTorch support using `[tool.uv.sources]` and `[[tool.uv.index]]` configuration
+   - Tests import functionality for both packages
 
 5. **Git Operations**:
    - Commits version bump changes
@@ -125,7 +126,18 @@ Automates patch, minor, and major releases for both package variants.
 
 7. **Verification**:
    - Tests installation of both packages from PyPI
+   - Verifies that `scxpand-cuda` installs CUDA-enabled PyTorch (version should show `+cu128`)
    - Provides links to PyPI and GitHub release
+
+### CUDA Package Configuration
+
+The `scxpand-cuda` package uses a sophisticated configuration to ensure CUDA PyTorch installation:
+
+- **CUDA Version**: Uses CUDA (`cu128`) - the latest supported version
+- **PyTorch Index**: Configured with `[[tool.uv.index]]` pointing to `https://download.pytorch.org/whl/cu128`
+- **Package Sources**: Uses `[tool.uv.sources]` to direct `torch`, `torchvision`, and `torchaudio` to the CUDA index
+- **Platform Support**: Works on Windows and Linux (macOS falls back to CPU PyTorch as CUDA is not available)
+- **Build Safety**: Uses `explicit = true` flag to prevent the CUDA index from being used for non-PyTorch dependencies
 
 ## PyPI Token Requirements
 
@@ -183,3 +195,13 @@ Automates patch, minor, and major releases for both package variants.
 **"Build failed"**:
 - Check for syntax errors or missing dependencies
 - Run build manually: `uv build`
+
+**"CUDA PyTorch not installing correctly"**:
+- Verify the generated CUDA configuration in `temp/pyproject-cuda.toml`
+- Check that `[tool.uv.sources]` and `[[tool.uv.index]]` sections are present
+- Ensure CUDA index URL points to `https://download.pytorch.org/whl/cu128`
+- Test CUDA installation manually: `uv pip install scxpand-cuda==0.1.40` and check `torch.__version__` includes `+cu128`
+
+**"Version detection issues"**:
+- The package uses a robust version detection system that tries `scxpand-cuda` first, then `scxpand`, then falls back to `"0.0.0"`
+- Both `scxpand` and `scxpand-cuda` packages can be imported as `import scxpand` regardless of which is installed
