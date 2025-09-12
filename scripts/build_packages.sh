@@ -125,8 +125,8 @@ build_standard_package() {
         return
     fi
 
-    # Build using original pyproject.toml
-    if ! uv build --config-file pyproject.toml; then
+    # Build using original pyproject.toml (no --config-file needed for default)
+    if ! uv build; then
         print_error "Failed to build standard package"
         return 1
     fi
@@ -143,18 +143,24 @@ build_cuda_package() {
         return
     fi
 
+    # Backup original pyproject.toml
+    backup_pyproject
+
     # Create CUDA variant configuration
     create_cuda_pyproject
 
+    # Replace the original with CUDA version temporarily
+    mv pyproject-cuda-temp.toml pyproject.toml
+
     # Build using CUDA configuration
-    if ! uv build --config-file pyproject-cuda-temp.toml; then
+    if ! uv build; then
         print_error "Failed to build CUDA package"
-        rm -f pyproject-cuda-temp.toml
+        restore_pyproject
         return 1
     fi
 
-    # Clean up temporary file
-    rm -f pyproject-cuda-temp.toml
+    # Restore original pyproject.toml
+    restore_pyproject
 
     print_success "CUDA package built successfully"
 }

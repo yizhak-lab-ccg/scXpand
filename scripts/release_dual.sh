@@ -291,20 +291,13 @@ publish_to_pypi() {
         exit 0
     fi
 
-    # Publish both packages from dist directory
-    print_package "Publishing standard package (scxpand - CPU/MPS)..."
-    if ! uv publish dist/scxpand-*.whl dist/scxpand-*.tar.gz; then
-        print_error "Publishing standard package to PyPI failed"
+    # Publish all packages from dist directory
+    print_package "Publishing both packages to PyPI..."
+    if ! uv publish dist/*; then
+        print_error "Publishing packages to PyPI failed"
         exit 1
     fi
-    print_success "Standard package (scxpand) published successfully"
-
-    print_package "Publishing CUDA package (scxpand-cuda)..."
-    if ! uv publish dist/scxpand_cuda-*.whl dist/scxpand_cuda-*.tar.gz; then
-        print_error "Publishing CUDA package to PyPI failed"
-        exit 1
-    fi
-    print_success "CUDA package (scxpand-cuda) published successfully"
+    print_success "Both packages published successfully"
 
     print_success "Both packages successfully published to PyPI"
 }
