@@ -137,7 +137,7 @@ ignore = [
 "NPY002",  # Replace legacy `np.random.seed`
 
 # PD - Pandas Rules
-"PD901",   # Avoid using the generic variable name `df` for DataFrames
+# "PD901" - This rule has been removed from Ruff
 
 # PGH - PyGrep Hooks
 "PGH003",  # Use specific rule codes when ignoring type issues
