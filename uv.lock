@@ -3472,6 +3472,9 @@ dependencies = [
     { name = "structlog" },
     { name = "tabulate" },
     { name = "tensorboard" },
+    { name = "torch" },
+    { name = "torchaudio" },
+    { name = "torchvision" },
     { name = "tqdm" },
 ]
 
@@ -3573,8 +3576,11 @@ requires-dist = [
     { name = "structlog", specifier = ">=24.0.0" },
     { name = "tabulate", specifier = ">=0.9.0" },
     { name = "tensorboard", specifier = ">=2.19.0" },
+    { name = "torch", specifier = ">=2.5.0" },
     { name = "torch", marker = "extra == 'cuda'", specifier = ">=2.5.0" },
+    { name = "torchaudio", specifier = ">=2.5.0" },
     { name = "torchaudio", marker = "extra == 'cuda'", specifier = ">=2.5.0" },
+    { name = "torchvision", specifier = ">=0.20.0" },
     { name = "torchvision", marker = "extra == 'cuda'", specifier = ">=0.20.0" },
     { name = "tqdm", specifier = ">=4.66.0" },
     { name = "vulture", marker = "extra == 'dev'", specifier = ">=2.14" },
