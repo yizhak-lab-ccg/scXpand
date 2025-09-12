@@ -244,14 +244,33 @@ create_cuda_pyproject() {
         -e 's/# PyTorch (CPU\/MPS backend - users can install CUDA variant separately)/# PyTorch with CUDA support/' \
         pyproject.toml > pyproject-cuda-temp.toml
 
-    # Add PyTorch CUDA index configuration to the CUDA variant
-    cat >> pyproject-cuda-temp.toml << 'EOF'
+    # Replace the existing [tool.uv.sources] section with CUDA-specific configuration
+    # Find the line number where [tool.uv.sources] starts
+    sources_line=$(grep -n "^\[tool\.uv\.sources\]" pyproject-cuda-temp.toml | cut -d: -f1)
 
-# PyTorch CUDA index configuration
-[[tool.uv.index]]
-name = "pytorch-cu124"
-url = "https://download.pytorch.org/whl/cu124"
-explicit = true
+    if [ -n "$sources_line" ]; then
+        # Create a temporary file with everything before [tool.uv.sources]
+        head -n $((sources_line - 1)) pyproject-cuda-temp.toml > pyproject-cuda-temp2.toml
+
+        # Add the CUDA-specific sources configuration
+        cat >> pyproject-cuda-temp2.toml << 'EOF'
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cu124" },
+]
+torchvision = [
+    { index = "pytorch-cu124" },
+]
+torchaudio = [
+    { index = "pytorch-cu124" },
+]
+EOF
+
+        # Replace the temp file
+        mv pyproject-cuda-temp2.toml pyproject-cuda-temp.toml
+    else
+        # If no [tool.uv.sources] section found, append it
+        cat >> pyproject-cuda-temp.toml << 'EOF'
 
 [tool.uv.sources]
 torch = [
@@ -264,6 +283,7 @@ torchaudio = [
     { index = "pytorch-cu124" },
 ]
 EOF
+    fi
 }
 
 # Function to build standard package

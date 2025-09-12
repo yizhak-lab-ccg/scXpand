@@ -3474,7 +3474,7 @@ wheels = [
 
 [[package]]
 name = "scxpand"
-version = "0.1.18"
+version = "0.1.19"
 source = { editable = "." }
 dependencies = [
     { name = "anndata" },
@@ -4085,7 +4085,7 @@ resolution-markers = [
     "python_full_version < '3.12' and extra != 'extra-7-scxpand-cpu' and extra != 'extra-7-scxpand-cuda'",
 ]
 dependencies = [
-    { name = "mpmath" },
+    { name = "mpmath", marker = "extra == 'extra-7-scxpand-cpu' or extra != 'extra-7-scxpand-cuda'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/83/d3/803453b36afefb7c2bb238361cd4ae6125a569b4db67cd9e79846ba2d68c/sympy-1.14.0.tar.gz", hash = "sha256:d3d3fe8df1e5a0b42f0e7bdf50541697dbe7d23746e894990c030e2b05e72517", size = 7793921, upload-time = "2025-04-27T18:05:01.611Z" }
 wheels = [
