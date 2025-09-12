@@ -7,7 +7,7 @@ Installation Options
 **For CUDA-enabled systems:**
 .. code-block:: bash
 
-    pip install scxpand[cuda]
+    pip install scxpand[cuda] --index-url https://download.pytorch.org/whl/cu121
 
 **For other systems:**
 .. code-block:: bash
@@ -20,7 +20,8 @@ PyTorch Backend Details
 scXpand requires PyTorch for some of the models. The installation options provide different PyTorch backends:
 
 **CUDA Installation (``scxpand[cuda]``)**
-- Explicitly installs PyTorch 2.5+ with CUDA 12.1 support
+- Installs PyTorch 2.5+ with CUDA 12.1 support from PyTorch's CUDA index
+- Requires specifying the PyTorch CUDA index URL: ``--index-url https://download.pytorch.org/whl/cu121``
 - Recommended for systems with NVIDIA hardware.
 
 **Standard Installation (``scxpand``)**
