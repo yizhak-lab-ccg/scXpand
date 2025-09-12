@@ -12,57 +12,38 @@ def is_in_virtual_environment():
     )
 
 
-def has_cuda_support():
-    """Check if CUDA is available on the system."""
-    try:
-        # Check for NVIDIA drivers and CUDA toolkit
-        if sys.platform.startswith("linux"):
-            # On Linux, check for nvidia-smi and CUDA
-            result = subprocess.run(["nvidia-smi"], check=False, capture_output=True, text=True)
-            if result.returncode == 0:
-                print("✓ NVIDIA GPU detected with nvidia-smi")
-                return True
-        elif sys.platform == "win32":
-            # On Windows, check for NVIDIA drivers
-            result = subprocess.run(["nvidia-smi"], check=False, capture_output=True, text=True, shell=True)
-            if result.returncode == 0:
-                print("✓ NVIDIA GPU detected with nvidia-smi")
-                return True
-
-        print("i No CUDA support detected (no NVIDIA GPU or drivers)")
-        return False
-    except (subprocess.SubprocessError, FileNotFoundError):
-        print("i No CUDA support detected (nvidia-smi not found)")
-        return False
-
-
 def install_torch_with_optimal_backend():
-    """Install PyTorch with optimal backend using uv's project interface."""
-    print("Configuring PyTorch backend for optimal performance...")
+    """Install torch with optimal backend using uv's auto backend selection."""
+    print("Installing PyTorch with auto backend selection...")
 
     try:
-        # Check if CUDA is available on the system
-        if has_cuda_support():
-            print("CUDA support detected. Installing CUDA-enabled PyTorch...")
-            # Install with CUDA extra and preserve dev/docs extras
-            subprocess.check_call(["uv", "sync", "--extra", "cuda", "--extra", "dev", "--extra", "docs"])
-            print("✓ PyTorch installation completed with CUDA support.")
-        else:
-            print("No CUDA support detected. Installing CPU-only PyTorch...")
-            # Install with CPU extra and preserve dev/docs extras
-            subprocess.check_call(["uv", "sync", "--extra", "cpu", "--extra", "dev", "--extra", "docs"])
-            print("✓ PyTorch installation completed with CPU/MPS support.")
+        # Use uv's auto backend selection with reinstall to override existing installation
+        # Set environment variable as documented in the uv PyTorch guide
+        env = os.environ.copy()
+        env["UV_TORCH_BACKEND"] = "auto"
 
+        subprocess.check_call(
+            ["uv", "pip", "install", "torch", "--torch-backend=auto", "--reinstall-package", "torch"], env=env
+        )
+        print("✓ PyTorch installation completed with auto backend selection.")
     except subprocess.CalledProcessError as e:
-        print(f"❌ Failed to install PyTorch with backend selection: {e}")
-        print("Falling back to default PyTorch installation...")
+        print(f"❌ Failed to install PyTorch with auto backend: {e}")
+        print("Trying CPU-only installation as fallback...")
         try:
-            # Fallback to default sync with dev/docs extras preserved
-            subprocess.check_call(["uv", "sync", "--extra", "dev", "--extra", "docs"])
-            print("✓ PyTorch installed with default backend (fallback).")
+            # Fallback to CPU-only torch
+            subprocess.check_call(["uv", "pip", "install", "torch", "--reinstall-package", "torch"])
+            print("✓ PyTorch installed with CPU backend (fallback).")
         except subprocess.CalledProcessError as e2:
             print(f"❌ Failed to install PyTorch with fallback method: {e2}")
             return False
+
+    # Update lock file to reflect the installation
+    print("Updating lock file to include torch installation...")
+    try:
+        subprocess.check_call(["uv", "lock"])
+        print("✓ Lock file updated successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"⚠ Warning: Failed to update lock file: {e}")
 
     return True
 
@@ -125,6 +106,12 @@ def print_torch_backend():
     elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
         print("Torch is using MPS (Metal Performance Shaders) backend")
         print("Running on Apple Silicon with GPU acceleration")
+    elif hasattr(torch, "xpu") and torch.xpu.is_available():
+        print("Torch is using XPU (Intel GPU) backend")
+    elif hasattr(torch.backends, "mkldnn") and torch.backends.mkldnn.is_available():
+        print("Torch is using MKLDNN backend (Intel CPU optimization)")
+    else:
+        print("Torch is using CPU backend")
 
     python_version = sys.version_info
     print(f"Python version: {python_version.major}.{python_version.minor}.{python_version.micro}")
