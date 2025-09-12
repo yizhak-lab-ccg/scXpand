@@ -10,6 +10,9 @@ This guide explains how to publish new versions of scXpand to PyPI.
   - [What the script does](#what-the-script-does)
   - [Safety Features](#safety-features)
   - [Example Output](#example-output)
+- [PyPI Cleanup](#pypi-cleanup)
+  - [Quick Usage](#quick-usage)
+  - [Advanced Options](#advanced-options)
 - [Legacy Scripts](#legacy-scripts)
 - [Troubleshooting](#troubleshooting)
 
@@ -117,6 +120,49 @@ Automates patch, minor, and major releases following the contributing guide.
    - Tests installation from PyPI
    - Provides links to PyPI and GitHub release
 
+## PyPI Cleanup
+
+After publishing multiple releases, you may want to clean up old versions from PyPI to avoid confusion and keep your package page tidy.
+
+### Quick Usage
+
+```bash
+# List all published versions
+./scripts/cleanup_pypi.sh list
+
+# Dry run: see what would be deleted (keeps 3 most recent)
+./scripts/cleanup_pypi.sh clean
+
+# Keep 5 most recent versions (dry run)
+./scripts/cleanup_pypi.sh clean --keep-latest 5
+
+# Actually delete old versions (use with caution!)
+./scripts/cleanup_pypi.sh clean-for-real --keep-latest 3
+```
+
+### Advanced Options
+
+```bash
+# Keep versions matching patterns
+python scripts/cleanup_pypi.py --keep-pattern "0.1.15*" --keep-pattern "1.0.*"
+
+# Different package name
+python scripts/cleanup_pypi.py --package-name mypackage
+
+# Keep only 2 most recent and delete everything else
+./scripts/cleanup_pypi.sh clean-for-real --keep-latest 2
+```
+
+**Important Notes:**
+- All operations are dry runs by default for safety
+- Deletion from PyPI is irreversible
+- The same PyPI token used for publishing is required for cleanup
+- See `scripts/CLEANUP_PYPI.md` for detailed documentation
+
+**Recommended Workflow:**
+1. After a successful release, review old versions: `./scripts/cleanup_pypi.sh list`
+2. Test cleanup plan: `./scripts/cleanup_pypi.sh clean --keep-latest 5`
+3. Execute cleanup: `./scripts/cleanup_pypi.sh clean-for-real --keep-latest 5`
 
 ## Troubleshooting
 

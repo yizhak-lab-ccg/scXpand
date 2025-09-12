@@ -106,24 +106,6 @@ exclude = ["tests*", "docs*", "notebooks*", "temp*", "data*", "results*", "_note
 [tool.uv]
 preview = true
 
-# PyTorch index configurations
-[[tool.uv.index]]
-name = "pytorch-cu121"
-url = "https://download.pytorch.org/whl/cu121"
-explicit = true
-
-# PyTorch source configurations for CUDA backend
-[tool.uv.sources]
-torch = [
-    { index = "pytorch-cu121" },
-]
-torchvision = [
-    { index = "pytorch-cu121" },
-]
-torchaudio = [
-    { index = "pytorch-cu121" },
-]
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["--tb=short", "--disable-warnings"]
