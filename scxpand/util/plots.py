@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from IPython import get_ipython
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 from sklearn.metrics import auc, roc_curve
 
@@ -14,6 +15,36 @@ from scxpand.util.logger import get_logger
 
 
 logger = get_logger()
+
+
+def _is_jupyter_environment() -> bool:
+    """Check if we're running in a Jupyter notebook environment."""
+    try:
+        # Check if we're in IPython
+        ipython = get_ipython()
+        if ipython is None:
+            return False
+
+        # Check if it's a notebook kernel
+        return hasattr(ipython, "kernel")
+    except ImportError:
+        return False
+
+
+def _show_plot_safely(show_plot: bool) -> None:
+    """Show plot in a way that works in both Jupyter and regular Python environments."""
+    if not show_plot:
+        return
+
+    if _is_jupyter_environment():
+        # In Jupyter, plots are automatically displayed when created
+        # We don't need to call plt.show() explicitly
+        pass
+    else:
+        # In regular Python environment, we need to call plt.show()
+        plt.show()
+
+
 # Global plotting configuration
 plt.rcParams.update(
     {
@@ -80,8 +111,7 @@ def plot_roc_curve(
             save_path = Path(plot_save_dir) / f"{plot_name}.png"
             save_path.parent.mkdir(parents=True, exist_ok=True)
             plt.savefig(save_path)
-        if show_plot:
-            plt.show()
+        _show_plot_safely(show_plot)
         plt.close("all")
 
     return auroc
@@ -202,8 +232,7 @@ def plot_roc_curves_per_strata(
             save_path = plot_save_dir / "roc_curves_per_strata.png"
             plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
-        if show_plot:
-            plt.show()
+        _show_plot_safely(show_plot)
 
         plt.close()
 
