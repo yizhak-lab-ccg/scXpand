@@ -228,6 +228,6 @@ Tutorials
 
 scXpand provides Jupyter notebooks for hands-on tutorials and data analysis:
 
-* **Getting Started with scXpand** (:doc:`_notebooks/scxpand_tutorial`) - Data preprocessing and model application.
-* **Inference** (:doc:`_notebooks/inference`) - Load trained models and run predictions on new datasets for model deployment. Demonstrates both file-based and in-memory inference modes.
-* **Embeddings Analysis** (:doc:`_notebooks/embeddings`) - Visualize and analyze learned model representations to understand what patterns contribute to expansion prediction.
+* **Getting Started with scXpand** (:doc:`notebooks/scxpand_tutorial`) - Data preprocessing and model application.
+* **Inference** (:doc:`notebooks/inference`) - Load trained models and run predictions on new datasets for model deployment. Demonstrates both file-based and in-memory inference modes.
+* **Embeddings Analysis** (:doc:`notebooks/embeddings`) - Visualize and analyze learned model representations to understand what patterns contribute to expansion prediction.

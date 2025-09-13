@@ -10,13 +10,13 @@ build:
   tools:
     python: "3.13"
   jobs:
-    pre_build:
-      - python docs/prepare_notebooks.py
+    pre_build: []
 
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:
    configuration: docs/conf.py
    fail_on_warning: false
+   builder: html
 
 # Optionally, but recommended,
 # declare the Python requirements required to build your documentation

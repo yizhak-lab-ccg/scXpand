@@ -3,7 +3,7 @@ scXpand Documentation
 
 scXpand is a framework for predicting T-cell clonal expansion from single-cell RNA sequencing data. It provides multiple methods for training and inference.
 
-.. image:: https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_datasets.jpeg
+.. image:: _static/images/scXpand_datasets.jpeg
    :width: 100%
    :alt: scXpand Datasets Overview
 
@@ -86,9 +86,9 @@ Tutorials
 ------------
 We provide a variety of tutorials to help you get started with scXpand:
 
-- :doc:`Getting Started with scXpand <_notebooks/scxpand_tutorial>`
-- :doc:`Model Inference and Evaluation Pipeline <_notebooks/inference>`
-- :doc:`Autoencoder Embedding Visualization <_notebooks/embeddings>`
+- :doc:`Getting Started with scXpand <notebooks/scxpand_tutorial>`
+- :doc:`Model Inference and Evaluation Pipeline <notebooks/inference>`
+- :doc:`Autoencoder Embedding Visualization <notebooks/embeddings>`
 
 Support and Contact
 -------------------

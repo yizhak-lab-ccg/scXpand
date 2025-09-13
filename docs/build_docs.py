@@ -31,40 +31,30 @@ def check_dependencies():
         sys.exit(1)
 
 
-def copy_images():
-    """Copy latest images from docs/images to docs/_static/images/."""
-    print("🖼️  Copying latest images...")
+def check_images():
+    """Check that images exist in docs/_static/images/."""
+    print("🖼️  Checking images...")
 
     docs_dir = Path(__file__).parent
+    images_dir = docs_dir / "_static" / "images"
 
-    # Define source and destination directories
-    source_images_dir = docs_dir / "images"
-    dest_images_dir = docs_dir / "_static" / "images"
-
-    # Create destination directory (already cleared by clear_all_caches)
-    dest_images_dir.mkdir(parents=True, exist_ok=True)
-
-    # Check if source images directory exists
-    if not source_images_dir.exists():
-        print(f"   ⚠️  Warning: Source images directory not found at {source_images_dir}")
-        print("   Images will not be updated. Please ensure images are in the docs/images/ directory.")
+    if not images_dir.exists():
+        print(f"   ⚠️  Warning: Images directory not found at {images_dir}")
+        print("   Please ensure images are in the docs/_static/images/ directory.")
         return
 
-    # Copy all image files from source to destination
+    # Count image files
     image_extensions = {".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"}
-    copied_count = 0
+    image_count = 0
 
-    for image_file in source_images_dir.iterdir():
+    for image_file in images_dir.iterdir():
         if image_file.is_file() and image_file.suffix.lower() in image_extensions:
-            dest_file = dest_images_dir / image_file.name
-            shutil.copy2(image_file, dest_file)
-            copied_count += 1
-            print(f"   Copied {image_file.name}")
+            image_count += 1
 
-    if copied_count > 0:
-        print(f"   ✅ Copied {copied_count} image(s) to docs/_static/images/")
+    if image_count > 0:
+        print(f"   ✅ Found {image_count} image(s) in docs/_static/images/")
     else:
-        print("   ⚠️  No image files found in source directory")
+        print("   ⚠️  No image files found in docs/_static/images/")
 
 
 def clear_all_caches():
@@ -78,18 +68,6 @@ def clear_all_caches():
     if build_dir.exists():
         shutil.rmtree(build_dir)
         print("   Removed docs/_build directory")
-
-    # Clear notebooks directory
-    notebooks_dir = docs_dir / "_notebooks"
-    if notebooks_dir.exists():
-        shutil.rmtree(notebooks_dir)
-        print(f"   Removed {notebooks_dir} directory")
-
-    # Clear static images directory
-    static_images_dir = docs_dir / "_static" / "images"
-    if static_images_dir.exists():
-        shutil.rmtree(static_images_dir)
-        print("   Cleared docs/_static/images/ directory")
 
     # Clear any doctrees cache
     doctrees_dir = docs_dir / ".doctrees"
@@ -108,34 +86,8 @@ def build_docs():
     # Check dependencies first
     check_dependencies()
 
-    # Copy latest images from source
-    copy_images()
-
-    # Prepare notebooks using the same script as ReadTheDocs
-    print("📓 Preparing notebooks...")
-    try:
-        from prepare_notebooks import prepare_notebooks  # noqa: PLC0415
-
-        prepare_notebooks()
-    except ImportError:
-        # Fallback to inline notebook preparation
-        project_root = Path(__file__).parent.parent
-        docs_dir = project_root / "docs"
-        source_notebooks_dir = docs_dir / "_notebooks"
-        source_notebooks_dir.mkdir(exist_ok=True)
-
-        # Find notebooks directory relative to project root (parent of docs directory)
-        project_notebooks = project_root / "notebooks"
-
-        if project_notebooks.exists():
-            notebook_count = 0
-            for notebook in project_notebooks.glob("*.ipynb"):
-                # Copy to _notebooks directory for documentation
-                shutil.copy2(notebook, source_notebooks_dir / notebook.name)
-                notebook_count += 1
-            print(f"   Copied {notebook_count} notebooks")
-        else:
-            print("   ⚠️  Warning: notebooks directory not found at", project_notebooks)
+    # Check that images exist
+    check_images()
 
     # Check if torch is available and warn if not
     try:

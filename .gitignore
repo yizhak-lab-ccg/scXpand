@@ -16,7 +16,6 @@ scripts/pypi_token.txt
 # Documentation builds
 docs/_build/
 docs/.doctrees/
-docs/_notebooks/
 _build/
 docs\build_output.txt
 
@@ -55,3 +54,6 @@ dist/
 
 # vscode
 .vscode/
+
+# scxpand_cache
+**/.scxpand_cache/

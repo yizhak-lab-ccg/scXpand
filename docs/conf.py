@@ -78,6 +78,10 @@ myst_enable_extensions = [
 ]
 myst_url_schemes = ("http", "https", "mailto")
 
+# Additional myst-nb configuration
+nb_execution_show_tb = True
+nb_execution_raise_on_error = False
+
 nb_output_stderr = "remove"
 nb_execution_mode = "cache"
 nb_merge_streams = True
@@ -89,6 +93,9 @@ if os.environ.get("READTHEDOCS") == "True":
     nb_execution_mode = "off"
     # Increase timeout for complex notebooks
     nb_execution_timeout = 120
+    # Disable execution for ReadTheDocs
+    nb_execution_allow_errors = True
+    nb_execution_excludepatterns = []
 typehints_defaults = "braces"
 
 source_suffix = {
