@@ -12,11 +12,12 @@ For development setup instructions, see :doc:`installation`.
 Contributing Workflow
 ---------------------
 
-**For External Contributors:**
+External Contributor Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **1. Fork the Repository**
 
-Fork the scXpand repository on GitHub by clicking the "Fork" button.
+Fork the scXpand repository on GitHub by clicking the "Fork" button on the main repository page.
 
 **2. Clone Your Fork**
 
@@ -26,6 +27,8 @@ Fork the scXpand repository on GitHub by clicking the "Fork" button.
    cd scXpand
 
 **3. Add Upstream Remote**
+
+This allows you to sync your fork with the main repository. Replace ORIGINAL_OWNER with the main scXpand repo owner (e.g., scXpandTeam):
 
 .. code-block:: bash
 
@@ -64,9 +67,29 @@ Keep commits focused on a single change when possible.
 
 **9. Create Pull Request**
 
-Create a pull request from your fork's branch to the main repository's main branch.
+On GitHub, create a pull request from your fork's branch to the main repository's main branch.
 
-**For Repository Maintainers:**
+Keeping Your Fork Up to Date
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For external contributors, regularly sync your fork with the upstream repository to avoid merge conflicts:
+
+.. code-block:: bash
+
+   # Fetch latest changes from upstream
+   git fetch upstream
+
+   # Switch to main branch
+   git checkout main
+
+   # Merge upstream changes
+   git merge upstream/main
+
+   # Push updated main to your fork
+   git push origin main
+
+Maintainer Workflow
+~~~~~~~~~~~~~~~~~~~
 
 **1. Create Branch**
 
@@ -101,25 +124,7 @@ Keep commits focused on a single change when possible.
 
 **6. Create Pull Request**
 
-Create a pull request targeting the main branch.
-
-**Keeping Your Fork Up to Date**
-
-For external contributors, regularly sync your fork with the upstream repository:
-
-.. code-block:: bash
-
-   # Fetch latest changes from upstream
-   git fetch upstream
-
-   # Switch to main branch
-   git checkout main
-
-   # Merge upstream changes
-   git merge upstream/main
-
-   # Push updated main to your fork
-   git push origin main
+On GitHub, create a pull request targeting the main branch.
 
 **Pull Request Checklist**
 
