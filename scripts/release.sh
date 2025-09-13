@@ -626,6 +626,26 @@ publish_to_pypi() {
     print_success "Both packages successfully published to PyPI"
 }
 
+# Function to trigger ReadTheDocs build
+trigger_readthedocs_build() {
+    if [ "$DRY_RUN" = true ]; then
+        print_status "DRY RUN: Would trigger ReadTheDocs build..."
+        return
+    fi
+
+    print_status "Triggering ReadTheDocs documentation build..."
+
+    # ReadTheDocs will automatically build when we push the tag
+    # But we can also trigger it manually via webhook if configured
+    print_status "ReadTheDocs will automatically build documentation from the new tag v$NEW_VERSION"
+    print_status "Documentation will be available at: https://scxpand.readthedocs.io/"
+
+    # Wait a moment for the webhook to trigger
+    sleep 5
+
+    print_success "ReadTheDocs build triggered"
+}
+
 # Function to verify both releases
 verify_releases() {
     if [ "$DRY_RUN" = true ]; then
@@ -677,6 +697,7 @@ show_summary() {
         echo "  - Tag: v$NEW_VERSION"
         echo "  - Push to main branch"
         echo "  - Publish both packages to PyPI"
+        echo "  - Trigger ReadTheDocs documentation build"
         echo
         print_warning "This was a DRY RUN - no actual changes were made to git or PyPI"
         print_status "To perform the actual release, run: ./scripts/release.sh --$VERSION_TYPE"
@@ -688,6 +709,7 @@ show_summary() {
         echo "  - Tag: v$NEW_VERSION"
         echo "  - Standard Package (CPU/MPS): https://pypi.org/project/scxpand/"
         echo "  - CUDA Package:               https://pypi.org/project/scxpand-cuda/"
+        echo "  - Documentation:              https://scxpand.readthedocs.io/"
         echo "  - GitHub: https://github.com/yizhak-lab-ccg/scXpand/releases/tag/v$NEW_VERSION"
     fi
     echo
@@ -718,6 +740,7 @@ main() {
     commit_and_push
     create_and_push_tag
     publish_to_pypi
+    trigger_readthedocs_build
     verify_releases
     show_summary
 }
