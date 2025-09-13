@@ -379,18 +379,27 @@ def time_seconds_to_str(seconds: float) -> str:
     # return f"{hours} hours, {minutes} minutes, and {round(seconds)} seconds."
 
 
-def get_last_git_commit_link():
+def get_last_git_commit_link() -> str:
+    """Get the last git commit link from the remote repository."""
     try:
-        # Get the Git commit hash
-        commit_hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8")
-        # Get the remote URL of the repository
-        remote_url = subprocess.check_output(["git", "config", "--get", "remote.origin.url"]).strip().decode("utf-8")
-        # Generate the Git link
-        git_link = remote_url.replace(".git", "/commit/") + commit_hash
-        return git_link
+        # Get commit hash and remote URL with timeout
+        commit_hash = subprocess.check_output(["git", "rev-parse", "HEAD"], timeout=5).strip().decode("utf-8")
+        remote_url = (
+            subprocess.check_output(["git", "config", "--get", "remote.origin.url"], timeout=5).strip().decode("utf-8")
+        )
+
+        # Basic validation
+        if not commit_hash or len(commit_hash) != 40:
+            raise ValueError("Invalid commit hash")
+        if not remote_url or not remote_url.startswith(("http://", "https://", "git@")):
+            raise ValueError("Invalid remote URL")
+
+        # Generate link
+        base_url = remote_url.rstrip(".git")
+        return f"{base_url}/commit/{commit_hash}"
+
     except Exception as e:
-        logger.info("Error: Failed to retrieve Git information.")
-        logger.info(f"Command '{e}' returned non-zero exit status {getattr(e, 'returncode', 'unknown')}.")
+        logger.warning(f"Failed to retrieve git information: {e}")
         return "Git information unavailable"
 
 

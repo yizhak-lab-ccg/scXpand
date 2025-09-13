@@ -5,7 +5,8 @@ from unittest.mock import Mock, patch
 import pytest
 
 from scxpand.core.inference import DEFAULT_MODEL_NAME
-from scxpand.main import list_pretrained_models, predict
+from scxpand.main import predict
+from scxpand.util.model_registry import list_pretrained_models
 
 
 class TestPredictCommand:

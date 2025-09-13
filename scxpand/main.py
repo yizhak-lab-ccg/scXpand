@@ -27,11 +27,11 @@ import matplotlib
 from scxpand.core.inference import run_inference
 from scxpand.core.model_types import MODEL_TYPES
 from scxpand.hyperopt.hyperopt_optimizer import HyperparameterOptimizer
-from scxpand.pretrained import PRETRAINED_MODELS
 from scxpand.util.classes import ModelType, ensure_model_type
 from scxpand.util.general_util import get_device, get_new_version_path, load_and_override_params
 from scxpand.util.io import load_eval_indices
 from scxpand.util.logger import get_logger
+from scxpand.util.model_registry import list_pretrained_models
 from scxpand.util.training_utils import call_training_function, validate_and_setup_common
 
 
@@ -253,20 +253,6 @@ def predict(
         num_workers=num_workers,
         eval_row_inds=eval_indices,
     )
-
-
-def list_pretrained_models() -> None:
-    """List all available pre-trained models with their information."""
-
-    logger.info("Available pre-trained models:")
-    logger.info("=" * 50)
-
-    for name, info in PRETRAINED_MODELS.items():
-        logger.info(f"Name: {name}")
-        logger.info(f"  Version: {info.version}")
-        logger.info(f"  URL configured: {'Yes' if info.url else 'No'}")
-        logger.info("  Model type: Auto-detected from model_type.txt")
-        logger.info("")
 
 
 def main():

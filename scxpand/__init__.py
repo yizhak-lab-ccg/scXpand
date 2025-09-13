@@ -8,13 +8,13 @@ from importlib.metadata import version
 
 from scxpand.core.inference import run_inference
 from scxpand.core.prediction import run_prediction_pipeline
-from scxpand.main import list_pretrained_models
 from scxpand.pretrained import (
     PRETRAINED_MODELS,
     download_pretrained_model,
     get_pretrained_model_info,
 )
 from scxpand.util.classes import ModelType
+from scxpand.util.model_registry import list_pretrained_models
 
 
 def _get_version():
