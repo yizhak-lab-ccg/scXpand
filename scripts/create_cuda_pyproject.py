@@ -82,7 +82,6 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
     sources_section_found = False
     sources_section_start = -1
     sources_section_end = -1
-    cuda_index_exists = False
     in_dependencies = False
     injected_cuda_deps = False
 
@@ -125,15 +124,11 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
 
         # Keep PyTorch dependencies unchanged - rely on [tool.uv.sources] for CUDA installation
 
-        # Check if CUDA index already exists
-        if f'name = "{pytorch_cuda_index_name}"' in line:
-            cuda_index_exists = True
-
-        # Track [tool.uv.sources] section
+        # Track [tool.uv.sources] section - remove it entirely for CUDA variant
         if re.match(r"^\s*\[tool\.uv\.sources\]", line):
             sources_section_found = True
             sources_section_start = i
-            print(f"  ✓ Found [tool.uv.sources] section at line {i + 1}")
+            print(f"  ✓ Found [tool.uv.sources] section at line {i + 1} - will replace with CUDA config")
 
             # Find end of this section
             for j in range(i + 1, len(lines)):
@@ -143,36 +138,24 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
             else:
                 sources_section_end = len(lines)
 
-            # Replace the entire sources section with CUDA configuration
-            modified_lines.append(line)  # Keep the section header
+            # Replace with CUDA-specific configuration
+            modified_lines.append("# PyTorch CUDA sources configuration\n")
+            modified_lines.append("[tool.uv.sources]\n")
+            modified_lines.append(f'torch = {{ index = "{pytorch_cuda_index_name}" }}\n')
+            modified_lines.append("\n")
 
-            # Add CUDA PyTorch configuration
-            # Force CUDA installation for scxpand-cuda package
-            cuda_config = [
-                f'torch = {{ index = "{pytorch_cuda_index_name}" }}\n',
-            ]
-            modified_lines.extend(cuda_config)
-            print("  ✓ Configured PyTorch sources: torch")
-
-            # Add PyTorch index definition (only if not already present)
-            if not cuda_index_exists:
-                pytorch_index = [
-                    "\n",
-                    "# PyTorch CUDA index configuration\n",
-                    "[[tool.uv.index]]\n",
-                    f'name = "{pytorch_cuda_index_name}"\n',
-                    f'url = "{pytorch_cuda_index_url}"\n',
-                    "explicit = true\n",
-                ]
-                modified_lines.extend(pytorch_index)
-                print("  ✓ Added PyTorch CUDA index configuration")
-            else:
-                print("  ✓ PyTorch CUDA index already exists, skipping")
+            # Add PyTorch CUDA index definition
+            modified_lines.append("# PyTorch CUDA index configuration\n")
+            modified_lines.append("[[tool.uv.index]]\n")
+            modified_lines.append(f'name = "{pytorch_cuda_index_name}"\n')
+            modified_lines.append(f'url = "{pytorch_cuda_index_url}"\n')
+            modified_lines.append("explicit = true\n")
+            print("  ✓ Added PyTorch CUDA index configuration")
 
             # Skip the original sources content
             continue
 
-        # Detect dependencies list
+        # Detect dependencies list and replace torch dependency
         if re.match(r"^\s*dependencies\s*=\s*\[", line):
             in_dependencies = True
             modified_lines.append(line)
@@ -192,7 +175,7 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
                 modified_lines.append(line)
                 in_dependencies = False
                 continue
-            # skip original torch lines
+            # skip original torch lines and replace with CUDA version
             if re.search(r'"torch', line):
                 continue
 
@@ -207,20 +190,17 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
     if not sources_section_found:
         print("  ✓ No [tool.uv.sources] section found, adding CUDA config at end")
         modified_lines.append("\n")
-        modified_lines.append("# Force CUDA PyTorch installation for scxpand-cuda package\n")
+        modified_lines.append("# PyTorch CUDA sources configuration\n")
         modified_lines.append("[tool.uv.sources]\n")
         modified_lines.append(f'torch = {{ index = "{pytorch_cuda_index_name}" }}\n')
-        modified_lines.append(f'torchvision = {{ index = "{pytorch_cuda_index_name}" }}\n')
-        modified_lines.append(f'torchaudio = {{ index = "{pytorch_cuda_index_name}" }}\n')
+        modified_lines.append("\n")
 
-        # Only add index if it doesn't already exist
-        if not cuda_index_exists:
-            modified_lines.append("\n")
-            modified_lines.append("# PyTorch CUDA index configuration\n")
-            modified_lines.append("[[tool.uv.index]]\n")
-            modified_lines.append(f'name = "{pytorch_cuda_index_name}"\n')
-            modified_lines.append(f'url = "{pytorch_cuda_index_url}"\n')
-            modified_lines.append("explicit = true\n")
+        # Add PyTorch CUDA index definition
+        modified_lines.append("# PyTorch CUDA index configuration\n")
+        modified_lines.append("[[tool.uv.index]]\n")
+        modified_lines.append(f'name = "{pytorch_cuda_index_name}"\n')
+        modified_lines.append(f'url = "{pytorch_cuda_index_url}"\n')
+        modified_lines.append("explicit = true\n")
 
     # Save CUDA variant
     print(f"Saving CUDA variant to {output_path}")

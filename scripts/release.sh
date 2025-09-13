@@ -9,8 +9,9 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOKEN_FILE="$SCRIPT_DIR/pypi_token.txt"
 
-# Load CUDA version from constants.py
+# Load CUDA version and torch version from constants.py
 CUDA_VERSION=$(python3 -c "import sys; sys.path.append('$SCRIPT_DIR'); from constants import CUDA_VERSION; print(CUDA_VERSION)")
+TORCH_VERSION=$(python3 -c "import sys; sys.path.append('$SCRIPT_DIR'); from constants import TORCH_VERSION; print(TORCH_VERSION)")
 
 if [ -f "$TOKEN_FILE" ]; then
     # Extract token from file (line starting with 'pypi-')
@@ -270,7 +271,56 @@ create_cuda_pyproject() {
         return 1
     fi
 
+    # Verify CUDA configuration
+    verify_cuda_pyproject "temp/pyproject-cuda.toml"
+
     print_success "CUDA variant pyproject.toml created successfully using Python script"
+}
+
+# Function to verify CUDA pyproject.toml configuration
+verify_cuda_pyproject() {
+    local cuda_file="$1"
+    print_status "Verifying CUDA pyproject.toml configuration..."
+
+    # Check package name
+    if ! grep -q 'name = "scxpand-cuda"' "$cuda_file"; then
+        print_error "CUDA variant missing correct package name"
+        return 1
+    fi
+
+    # Check CUDA torch dependency
+    if ! grep -q "torch==${TORCH_VERSION}+${CUDA_VERSION}" "$cuda_file"; then
+        print_error "CUDA variant missing torch==${TORCH_VERSION}+${CUDA_VERSION} dependency"
+        print_status "Found torch dependencies:"
+        grep "torch" "$cuda_file" || echo "  (none found)"
+        return 1
+    fi
+
+    # Check [tool.uv.sources] section
+    if ! grep -q "\[tool.uv.sources\]" "$cuda_file"; then
+        print_error "CUDA variant missing [tool.uv.sources] section"
+        return 1
+    fi
+
+    # Check PyTorch index configuration
+    if ! grep -q "pytorch-${CUDA_VERSION}" "$cuda_file"; then
+        print_error "CUDA variant missing pytorch-${CUDA_VERSION} index configuration"
+        return 1
+    fi
+
+    # Check [[tool.uv.index]] section
+    if ! grep -q "\[\[tool.uv.index\]\]" "$cuda_file"; then
+        print_error "CUDA variant missing [[tool.uv.index]] section"
+        return 1
+    fi
+
+    # Check explicit = true
+    if ! grep -q "explicit = true" "$cuda_file"; then
+        print_error "CUDA variant missing 'explicit = true' in index configuration"
+        return 1
+    fi
+
+    print_success "CUDA pyproject.toml verification passed"
 }
 
 # Function to build standard package
