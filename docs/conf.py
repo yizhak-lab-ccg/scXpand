@@ -23,6 +23,7 @@ except PackageNotFoundError:
     author = "The scXpand Team"
     release = "0.1.0"
 
+project = project_name
 version = release
 project_copyright = f"{datetime.now():%Y}, {author}"
 bibtex_bibfiles = ["references.bib"]
