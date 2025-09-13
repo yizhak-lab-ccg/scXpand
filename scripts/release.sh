@@ -396,11 +396,6 @@ test_package_imports() {
 test_cuda_wheel_locally() {
     print_status "Testing CUDA wheel configuration locally..."
 
-    # Create a temporary test environment
-    local test_env_dir="temp/test_cuda_env"
-    rm -rf "$test_env_dir"
-    mkdir -p "$test_env_dir"
-
     # Find the CUDA wheel file
     local cuda_wheel=$(find dist/ -name "*scxpand_cuda*.whl" | head -1)
     if [ -z "$cuda_wheel" ]; then
@@ -409,6 +404,59 @@ test_cuda_wheel_locally() {
     fi
 
     print_status "Testing CUDA wheel: $cuda_wheel"
+
+    # Check if we're on macOS ARM64 (where CUDA PyTorch isn't available)
+    local platform=$(uname -s)
+    local arch=$(uname -m)
+    if [[ "$platform" == "Darwin" && "$arch" == "arm64" ]]; then
+        print_warning "Skipping CUDA wheel installation test on macOS ARM64 (CUDA not available)"
+        print_status "Verifying CUDA wheel structure and metadata instead..."
+
+        # Verify wheel contents using Python
+        if ! python3 -c "
+import zipfile
+import sys
+
+wheel_path = '$cuda_wheel'
+print(f'Checking wheel: {wheel_path}')
+
+with zipfile.ZipFile(wheel_path, 'r') as wheel:
+    files = wheel.namelist()
+
+    # Check for required metadata files
+    metadata_files = [f for f in files if f.endswith('METADATA')]
+    if not metadata_files:
+        print('ERROR: No METADATA file found in wheel')
+        sys.exit(1)
+
+    # Read and check METADATA
+    metadata = wheel.read(metadata_files[0]).decode('utf-8')
+    if 'Name: scxpand-cuda' not in metadata:
+        print('ERROR: Package name not scxpand-cuda in metadata')
+        sys.exit(1)
+
+    if 'torch==${TORCH_VERSION}+${CUDA_VERSION}' not in metadata:
+        print('ERROR: CUDA torch dependency not found in metadata')
+        sys.exit(1)
+
+    print('✓ CUDA wheel structure and metadata verified')
+"; then
+            print_error "CUDA wheel metadata verification failed"
+            return 1
+        fi
+
+        print_success "CUDA wheel metadata verification passed"
+        rm -rf "temp/test_cuda_env" 2>/dev/null || true
+        return 0
+    fi
+
+    # For non-macOS ARM64 platforms, try full installation test
+    print_status "Platform supports CUDA, testing full installation..."
+
+    # Create a temporary test environment
+    local test_env_dir="temp/test_cuda_env"
+    rm -rf "$test_env_dir"
+    mkdir -p "$test_env_dir"
 
     # Install uv if not available
     if ! command -v uv >/dev/null 2>&1; then
