@@ -11,7 +11,7 @@
     <a href="https://scxpand.readthedocs.io/en/stable/" style="margin: 0 8px;">Documentation</a> •
     <a href="#installation" style="margin: 0 8px;">Installation</a> •
     <a href="#quick-start" style="margin: 0 8px;">Quick Start</a> •
-    <a href="docs/usage_examples.rst" style="margin: 0 8px;">Examples</a> •
+    <a href="https://scxpand.readthedocs.io/en/stable/usage_examples.html" style="margin: 0 8px;">Examples</a> •
     <a href="#citation" style="margin: 0 8px;">Citation</a>
   </p>
 </div>
