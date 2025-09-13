@@ -9,6 +9,9 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOKEN_FILE="$SCRIPT_DIR/pypi_token.txt"
 
+# Load CUDA version from constants.py
+CUDA_VERSION=$(python3 -c "import sys; sys.path.append('$SCRIPT_DIR'); from constants import CUDA_VERSION; print(CUDA_VERSION)")
+
 if [ -f "$TOKEN_FILE" ]; then
     # Extract token from file (line starting with 'pypi-')
     UV_PUBLISH_TOKEN=$(grep "^pypi-" "$TOKEN_FILE" | head -1)
@@ -466,7 +469,7 @@ verify_releases() {
 
     # Test CUDA package installation
     print_package "Testing CUDA package installation..."
-    if ! pip install "scxpand-cuda==$NEW_VERSION" --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cu128; then
+    if ! pip install "scxpand-cuda==$NEW_VERSION" --no-cache-dir --extra-index-url https://download.pytorch.org/whl/${CUDA_VERSION}; then
         print_warning "Could not install CUDA package from PyPI immediately (this is normal)"
         print_status "Please check manually: pip install scxpand-cuda==$NEW_VERSION"
     else
