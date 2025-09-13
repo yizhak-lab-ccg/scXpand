@@ -17,6 +17,7 @@ from typing import List
 
 # Default CUDA configuration (can be overridden via --cuda-version)
 DEFAULT_CUDA_VERSION = "cu128"  # Default CUDA version; override with CLI flag
+TORCH_VERSION = "2.8.0"
 
 
 def load_toml_lines(file_path: Path) -> List[str]:
@@ -152,11 +153,9 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
             # Force CUDA installation for scxpand-cuda package
             cuda_config = [
                 f'torch = {{ index = "{pytorch_cuda_index_name}" }}\n',
-                f'torchvision = {{ index = "{pytorch_cuda_index_name}" }}\n',
-                f'torchaudio = {{ index = "{pytorch_cuda_index_name}" }}\n',
             ]
             modified_lines.extend(cuda_config)
-            print("  ✓ Configured PyTorch sources: torch, torchvision, torchaudio")
+            print("  ✓ Configured PyTorch sources: torch")
 
             # Add PyTorch index definition (only if not already present)
             if not cuda_index_exists:
@@ -189,9 +188,7 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
                 if not injected_cuda_deps:
                     modified_lines.extend(
                         [
-                            f'    "torch==2.5.0+{cuda_version}" ,\n',
-                            f'    "torchvision==0.20.0+{cuda_version}" ,\n',
-                            f'    "torchaudio==2.5.0+{cuda_version}" ,\n',
+                            f'    "torch=={TORCH_VERSION}+{cuda_version}",\n',
                         ]
                     )
                     injected_cuda_deps = True

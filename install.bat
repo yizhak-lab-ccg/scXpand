@@ -114,7 +114,7 @@ if exist .venv (
 
 :: Configure PyTorch backend based on system capabilities
 echo Configuring PyTorch backend...
-uv run python install_torch.py
+uv run python scripts/install_torch_for_dev.py
 
 :: Register Jupyter kernel for this environment
 echo Registering Jupyter kernel...

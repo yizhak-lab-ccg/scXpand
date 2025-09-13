@@ -136,7 +136,7 @@ def build_docs():
         subprocess.run(["uv", "run", "python", "-c", "import torch"], check=True, capture_output=True)
     except subprocess.CalledProcessError:
         print("⚠️  Warning: torch not found. Some API documentation may be incomplete.")
-        print("   Run 'python ../install_torch.py' to install torch with optimal backend.")
+        print("   Run 'python ../scripts/install_torch_for_dev.py' to install torch with optimal backend.")
 
     try:
         # Ensure we're in the docs directory for sphinx-build
