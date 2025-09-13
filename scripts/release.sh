@@ -3,6 +3,7 @@
 # scXpand Release Script
 # Publishes both standard (scxpand - CPU/MPS) and CUDA-enabled (scxpand-cuda) versions
 # Usage: ./scripts/release.sh [--dry-run] [--patch|--minor|--major]
+# The CUDA build defaults to CUDA 12.8 (cu128). Override by passing --cuda-version to create_cuda_pyproject.py inside the script.
 
 # Load PyPI token from file
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

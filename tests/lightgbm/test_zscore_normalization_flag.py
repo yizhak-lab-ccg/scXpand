@@ -88,14 +88,14 @@ class TestDataFormat:
 
     def test_default_use_zscore_norm(self):
         """Test that use_zscore_norm defaults to True."""
-        df = DataFormat()
-        assert hasattr(df, "use_zscore_norm")
-        assert df.use_zscore_norm is True
+        data_format = DataFormat()
+        assert hasattr(data_format, "use_zscore_norm")
+        assert data_format.use_zscore_norm is True
 
     def test_set_use_zscore_norm_false(self):
         """Test that use_zscore_norm can be set to False."""
-        df = DataFormat(use_zscore_norm=False)
-        assert df.use_zscore_norm is False
+        data_format = DataFormat(use_zscore_norm=False)
+        assert data_format.use_zscore_norm is False
 
 
 class TestPreprocessingPipeline:
@@ -227,7 +227,7 @@ class TestCellsDataset:
             dummy_adata.write_h5ad(data_path)
             ctx.register_file(data_path)
 
-            df = DataFormat(
+            data_format = DataFormat(
                 use_zscore_norm=True,
                 use_log_transform=False,
                 n_genes=dummy_adata.n_vars,
@@ -236,7 +236,7 @@ class TestCellsDataset:
                 genes_sigma=np.random.rand(dummy_adata.n_vars).astype(np.float32) + 0.1,
             )
 
-            dataset = CellsDataset(data_format=df, data_path=data_path, is_train=False)
+            dataset = CellsDataset(data_format=data_format, data_path=data_path, is_train=False)
 
             assert dataset.use_zscore_norm is True
             assert dataset.genes_mu_tensor is not None
@@ -249,7 +249,7 @@ class TestCellsDataset:
             dummy_adata.write_h5ad(data_path)
             ctx.register_file(data_path)
 
-            df = DataFormat(
+            data_format = DataFormat(
                 use_zscore_norm=False,
                 use_log_transform=False,
                 n_genes=dummy_adata.n_vars,
@@ -258,7 +258,7 @@ class TestCellsDataset:
                 genes_sigma=np.random.rand(dummy_adata.n_vars).astype(np.float32) + 0.1,
             )
 
-            dataset = CellsDataset(data_format=df, data_path=data_path, is_train=False)
+            dataset = CellsDataset(data_format=data_format, data_path=data_path, is_train=False)
 
             assert dataset.use_zscore_norm is False
             assert dataset.genes_mu_tensor is None

@@ -10,7 +10,7 @@ scXpand is available in two variants to match your hardware configuration:
 
 .. code-block:: bash
 
-   pip install scxpand-cuda
+   pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
 
 **Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):**
 
@@ -19,6 +19,16 @@ scXpand is available in two variants to match your hardware configuration:
    pip install scxpand
 
 .. note::
+
+   The *CUDA version* you install is determined solely by the suffix in the
+   extra-index URL.  To target a different build just replace ``cu128`` with
+   the desired version, e.g. ``cu124``::
+
+      pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu124
+
+   Tools that understand ``[tool.uv.sources]`` (uv, poetry, pdm) read the
+   correct index from the package metadata automatically, so you can omit the
+   flag when using those installers.
 
 
 Development Version

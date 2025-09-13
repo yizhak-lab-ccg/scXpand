@@ -38,7 +38,7 @@ class TestCellsDatasetDataFormatIntegration:
     @pytest.fixture(scope="class")
     def data_format(self, minimal_adata) -> DataFormat:
         # Create a DataFormat instance with categorical features
-        df = DataFormat(
+        data_format = DataFormat(
             n_genes=2,
             aux_categorical_types=["tissue_type", "imputed_labels"],
             use_log_transform=False,
@@ -47,14 +47,14 @@ class TestCellsDatasetDataFormatIntegration:
             on_disk_mode=False,
         )
         # Simulate fitting on the minimal adata
-        df.genes_mu = np.mean(minimal_adata.X, axis=0)
-        df.genes_sigma = np.std(minimal_adata.X, axis=0) + 1e-6
-        df.gene_names = ["gene1", "gene2"]
-        df.aux_categorical_mappings = {
+        data_format.genes_mu = np.mean(minimal_adata.X, axis=0)
+        data_format.genes_sigma = np.std(minimal_adata.X, axis=0) + 1e-6
+        data_format.gene_names = ["gene1", "gene2"]
+        data_format.aux_categorical_mappings = {
             "tissue_type": {"A": 0, "B": 1},
             "imputed_labels": {"X": 0, "Y": 1},
         }
-        return df
+        return data_format
 
     @pytest.fixture(scope="class")
     def dataset_params(self) -> DataAugmentParams:

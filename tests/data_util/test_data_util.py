@@ -52,35 +52,35 @@ def test_compute_soft_labels_basic(sample_expansion_df, param_fixture):
 
 def test_compute_soft_labels_zero_median(param_fixture):
     """Test handling of zero median clone size."""
-    df = pd.DataFrame(
+    clone_data = pd.DataFrame(
         {
             "clone_id_size": [1, 2],
             "median_clone_size": [0, 0],
         }
     )
 
-    y_soft = compute_soft_labels(df, param_fixture)
+    y_soft = compute_soft_labels(clone_data, param_fixture)
     assert not np.any(np.isnan(y_soft))  # No NaN values
     assert len(y_soft) == 2
 
 
 def test_compute_soft_labels_nan_values(param_fixture):
     """Test handling of NaN values."""
-    df = pd.DataFrame(
+    clone_data = pd.DataFrame(
         {
             "clone_id_size": [1, np.nan],
             "median_clone_size": [1, 1],
         }
     )
 
-    y_soft = compute_soft_labels(df, param_fixture)
+    y_soft = compute_soft_labels(clone_data, param_fixture)
     assert not np.any(np.isnan(y_soft))  # No NaN values in output
     assert y_soft[1] == 0.0  # NaN should be converted to 0
 
 
 def test_compute_soft_labels_different_beta():
     """Test behavior with different soft_loss_beta values."""
-    df = pd.DataFrame(
+    clone_data = pd.DataFrame(
         {
             "clone_id_size": [3],
             "median_clone_size": [1],
@@ -91,8 +91,8 @@ def test_compute_soft_labels_different_beta():
     param1 = type("Param", (), {"soft_loss_beta": 1.0})()
     param2 = type("Param", (), {"soft_loss_beta": 2.0})()
 
-    y_soft1 = compute_soft_labels(df, param1)
-    y_soft2 = compute_soft_labels(df, param2)
+    y_soft1 = compute_soft_labels(clone_data, param1)
+    y_soft2 = compute_soft_labels(clone_data, param2)
 
     # Higher beta should give more extreme values
     assert y_soft2[0] > y_soft1[0]
@@ -458,8 +458,8 @@ def test_compute_preprocessed_genes_means_stds_realistic(tmp_path):
 
 class TestExtractIsExpanded:
     def test_extract_is_expanded_series(self):
-        df = pd.DataFrame({"expansion": ["expanded", "not_expanded", "expanded", "foo"]})
-        result = extract_is_expanded(df)
+        expansion_data = pd.DataFrame({"expansion": ["expanded", "not_expanded", "expanded", "foo"]})
+        result = extract_is_expanded(expansion_data)
         expected = np.array([1, 0, 1, 0])
         assert np.array_equal(result, expected)
 

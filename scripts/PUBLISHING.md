@@ -139,6 +139,12 @@ The `scxpand-cuda` package uses a sophisticated configuration to ensure CUDA PyT
 - **Platform Support**: Works on Windows and Linux (macOS falls back to CPU PyTorch as CUDA is not available)
 - **Build Safety**: Uses `explicit = true` flag to prevent the CUDA index from being used for non-PyTorch dependencies
 
+*Changing CUDA version*: regenerate the CUDA configuration with:
+
+```bash
+python scripts/create_cuda_pyproject.py -c cu124  # example for CUDA 12.4
+```
+
 ## PyPI Token Requirements
 
 **CRITICAL**: scXpand publishes TWO packages and requires specific token configuration.

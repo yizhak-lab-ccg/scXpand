@@ -44,7 +44,7 @@ scXpand is available in two variants to match your hardware:
 **If you have an NVIDIA GPU with CUDA support:**
 
 ```bash
-pip install scxpand-cuda
+pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
 ```
 
 **Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):**

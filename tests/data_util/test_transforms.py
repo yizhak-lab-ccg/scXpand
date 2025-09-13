@@ -596,9 +596,9 @@ class TestExtractIsExpanded:
 
     def test_dataframe_input(self):
         """Test with DataFrame input."""
-        df = pd.DataFrame({"expansion": ["expanded", "not_expanded", "expanded", "other"]})
+        expansion_data = pd.DataFrame({"expansion": ["expanded", "not_expanded", "expanded", "other"]})
 
-        result = extract_is_expanded(df)
+        result = extract_is_expanded(expansion_data)
         expected = np.array([1, 0, 1, 0])
 
         np.testing.assert_array_equal(result, expected)

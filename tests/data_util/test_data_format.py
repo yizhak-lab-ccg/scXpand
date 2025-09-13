@@ -17,14 +17,14 @@ class TestDataFormatGeneConversion:
     @pytest.fixture
     def data_format(self) -> DataFormat:
         """Create a simple DataFormat with predefined gene names."""
-        df = DataFormat(
+        data_format = DataFormat(
             gene_names=["gene1", "gene2", "gene3"],
             n_genes=3,
         )
         # Set dummy mu and sigma values
-        df.genes_mu = np.array([0.1, 0.2, 0.3])
-        df.genes_sigma = np.array([1.0, 1.0, 1.0])
-        return df
+        data_format.genes_mu = np.array([0.1, 0.2, 0.3])
+        data_format.genes_sigma = np.array([1.0, 1.0, 1.0])
+        return data_format
 
     def test_exact_match(self, data_format: DataFormat):
         """Test when AnnData has exactly the same genes in the same order."""
@@ -176,14 +176,14 @@ class TestDataFormatRefactoredMethods:
     @pytest.fixture
     def data_format(self) -> DataFormat:
         """Create a DataFormat for testing refactored methods."""
-        df = DataFormat(
+        data_format = DataFormat(
             gene_names=["gene1", "gene2", "gene3", "gene4"],
             n_genes=4,
             target_sum=1000.0,
         )
-        df.genes_mu = np.array([0.1, 0.2, 0.3, 0.4])
-        df.genes_sigma = np.array([1.0, 1.1, 1.2, 1.3])
-        return df
+        data_format.genes_mu = np.array([0.1, 0.2, 0.3, 0.4])
+        data_format.genes_sigma = np.array([1.0, 1.1, 1.2, 1.3])
+        return data_format
 
     def test_analyze_gene_differences_exact_match(self, data_format: DataFormat):
         """Test _analyze_gene_differences when genes match exactly."""
