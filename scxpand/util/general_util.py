@@ -387,10 +387,11 @@ def get_last_git_commit_link():
         remote_url = subprocess.check_output(["git", "config", "--get", "remote.origin.url"]).strip().decode("utf-8")
         # Generate the Git link
         git_link = remote_url.replace(".git", "/commit/") + commit_hash
+        return git_link
     except Exception as e:
         logger.info("Error: Failed to retrieve Git information.")
-        logger.info(e)
-    return git_link
+        logger.info(f"Command '{e}' returned non-zero exit status {getattr(e, 'returncode', 'unknown')}.")
+        return "Git information unavailable"
 
 
 def num2str(v: float) -> str:
