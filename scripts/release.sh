@@ -422,7 +422,7 @@ test_cuda_wheel_locally() {
 
     # Create test environment with uv and install CUDA wheel
     print_status "Creating test environment and installing CUDA wheel with uv..."
-    if ! (cd "$test_env_dir" && uv venv test_venv && source test_venv/bin/activate && uv pip install "../../$cuda_wheel"); then
+    if ! (cd "$test_env_dir" && uv venv test_venv && source test_venv/bin/activate && uv pip install "../../$cuda_wheel" --extra-index-url "https://download.pytorch.org/whl/${CUDA_VERSION}"); then
         print_error "Failed to install CUDA wheel in test environment with uv"
         rm -rf "$test_env_dir"
         return 1
