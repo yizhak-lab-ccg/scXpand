@@ -466,7 +466,7 @@ verify_releases() {
 
     # Test CUDA package installation
     print_package "Testing CUDA package installation..."
-    if ! pip install "scxpand-cuda==$NEW_VERSION" --no-cache-dir; then
+    if ! pip install "scxpand-cuda==$NEW_VERSION" --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cu128; then
         print_warning "Could not install CUDA package from PyPI immediately (this is normal)"
         print_status "Please check manually: pip install scxpand-cuda==$NEW_VERSION"
     else

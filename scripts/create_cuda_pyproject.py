@@ -14,10 +14,7 @@ import tomllib
 from pathlib import Path
 from typing import List
 
-
-# Default CUDA configuration (can be overridden via --cuda-version)
-DEFAULT_CUDA_VERSION = "cu128"  # Default CUDA version; override with CLI flag
-TORCH_VERSION = "2.8.0"
+from scripts.constants import CUDA_VERSION as DEFAULT_CUDA_VERSION, TORCH_VERSION
 
 
 def load_toml_lines(file_path: Path) -> List[str]:
