@@ -8,15 +8,26 @@ scXpand is available in two variants to match your hardware configuration:
 
 **If you have an NVIDIA GPU with CUDA support:**
 
+With plain *pip* (add CUDA index):
+
 .. code-block:: bash
 
    pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
 
+With *uv, poetry, etc.* (no flags needed - wheel contains the PyTorch index):
+
+.. code-block:: bash
+
+   uv pip install scxpand-cuda
+
 **Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):**
+
+Install scXpand without CUDA support:
 
 .. code-block:: bash
 
    pip install scxpand
+
 
 .. note::
 

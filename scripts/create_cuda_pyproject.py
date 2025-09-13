@@ -85,6 +85,8 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
     sources_section_start = -1
     sources_section_end = -1
     cuda_index_exists = False
+    in_dependencies = False
+    injected_cuda_deps = False
 
     for i, line in enumerate(lines):
         # Change package name
@@ -173,6 +175,32 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
 
             # Skip the original sources content
             continue
+
+        # Detect dependencies list
+        if re.match(r"^\s*dependencies\s*=\s*\[", line):
+            in_dependencies = True
+            modified_lines.append(line)
+            continue
+
+        if in_dependencies:
+            # end of dependencies list
+            if "]" in line:
+                # inject CUDA-aware dependencies once
+                if not injected_cuda_deps:
+                    modified_lines.extend(
+                        [
+                            f'    "torch==2.5.0+{cuda_version}" ,\n',
+                            f'    "torchvision==0.20.0+{cuda_version}" ,\n',
+                            f'    "torchaudio==2.5.0+{cuda_version}" ,\n',
+                        ]
+                    )
+                    injected_cuda_deps = True
+                modified_lines.append(line)
+                in_dependencies = False
+                continue
+            # skip original torch lines
+            if re.search(r'"torch', line):
+                continue
 
         # Skip lines that are part of the original sources section
         if sources_section_found and sources_section_start < i < sources_section_end:
