@@ -8,7 +8,6 @@ dummy_save_dir/
 _notebooks/
 norm_bug/*
 **/.scxpand_cache/
-docs/_static/images
 
 # Scripts - ignore token file but track scripts
 scripts/pypi_token.txt
