@@ -173,8 +173,8 @@ class TestListPretrainedModelsCommand:
         }
 
         with (
-            patch("scxpand.main.PRETRAINED_MODELS", mock_models),
-            patch("scxpand.main.logger") as mock_logger,
+            patch("scxpand.util.model_registry.PRETRAINED_MODELS", mock_models),
+            patch("scxpand.util.model_registry.logger") as mock_logger,
         ):
             list_pretrained_models()
 
@@ -205,8 +205,8 @@ class TestListPretrainedModelsCommand:
     def test_list_pretrained_models_empty_registry(self):
         """Test list_pretrained_models with empty model registry."""
         with (
-            patch("scxpand.main.PRETRAINED_MODELS", {}),
-            patch("scxpand.main.logger") as mock_logger,
+            patch("scxpand.util.model_registry.PRETRAINED_MODELS", {}),
+            patch("scxpand.util.model_registry.logger") as mock_logger,
         ):
             list_pretrained_models()
 
