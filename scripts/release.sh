@@ -401,12 +401,6 @@ test_cuda_wheel_locally() {
     rm -rf "$test_env_dir"
     mkdir -p "$test_env_dir"
 
-    # Create a test environment and install the local CUDA wheel
-    if ! (cd "$test_env_dir" && python -m venv test_venv); then
-        print_error "Failed to create test virtual environment"
-        return 1
-    fi
-
     # Find the CUDA wheel file
     local cuda_wheel=$(find dist/ -name "*scxpand_cuda*.whl" | head -1)
     if [ -z "$cuda_wheel" ]; then
@@ -416,9 +410,20 @@ test_cuda_wheel_locally() {
 
     print_status "Testing CUDA wheel: $cuda_wheel"
 
-    # Activate test environment and install CUDA wheel
-    if ! (cd "$test_env_dir" && source test_venv/bin/activate && pip install "../../$cuda_wheel"); then
-        print_error "Failed to install CUDA wheel in test environment"
+    # Install uv if not available
+    if ! command -v uv >/dev/null 2>&1; then
+        print_status "Installing uv for CUDA wheel testing..."
+        if ! pip install uv; then
+            print_error "Failed to install uv"
+            rm -rf "$test_env_dir"
+            return 1
+        fi
+    fi
+
+    # Create test environment with uv and install CUDA wheel
+    print_status "Creating test environment and installing CUDA wheel with uv..."
+    if ! (cd "$test_env_dir" && uv venv test_venv && source test_venv/bin/activate && uv pip install "../../$cuda_wheel"); then
+        print_error "Failed to install CUDA wheel in test environment with uv"
         rm -rf "$test_env_dir"
         return 1
     fi
