@@ -6,7 +6,7 @@ description = "Pan-cancer detection of T-cell clonal expansion from single-cell 
 readme = "README.md"
 license = "MIT"
 authors = [
-    {name = "Ron Amit", email = "ron2amit@gmail.com"},
+    {name = "Ron Amit", email = "ronamit@ef.technion.ac.il"},
     {name = "Ofir Shorer", email = "ofirshorer@campus.technion.ac.il"}
 ]
 keywords = ["single-cell", "RNA-seq", "T-cell", "clonal-expansion", "machine-learning", "bioinformatics"]
