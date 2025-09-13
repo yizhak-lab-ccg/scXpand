@@ -46,29 +46,26 @@ scXpand is available in two variants to match your hardware:
 With plain *pip* (add CUDA index):
 
 ```bash
-pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
+pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
 ```
 
 With **uv**:
 
 ```bash
-uv pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
-```
-
-With **poetry/pdm** (reads PyTorch index from wheel metadata):
-
-```bash
-poetry add scxpand-cuda
-# or
-pdm add scxpand-cuda
+uv pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
 ```
 
 **Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):**
 
-Install scXpand without CUDA support:
+With plain *pip*:
 
 ```bash
-pip install scxpand
+pip install --upgrade scxpand
+```
+
+With **uv**:
+```bash
+uv pip install --upgrade scxpand
 ```
 
 See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.

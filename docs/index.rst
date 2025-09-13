@@ -29,39 +29,37 @@ Features
 Quick Start
 -----------
 
-**Installation**:
+**Installation:**
 
-**If you have an NVIDIA GPU with CUDA support:**
+If you have an NVIDIA GPU with CUDA support:
 
 With plain *pip* (add CUDA index):
 
 .. code-block:: bash
 
-   pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
+   pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
 
 With **uv**:
 
 .. code-block:: bash
 
-   uv pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
+   uv pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
 
-With **poetry/pdm** (reads PyTorch index from wheel metadata):
+Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):
 
-.. code-block:: bash
-
-   poetry add scxpand-cuda
-   # or
-   pdm add scxpand-cuda
-
-**Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):**
-
-Install scXpand without CUDA support:
+With plain *pip*:
 
 .. code-block:: bash
 
-   pip install scxpand
+   pip install --upgrade scxpand
 
-See :doc:`installation` for detailed setup instructions.
+With **uv**:
+
+.. code-block:: bash
+
+   uv pip install --upgrade scxpand
+
+See the `full installation guide <https://scxpand.readthedocs.io/en/latest/installation.html>`_ for detailed setup instructions.
 
 .. code-block:: python
 
@@ -75,9 +73,8 @@ See :doc:`installation` for detailed setup instructions.
 
    # Run inference with automatic model download
    results = scxpand.run_inference(
-       model_name="pan_cancer_autoencoder",
-       data_path="your_data.h5ad",
-       device=None  # Auto-detect best available device
+       model_name="pan_cancer_autoencoder",  # default model
+       data_path="your_data.h5ad"
    )
 
    # Or use the command line

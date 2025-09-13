@@ -1,64 +1,58 @@
-Installation
-============
+Installation Guide
+=================
 
-Installation Options
---------------------
+.. note::
 
-scXpand is available in two variants to match your hardware configuration:
+   **There are two ways to install scXpand:**
 
-**If you have an NVIDIA GPU with CUDA support:**
+   - **Standard Installation** (recommended for most users):
+     Use this if you simply want to use scXpand for analysis or inference.
+   - **Development Setup** (for contributors/developers):
+     Use this if you want to contribute to scXpand or work with the latest source code from GitHub.
+
+Standard Installation
+---------------------
+
+scXpand is available in two variants to match your hardware:
+
+If you have an NVIDIA GPU with CUDA support:
 
 With plain *pip* (add CUDA index):
 
 .. code-block:: bash
 
-   pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
+   pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
 
 With **uv**:
 
 .. code-block:: bash
 
-   uv pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
+   uv pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
 
-With **poetry/pdm** (reads PyTorch index from wheel metadata):
+Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):
 
-.. code-block:: bash
-
-   poetry add scxpand-cuda
-   # or
-   pdm add scxpand-cuda
-
-**Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):**
-
-Install scXpand without CUDA support:
+With plain *pip*:
 
 .. code-block:: bash
 
-   pip install scxpand
+   pip install --upgrade scxpand
+
+With **uv**:
+
+.. code-block:: bash
+
+   uv pip install --upgrade scxpand
 
 
-.. note::
+Development Setup (from Source)
+-------------------------------
 
-   The *CUDA version* you install is determined solely by the suffix in the
-   extra-index URL.  To target a different build just replace ``cu128`` with
-   the desired version, e.g. ``cu124``::
-
-      pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu124
-
-   For **uv**, you need both flags as shown above. Tools like **poetry** and **pdm**
-   can read the PyTorch index from the package metadata automatically and don't
-   require extra flags.
-
-
-Development Version
--------------------
-
-To work with the latest version on GitHub: clone the repository and ``cd`` into its root directory.
+To work with the latest version on GitHub (for development or contributions):
 
 .. code-block:: bash
 
     git clone https://github.com/yizhak-lab-ccg/scXpand.git
-    cd scxpand
+    cd scXpand
 
 scXpand uses `uv <https://docs.astral.sh/uv/>`_ for fast, reliable dependency management. Use the provided install scripts:
 
@@ -93,8 +87,6 @@ Then activate the environment:
     # Windows PowerShell
     .\.venv\Scripts\activate
 
-
-
 Quick Start
 -----------
 
@@ -113,19 +105,18 @@ After installation, you can immediately start using scXpand:
     # Run inference with a pre-trained model
     results = scxpand.run_inference(
         model_name="pan_cancer_autoencoder",
-        data_path="your_data.h5ad",
-        device=None  # Auto-detect best available device
+        data_path="your_data.h5ad"
     )
 
 Or use the command line interface:
 
 .. code-block:: bash
 
-      # List pre-trained models
-        scxpand list-models
+    # List pre-trained models
+    scxpand list-models
 
-        # Run inference with pre-trained model
-        scxpand predict --data_path your_data.h5ad --model_name pan_cancer_autoencoder
+    # Run inference with pre-trained model
+    scxpand predict --data_path your_data.h5ad --model_name pan_cancer_autoencoder
 
-        # Run inference with local model
-        scxpand predict --data_path your_data.h5ad --model_path results/my_model
+    # Run inference with local model
+    scxpand predict --data_path your_data.h5ad --model_path results/my_model
