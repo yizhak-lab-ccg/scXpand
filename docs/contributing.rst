@@ -12,6 +12,62 @@ For development setup instructions, see :doc:`installation`.
 Contributing Workflow
 ---------------------
 
+**For External Contributors:**
+
+**1. Fork the Repository**
+
+Fork the scXpand repository on GitHub by clicking the "Fork" button.
+
+**2. Clone Your Fork**
+
+.. code-block:: bash
+
+   git clone https://github.com/YOUR_USERNAME/scXpand.git
+   cd scXpand
+
+**3. Add Upstream Remote**
+
+.. code-block:: bash
+
+   git remote add upstream https://github.com/ORIGINAL_OWNER/scXpand.git
+
+**4. Create Branch**
+
+.. code-block:: bash
+
+   git checkout -b your-feature-name
+
+**5. Make Changes**
+
+Implement your changes with appropriate tests and documentation updates.
+
+**6. Test Your Changes**
+
+.. code-block:: bash
+
+   # Run all tests
+   uv run pytest -n auto
+
+   # Run specific tests for your changes
+   uv run pytest tests/your_test_file.py
+
+**7. Commit Guidelines**
+
+Write clear, descriptive commit messages.
+Keep commits focused on a single change when possible.
+
+**8. Push to Your Fork**
+
+.. code-block:: bash
+
+   git push origin your-feature-name
+
+**9. Create Pull Request**
+
+Create a pull request from your fork's branch to the main repository's main branch.
+
+**For Repository Maintainers:**
+
 **1. Create Branch**
 
 .. code-block:: bash
@@ -37,12 +93,33 @@ Implement your changes with appropriate tests and documentation updates.
 Write clear, descriptive commit messages.
 Keep commits focused on a single change when possible.
 
-**5. Create Pull Request**
+**5. Push Branch**
 
 .. code-block:: bash
 
    git push origin your-feature-name
-   # Then create PR targeting main branch
+
+**6. Create Pull Request**
+
+Create a pull request targeting the main branch.
+
+**Keeping Your Fork Up to Date**
+
+For external contributors, regularly sync your fork with the upstream repository:
+
+.. code-block:: bash
+
+   # Fetch latest changes from upstream
+   git fetch upstream
+
+   # Switch to main branch
+   git checkout main
+
+   # Merge upstream changes
+   git merge upstream/main
+
+   # Push updated main to your fork
+   git push origin main
 
 **Pull Request Checklist**
 
