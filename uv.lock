@@ -3481,7 +3481,7 @@ wheels = [
 
 [[package]]
 name = "scxpand"
-version = "0.1.57"
+version = "0.1.58"
 source = { editable = "." }
 dependencies = [
     { name = "anndata" },
