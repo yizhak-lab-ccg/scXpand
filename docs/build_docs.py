@@ -111,25 +111,31 @@ def build_docs():
     # Copy latest images from source
     copy_images()
 
-    # Copy notebooks from project root
-    print("📓 Copying notebooks...")
-    project_root = Path(__file__).parent.parent
-    docs_dir = project_root / "docs"
-    source_notebooks_dir = docs_dir / "_notebooks"
-    source_notebooks_dir.mkdir(exist_ok=True)
+    # Prepare notebooks using the same script as ReadTheDocs
+    print("📓 Preparing notebooks...")
+    try:
+        from prepare_notebooks import prepare_notebooks  # noqa: PLC0415
 
-    # Find notebooks directory relative to project root (parent of docs directory)
-    project_notebooks = project_root / "notebooks"
+        prepare_notebooks()
+    except ImportError:
+        # Fallback to inline notebook preparation
+        project_root = Path(__file__).parent.parent
+        docs_dir = project_root / "docs"
+        source_notebooks_dir = docs_dir / "_notebooks"
+        source_notebooks_dir.mkdir(exist_ok=True)
 
-    if project_notebooks.exists():
-        notebook_count = 0
-        for notebook in project_notebooks.glob("*.ipynb"):
-            # Copy to _notebooks directory for documentation
-            shutil.copy2(notebook, source_notebooks_dir / notebook.name)
-            notebook_count += 1
-        print(f"   Copied {notebook_count} notebooks")
-    else:
-        print("   ⚠️  Warning: notebooks directory not found at", project_notebooks)
+        # Find notebooks directory relative to project root (parent of docs directory)
+        project_notebooks = project_root / "notebooks"
+
+        if project_notebooks.exists():
+            notebook_count = 0
+            for notebook in project_notebooks.glob("*.ipynb"):
+                # Copy to _notebooks directory for documentation
+                shutil.copy2(notebook, source_notebooks_dir / notebook.name)
+                notebook_count += 1
+            print(f"   Copied {notebook_count} notebooks")
+        else:
+            print("   ⚠️  Warning: notebooks directory not found at", project_notebooks)
 
     # Check if torch is available and warn if not
     try:

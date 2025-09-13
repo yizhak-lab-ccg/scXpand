@@ -82,6 +82,13 @@ nb_output_stderr = "remove"
 nb_execution_mode = "cache"
 nb_merge_streams = True
 nb_execution_timeout = 60
+
+# ReadTheDocs-specific notebook settings
+if os.environ.get("READTHEDOCS") == "True":
+    # On ReadTheDocs, use 'off' mode to avoid execution issues
+    nb_execution_mode = "off"
+    # Increase timeout for complex notebooks
+    nb_execution_timeout = 120
 typehints_defaults = "braces"
 
 source_suffix = {
