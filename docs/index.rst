@@ -59,7 +59,7 @@ With **uv**:
 
    uv pip install --upgrade scxpand
 
-See the `full installation guide <https://scxpand.readthedocs.io/en/latest/installation.html>`_ for detailed setup instructions.
+See the `full installation guide <https://scxpand.readthedocs.io/en/stable/installation.html>`_ for detailed setup instructions.
 
 .. code-block:: python
 

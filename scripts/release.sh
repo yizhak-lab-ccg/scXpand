@@ -638,7 +638,7 @@ trigger_readthedocs_build() {
     # ReadTheDocs will automatically build when we push the tag
     # But we can also trigger it manually via webhook if configured
     print_status "ReadTheDocs will automatically build documentation from the new tag v$NEW_VERSION"
-    print_status "Documentation will be available at: https://scxpand.readthedocs.io/"
+    print_status "Documentation will be available at: https://scxpand.readthedocs.io/en/stable/"
 
     # Wait a moment for the webhook to trigger
     sleep 5
@@ -709,7 +709,7 @@ show_summary() {
         echo "  - Tag: v$NEW_VERSION"
         echo "  - Standard Package (CPU/MPS): https://pypi.org/project/scxpand/"
         echo "  - CUDA Package:               https://pypi.org/project/scxpand-cuda/"
-        echo "  - Documentation:              https://scxpand.readthedocs.io/"
+        echo "  - Documentation:              https://scxpand.readthedocs.io/en/stable/"
         echo "  - GitHub: https://github.com/yizhak-lab-ccg/scXpand/releases/tag/v$NEW_VERSION"
     fi
     echo

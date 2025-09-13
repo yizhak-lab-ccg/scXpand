@@ -8,7 +8,7 @@
   </p>
 
   <p style="margin: 0;">
-    <a href="https://scxpand.readthedocs.io" style="margin: 0 8px;">Documentation</a> •
+    <a href="https://scxpand.readthedocs.io/en/stable/" style="margin: 0 8px;">Documentation</a> •
     <a href="#installation" style="margin: 0 8px;">Installation</a> •
     <a href="#quick-start" style="margin: 0 8px;">Quick Start</a> •
     <a href="docs/usage_examples.rst" style="margin: 0 8px;">Examples</a> •
@@ -24,7 +24,7 @@ A framework for predicting T-cell clonal expansion from single-cell RNA sequenci
 
 **Manuscript in preparation** - detailed methodology and benchmarks coming soon.
 
-**[View full documentation](https://scxpand.readthedocs.io)** for comprehensive guides and API reference.
+**[View full documentation](https://scxpand.readthedocs.io/en/stable/)** for comprehensive guides and API reference.
 
 
 ## Features
@@ -68,7 +68,7 @@ With **uv**:
 uv pip install --upgrade scxpand
 ```
 
-See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
+See the [full installation guide](https://scxpand.readthedocs.io/en/stable/installation.html) for detailed setup instructions.
 
 ## Quick Start
 
@@ -108,7 +108,7 @@ See our **[Tutorial Notebook](notebooks/scxpand_tutorial.ipynb)** for a complete
 - **[Evaluation Metrics](docs/evaluation_metrics.rst)** - Performance assessment and stratified analysis
 - **[Output Format](docs/output_format.rst)** - Understanding model outputs and results
 
-**[📖 Full Documentation](https://scxpand.readthedocs.io)** - Complete guides, API reference, and interactive tutorials
+**[📖 Full Documentation](https://scxpand.readthedocs.io/en/stable/)** - Complete guides, API reference, and interactive tutorials
 
 ## License
 
