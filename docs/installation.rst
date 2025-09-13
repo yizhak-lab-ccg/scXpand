@@ -14,11 +14,19 @@ With plain *pip* (add CUDA index):
 
    pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
 
-With *uv, poetry, etc.* (no flags needed - wheel contains the PyTorch index):
+With **uv**:
 
 .. code-block:: bash
 
-   uv pip install scxpand-cuda
+   uv pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
+
+With **poetry/pdm** (reads PyTorch index from wheel metadata):
+
+.. code-block:: bash
+
+   poetry add scxpand-cuda
+   # or
+   pdm add scxpand-cuda
 
 **Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):**
 
@@ -37,9 +45,9 @@ Install scXpand without CUDA support:
 
       pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu124
 
-   Tools that understand ``[tool.uv.sources]`` (uv, poetry, pdm) read the
-   correct index from the package metadata automatically, so you can omit the
-   flag when using those installers.
+   For **uv**, you need both flags as shown above. Tools like **poetry** and **pdm**
+   can read the PyTorch index from the package metadata automatically and don't
+   require extra flags.
 
 
 Development Version
