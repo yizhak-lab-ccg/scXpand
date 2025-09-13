@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/images/scXpand_logo_gray.png" alt="scXpand Logo" width="280"/>
+  <img src="https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_logo_gray.png" alt="scXpand Logo" width="280"/>
 
   <h1 style="margin: 10px 0 5px 0;">scXpand: Pan-cancer Detection of T-cell Clonal Expansion</h1>
 
@@ -17,7 +17,7 @@
 </div>
 
 <div style="width: 100vw; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); margin-top: 20px; margin-bottom: 40px; padding: 0 40px;">
-  <img src="docs/images/scXpand_datasets.jpeg" alt="scXpand Datasets Overview" style="width: 100%; height: auto; display: block; margin: 0; padding: 0;"/>
+  <img src="https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_datasets.jpeg" alt="scXpand Datasets Overview" style="width: 100%; height: auto; display: block; margin: 0; padding: 0;"/>
 </div>
 
 A framework for predicting T-cell clonal expansion from single-cell RNA sequencing data.
