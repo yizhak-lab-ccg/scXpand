@@ -372,14 +372,14 @@ build_cuda_package() {
     print_success "CUDA package built successfully"
 }
 
-# Function to test package imports
+# Function to test package imports and CUDA configuration
 test_package_imports() {
     if [ "$DRY_RUN" = true ]; then
-        print_status "DRY RUN: Would test package imports"
+        print_status "DRY RUN: Would test package imports and CUDA configuration"
         return
     fi
 
-    print_status "Testing package imports..."
+    print_status "Testing package imports and CUDA configuration..."
 
     # Test standard package import
     if uv run --with scxpand --no-project -- python -c "import scxpand; print('Standard package import successful')" >/dev/null 2>&1; then
@@ -387,6 +387,84 @@ test_package_imports() {
     else
         print_warning "Standard package import test failed (package may not be available yet)"
     fi
+
+    # Test CUDA package configuration before publishing
+    test_cuda_wheel_locally
+}
+
+# Function to test CUDA wheel locally before publishing
+test_cuda_wheel_locally() {
+    print_status "Testing CUDA wheel configuration locally..."
+
+    # Create a temporary test environment
+    local test_env_dir="temp/test_cuda_env"
+    rm -rf "$test_env_dir"
+    mkdir -p "$test_env_dir"
+
+    # Create a test environment and install the local CUDA wheel
+    if ! (cd "$test_env_dir" && python -m venv test_venv); then
+        print_error "Failed to create test virtual environment"
+        return 1
+    fi
+
+    # Find the CUDA wheel file
+    local cuda_wheel=$(find dist/ -name "*scxpand_cuda*.whl" | head -1)
+    if [ -z "$cuda_wheel" ]; then
+        print_error "CUDA wheel not found in dist/"
+        return 1
+    fi
+
+    print_status "Testing CUDA wheel: $cuda_wheel"
+
+    # Activate test environment and install CUDA wheel
+    if ! (cd "$test_env_dir" && source test_venv/bin/activate && pip install "../../$cuda_wheel"); then
+        print_error "Failed to install CUDA wheel in test environment"
+        rm -rf "$test_env_dir"
+        return 1
+    fi
+
+    # Test that the wheel has correct torch dependency
+    print_status "Verifying torch dependency in CUDA wheel..."
+    if ! (cd "$test_env_dir" && source test_venv/bin/activate && python -c "
+import pkg_resources
+import sys
+
+# Get scxpand-cuda package info
+try:
+    dist = pkg_resources.get_distribution('scxpand-cuda')
+    print(f'Package: {dist.project_name} {dist.version}')
+
+    # Check if torch dependency includes CUDA suffix
+    torch_req = None
+    for req in dist.requires():
+        if req.project_name.lower() == 'torch':
+            torch_req = str(req)
+            break
+
+    if torch_req:
+        print(f'Torch requirement: {torch_req}')
+        if '+${CUDA_VERSION}' in torch_req:
+            print('✓ CUDA torch dependency found')
+            sys.exit(0)
+        else:
+            print('❌ CUDA torch dependency missing')
+            sys.exit(1)
+    else:
+        print('❌ No torch dependency found')
+        sys.exit(1)
+
+except Exception as e:
+    print(f'❌ Error checking dependencies: {e}')
+    sys.exit(1)
+"); then
+        print_error "CUDA wheel does not have correct torch dependency"
+        rm -rf "$test_env_dir"
+        return 1
+    fi
+
+    print_success "CUDA wheel configuration verified"
+    rm -rf "$test_env_dir"
+    return 0
 }
 
 # Function to build and test both packages
