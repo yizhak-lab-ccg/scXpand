@@ -2,9 +2,9 @@ import os
 import subprocess
 import sys
 
+from scripts.constants import CUDA_VERSION
 
-# Constants for CUDA configuration
-CUDA_VERSION = "cu128"  # Latest supported CUDA version
+
 PYTORCH_CUDA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 
 

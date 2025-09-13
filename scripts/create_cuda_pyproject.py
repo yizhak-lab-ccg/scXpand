@@ -112,19 +112,12 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
                 print("  ✓ Added CUDA keywords: cuda, gpu")
                 continue
 
-        # Update PyTorch comment
-        if "PyTorch" in line and "CPU/MPS" in line:
-            original_line = line.strip()
-            modified_line = line.replace(
-                "# PyTorch - will use CPU/MPS on macOS/Windows, CUDA on Linux by default", "# PyTorch with CUDA support"
-            )
-            modified_lines.append(modified_line)
-            print("  ✓ Updated PyTorch comment")
+        # Remove PyTorch comment lines
+        if "PyTorch" in line and ("CPU/MPS" in line or "will use" in line):
+            print("  ✓ Removed PyTorch comment line")
             continue
 
-        # Keep PyTorch dependencies unchanged - rely on [tool.uv.sources] for CUDA installation
-
-        # Track [tool.uv.sources] section - remove it entirely for CUDA variant
+        # Track [tool.uv.sources] section - replace with CUDA variant
         if re.match(r"^\s*\[tool\.uv\.sources\]", line):
             sources_section_found = True
             sources_section_start = i
@@ -139,13 +132,9 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
                 sources_section_end = len(lines)
 
             # Replace with CUDA-specific configuration
-            modified_lines.append("# PyTorch CUDA sources configuration\n")
             modified_lines.append("[tool.uv.sources]\n")
             modified_lines.append(f'torch = {{ index = "{pytorch_cuda_index_name}" }}\n')
             modified_lines.append("\n")
-
-            # Add PyTorch CUDA index definition
-            modified_lines.append("# PyTorch CUDA index configuration\n")
             modified_lines.append("[[tool.uv.index]]\n")
             modified_lines.append(f'name = "{pytorch_cuda_index_name}"\n')
             modified_lines.append(f'url = "{pytorch_cuda_index_url}"\n')
@@ -190,13 +179,9 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
     if not sources_section_found:
         print("  ✓ No [tool.uv.sources] section found, adding CUDA config at end")
         modified_lines.append("\n")
-        modified_lines.append("# PyTorch CUDA sources configuration\n")
         modified_lines.append("[tool.uv.sources]\n")
         modified_lines.append(f'torch = {{ index = "{pytorch_cuda_index_name}" }}\n')
         modified_lines.append("\n")
-
-        # Add PyTorch CUDA index definition
-        modified_lines.append("# PyTorch CUDA index configuration\n")
         modified_lines.append("[[tool.uv.index]]\n")
         modified_lines.append(f'name = "{pytorch_cuda_index_name}"\n')
         modified_lines.append(f'url = "{pytorch_cuda_index_url}"\n')

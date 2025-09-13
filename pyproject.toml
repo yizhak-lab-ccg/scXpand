@@ -44,7 +44,6 @@ dependencies = [
     "requests>=2.31.0",
     "tqdm>=4.66.0",
     "pooch>=1.8.0",
-    # PyTorch - will use CPU/MPS on macOS/Windows, CUDA on Linux by default
     "torch>=2.5.0",
     "torchvision>=0.20.0",
     "torchaudio>=2.5.0",
@@ -61,13 +60,11 @@ Logo = "https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/image
 scxpand = "scxpand.main:main"
 
 [project.optional-dependencies]
-# PyTorch CPU-only variant (forces CPU even on Linux)
 cpu = [
     "torch>=2.5.0",
     "torchvision>=0.20.0",
     "torchaudio>=2.5.0",
 ]
-# PyTorch CUDA variant (for NVIDIA GPU acceleration)
 cuda = [
     "torch>=2.5.0",
     "torchvision>=0.20.0",
@@ -114,26 +111,21 @@ exclude = ["tests*", "docs*", "notebooks*", "temp*", "data*", "results*", "_note
 [tool.uv]
 preview = true
 
-# Prevent conflicting PyTorch extras from being installed together
 conflicts = [
     [
         { extra = "cpu" },
         { extra = "cuda" },
     ],
 ]
-
-# PyTorch index configuration for different backends
 [[tool.uv.index]]
 name = "pytorch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
 explicit = true
 
-# Configure PyTorch sources for different extras
 [tool.uv.sources]
 torch = { index = "pytorch-cpu", extra = "cpu" }
 torchvision = { index = "pytorch-cpu", extra = "cpu" }
 torchaudio = { index = "pytorch-cpu", extra = "cpu" }
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["--tb=short", "--disable-warnings"]
