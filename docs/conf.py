@@ -79,8 +79,9 @@ myst_enable_extensions = [
 myst_url_schemes = ("http", "https", "mailto")
 
 nb_output_stderr = "remove"
-nb_execution_mode = "off"
+nb_execution_mode = "cache"
 nb_merge_streams = True
+nb_execution_timeout = 60
 typehints_defaults = "braces"
 
 source_suffix = {
@@ -118,8 +119,8 @@ html_theme_options = {
     "path_to_docs": "docs/",
     "navigation_with_keys": False,
     "logo": {
-        "image_light": "_static/images/scXpand_logo_gray.png",
-        "image_dark": "_static/images/scXpand_logo_gray.png",
+        "image_light": "https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_logo_gray.png",
+        "image_dark": "https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_logo_gray.png",
     },
     "show_navbar_depth": 1,
 }
