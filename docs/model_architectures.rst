@@ -9,13 +9,8 @@ Overview
 
 scXpand provides five distinct model architectures, each designed for different use cases and data characteristics. The framework allows you to experiment with multiple approaches for T-cell expansion prediction tasks.
 
-.. raw:: html
-
-   <div align="center">
-     <br/>
-     <h4>Available Model Architectures</h4>
-     <br/>
-   </div>
+Available Model Architectures
+==============================
 
 **Neural Network Models:**
    - **Autoencoder**: Deep count autoencoder with reconstruction and classification heads

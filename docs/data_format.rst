@@ -83,7 +83,7 @@ Required for Training
      - **Training only** - Used for evaluation stratification
 
 .. note::
-   ``tissue_type`` and ``imputed_labels`` are only needed if you want to compute stratified evaluation metrics, but are not required for the actual inference/prediction process.
+   ``tissue_type`` and ``imputed_labels`` can also be used as auxiliary labels in some training configurations, in addition to their use for computing stratified evaluation metrics. They are not required for the actual inference/prediction process.
 
 Expansion Definition
 ~~~~~~~~~~~~~~~~~~~

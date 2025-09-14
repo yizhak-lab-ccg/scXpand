@@ -9,13 +9,8 @@ Overview
 
 scXpand provides an evaluation framework that computes performance metrics stratified by cell type and tissue type. The system uses aggregation methods to combine results across strata and provides detailed performance breakdowns.
 
-.. raw:: html
-
-   <div align="center">
-     <br/>
-     <h4>Multi-Level Performance Evaluation</h4>
-     <br/>
-   </div>
+Multi-Level Performance Evaluation
+====================================
 
 **Key Features:**
    - **Stratified Analysis**: Performance broken down by cell type and tissue type

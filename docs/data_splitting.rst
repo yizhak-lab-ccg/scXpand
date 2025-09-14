@@ -14,13 +14,8 @@ scXpand uses two distinct splitting strategies depending on the evaluation level
 
 This dual approach ensures both proper model selection during training and realistic evaluation of generalization across different study contexts.
 
-.. raw:: html
-
-   <div align="center">
-     <br/>
-     <h4>Multi-Level Data Splitting Strategy</h4>
-     <br/>
-   </div>
+Multi-Level Data Splitting Strategy
+====================================
 
 Key Principles
 --------------

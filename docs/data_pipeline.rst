@@ -9,13 +9,8 @@ Overview
 
 The scXpand data pipeline transforms raw single-cell gene expression data through a series of preprocessing steps to prepare it for machine learning models. The pipeline ensures consistent data processing between training and inference while maintaining computational efficiency for large datasets.
 
-.. raw:: html
-
-   <div align="center">
-     <br/>
-     <h4>Data Pipeline Architecture</h4>
-     <br/>
-   </div>
+Data Pipeline Architecture
+============================
 
 The data pipeline consists of three main components:
 
