@@ -267,7 +267,7 @@ def set_seed(seed: int | None) -> None:
     torch.backends.cudnn.benchmark = False
 
 
-def get_new_version_path(save_path: Path | str) -> Path:
+def get_new_version_path(save_path: Path | str, start_index: int = 1) -> Path:
     """Create a versioned directory path to avoid overwriting existing results.
 
     If the target path already exists and contains files, creates a new versioned
@@ -275,14 +275,10 @@ def get_new_version_path(save_path: Path | str) -> Path:
 
     Args:
         save_path: Desired save directory path.
+        start_index: Starting index for version numbering (default: 1).
 
     Returns:
         Path to use for saving (original path or new versioned path).
-
-    Example:
-        >>> path = get_new_version_path("results/experiment_1")
-        >>> # If results/experiment_1 exists, returns results/experiment_1_v_1
-        >>> print(f"Saving to: {path}")
     """
     save_path = Path(save_path)
     if not save_path.exists():
@@ -298,7 +294,7 @@ def get_new_version_path(save_path: Path | str) -> Path:
     # Get the version number of each:
     existing_versions = [int(d.name.split("_v_")[1]) for d in existing_dirs]
     # Find the next version number:
-    max_version = np.max(existing_versions) if len(existing_versions) > 0 else -1
+    max_version = np.max(existing_versions) if len(existing_versions) > 0 else start_index - 1
     new_version = max_version + 1
     version_path = parent_dir / f"{dir_name}_v_{new_version}"
     version_path.mkdir(parents=True, exist_ok=True)
