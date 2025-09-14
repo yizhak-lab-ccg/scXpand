@@ -8,7 +8,7 @@
   </p>
 
   <p style="margin: 0;">
-    <a href="https://scxpand.readthedocs.io/en//" style="margin: 0 8px;">Documentation</a> •
+    <a href="https://scxpand.readthedocs.io/en/latest/" style="margin: 0 8px;">Documentation</a> •
     <a href="#installation" style="margin: 0 8px;">Installation</a> •
     <a href="#quick-start" style="margin: 0 8px;">Quick Start</a> •
     <a href="https://scxpand.readthedocs.io/en/latest/usage_examples.html" style="margin: 0 8px;">Examples</a> •
