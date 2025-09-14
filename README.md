@@ -108,7 +108,7 @@ See our **[Tutorial Notebook](docs/notebooks/scxpand_tutorial.ipynb)** for a com
 - **[Evaluation Metrics](docs/evaluation_metrics.rst)** - Performance assessment and stratified analysis
 - **[Output Format](docs/output_format.rst)** - Understanding model outputs and results
 
-**[📖 Full Documentation](https://scxpand.readthedocs.io/en//)** - Complete guides, API reference, and interactive tutorials
+**[📖 Full Documentation](https://scxpand.readthedocs.io/en/latest/)** - Complete guides, API reference, and interactive tutorials
 
 ## License
 
