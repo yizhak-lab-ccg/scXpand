@@ -709,6 +709,10 @@ publish_to_pypi() {
     # Confirm before publishing
     echo
     print_warning "About to publish BOTH packages (scxpand and scxpand-cuda) version $NEW_VERSION to PyPI"
+    echo
+    print_status "REMINDER: Please ensure CHANGELOG.md has been updated with release notes for version $NEW_VERSION"
+    print_status "You can edit CHANGELOG.md now if needed before proceeding with the release"
+    echo
     read -p "Are you sure you want to continue? (y/N): " -r
     echo
 
