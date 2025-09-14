@@ -91,7 +91,7 @@ results = scxpand.run_inference(
 
 ## Documentation
 
-See our **[Tutorial Notebook](notebooks/scxpand_tutorial.ipynb)** for a complete example with data preprocessing, T-cell filtering, gene ID conversion, and model application using a real breast cancer dataset.
+See our **[Tutorial Notebook](docs/notebooks/scxpand_tutorial.ipynb)** for a complete example with data preprocessing, T-cell filtering, gene ID conversion, and model application using a real breast cancer dataset.
 
 
 **Getting Started:**
