@@ -300,7 +300,7 @@ class DataFormat(BaseModel):
             - Gene reordering is typically only needed for inference with new data
             - During training, gene ordering is handled efficiently at batch level
             - Preprocessing (normalization, log transform, z-score) is performed
-              on-the-fly during batch loading for memory efficiency
+                on-the-fly during batch loading for memory efficiency
         """
         if reorder_genes:
             return self.reorder_genes_to_match_format(adata)

@@ -2,7 +2,7 @@ Model Architectures Guide
 =========================
 
 .. note::
-   This guide explains all model architectures available in scXpand, their strengths, use cases, and configuration options.
+   This guide explains all model architectures available in scXpand and their configuration options.
 
 Overview
 --------

@@ -31,24 +31,7 @@ The :py:class:`~scxpand.data_util.data_format.DataFormat` class serves as the ce
 * **Preprocessing Parameters**: Log transformation and normalization settings
 * **Metadata**: Categorical feature mappings
 
-.. code-block:: python
-
-   from scxpand.data_util.data_format import DataFormat, load_data_format
-
-   # During training: create data format
-   data_format = DataFormat(
-       use_log_transform=True,
-       use_zscore_norm=True,
-       target_sum=10000
-   )
-   data_format.create_data_format(
-       data_path="data.h5ad",
-       adata=adata,
-       row_inds_train=train_indices
-   )
-
-   # During inference: load saved data format
-   data_format = load_data_format("results/data_format.json")
+See :class:`~scxpand.data_util.data_format.DataFormat` and :func:`~scxpand.data_util.data_format.load_data_format` for complete API details and usage examples.
 
 Preprocessing Pipeline
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -77,15 +60,7 @@ The preprocessing pipeline applies three sequential transformations to raw gene 
 
    Where :math:`\mu_j` and :math:`\sigma_j` are the mean and standard deviation of gene *j* computed from training data.
 
-.. code-block:: python
-
-   from scxpand.data_util.transforms import preprocess_expression_data
-
-   # Apply complete preprocessing pipeline
-   X_processed = preprocess_expression_data(
-       X=raw_expression_matrix,
-       data_format=data_format
-   )
+See :func:`~scxpand.data_util.transforms.preprocess_expression_data` for complete API details and usage examples.
 
 Data Input Modes
 ----------------
@@ -99,16 +74,7 @@ File-Based Mode (Memory Efficient)
 
 **How it works**: Data is loaded in batches directly from disk using AnnData's backed mode. Only the required cells and genes are loaded into memory at any given time.
 
-.. code-block:: python
-
-   # File-based inference example
-   # Use unified API (model type auto-detected)
-   results = scxpand.run_inference(
-       model_path='results/autoencoder',  # Local model
-       data_path='large_dataset.h5ad',  # File path
-       adata=None,                      # No in-memory data
-       device=None                      # Auto-detect device
-   )
+See :func:`~scxpand.run_inference` for complete API details and usage examples.
 
 **Advantages**:
    * Memory efficient for very large datasets
@@ -126,19 +92,7 @@ In-Memory Mode (High Performance)
 
 **How it works**: The entire dataset is loaded into memory once, enabling faster batch access during training or inference.
 
-.. code-block:: python
-
-   # Load data into memory
-   adata = ad.read_h5ad("dataset.h5ad")
-
-   # In-memory inference example
-   # Use unified API (model type auto-detected)
-   results = scxpand.run_inference(
-       model_path='results/autoencoder',  # Local model
-       data_path=None,           # No file path
-       adata=adata,             # In-memory data
-       device=None              # Auto-detect device
-   )
+See :func:`~scxpand.run_inference` for complete API details and usage examples.
 
 **Advantages**:
    * Faster data access during training/inference
@@ -157,24 +111,14 @@ Row Normalization
 
 Row normalization addresses the technical variability in sequencing depth between cells. Without normalization, cells with higher total read counts would appear to have higher expression across all genes.
 
-.. code-block:: python
-
-   from scxpand.data_util.transforms import apply_row_normalization
-
-   # Normalize to 10,000 total counts per cell
-   X_normalized = apply_row_normalization(X_raw, target_sum=10000)
+See :func:`~scxpand.data_util.transforms.apply_row_normalization` for complete API details.
 
 Log Transformation
 ~~~~~~~~~~~~~~~~~~
 
 Log transformation helps with:
 
-.. code-block:: python
-
-   from scxpand.data_util.transforms import apply_log_transform
-
-   # Apply log1p transformation
-   X_log = apply_log_transform(X_normalized, in_place=True)
+See :func:`~scxpand.data_util.transforms.apply_log_transform` for complete API details.
 
 
 Z-Score Normalization
@@ -182,23 +126,21 @@ Z-Score Normalization
 
 Z-score normalization standardizes each gene's expression across cells using training set statistics. This step:
 
+* Centers each gene's expression around zero
+* Scales each gene to unit variance
+* Uses robust clipping to handle outliers
 
-.. code-block:: python
-
-   from scxpand.data_util.transforms import apply_zscore_normalization
-
-   # Apply z-score normalization using training statistics
-   X_zscore = apply_zscore_normalization(
-       X_log,
-       genes_mu=data_format.genes_mu,
-       genes_sigma=data_format.genes_sigma,
-       eps=1e-4
-   )
+See :func:`~scxpand.data_util.transforms.apply_zscore_normalization` for complete API details.
 
 **Statistical Considerations**:
    * Uses training set statistics for both training and inference
    * Applies clipping to limit outlier effects (±3σ by default)
    * Adds small epsilon for numerical stability
+
+**Gene Statistics Computation**:
+   The per-gene means (μ) and standard deviations (σ) are computed once from the training set using the same preprocessing steps (row normalization and optional log transformation) but **without** masking or noise augmentation. These statistics are then saved with the model and reused for all inference.
+   These statistics are saved in DataFormat and used for all future processing.
+
 
 
 Gene Reordering and Subset Handling
@@ -211,10 +153,7 @@ Gene Reordering
 
 When gene order differs between training and inference:
 
-.. code-block:: python
-
-   # Automatically reorder genes to match training format
-   adata_reordered = data_format.reorder_genes_to_match_format(adata)
+See :meth:`~scxpand.data_util.data_format.DataFormat.reorder_genes_to_match_format` for complete API details.
 
 **Process**:
    1. Compare gene names between datasets
@@ -227,16 +166,7 @@ Gene Subsetting
 
 For inference on specific gene subsets:
 
-.. code-block:: python
-
-   from scxpand.data_util.transforms import load_and_preprocess_data_numpy
-
-   # Load and preprocess only specific genes
-   X_subset = load_and_preprocess_data_numpy(
-       data_path="data.h5ad",
-       data_format=data_format,
-       gene_subset=["CD3D", "CD8A", "CD4"]  # Specific genes
-   )
+See :func:`~scxpand.data_util.transforms.load_and_preprocess_data_numpy` for complete API details.
 
 
 Performance Optimization
@@ -250,14 +180,7 @@ Batch Processing
 * **Streaming from Disk**: Processes data in configurable batches to control memory usage
 * **Parallel Loading**: Supports multi-worker data loading for training
 
-.. code-block:: python
-
-   # Configure batch processing
-   dataset = CellsDataset(
-       data_format=data_format,
-       data_path="large_dataset.h5ad",
-       batch_size=1024
-   )
+See the :class:`~scxpand.data_util.dataset.CellsDataset` API documentation for complete parameter details and usage examples.
 
 Memory Management
 ~~~~~~~~~~~~~~~~~
@@ -279,83 +202,29 @@ Inference Considerations
 3. **Memory Mode Selection**: Choose based on dataset size and available RAM
 4. **Batch Size Tuning**: Optimize for your hardware configuration
 
-.. code-block:: python
 
-   # Inference best practices
-   data_format = load_data_format("results/data_format.json")  # From training
 
-   # Verify gene compatibility
-   missing_genes = set(data_format.gene_names) - set(adata.var_names)
-   if missing_genes:
-       print(f"Warning: {len(missing_genes)} genes missing from inference data")
 
-Troubleshooting
-~~~~~~~~~~~~~~~
 
-**Common Issues**:
 
-* **Memory Errors**: Switch to file-based mode or reduce batch size
-* **Gene Mismatches**: Use gene reordering or subset functionality
-* **Slow Processing**: Increase batch size or use more workers
-* **Numerical Issues**: Check for extreme values or invalid statistics
-
-**Debug Tools**:
-
-.. code-block:: python
-
-   # Debug preprocessing pipeline
-   print(f"Data format: {data_format}")
-   print(f"Gene statistics: μ={data_format.genes_mu.mean():.3f}, σ={data_format.genes_sigma.mean():.3f}")
-   print(f"Matrix shape: {X.shape}, dtype: {X.dtype}")
-
-Integration with Model Training
--------------------------------
-
-The data pipeline integrates with scXpand's model training system:
-
-Dataset Creation
-~~~~~~~~~~~~~~~~
-
-.. code-block:: python
-
-   from scxpand.data_util.dataset import CellsDataset
-   from scxpand.data_util.dataloaders import create_train_dataloader
-
-   # Create training dataset with preprocessing
-   train_dataset = CellsDataset(
-       data_format=data_format,
-       row_inds=train_indices,
-       is_train=True,
-       data_path="data.h5ad"
-   )
-
-   # Create data loader with batching
-   train_loader = create_train_dataloader(
-       train_dataset=train_dataset,
-       batch_size=512,
-       num_workers=4
-   )
-
-Training Loop Integration
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: python
-
-   # Training loop with automatic preprocessing
-   for batch in train_loader:
-       X = batch['x']  # Already preprocessed
-       y = batch['y']  # Target labels
-
-       # Model forward pass
-       predictions = model(X)
-       loss = criterion(predictions, y)
-
-The preprocessing happens transparently in the background, ensuring that model training always receives properly normalized data.
 
 Data Augmentation
 ~~~~~~~~~~~~~~~~~
 
 Data augmentation is used **only during training** for the neural network models (MLP and Autoencoder) and the linear models (Logistic regression and SVM) to improve generalization and robustness.
+
+**Complete Training Pipeline Sequence:**
+During training, the data processing follows this exact sequence:
+
+1. **Load raw expression data** from AnnData file
+2. **Apply pre-normalization augmentations** (gene masking) - sets selected genes to zero to simulate technical dropouts
+3. **Apply core preprocessing pipeline**:
+
+   a. Row normalization (target_sum = 10,000)
+   b. Log transformation (if enabled)
+   c. Z-score normalization (if enabled) using pre-computed training statistics
+
+4. **Apply post-normalization augmentations** (Gaussian noise addition)
 
 **Augmentation Pipeline:**
 Data augmentation is applied in two stages during the preprocessing pipeline:
@@ -366,35 +235,18 @@ Data augmentation is applied in two stages during the preprocessing pipeline:
 2. **Post-normalization augmentations** (applied after preprocessing):
    - Gaussian noise addition to normalized data
 
-.. code-block:: python
-
-   # Example configuration for neural network models
-   from scxpand.mlp.mlp_params import MLPParam
-   from scxpand.autoencoders.ae_params import AutoEncoderParams
-
-   # MLP with augmentation
-   mlp_params = MLPParam(
-       mask_rate=0.1,                     # Mask 10% of genes (pre-normalization)
-       noise_std=1e-4,                    # Add Gaussian noise (post-normalization)
-       soft_loss_beta=1.0,                # Soft label scaling factor
-       soft_loss_start_epoch=None         # Use soft labels from epoch 0
-   )
-
-   # Autoencoder with augmentation
-   ae_params = AutoEncoderParams(
-       mask_rate=0.1,                     # Mask 10% of genes
-       noise_std=1e-4,                    # Add Gaussian noise
-       soft_loss_beta=1.0,                # Soft label scaling factor
-   )
 
 **Augmentation Types:**
 
 1. **Gene Masking** (Pre-normalization):
-   - Randomly sets genes to zero before normalization
+   - Randomly sets genes to zero before any normalization steps
    - Simulates technical dropouts in single-cell data
+   - Applied directly to raw count data to mimic missing gene expression
 
 2. **Gaussian Noise** (Post-normalization):
-   - Adds small amounts of Gaussian noise to normalized expression data
+   - Adds small amounts of Gaussian noise to fully normalized expression data
+   - Applied after all preprocessing steps (row norm, log transform, z-score)
+   - Uses a small standard deviation (typically 1e-4) appropriate for normalized data scale
    - Helps prevent overfitting and improves generalization
 
 3. **Soft Labels**:
@@ -403,3 +255,10 @@ Data augmentation is applied in two stages during the preprocessing pipeline:
    - Formula: ``sigmoid(soft_loss_beta * (clone_size_ratio - 1.5))``
    - Can be scheduled to start after specific epochs
    - Helps with label noise and improves model calibration
+
+**Important Notes:**
+   - During **inference**, no augmentations are applied - only the core preprocessing pipeline runs
+   - Gene statistics (μ, σ) for z-score normalization are **precomputed once** from clean training data (without masking or noise) and reused for all inference
+   - Genes from training that are missing in inference data are filled with zeros and normalized using their training statistics
+   - Genes in inference data that were not in training are discarded (only training genes are processed)
+   - This ensures that normalization statistics reflect the true data distribution
