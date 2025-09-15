@@ -53,7 +53,7 @@ Optimize a single model with default settings:
        --study_name "autoencoder_deep_search" \
        --num_workers 4
 
-Multi-Model Optimization
+Optimization of Multiple Models
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Compare all available architectures:
