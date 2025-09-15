@@ -41,6 +41,8 @@ def train(
     save_dir: str | None = None,
     config_path: str | None = None,
     resume: bool = False,
+    batch_size: int = 1024,
+    device: str | None = None,
     num_workers: int = 4,
     **kwargs,
 ) -> None:
@@ -52,6 +54,8 @@ def train(
         save_dir: Directory to save results (if None, uses default for model type).
         config_path: Path to configuration file.
         resume: Whether to resume from existing checkpoint.
+        batch_size: Batch size for training.
+        device: Device to use for training (e.g., 'cuda', 'cpu', 'mps'). If None, auto-detects.
         num_workers: Number of workers for data loading.
         **kwargs: Additional parameters to override config.
 
@@ -81,6 +85,9 @@ def train(
     save_dir = get_new_version_path(save_dir or model_spec.default_save_dir)
 
     # Load parameters and apply overrides
+    # Add batch_size to kwargs if provided
+    if batch_size is not None:
+        kwargs["train_batch_size"] = batch_size
     prm = load_and_override_params(param_class=model_spec.param_class, config_path=config_path, **kwargs)
 
     # Run training
@@ -92,6 +99,7 @@ def train(
         prm=prm,
         resume=resume,
         num_workers=num_workers,
+        device=device,
     )
 
 
@@ -104,6 +112,8 @@ def optimize(
     score_metric: str = "harmonic_avg/AUROC",
     resume: bool = True,
     seed_base: int = 42,
+    batch_size: int = 1024,
+    device: str | None = None,
     num_workers: int = 4,
     config_path: str | None = None,
     fail_fast: bool = False,
@@ -120,6 +130,8 @@ def optimize(
         score_metric: Metric to optimize (e.g., "harmonic_avg/AUROC", "AUROC", "AUPRC").
         resume: Whether to resume from existing study (False = start fresh).
         seed_base: Base seed for reproducibility across trials.
+        batch_size: Batch size for training during optimization.
+        device: Device to use for optimization (e.g., 'cuda', 'cpu', 'mps'). If None, auto-detects.
         num_workers: Number of workers for parallel processing.
         config_path: Path to configuration file for base parameters.
         fail_fast: Whether to fail immediately on any exception (for testing).
@@ -144,6 +156,11 @@ def optimize(
     study_name = study_name or model_type_enum.value
 
     # Create optimizer instance
+    # Add batch_size and device to kwargs if provided
+    if batch_size is not None:
+        kwargs["train_batch_size"] = batch_size
+    if device is not None:
+        kwargs["device"] = device
     optimizer = HyperparameterOptimizer(
         model_type=model_type_enum,
         data_path=data_path,
@@ -169,6 +186,8 @@ def optimize_all(
     storage_path: str = "results/optuna_studies",
     score_metric: str = "harmonic_avg/AUROC",
     resume: bool = True,
+    batch_size: int = 1024,
+    device: str | None = None,
     num_workers: int = 4,
     model_types: list[ModelType] | None = None,
     **kwargs,
@@ -181,6 +200,8 @@ def optimize_all(
         storage_path: Directory to store optimization results.
         score_metric: Metric to optimize (e.g., "harmonic_avg/AUROC", "AUROC", "AUPRC").
         resume: Whether to resume existing studies (False = start fresh for all models).
+        batch_size: Batch size for training during optimization.
+        device: Device to use for optimization (e.g., 'cuda', 'cpu', 'mps'). If None, auto-detects.
         num_workers: Number of workers for parallel processing.
         model_types: List of model types to optimize in order. If None, optimizes all supported models.
             Supported types: ["autoencoder", "mlp", "lightgbm", "logistic", "svm"].
@@ -227,6 +248,8 @@ def optimize_all(
             storage_path=storage_path,
             score_metric=score_metric,
             resume=resume,
+            batch_size=batch_size,
+            device=device,
             num_workers=num_workers,
             **kwargs,
         )
@@ -239,6 +262,7 @@ def inference(
     model_url: str | None = None,
     save_path: str | None = None,
     batch_size: int = 1024,
+    device: str | None = None,
     num_workers: int = 4,
     eval_row_inds: str | None = None,
 ) -> None:
@@ -254,6 +278,7 @@ def inference(
         model_url: Direct URL to model ZIP file (for any external model).
         save_path: Directory to save prediction results.
         batch_size: Batch size for inference.
+        device: Device to use for inference (e.g., 'cuda', 'cpu', 'mps'). If None, auto-detects.
         num_workers: Number of workers for data loading.
         eval_row_inds: Path to file containing cell indices to evaluate (one per line), or None for all cells.
 
@@ -287,6 +312,7 @@ def inference(
         model_url=model_url,
         save_path=save_path,
         batch_size=batch_size,
+        device=device,
         num_workers=num_workers,
         eval_row_inds=eval_indices,
     )

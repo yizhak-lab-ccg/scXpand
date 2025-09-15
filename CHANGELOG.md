@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.1.0
 
 ## [Unreleased]
 
+## [0.3.31] - 2025-09-15
 
-## [0.3.0] - 2024-09-14
+### Changed
+- Renamed "main.predict" to "main.inference"
+- Added `batch_size`, `device`, and `num_workers` optional arguments to all main CLI functions
+
+
+## [0.3.0] - 2025-09-14
 
 ### Added
 - Initial release of scXpand

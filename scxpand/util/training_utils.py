@@ -77,6 +77,7 @@ def call_training_function(
     prm: Any,
     resume: bool = False,
     num_workers: int = 0,
+    device: str | None = None,
 ) -> dict[str, dict[str, float]]:
     """Call the appropriate training function with standardized parameters."""
     # Neural network models (autoencoder, mlp) use consistent signatures
@@ -85,6 +86,7 @@ def call_training_function(
             data_path=data_path,
             base_save_dir=save_dir,
             prm=prm,
+            device=device,
             resume=resume,
             num_workers=num_workers,
         )
