@@ -14,6 +14,7 @@ scXpand is a framework for predicting T-cell clonal expansion from single-cell R
    user_guide
    tutorials
    contributing
+   api/index
 
 ..
    The toctree below is for structuring the landing page, not the sidebar.
