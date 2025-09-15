@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.1.0
 
 ## [Unreleased]
 
-## [0.3.31] - 2025-09-15
+## [0.3.1] - 2025-09-15
 
 ### Changed
 - Renamed "main.predict" to "main.inference"
