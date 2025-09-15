@@ -16,6 +16,11 @@ import pytest
 class TestCLIIntegration:
     """Slow integration tests using actual subprocess calls."""
 
+    def setup_method(self):
+        """Skip tests in parallel execution due to global state conflicts."""
+        if os.environ.get("PYTEST_XDIST_WORKER") is not None:
+            pytest.skip("CLI integration tests skipped in parallel execution due to global state conflicts")
+
     @pytest.mark.slow
     def test_cli_help_command_integration(self):
         """Test that CLI shows help information via subprocess."""
@@ -153,6 +158,11 @@ class TestCLIIntegration:
 class TestCLIEndToEnd:
     """End-to-end tests for complete CLI workflows."""
 
+    def setup_method(self):
+        """Skip tests in parallel execution due to global state conflicts."""
+        if os.environ.get("PYTEST_XDIST_WORKER") is not None:
+            pytest.skip("CLI integration tests skipped in parallel execution due to global state conflicts")
+
     @pytest.mark.slow
     @pytest.mark.integration
     def test_cli_complete_workflow_help(self):
@@ -226,6 +236,11 @@ class TestCLIEndToEnd:
 
 class TestCLIEnvironment:
     """Tests for CLI behavior in different environments."""
+
+    def setup_method(self):
+        """Skip tests in parallel execution due to global state conflicts."""
+        if os.environ.get("PYTEST_XDIST_WORKER") is not None:
+            pytest.skip("CLI integration tests skipped in parallel execution due to global state conflicts")
 
     @pytest.mark.slow
     def test_cli_with_different_python_versions(self):
