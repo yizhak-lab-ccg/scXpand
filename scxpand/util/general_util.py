@@ -118,8 +118,9 @@ def load_params(save_path: Path | str) -> dict:
 
 # Add this helper function near the top of the file (after the imports)
 def format_float(x: float, precision: int = 4, threshold: float = 1e-3) -> str:
-    """Format a float number using fixed-point notation unless it is very small (but nonzero),
-    in which case scientific notation is used.
+    """Format a float number using fixed-point notation unless it is very small (but nonzero).
+
+    In which case scientific notation is used.
 
     For scientific notation, trailing zeros in the significand and unnecessary zeros in the exponent
     are removed. For example, 5.000e-5 is formatted as 5e-5.
@@ -475,6 +476,7 @@ def nested_dict_to_flat_str(nested_scalars: dict, omit_keys: list[str] | None = 
 
 def nested_dict_to_multiline_str(nested_scalars: dict, indent: int = 0, oneline_last_level: bool = True) -> str:
     """Recursively returns a string containing a nested dictionary of scalars in a hierarchically indented multi-line format.
+
     Float values are displayed with improved formatting.
 
     Args:

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Create CUDA variant of pyproject.toml for scXpand dual package release.
+"""Create CUDA variant of pyproject.toml for scXpand dual package release.
 
 This script safely modifies the original pyproject.toml to create a CUDA-enabled variant
 that forces PyTorch installation from the pytorch-cu128 index.
@@ -51,8 +50,7 @@ def validate_toml(file_path: Path) -> bool:
 
 
 def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) -> bool:
-    """
-    Create CUDA variant of pyproject.toml.
+    """Create CUDA variant of pyproject.toml.
 
     Args:
         input_path: Path to original pyproject.toml

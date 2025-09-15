@@ -395,7 +395,8 @@ class TestRegressionPrevention:
         # (This is just documentation - we don't actually run this problematic case)
 
     def test_scaling_factor_consistency_bug_prevention(self, sample_data, data_format_basic):
-        """Regression test for the specific bug where gene subset normalization
+        """Regression test for the specific bug where gene subset normalization.
+
         gave different results than full matrix normalization.
 
         This test ensures that when using precomputed scaling factors,

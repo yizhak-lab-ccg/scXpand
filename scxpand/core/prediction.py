@@ -47,23 +47,23 @@ def run_prediction_pipeline(
     by depending on abstractions (interfaces) rather than concrete implementations.
 
     Args:
-        model_path: Path to directory containing the trained model
+        model_path: Path to directory containing the trained model.
         model_type: Type of model to use for prediction. If None, automatically
-        detected from model_type.txt file in model_path
-        adata: In-memory AnnData object (alternative to data_path)
-        data_path: Path to data file (alternative to adata)
-        save_path: Directory to save prediction results
-        batch_size: Batch size for inference
-        num_workers: Number of workers for data loading
-        eval_row_inds: Specific cell indices to evaluate (None for all)
-        device: Device for computation (e.g., 'cpu', 'cuda', 'mps'). If None, auto-detected
+            detected from model_type.txt file in model_path.
+        adata: In-memory AnnData object (alternative to data_path).
+        data_path: Path to data file (alternative to adata).
+        save_path: Directory to save prediction results.
+        batch_size: Batch size for inference.
+        num_workers: Number of workers for data loading.
+        eval_row_inds: Specific cell indices to evaluate (None for all).
+        device: Device for computation (e.g., 'cpu', 'cuda', 'mps'). If None, auto-detected.
 
     Returns:
-        InferenceResults: Structured results containing predictions and metrics (if available)
+        Structured results containing predictions and metrics (if available).
 
     Raises:
-        ValueError: If neither adata nor data_path is provided
-        FileNotFoundError: If model_path doesn't exist
+        ValueError: If neither adata nor data_path is provided.
+        FileNotFoundError: If model_path doesn't exist.
     """
     # Validate inputs
     if adata is None and data_path is None:

@@ -85,7 +85,7 @@ def download_pretrained_model(
     Args:
         model_name: Name of pre-trained model from registry (alternative to model_url)
         model_url: Direct URL to model file (alternative to model_name)
-                  Supports HTTP/HTTPS URLs for direct downloads
+        Supports HTTP/HTTPS URLs for direct downloads
         cache_dir: Custom cache directory (uses `.scxpand_cache` in current dir if None)
 
     Returns:

@@ -130,7 +130,6 @@ def plot_roc_curves_per_strata(
     Returns:
         Dictionary mapping stratum names to AUROC scores
     """
-
     # Check which columns are available
     available_cols = [col for col in strata_columns if col in obs_df.columns]
     if not available_cols:

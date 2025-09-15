@@ -1,22 +1,16 @@
 """Single entry point for all scXpand operations.
 
-Example usage:
-# Training models:
-python -m scxpand.main train --model_type autoencoder --data_path data/example_data.h5ad --n_epochs 1
-python -m scxpand.main train --model_type mlp --data_path data/example_data.h5ad --n_epochs 10
-python -m scxpand.main train --model_type lightgbm --data_path data/example_data.h5ad
-python -m scxpand.main train --model_type linear --data_path data/example_data.h5ad
-python -m scxpand.main train --model_type svm --data_path data/example_data.h5ad --config_path config/svm_config.json
+This module provides the main command-line interface for scXpand, including
+training models, hyperparameter optimization, and running inference.
 
-# Hyperparameter optimization:
-python -m scxpand.main optimize --model_type autoencoder --n_trials 100 --data_path data/example_data.h5ad
-python -m scxpand.main optimize --model_type mlp --n_trials 100 --data_path data/example_data.h5ad --n_epochs 10
-python -m scxpand.main optimize-all --n_trials 10 --data_path data/example_data.h5ad --num_workers 6
-python -m scxpand.main optimize-all --n_trials 100 --data_path data/example_data.h5ad --model_types mlp,autoencoder
+Available commands:
+    - train: Train a single model
+    - optimize: Run hyperparameter optimization for a specified model type
+    - optimize-all: Run hyperparameter optimization for all supported model types
+    - predict: Run inference with trained models
+    - list-models: List available pre-trained models
 
-# Model prediction/inference:
-python -m scxpand.main predict --model_path results/autoencoder --data_path new_data.h5ad
-python -m scxpand.main predict --model_path results/mlp --data_path new_data.h5ad
+See individual function docstrings for detailed usage examples.
 """
 
 from pathlib import Path
@@ -53,13 +47,32 @@ def train(
     """Train a single model.
 
     Args:
-        model_type: Type of model to train (autoencoder, mlp, lightgbm, logistic, svm)
-        data_path: Path to input data file
-        save_dir: Directory to save results (if None, uses default for model type)
-        config_path: Path to configuration file
-        resume: Whether to resume from existing checkpoint
-        num_workers: Number of workers for data loading
-        **kwargs: Additional parameters to override config
+        model_type: Type of model to train (autoencoder, mlp, lightgbm, logistic, svm).
+        data_path: Path to input data file.
+        save_dir: Directory to save results (if None, uses default for model type).
+        config_path: Path to configuration file.
+        resume: Whether to resume from existing checkpoint.
+        num_workers: Number of workers for data loading.
+        **kwargs: Additional parameters to override config.
+
+    Returns:
+        None.
+
+    Examples:
+        >>> # Autoencoder training
+        >>> python -m scxpand.main train --model_type autoencoder --data_path data/example_data.h5ad --n_epochs 100
+        >>>
+        >>> # MLP training
+        >>> python -m scxpand.main train --model_type mlp --data_path data/example_data.h5ad --n_epochs 50
+        >>>
+        >>> # LightGBM training (no epochs needed)
+        >>> python -m scxpand.main train --model_type lightgbm --data_path data/example_data.h5ad
+        >>>
+        >>> # Linear model training
+        >>> python -m scxpand.main train --model_type linear --data_path data/example_data.h5ad
+        >>>
+        >>> # SVM training with custom config
+        >>> python -m scxpand.main train --model_type svm --data_path data/example_data.h5ad --config_path config/svm_config.json
     """
     # Common validation and setup
     model_type_enum, model_spec = validate_and_setup_common(model_type=model_type, data_path=data_path)
@@ -99,23 +112,31 @@ def optimize(
     """Run hyperparameter optimization for a specified model type.
 
     Args:
-        model_type: Type of model to optimize (autoencoder, mlp, lightgbm, logistic, svm)
-        data_path: Path to the input data file (h5ad format)
-        n_trials: Number of optimization trials to run
-        study_name: Name of the optimization study (defaults to model_type)
-        storage_path: Directory to store optimization results
-        score_metric: Metric to optimize (e.g., "harmonic_avg/AUROC", "AUROC", "AUPRC")
-        resume: Whether to resume from existing study (False = start fresh)
-        seed_base: Base seed for reproducibility across trials
-        num_workers: Number of workers for parallel processing
-        config_path: Path to configuration file for base parameters
-        fail_fast: Whether to fail immediately on any exception (for testing)
-        **kwargs: Additional parameters to override config
+        model_type: Type of model to optimize (autoencoder, mlp, lightgbm, logistic, svm).
+        data_path: Path to the input data file (h5ad format).
+        n_trials: Number of optimization trials to run.
+        study_name: Name of the optimization study (defaults to model_type).
+        storage_path: Directory to store optimization results.
+        score_metric: Metric to optimize (e.g., "harmonic_avg/AUROC", "AUROC", "AUPRC").
+        resume: Whether to resume from existing study (False = start fresh).
+        seed_base: Base seed for reproducibility across trials.
+        num_workers: Number of workers for parallel processing.
+        config_path: Path to configuration file for base parameters.
+        fail_fast: Whether to fail immediately on any exception (for testing).
+        **kwargs: Additional parameters to override config.
 
     Raises:
-        ValueError: If model_type is not supported for optimization
-        FileNotFoundError: If data_path does not exist
-        ValueError: If study already exists and resume=False (with instructions to delete manually)
+        ValueError: If model_type is not supported for optimization.
+        FileNotFoundError: If data_path does not exist.
+        ValueError: If study already exists and resume=False (with instructions to delete manually).
+
+    Returns:
+        None.
+
+    Examples:
+        >>> # Single model optimization
+        >>> python -m scxpand.main optimize --model_type autoencoder --n_trials 100 --data_path data/example_data.h5ad
+        >>> python -m scxpand.main optimize --model_type mlp --n_trials 100 --data_path data/example_data.h5ad --n_epochs 10
     """
     # Common validation and setup
     model_type_enum, _model_spec = validate_and_setup_common(model_type=model_type, data_path=data_path)
@@ -155,15 +176,25 @@ def optimize_all(
     """Run hyperparameter optimization for all supported model types or a specified subset.
 
     Args:
-        data_path: Path to the input data file (h5ad format)
-        n_trials: Number of optimization trials per model type
-        storage_path: Directory to store optimization results
-        score_metric: Metric to optimize (e.g., "harmonic_avg/AUROC", "AUROC", "AUPRC")
-        resume: Whether to resume existing studies (False = start fresh for all models)
-        num_workers: Number of workers for parallel processing
+        data_path: Path to the input data file (h5ad format).
+        n_trials: Number of optimization trials per model type.
+        storage_path: Directory to store optimization results.
+        score_metric: Metric to optimize (e.g., "harmonic_avg/AUROC", "AUROC", "AUPRC").
+        resume: Whether to resume existing studies (False = start fresh for all models).
+        num_workers: Number of workers for parallel processing.
         model_types: List of model types to optimize in order. If None, optimizes all supported models.
-                    Supported types: ["autoencoder", "mlp", "lightgbm", "logistic", "svm"]
-        **kwargs: Additional parameters to override config for all models
+            Supported types: ["autoencoder", "mlp", "lightgbm", "logistic", "svm"].
+        **kwargs: Additional parameters to override config for all models.
+
+    Returns:
+        None.
+
+    Examples:
+        >>> # Optimize all models (parallel processing)
+        >>> python -m scxpand.main optimize-all --n_trials 10 --data_path data/example_data.h5ad --num_workers 6
+        >>>
+        >>> # Optimize specific model types only
+        >>> python -m scxpand.main optimize-all --n_trials 100 --data_path data/example_data.h5ad --model_types mlp,autoencoder
     """
     # Validate data path only
     if not data_path:
@@ -214,24 +245,27 @@ def predict(
     """Unified prediction function for both local and pre-trained models.
 
     Args:
-        data_path: Path to input data file (h5ad format)
-        model_path: Path to directory containing the trained model (for local models)
-        model_name: Name of pre-trained model from registry (for pre-trained models)
-        model_url: Direct URL to model ZIP file (for any external model)
-        save_path: Directory to save prediction results
-        batch_size: Batch size for inference
-        num_workers: Number of workers for data loading
-        eval_row_inds: Path to file containing cell indices to evaluate (one per line), or None for all cells
+        data_path: Path to input data file (h5ad format).
+        model_path: Path to directory containing the trained model (for local models).
+        model_name: Name of pre-trained model from registry (for pre-trained models).
+        model_url: Direct URL to model ZIP file (for any external model).
+        save_path: Directory to save prediction results.
+        batch_size: Batch size for inference.
+        num_workers: Number of workers for data loading.
+        eval_row_inds: Path to file containing cell indices to evaluate (one per line), or None for all cells.
 
     Examples:
-        # Local model inference
-        predict --data_path my_data.h5ad --model_path results/mlp
+        >>> # Local model inference
+        >>> python -m scxpand.main predict --data_path my_data.h5ad --model_path results/mlp
+        >>>
+        >>> # Registry model inference
+        >>> python -m scxpand.main predict --data_path my_data.h5ad --model_name pan_cancer_autoencoder
+        >>>
+        >>> # Direct URL inference (any external model)
+        >>> python -m scxpand.main predict --data_path my_data.h5ad --model_url "https://your-platform.com/model.zip"
 
-        # Registry model inference
-        predict --data_path my_data.h5ad --model_name pan_cancer_autoencoder
-
-        # Direct URL inference (any external model)
-        predict --data_path my_data.h5ad --model_url "https://your-platform.com/model.zip"
+    Returns:
+        None.
     """
     # Load evaluation indices if specified
     eval_indices = None
@@ -256,7 +290,11 @@ def predict(
 
 
 def main():
-    """Main entry point for the scxpand CLI."""
+    """Main entry point for the scxpand CLI.
+
+    Returns:
+        None
+    """
     fire.Fire(
         {
             "train": train,

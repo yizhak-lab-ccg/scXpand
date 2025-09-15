@@ -60,13 +60,32 @@ extensions = [
 autosummary_generate = True
 autodoc_member_order = "groupwise"
 default_role = "literal"
-napoleon_google_docstring = False
-napoleon_numpy_docstring = True
+napoleon_google_docstring = True
+napoleon_numpy_docstring = False
 napoleon_include_init_with_doc = False
 napoleon_use_rtype = True
 napoleon_use_param = True
 napoleon_use_ivar = True
 napoleon_custom_sections = [("Params", "Parameters")]
+
+# Configure autodoc to highlight parameter names
+autodoc_default_options = {
+    "members": True,
+    "member-order": "groupwise",
+    "special-members": "__init__",
+    "undoc-members": True,
+    "exclude-members": "__weakref__",
+}
+
+# Enable parameter highlighting
+napoleon_preprocess_types = True
+napoleon_type_aliases = {
+    "ModelType": ":class:`scxpand.util.classes.ModelType`",
+    "AnnData": ":class:`anndata.AnnData`",
+    "Path": ":class:`pathlib.Path`",
+    "np.ndarray": ":class:`numpy.ndarray`",
+    "torch.Tensor": ":class:`torch.Tensor`",
+}
 
 myst_heading_anchors = 6
 myst_enable_extensions = [
@@ -84,7 +103,7 @@ nb_execution_show_tb = True
 nb_execution_raise_on_error = False
 
 nb_output_stderr = "remove"
-nb_execution_mode = "cache"
+nb_execution_mode = "off"  # Use existing outputs, don't execute notebooks
 nb_merge_streams = True
 nb_execution_timeout = 60
 
@@ -126,7 +145,11 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 # -- HTML output -------------------------------------------------------------
 html_theme = "sphinx_book_theme"
 html_static_path = ["_static"]
-html_css_files = ["custom.css"]
+
+# Include custom CSS
+html_css_files = [
+    "custom.css",
+]
 
 html_theme_options = {
     "repository_url": repository_url,
@@ -138,6 +161,6 @@ html_theme_options = {
         "image_dark": "https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_logo_gray.png",
     },
     "show_navbar_depth": 1,
+    "pygments_light_style": "github-light",
+    "pygments_dark_style": "github-dark",
 }
-
-pygments_style = "default"

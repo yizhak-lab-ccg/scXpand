@@ -1,40 +1,52 @@
 API Reference
 =============
 
-This section documents the public API for scXpand.
+This section documents the main ways to use scXpand for your analysis.
 
-Main API
---------
+How to Run Inference
+--------------------
 
-The primary entry points for using scXpand:
+Run predictions on new data using trained models:
 
-.. automodule:: scxpand
-   :members: run_inference, run_prediction_pipeline, download_pretrained_model, get_pretrained_model_info, list_pretrained_models, ModelType
+.. automodule:: scxpand.core.inference
+   :members: run_inference
    :show-inheritance:
 
-Result Classes
---------------
-
-Classes returned by the main API functions:
-
-.. automodule:: scxpand.core.inference_results
-   :members: InferenceResults, ModelInfo
+.. automodule:: scxpand.core.prediction
+   :members: run_prediction_pipeline
    :show-inheritance:
 
-Command Line Interface
-----------------------
+How to Run Training
+-------------------
 
-The CLI functions that power the ``scxpand`` command-line tool. These can also be called programmatically:
+Train models on your data:
 
 .. automodule:: scxpand.main
-   :members: train, optimize, optimize_all, predict
+   :members: train
    :show-inheritance:
 
-.. note::
-   These functions are primarily designed for CLI use. For programmatic use, prefer the main API functions above.
+How to Run Hyperparameter Search
+--------------------------------
 
-.. toctree::
-   :maxdepth: 1
+Optimize model hyperparameters:
 
-   api/data_util
-   api/hyperopt
+.. automodule:: scxpand.main
+   :members: optimize, optimize_all
+   :show-inheritance:
+
+.. automodule:: scxpand.hyperopt.hyperopt_optimizer
+   :members: HyperparameterOptimizer
+   :show-inheritance:
+
+Pre-trained Models
+------------------
+
+Download and use pre-trained models:
+
+.. automodule:: scxpand.pretrained.download_manager
+   :members: download_pretrained_model, download_model
+   :show-inheritance:
+
+.. automodule:: scxpand.util.model_registry
+   :members: list_pretrained_models, get_pretrained_model_info
+   :show-inheritance:

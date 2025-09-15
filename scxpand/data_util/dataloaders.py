@@ -122,7 +122,8 @@ class BalancedLabelsBatchSampler(Sampler):
 
 class BalancedTypesBatchSampler(Sampler):
     def __init__(self, dataset: CellsDataset, batch_size: int, seed: int = 1) -> None:
-        """Balanced batch sampler that equalizes the proportions of each stratum defined by
+        """Balanced batch sampler that equalizes the proportions of each stratum defined by.
+
         the combinations of categorical features ["tissue_type", "imputed_labels"]. For composite groups
         with both positive and negative labels, the group is split into two strata. Each batch contains an
         equal (or nearly equal) number of samples from each stratum.

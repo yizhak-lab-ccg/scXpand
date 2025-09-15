@@ -57,44 +57,27 @@ def check_images():
         print("   ⚠️  No image files found in docs/_static/images/")
 
 
-def clear_all_caches():
-    """Clear all documentation caches and build artifacts."""
-    print("🧹 Cleaning all caches and build artifacts...")
-
+def clear_build_cache():
+    """Clear only the build directory for a fresh build."""
     docs_dir = Path(__file__).parent
-
-    # Clear build directory
     build_dir = docs_dir / "_build"
     if build_dir.exists():
         shutil.rmtree(build_dir)
         print("   Removed docs/_build directory")
-
-    # Clear any doctrees cache
-    doctrees_dir = docs_dir / ".doctrees"
-    if doctrees_dir.exists():
-        shutil.rmtree(doctrees_dir)
-        print("   Removed .doctrees cache")
 
 
 def build_docs():
     """Build the documentation using Sphinx."""
     print("Building documentation...")
 
-    # Clean all caches first
-    clear_all_caches()
+    # Clear build directory for fresh build
+    clear_build_cache()
 
     # Check dependencies first
     check_dependencies()
 
     # Check that images exist
     check_images()
-
-    # Check if torch is available and warn if not
-    try:
-        subprocess.run(["uv", "run", "python", "-c", "import torch"], check=True, capture_output=True)
-    except subprocess.CalledProcessError:
-        print("⚠️  Warning: torch not found. Some API documentation may be incomplete.")
-        print("   Run 'python ../scripts/install_torch_for_dev.py' to install torch with optimal backend.")
 
     try:
         # Ensure we're in the docs directory for sphinx-build
@@ -103,6 +86,7 @@ def build_docs():
         if current_dir != docs_dir:
             os.chdir(docs_dir)
 
+        print("Building documentation with sphinx-build...")
         result = subprocess.run(
             ["uv", "run", "sphinx-build", "-q", "-b", "html", ".", "_build/html"],
             check=True,
