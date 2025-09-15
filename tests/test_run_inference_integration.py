@@ -90,9 +90,7 @@ class TestRunInferenceIntegration:
             )
 
             # Run inference
-            results = run_inference(
-                adata=sample_adata, model_path=str(mock_model_path), batch_size=32, num_workers=2, device="cpu"
-            )
+            results = run_inference(adata=sample_adata, model_path=str(mock_model_path), batch_size=32, num_workers=2)
 
             # Verify results
             assert isinstance(results, InferenceResults)
@@ -268,7 +266,6 @@ class TestRunInferenceIntegration:
             call_kwargs = mock_pipeline.call_args[1]
             assert call_kwargs["batch_size"] == 1024  # Default batch size
             assert call_kwargs["num_workers"] == 4  # Default num_workers
-            assert call_kwargs["device"] is None  # Default device (auto-detect)
             assert call_kwargs["eval_row_inds"] is None  # Default eval_row_inds
 
     def test_run_inference_with_missing_expansion_column(self, sample_adata, mock_model_path):

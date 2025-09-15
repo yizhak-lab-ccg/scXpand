@@ -76,6 +76,11 @@ See the `full installation guide <https://scxpand.readthedocs.io/en/latest/insta
        data_path="your_data.h5ad"
    )
 
+   # Access predictions
+   predictions = results.predictions
+   if results.has_metrics:
+       print(f"AUROC: {results.get_auroc():.3f}")
+
    # Or use the command line
    # scxpand inference --data_path your_data.h5ad --model_name pan_cancer_autoencoder
 

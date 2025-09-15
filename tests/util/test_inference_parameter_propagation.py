@@ -258,7 +258,6 @@ class TestFunctionSignatureCompatibility:
         assert "batch_size" in params
         assert "num_workers" in params
         assert "eval_row_inds" in params
-        assert "device" in params
 
         # Check default values
         assert params["adata"].default is None

@@ -86,6 +86,11 @@ results = scxpand.run_inference(
     model_name="pan_cancer_autoencoder",  # default model
     data_path="your_data.h5ad"
 )
+
+# Access predictions
+predictions = results.predictions
+if results.has_metrics:
+    print(f"AUROC: {results.get_auroc():.3f}")
 ```
 
 

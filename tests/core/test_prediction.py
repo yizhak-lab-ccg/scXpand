@@ -81,7 +81,7 @@ class TestRunPredictionPipeline:
             )
 
             # Verify mocks were called correctly
-            mock_setup.assert_called_once_with(model_type=ModelType.AUTOENCODER, model_path=model_path, device=None)
+            mock_setup.assert_called_once_with(model_type=ModelType.AUTOENCODER, model_path=model_path)
 
             mock_inference.assert_called_once_with(
                 model_type=ModelType.AUTOENCODER,
@@ -131,7 +131,7 @@ class TestRunPredictionPipeline:
             )
 
             # Verify mocks were called correctly
-            mock_setup.assert_called_once_with(model_type="mlp", model_path=model_path, device=None)
+            mock_setup.assert_called_once_with(model_type="mlp", model_path=model_path)
             mock_inference.assert_called_once_with(
                 model_type="mlp",
                 model=mock_model,

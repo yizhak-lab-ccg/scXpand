@@ -289,7 +289,6 @@ class TestRunInferenceErrorHandling:
         edge_cases = [
             {"batch_size": 1},  # Minimum batch size
             {"num_workers": 0},  # No multiprocessing
-            {"device": "cpu"},  # CPU device
             {"eval_row_inds": np.array([])},  # Empty eval indices
         ]
 
