@@ -13,7 +13,6 @@ scXpand is a framework for predicting T-cell clonal expansion from single-cell R
 
    user_guide
    tutorials
-   api_reference
    contributing
 
 ..
@@ -80,7 +79,7 @@ See the `full installation guide <https://scxpand.readthedocs.io/en/latest/insta
    # Or use the command line
    # scxpand inference --data_path your_data.h5ad --model_name pan_cancer_autoencoder
 
-See :doc:`installation` for different installation methods and :doc:`usage_examples` for more examples.
+See :doc:`installation` for different installation methods and :doc:`user_guide` for comprehensive usage instructions.
 
 Tutorials
 ------------

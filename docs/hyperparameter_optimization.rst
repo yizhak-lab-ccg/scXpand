@@ -352,6 +352,29 @@ scXpand uses Optuna's TPE (Tree-structured Parzen Estimator) sampler with automa
 
 
 
+API Reference
+=============
+
+Hyperparameter Optimization Functions
+--------------------------------------
+
+Single Model Optimization
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: scxpand.main.optimize
+
+Multi-Model Optimization
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: scxpand.main.optimize_all
+
+Optimization Framework
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: scxpand.hyperopt.hyperopt_optimizer
+   :members: HyperparameterOptimizer
+   :show-inheritance:
+
 Parameter Spaces Reference
 --------------------------
 

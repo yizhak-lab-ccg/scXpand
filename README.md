@@ -11,7 +11,7 @@
     <a href="https://scxpand.readthedocs.io/en/latest/" style="margin: 0 8px;">Documentation</a> •
     <a href="#installation" style="margin: 0 8px;">Installation</a> •
     <a href="#quick-start" style="margin: 0 8px;">Quick Start</a> •
-    <a href="https://scxpand.readthedocs.io/en/latest/usage_examples.html" style="margin: 0 8px;">Examples</a> •
+    <a href="https://scxpand.readthedocs.io/en/latest/user_guide.html" style="margin: 0 8px;">Usage Guide</a> •
     <a href="#citation" style="margin: 0 8px;">Citation</a>
   </p>
 </div>
@@ -94,19 +94,22 @@ results = scxpand.run_inference(
 See our **[Tutorial Notebook](docs/notebooks/scxpand_tutorial.ipynb)** for a complete example with data preprocessing, T-cell filtering, gene ID conversion, and model application using a real breast cancer dataset.
 
 
-**Getting Started:**
-- **[Development Guide](docs/installation.rst)** - Setup for local development of scXpand
-- **[Usage Examples](docs/usage_examples.rst)** - Detailed tutorials and CLI examples
-- **[Data Format](docs/data_format.rst)** - Input data requirements and specifications
+**Setup & Getting Started:**
+- **[Installation Guide](https://scxpand.readthedocs.io/en/latest/installation.html)** - Setup for local development of scXpand
+- **[User Guide](https://scxpand.readthedocs.io/en/latest/user_guide.html)** - Quick start and comprehensive workflow guide
+- **[Data Format](https://scxpand.readthedocs.io/en/latest/data_format.html)** - Input data requirements and specifications
 
-**Model Training & Optimization:**
-- **[Model Architectures](docs/model_architectures.rst)** - Detailed architecture descriptions and configurations
-- **[Hyperparameter Optimization](docs/hyperparameter_optimization.rst)** - Automated model tuning with Optuna
-- **[Data Pipeline](docs/data_pipeline.rst)** - Preprocessing and normalization details
+**Using Pre-trained Models:**
+- **[Model Inference](https://scxpand.readthedocs.io/en/latest/model_inference.html)** - Run predictions on new data with pre-trained models
 
-**Analysis & Evaluation:**
-- **[Evaluation Metrics](docs/evaluation_metrics.rst)** - Performance assessment and stratified analysis
-- **[Output Format](docs/output_format.rst)** - Understanding model outputs and results
+**Training Your Own Models:**
+- **[Model Training](https://scxpand.readthedocs.io/en/latest/model_training.html)** - Train models with CLI and programmatic API
+- **[Hyperparameter Optimization](https://scxpand.readthedocs.io/en/latest/hyperparameter_optimization.html)** - Automated model tuning with Optuna
+
+**Understanding Results:**
+- **[Model Architectures](https://scxpand.readthedocs.io/en/latest/model_architectures.html)** - Detailed architecture descriptions and configurations
+- **[Evaluation Metrics](https://scxpand.readthedocs.io/en/latest/evaluation_metrics.html)** - Performance assessment and interpretation
+- **[Output Format](https://scxpand.readthedocs.io/en/latest/output_format.html)** - Understanding model outputs and results
 
 **[📖 Full Documentation](https://scxpand.readthedocs.io/en/latest/)** - Complete guides, API reference, and interactive tutorials
 

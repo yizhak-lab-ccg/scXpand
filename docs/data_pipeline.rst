@@ -257,8 +257,79 @@ Data augmentation is applied in two stages during the preprocessing pipeline:
    - Helps with label noise and improves model calibration
 
 **Important Notes:**
-   - During **inference**, no augmentations are applied - only the core preprocessing pipeline runs
-   - Gene statistics (μ, σ) for z-score normalization are **precomputed once** from clean training data (without masking or noise) and reused for all inference
-   - Genes from training that are missing in inference data are filled with zeros and normalized using their training statistics
-   - Genes in inference data that were not in training are discarded (only training genes are processed)
-   - This ensures that normalization statistics reflect the true data distribution
+  - During **inference**, no augmentations are applied - only the core preprocessing pipeline runs
+  - Gene statistics (μ, σ) for z-score normalization are **precomputed once** from clean training data (without masking or noise) and reused for all inference
+  - Genes from training that are missing in inference data are filled with zeros and normalized using their training statistics
+  - Genes in inference data that were not in training are discarded (only training genes are processed)
+  - This ensures that normalization statistics reflect the true data distribution
+
+Inference Data Format Handling
+===============================
+
+The scXpand inference pipeline is designed to handle test data with different formats, gene sets, and structures than the training data while maintaining consistency with the training preprocessing pipeline.
+
+Gene Format Standardization Process
+------------------------------------
+
+**Step 1: Gene Mapping and Reordering**
+
+All inference data goes through automatic gene format standardization:
+
+.. code-block:: python
+
+   # Standardize gene format to match training
+   adata_standardized = data_format.prepare_adata_for_training(
+       source_data,
+       reorder_genes=True
+   )
+
+**What happens during standardization:**
+
+- Genes are reordered to match ``data_format.gene_names``
+- Missing genes are added as zero columns at correct positions
+- Extra genes are removed
+- Final gene count matches training format exactly
+
+**Step 2: Preprocessing Pipeline**
+
+The same preprocessing pipeline as training is applied:
+
+.. code-block:: python
+
+   # Identical preprocessing: row norm → log → z-score
+   X_processed = preprocess_expression_data(
+       X=adata_standardized.X,
+       data_format=data_format
+   )
+
+**Preprocessing steps:**
+
+1. **Row normalization**: Each cell sums to ``target_sum`` (typically 10,000)
+2. **Log transformation**: ``log1p()`` for variance stabilization
+3. **Z-score normalization**: Per-gene normalization using precomputed ``genes_mu[i]`` and ``genes_sigma[i]``
+
+Example: Complex Gene Mismatch Handling
+----------------------------------------
+
+**Training Data Format:**
+::
+
+   training_genes = ["GENE_A", "GENE_B", "GENE_C", "GENE_D"]
+   genes_mu = [100.0, 10.0, 50.0, 5.0]
+   genes_sigma = [20.0, 100.0, 30.0, 200.0]
+
+**Test Data (Complex Mismatch):**
+::
+
+   test_genes = ["GENE_C", "GENE_A", "EXTRA_1", "GENE_E", "EXTRA_2"]
+   # Missing: GENE_B, GENE_D
+   # Extra: EXTRA_1, EXTRA_2, GENE_E
+   # Reordered: GENE_C, GENE_A
+
+**Transformation Process:**
+
+1. **Gene mapping**: GENE_A → position 0, GENE_C → position 2
+2. **Missing genes**: GENE_B (position 1), GENE_D (position 3) filled with zeros
+3. **Extra genes**: EXTRA_1, EXTRA_2, GENE_E ignored
+4. **Result**: ``[100.0, 0.0, 50.0, 0.0]`` (missing genes filled with zeros)
+5. **Preprocessing**: Row norm → log → z-score using training statistics
