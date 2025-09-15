@@ -129,6 +129,60 @@ class TestInferenceCommand:
             call_kwargs = mock_run_inference.call_args[1]
             assert call_kwargs["save_path"] is None
 
+    def test_inference_with_all_parameters(self):
+        """Test inference with all parameters specified."""
+        with (
+            patch("scxpand.main.run_inference") as mock_run_inference,
+            patch("scxpand.main.load_eval_indices") as mock_load_indices,
+        ):
+            mock_load_indices.return_value = [1, 2, 3]
+
+            inference(
+                data_path="data/test.h5ad",
+                model_path="results/test_model",
+                save_path="custom/predictions",
+                batch_size=512,
+                num_workers=8,
+                eval_row_inds="eval.txt",
+            )
+
+            call_kwargs = mock_run_inference.call_args[1]
+            assert call_kwargs["data_path"] == "data/test.h5ad"
+            assert call_kwargs["model_path"] == "results/test_model"
+            assert call_kwargs["save_path"] == "custom/predictions"
+            assert call_kwargs["batch_size"] == 512
+            assert call_kwargs["num_workers"] == 8
+            assert call_kwargs["eval_row_inds"] == [1, 2, 3]
+
+    def test_inference_empty_eval_indices_file(self):
+        """Test inference with empty eval indices file."""
+        with (
+            patch("scxpand.main.run_inference") as mock_run_inference,
+            patch("scxpand.main.load_eval_indices") as mock_load_indices,
+        ):
+            mock_load_indices.return_value = []
+
+            inference(
+                data_path="data/test.h5ad",
+                model_path="results/test_model",
+                eval_row_inds="empty_eval.txt",
+            )
+
+            call_kwargs = mock_run_inference.call_args[1]
+            assert call_kwargs["eval_row_inds"] == []
+
+    def test_inference_registry_model_with_version(self):
+        """Test inference with registry model name that includes version."""
+        with patch("scxpand.main.run_inference") as mock_run_inference:
+            inference(
+                data_path="data/test.h5ad",
+                model_name="pan_cancer_mlp_v1.0",
+            )
+
+            call_kwargs = mock_run_inference.call_args[1]
+            assert call_kwargs["model_name"] == "pan_cancer_mlp_v1.0"
+            assert call_kwargs["save_path"] == "results/pan_cancer_mlp_v1.0_predictions"
+
     def test_inference_local_model_auto_detect_type(self):
         """Test inference with local model auto-detects model type."""
         with patch("scxpand.main.run_inference") as mock_run_inference:

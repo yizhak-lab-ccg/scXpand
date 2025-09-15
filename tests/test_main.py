@@ -201,3 +201,65 @@ class TestOptimizeAllCommand:
                     resume=True,
                     num_workers=4,
                 )
+
+    def test_optimize_all_invalid_data_path(self):
+        """Test optimize_all with invalid data path."""
+        with pytest.raises(ValueError, match="data_path cannot be empty"):
+            optimize_all(data_path="")
+
+    def test_optimize_all_nonexistent_file(self):
+        """Test optimize_all with nonexistent data file."""
+        with pytest.raises(FileNotFoundError, match="Data file not found"):
+            optimize_all(data_path="nonexistent.h5ad")
+
+    def test_optimize_all_directory_instead_of_file(self):
+        """Test optimize_all with directory instead of file."""
+        with pytest.raises(ValueError, match="Data path is not a file"):
+            optimize_all(data_path="data/")  # Assuming data/ is a directory
+
+    def test_optimize_all_custom_model_types(self):
+        """Test optimize_all with custom model types list."""
+        model_types = ["mlp", "autoencoder"]
+
+        with (
+            patch("scxpand.main.optimize") as mock_optimize,
+            patch("scxpand.main.Path") as mock_path_cls,
+            patch.dict(
+                "scxpand.main.MODEL_TYPES",
+                {ModelType.MLP: None, ModelType.AUTOENCODER: None},
+                clear=True,
+            ),
+        ):
+            # Set up file path mocking for validation
+            mock_data_file = mock_path_cls.return_value
+            mock_data_file.exists.return_value = True
+            mock_data_file.is_file.return_value = True
+
+            optimize_all(
+                data_path="data/test.h5ad",
+                n_trials=2,
+                model_types=model_types,
+            )
+
+            # Should only optimize the specified models
+            assert mock_optimize.call_count == 2
+            mock_optimize.assert_any_call(
+                model_type=ModelType.MLP,
+                data_path="data/test.h5ad",
+                n_trials=2,
+                study_name="mlp",
+                storage_path="results/optuna_studies",
+                score_metric="harmonic_avg/AUROC",
+                resume=True,
+                num_workers=4,
+            )
+            mock_optimize.assert_any_call(
+                model_type=ModelType.AUTOENCODER,
+                data_path="data/test.h5ad",
+                n_trials=2,
+                study_name="autoencoder",
+                storage_path="results/optuna_studies",
+                score_metric="harmonic_avg/AUROC",
+                resume=True,
+                num_workers=4,
+            )
