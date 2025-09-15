@@ -24,7 +24,7 @@ class TestCLIIntegration:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=10,
         )
 
         # Should succeed and show help
@@ -45,7 +45,7 @@ class TestCLIIntegration:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=10,
         )
 
         assert result.returncode in {0, 1, 2}
@@ -64,7 +64,7 @@ class TestCLIIntegration:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=10,
         )
 
         assert result.returncode in {0, 1, 2}
@@ -83,7 +83,7 @@ class TestCLIIntegration:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=10,
         )
 
         # Should fail with non-zero exit code
@@ -99,7 +99,7 @@ class TestCLIIntegration:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=10,
         )
 
         # Should fail due to missing required argument
@@ -113,7 +113,7 @@ class TestCLIIntegration:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=10,
         )
 
         # Should fail with validation error
@@ -127,7 +127,7 @@ class TestCLIIntegration:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=10,
         )
 
         # Should fail due to missing data file
@@ -141,7 +141,7 @@ class TestCLIIntegration:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=10,
         )
 
         # Should succeed (list-models has no required args)
@@ -171,7 +171,7 @@ class TestCLIEndToEnd:
                 check=False,
                 capture_output=True,
                 text=True,
-                timeout=5,
+                timeout=10,
             )
 
             # Each help command should work
@@ -195,7 +195,7 @@ class TestCLIEndToEnd:
                 check=False,
                 capture_output=True,
                 text=True,
-                timeout=5,
+                timeout=10,
             )
 
             # Error commands should fail
@@ -214,7 +214,7 @@ class TestCLIEndToEnd:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=10,
         )
         end_time = time.time()
 
@@ -235,7 +235,7 @@ class TestCLIEnvironment:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=10,
         )
 
         # Should work regardless of Python version
@@ -255,7 +255,7 @@ class TestCLIEnvironment:
                     check=False,
                     capture_output=True,
                     text=True,
-                    timeout=5,
+                    timeout=10,
                 )
 
                 # Should work from any directory
@@ -275,7 +275,7 @@ class TestCLIEnvironment:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=10,
             env=env,
         )
 

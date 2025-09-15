@@ -88,6 +88,7 @@ class TestCallTrainingFunction:
                 data_path="data/test.h5ad",
                 base_save_dir="results/test",
                 prm=mock_fn.call_args[1]["prm"],
+                device=None,
                 resume=True,
                 num_workers=4,
             )
