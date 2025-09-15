@@ -219,18 +219,3 @@ The scXpand inference pipeline is designed to handle test data with different fo
 3. **Extra genes**: EXTRA_1, EXTRA_2, GENE_E ignored
 4. **Result**: ``[100.0, 0.0, 50.0, 0.0]`` (missing genes filled with zeros)
 5. **Preprocessing**: Row norm → log → z-score using training statistics
-
-API Reference
-=============
-
-Key functions and classes for data pipeline operations:
-
-* :py:class:`~scxpand.data_util.data_format.DataFormat` - Central configuration hub for preprocessing parameters
-* :py:func:`~scxpand.data_util.data_format.load_data_format` - Load DataFormat from file
-* :py:func:`~scxpand.data_util.transforms.preprocess_expression_data` - Apply complete preprocessing pipeline
-* :py:func:`~scxpand.data_util.transforms.apply_row_normalization` - Row normalization step
-* :py:func:`~scxpand.data_util.transforms.apply_log_transform` - Log transformation step
-* :py:func:`~scxpand.data_util.transforms.apply_zscore_normalization` - Z-score normalization step
-* :py:meth:`~scxpand.data_util.data_format.DataFormat.reorder_genes_to_match_format` - Gene reordering for inference
-* :py:func:`~scxpand.data_util.transforms.load_and_preprocess_data_numpy` - Load and preprocess data for inference
-* :py:func:`~scxpand.run_inference` - Complete inference pipeline with data loading options
