@@ -107,6 +107,7 @@ Log Transformation
 ~~~~~~~~~~~~~~~~~~
 
 Log transformation helps with:
+
 * Reducing the impact of highly expressed genes
 * Stabilizing variance across the expression range
 * Making the data more suitable for downstream analysis
@@ -146,13 +147,14 @@ Data Augmentation
 Data augmentation is used **only during training** for neural network models (MLP and Autoencoder) and linear models (Logistic regression and SVM) to improve generalization and robustness.
 
 **Training Pipeline Sequence:**
-1. **Load raw expression data** from AnnData file
-2. **Apply pre-normalization augmentations** (gene masking)
-3. **Apply core preprocessing pipeline**:
-   a. Row normalization (target_sum = 10,000)
-   b. Log transformation (if enabled)
-   c. Z-score normalization (if enabled) using pre-computed training statistics
-4. **Apply post-normalization augmentations** (Gaussian noise addition)
+   1. **Load raw expression data** from AnnData file
+   2. **Apply pre-normalization augmentations** (gene masking)
+   3. **Apply core preprocessing pipeline**:
+
+      a. Row normalization (target_sum = 10,000)
+      b. Log transformation (if enabled)
+      c. Z-score normalization (if enabled) using pre-computed training statistics
+   4. **Apply post-normalization augmentations** (Gaussian noise addition)
 
 **Augmentation Types:**
 
