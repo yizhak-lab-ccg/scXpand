@@ -7,12 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.1.0
 
 ## [Unreleased]
 
-## [0.3.1] - 2025-09-15
+## [0.3.2] - 2025-09-15
 
 ### Changed
 - Renamed "main.predict" to "main.inference"
-- Added `batch_size`, `device`, and `num_workers` optional arguments to all main CLI functions
-
 
 ## [0.3.0] - 2025-09-14
 

@@ -199,8 +199,6 @@ class TestOptimizeAllCommand:
                     storage_path="results/optuna_studies",
                     score_metric="harmonic_avg/AUROC",
                     resume=True,
-                    batch_size=1024,
-                    device=None,
                     num_workers=4,
                 )
 
@@ -253,8 +251,6 @@ class TestOptimizeAllCommand:
                 storage_path="results/optuna_studies",
                 score_metric="harmonic_avg/AUROC",
                 resume=True,
-                batch_size=1024,
-                device=None,
                 num_workers=4,
             )
             mock_optimize.assert_any_call(
@@ -265,7 +261,5 @@ class TestOptimizeAllCommand:
                 storage_path="results/optuna_studies",
                 score_metric="harmonic_avg/AUROC",
                 resume=True,
-                batch_size=1024,
-                device=None,
                 num_workers=4,
             )
