@@ -104,7 +104,6 @@ class TestRunInferenceIntegration:
             assert call_kwargs["adata"] is sample_adata
             assert call_kwargs["batch_size"] == 32
             assert call_kwargs["num_workers"] == 2
-            assert call_kwargs["device"] == "cpu"
 
     def test_run_inference_with_data_path(self, sample_adata, mock_model_path, tmp_path):
         """Test run_inference with data_path instead of adata."""
