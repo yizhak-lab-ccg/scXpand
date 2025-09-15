@@ -52,6 +52,12 @@ Documentation Structure
 
 .. toctree::
    :maxdepth: 2
+   :caption: CLI Reference
+
+   cli_reference
+
+.. toctree::
+   :maxdepth: 2
    :caption: Training Your Own Models
 
    model_training

@@ -233,10 +233,10 @@ Classic linear model using logistic loss function for binary classification. Pro
 
    # Configure logistic regression
    logistic_params = LinearClassifierParam(
-       model_name="LogisticRegression",
-       C=1.0,                             # Inverse regularization strength
-       penalty="l2",                      # L1, L2, or elastic net
-       max_iter=1000,
+       model_type="logistic",                 # 'logistic' or 'svm'
+       alpha=0.0001,                          # Regularization strength
+       penalty="l2",                          # L1, L2, or elasticnet
+       n_epochs=1000,
        class_weight="balanced"
    )
 
@@ -255,11 +255,9 @@ Linear SVM using hinge loss, optimized for maximum margin classification.
 
    # Configure SVM
    svm_params = LinearClassifierParam(
-       model_name="LinearSVC",
-       C=1.0,                             # Regularization parameter
-       loss="hinge",                      # Loss function
-       penalty="l2",                      # Regularization type
-       dual=False,                        # Primal vs dual formulation
+       model_type="svm",                      # 'svm' or 'logistic'
+       alpha=0.0001,                          # Regularization strength
+       penalty="l2",                          # Regularization type
        class_weight="balanced"
    )
 
