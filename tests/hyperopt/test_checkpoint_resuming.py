@@ -9,7 +9,9 @@ Tests verify that:
 6. Duplicate epoch reporting is prevented
 """
 
+import shutil
 import tempfile
+import time
 
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -151,7 +153,8 @@ class TestCheckpointResuming:
 
     def test_checkpoint_resume_without_optimizer(self):
         """Test that model can be resumed even if optimizer is None."""
-        with tempfile.TemporaryDirectory() as temp_dir:
+        temp_dir = tempfile.mkdtemp()
+        try:
             save_path = Path(temp_dir) / "test_checkpoint"
 
             model = MockModel()
@@ -189,6 +192,14 @@ class TestCheckpointResuming:
             # Model state should be restored
             for orig_param, new_param in zip(model.parameters(), new_model.parameters()):
                 assert torch.allclose(orig_param, new_param, atol=1e-6)
+        finally:
+            # Robust cleanup with retry mechanism
+            for _ in range(3):
+                try:
+                    shutil.rmtree(temp_dir)
+                    break
+                except OSError:
+                    time.sleep(0.1)
 
     def test_checkpoint_file_not_found(self):
         """Test that appropriate error is raised when checkpoint file doesn't exist."""

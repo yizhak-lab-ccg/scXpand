@@ -13,6 +13,9 @@ Available commands:
 See individual function docstrings for detailed usage examples.
 """
 
+# Set matplotlib backend to non-interactive to avoid GUI issues
+import contextlib
+
 from pathlib import Path
 
 import fire
@@ -29,7 +32,8 @@ from scxpand.util.model_registry import list_pretrained_models
 from scxpand.util.training_utils import call_training_function, validate_and_setup_common
 
 
-matplotlib.use("Agg")
+with contextlib.suppress(Exception):
+    matplotlib.use("Agg")
 
 
 logger = get_logger()
