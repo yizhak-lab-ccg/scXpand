@@ -8,7 +8,7 @@ Programmatic API
 
 scXpand provides a unified inference API that supports local models, registry models, and direct URL models:
 
-Unified Inference API (Recommended)
+Unified Inference API
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Use the high-level ``scxpand.run_inference`` function for all model types:
