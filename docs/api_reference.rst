@@ -12,27 +12,29 @@ Run predictions on new data using trained models:
    :members: run_inference
    :show-inheritance:
 
+Command-line interface for inference:
+
+.. autofunction:: scxpand.main.inference
+
 .. automodule:: scxpand.core.prediction
    :members: run_prediction_pipeline
    :show-inheritance:
 
-How to Run Training
--------------------
+How to Run Training with a Single Configuration
+------------------------------------------------
 
-Train models on your data:
+Train a single model with specific configuration:
 
-.. automodule:: scxpand.main
-   :members: train
-   :show-inheritance:
+.. autofunction:: scxpand.main.train
 
 How to Run Hyperparameter Search
 --------------------------------
 
 Optimize model hyperparameters:
 
-.. automodule:: scxpand.main
-   :members: optimize, optimize_all
-   :show-inheritance:
+.. autofunction:: scxpand.main.optimize
+
+.. autofunction:: scxpand.main.optimize_all
 
 .. automodule:: scxpand.hyperopt.hyperopt_optimizer
    :members: HyperparameterOptimizer

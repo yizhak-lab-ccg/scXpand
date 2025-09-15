@@ -110,22 +110,22 @@ Use the predict command for direct model inference:
 .. code-block:: bash
 
    # Basic prediction with automatic model type detection
-   python -m scxpand.main predict \
+   python -m scxpand.main inference \
      --model_path results/autoencoder \
      --data_path new_data.h5ad
 
    # Pre-trained model from registry
-   python -m scxpand.main predict \
+   python -m scxpand.main inference \
      --model_name pan_cancer_autoencoder \
      --data_path new_data.h5ad
 
    # External model via direct URL (seamless model sharing!)
-   python -m scxpand.main predict \
+   python -m scxpand.main inference \
      --model_url "https://your-platform.com/model.zip" \
      --data_path new_data.h5ad
 
    # Prediction with custom save location and batch size
-   python -m scxpand.main predict \
+   python -m scxpand.main inference \
      --model_path results/lightgbm \
      --data_path test_data.h5ad \
      --save_path custom_predictions/ \

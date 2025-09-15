@@ -7,7 +7,7 @@ Available commands:
     - train: Train a single model
     - optimize: Run hyperparameter optimization for a specified model type
     - optimize-all: Run hyperparameter optimization for all supported model types
-    - predict: Run inference with trained models
+    - inference: Run inference with trained models
     - list-models: List available pre-trained models
 
 See individual function docstrings for detailed usage examples.
@@ -232,7 +232,7 @@ def optimize_all(
         )
 
 
-def predict(
+def inference(
     data_path: str,
     model_path: str | None = None,
     model_name: str | None = None,
@@ -242,7 +242,10 @@ def predict(
     num_workers: int = 4,
     eval_row_inds: str | None = None,
 ) -> None:
-    """Unified prediction function for both local and pre-trained models.
+    """Command-line interface for running inference with scXpand models.
+
+    This is a convenience wrapper around run_inference() for command-line usage.
+    For programmatic usage, use scxpand.run_inference() directly.
 
     Args:
         data_path: Path to input data file (h5ad format).
@@ -256,13 +259,13 @@ def predict(
 
     Examples:
         >>> # Local model inference
-        >>> python -m scxpand.main predict --data_path my_data.h5ad --model_path results/mlp
+        >>> python -m scxpand.main inference --data_path my_data.h5ad --model_path results/mlp
         >>>
         >>> # Registry model inference
-        >>> python -m scxpand.main predict --data_path my_data.h5ad --model_name pan_cancer_autoencoder
+        >>> python -m scxpand.main inference --data_path my_data.h5ad --model_name pan_cancer_autoencoder
         >>>
         >>> # Direct URL inference (any external model)
-        >>> python -m scxpand.main predict --data_path my_data.h5ad --model_url "https://your-platform.com/model.zip"
+        >>> python -m scxpand.main inference --data_path my_data.h5ad --model_url "https://your-platform.com/model.zip"
 
     Returns:
         None.
@@ -276,7 +279,7 @@ def predict(
     if save_path is None and model_name is not None:
         save_path = f"results/{model_name}_predictions"
 
-    # Use the unified inference function
+    # Call the main inference API
     run_inference(
         data_path=data_path,
         model_path=model_path,
@@ -300,7 +303,7 @@ def main():
             "train": train,
             "optimize": optimize,
             "optimize-all": optimize_all,
-            "predict": predict,
+            "inference": inference,
             "list-models": list_pretrained_models,
         }
     )

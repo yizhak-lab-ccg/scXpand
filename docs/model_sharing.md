@@ -61,13 +61,13 @@ Users can access models in two ways:
 scxpand list-models
 
 # Use curated model
-scxpand predict --data_path data.h5ad --model_name pan_cancer_logistic
+scxpand inference --data_path data.h5ad --model_name pan_cancer_logistic
 ```
 
 ### Direct URL Access (Any External Model)
 ```bash
 # Use any external model directly via URL - no code changes needed!
-scxpand predict --data_path data.h5ad --model_url "https://your-platform.com/model.zip"
+scxpand inference --data_path data.h5ad --model_url "https://your-platform.com/model.zip"
 ```
 
 ```python

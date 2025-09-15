@@ -1,19 +1,19 @@
-"""Tests for the predict and list_pretrained_models functions in main.py."""
+"""Tests for the inference and list_pretrained_models functions in main.py."""
 
 from unittest.mock import Mock, patch
 
 import pytest
 
 from scxpand.core.inference import DEFAULT_MODEL_NAME
-from scxpand.main import predict
+from scxpand.main import inference
 from scxpand.util.model_registry import list_pretrained_models
 
 
-class TestPredictCommand:
-    """Tests for the unified predict command."""
+class TestInferenceCommand:
+    """Tests for the unified inference command."""
 
-    def test_predict_local_model_success(self):
-        """Test predict with local model path."""
+    def test_inference_local_model_success(self):
+        """Test inference with local model path."""
         with (
             patch("scxpand.main.run_inference") as mock_run_inference,
             patch("scxpand.main.load_eval_indices") as mock_load_indices,
@@ -21,7 +21,7 @@ class TestPredictCommand:
             # Setup mocks
             mock_load_indices.return_value = [0, 1, 2, 3, 4]
 
-            predict(
+            inference(
                 data_path="data/test.h5ad",
                 model_path="results/pan_cancer_mlp",
                 eval_row_inds="eval_indices.txt",
@@ -36,10 +36,10 @@ class TestPredictCommand:
 
             mock_load_indices.assert_called_once_with("eval_indices.txt")
 
-    def test_predict_registry_model_success(self):
-        """Test predict with registry model name."""
+    def test_inference_registry_model_success(self):
+        """Test inference with registry model name."""
         with patch("scxpand.main.run_inference") as mock_run_inference:
-            predict(
+            inference(
                 data_path="data/test.h5ad",
                 model_name=DEFAULT_MODEL_NAME,
                 batch_size=512,
@@ -54,10 +54,10 @@ class TestPredictCommand:
             assert call_kwargs["data_path"] == "data/test.h5ad"
             assert call_kwargs["batch_size"] == 512
 
-    def test_predict_url_model_success(self):
-        """Test predict with URL model."""
+    def test_inference_url_model_success(self):
+        """Test inference with URL model."""
         with patch("scxpand.main.run_inference") as mock_run_inference:
-            predict(
+            inference(
                 data_path="data/test.h5ad",
                 model_url="https://your-platform.com/model.zip",
                 save_path="custom/save/path",
@@ -72,43 +72,43 @@ class TestPredictCommand:
             assert call_kwargs["data_path"] == "data/test.h5ad"
             assert call_kwargs["save_path"] == "custom/save/path"
 
-    def test_predict_no_model_source_uses_default(self):
-        """Test predict uses default model when no model source is provided."""
+    def test_inference_no_model_source_uses_default(self):
+        """Test inference uses default model when no model source is provided."""
         with patch("scxpand.main.run_inference") as mock_run_inference:
-            predict(data_path="data/test.h5ad")
+            inference(data_path="data/test.h5ad")
 
             # Verify unified inference function was called
-            # The predict function passes None, but run_inference will internally use default
+            # The inference function passes None, but run_inference will internally use default
             mock_run_inference.assert_called_once()
             call_kwargs = mock_run_inference.call_args[1]
-            assert call_kwargs["model_name"] is None  # predict passes None
+            assert call_kwargs["model_name"] is None  # inference passes None
             assert call_kwargs["model_url"] is None
             assert call_kwargs["model_path"] is None
             assert call_kwargs["data_path"] == "data/test.h5ad"
 
-    def test_predict_multiple_model_sources_error(self):
-        """Test predict raises error when multiple model sources are provided."""
+    def test_inference_multiple_model_sources_error(self):
+        """Test inference raises error when multiple model sources are provided."""
         with pytest.raises(ValueError, match="Cannot specify multiple model sources"):
-            predict(
+            inference(
                 data_path="data/test.h5ad",
                 model_path="results/pan_cancer_mlp",
                 model_name=DEFAULT_MODEL_NAME,
             )
 
-    def test_predict_multiple_model_sources_all_three_error(self):
-        """Test predict raises error when all three model sources are provided."""
+    def test_inference_multiple_model_sources_all_three_error(self):
+        """Test inference raises error when all three model sources are provided."""
         with pytest.raises(ValueError, match="Cannot specify multiple model sources"):
-            predict(
+            inference(
                 data_path="data/test.h5ad",
                 model_path="results/pan_cancer_mlp",
                 model_name=DEFAULT_MODEL_NAME,
                 model_url="https://your-platform.com/model.zip",
             )
 
-    def test_predict_registry_model_with_custom_save_path(self):
-        """Test predict with registry model sets default save path correctly."""
+    def test_inference_registry_model_with_custom_save_path(self):
+        """Test inference with registry model sets default save path correctly."""
         with patch("scxpand.main.run_inference") as mock_run_inference:
-            predict(
+            inference(
                 data_path="data/test.h5ad",
                 model_name="pan_cancer_mlp",
             )
@@ -117,10 +117,10 @@ class TestPredictCommand:
             call_kwargs = mock_run_inference.call_args[1]
             assert call_kwargs["save_path"] == "results/pan_cancer_mlp_predictions"
 
-    def test_predict_url_model_with_no_default_save_path(self):
-        """Test predict with URL model doesn't set default save path."""
+    def test_inference_url_model_with_no_default_save_path(self):
+        """Test inference with URL model doesn't set default save path."""
         with patch("scxpand.main.run_inference") as mock_run_inference:
-            predict(
+            inference(
                 data_path="data/test.h5ad",
                 model_url="https://your-platform.com/model.zip",
             )
@@ -129,10 +129,10 @@ class TestPredictCommand:
             call_kwargs = mock_run_inference.call_args[1]
             assert call_kwargs["save_path"] is None
 
-    def test_predict_local_model_auto_detect_type(self):
-        """Test predict with local model auto-detects model type."""
+    def test_inference_local_model_auto_detect_type(self):
+        """Test inference with local model auto-detects model type."""
         with patch("scxpand.main.run_inference") as mock_run_inference:
-            predict(
+            inference(
                 data_path="data/test.h5ad",
                 model_path="results/pan_cancer_mlp",
             )
@@ -142,10 +142,10 @@ class TestPredictCommand:
             call_kwargs = mock_run_inference.call_args[1]
             assert call_kwargs["model_path"] == "results/pan_cancer_mlp"
 
-    def test_predict_local_model_with_eval_indices_none(self):
-        """Test predict with local model and no eval indices."""
+    def test_inference_local_model_with_eval_indices_none(self):
+        """Test inference with local model and no eval indices."""
         with patch("scxpand.main.run_inference") as mock_run_inference:
-            predict(
+            inference(
                 data_path="data/test.h5ad",
                 model_path="results/pan_cancer_mlp",
                 eval_row_inds=None,

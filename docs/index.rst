@@ -78,7 +78,7 @@ See the `full installation guide <https://scxpand.readthedocs.io/en/latest/insta
    )
 
    # Or use the command line
-   # scxpand predict --data_path your_data.h5ad --model_name pan_cancer_autoencoder
+   # scxpand inference --data_path your_data.h5ad --model_name pan_cancer_autoencoder
 
 See :doc:`installation` for different installation methods and :doc:`usage_examples` for more examples.
 

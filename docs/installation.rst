@@ -116,7 +116,7 @@ Or use the command line interface:
     scxpand list-models
 
     # Run inference with pre-trained model
-    scxpand predict --data_path your_data.h5ad --model_name pan_cancer_autoencoder
+    scxpand inference --data_path your_data.h5ad --model_name pan_cancer_autoencoder
 
     # Run inference with local model
-    scxpand predict --data_path your_data.h5ad --model_path results/my_model
+    scxpand inference --data_path your_data.h5ad --model_path results/my_model

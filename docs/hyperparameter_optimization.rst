@@ -216,7 +216,7 @@ Use the already trained model from optimization for predictions:
 .. code-block:: bash
 
    # Use the trained model directly for inference on new data
-   python -m scxpand.main predict \
+   python -m scxpand.main inference \
        --model_path results/optuna_studies/mlp_optimization/trial_42 \
        --data_path new_data.h5ad \
        --save_path predictions/
