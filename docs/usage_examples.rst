@@ -159,8 +159,7 @@ Use the high-level ``scxpand.run_inference`` function for all model types:
        model_path='results/autoencoder',
        data_path='test_data.h5ad',
        save_path='predictions/',
-       batch_size=1024,
-       device='cuda'  # Optional: specify device (cpu, cuda, mps)
+       batch_size=1024
    )
 
    # Registry model inference (pre-trained models)
@@ -168,8 +167,7 @@ Use the high-level ``scxpand.run_inference`` function for all model types:
        model_name='pan_cancer_autoencoder',
        data_path='test_data.h5ad',
        save_path='predictions/',
-       batch_size=1024,
-       device=None  # Auto-detect best available device (cuda/mps/cpu)
+       batch_size=1024
    )
 
    # Direct URL model inference (any external model)
@@ -177,8 +175,7 @@ Use the high-level ``scxpand.run_inference`` function for all model types:
        model_url='https://your-platform.com/model.zip',
        data_path='test_data.h5ad',
        save_path='predictions/',
-       batch_size=1024,
-       device='mps'  # Use Apple Silicon GPU
+       batch_size=1024
    )
 
    # In-memory inference (any model type)
@@ -187,8 +184,7 @@ Use the high-level ``scxpand.run_inference`` function for all model types:
        model_path='results/autoencoder',
        adata=adata,  # In-memory AnnData object
        save_path='predictions/',
-       batch_size=1024,
-       device='cpu'  # Force CPU usage
+       batch_size=1024
    )
 
 Lower-level API (Advanced Users)
@@ -205,8 +201,7 @@ The unified ``scxpand.run_inference`` is recommended for most use cases:
    results = scxpand.run_inference(
        model_path='results/autoencoder',  # Local model
        data_path='test_data.h5ad',
-       batch_size=1024,
-       device=None  # Auto-detect device
+       batch_size=1024
    )
    y_pred_prob = results.predictions
 

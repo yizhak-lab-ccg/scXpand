@@ -31,7 +31,6 @@ def run_inference(
     batch_size: int = 1024,
     num_workers: int = 4,
     eval_row_inds=None,
-    device: str | None = None,
 ) -> InferenceResults:
     """Main public API for running inference with scXpand models.
 
@@ -50,7 +49,6 @@ def run_inference(
         batch_size: Batch size for inference.
         num_workers: Number of workers for data loading.
         eval_row_inds: Specific cell indices to evaluate (None for all cells, only supported for local models).
-        device: Device for computation (e.g., 'cpu', 'cuda', 'mps'). If None, auto-detected.
 
     Returns:
         Structured results containing predictions, metrics (if available), and model info.
@@ -114,7 +112,6 @@ def run_inference(
             batch_size=batch_size,
             num_workers=num_workers,
             eval_row_inds=eval_row_inds,
-            device=device,
         )
         return results
     else:
@@ -133,6 +130,5 @@ def run_inference(
             batch_size=batch_size,
             num_workers=num_workers,
             eval_row_inds=eval_row_inds,
-            device=device,
         )
         return results

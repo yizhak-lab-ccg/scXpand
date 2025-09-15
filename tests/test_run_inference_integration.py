@@ -319,22 +319,19 @@ class TestRunInferenceIntegration:
             stratified_keys = [key for key in results.metrics if "__" in key]
             assert len(stratified_keys) > 0
 
-    def test_run_inference_device_parameter(self, sample_adata, mock_model_path):
-        """Test run_inference with different device parameters."""
-        test_devices = ["cpu", "cuda", "mps", None]
+    def test_run_inference_auto_device_detection(self, sample_adata, mock_model_path):
+        """Test run_inference with automatic device detection."""
+        with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
+            mock_predictions = np.random.random(len(sample_adata))
+            mock_pipeline.return_value = InferenceResults(predictions=mock_predictions, metrics={"AUROC": 0.85})
 
-        for device in test_devices:
-            with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
-                mock_predictions = np.random.random(len(sample_adata))
-                mock_pipeline.return_value = InferenceResults(predictions=mock_predictions, metrics={"AUROC": 0.85})
+            # Run inference without device parameter (auto-detection)
+            _results = run_inference(adata=sample_adata, model_path=str(mock_model_path))
 
-                # Run inference with specific device
-                _results = run_inference(adata=sample_adata, model_path=str(mock_model_path), device=device)
-
-                # Verify device parameter was passed
-                mock_pipeline.assert_called_once()
-                call_kwargs = mock_pipeline.call_args[1]
-                assert call_kwargs["device"] == device
+            # Verify device parameter was not passed (auto-detection happens internally)
+            mock_pipeline.assert_called_once()
+            call_kwargs = mock_pipeline.call_args[1]
+            assert "device" not in call_kwargs
 
     def test_run_inference_batch_size_variations(self, sample_adata, mock_model_path):
         """Test run_inference with different batch sizes."""

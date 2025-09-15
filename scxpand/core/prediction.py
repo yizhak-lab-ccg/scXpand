@@ -38,7 +38,6 @@ def run_prediction_pipeline(
     batch_size: int = 1024,
     num_workers: int = 0,
     eval_row_inds: np.ndarray | None = None,
-    device: str | None = None,
 ) -> InferenceResults:
     """Complete prediction pipeline from model loading to evaluation.
 
@@ -56,7 +55,6 @@ def run_prediction_pipeline(
         batch_size: Batch size for inference.
         num_workers: Number of workers for data loading.
         eval_row_inds: Specific cell indices to evaluate (None for all).
-        device: Device for computation (e.g., 'cpu', 'cuda', 'mps'). If None, auto-detected.
 
     Returns:
         Structured results containing predictions and metrics (if available).
@@ -93,7 +91,7 @@ def run_prediction_pipeline(
 
     # Setup inference environment (load model, data format, device)
     data_format, model, device = inference_utils.setup_inference_environment(
-        model_type=model_type, model_path=model_path, device=device
+        model_type=model_type, model_path=model_path
     )
 
     # Run inference
