@@ -3,7 +3,7 @@ scxpand.util
 
 .. automodule:: scxpand.util
 
-
+   
 .. rubric:: Modules
 
 .. autosummary::

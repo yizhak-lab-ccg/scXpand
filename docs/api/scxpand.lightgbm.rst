@@ -3,7 +3,7 @@ scxpand.lightgbm
 
 .. automodule:: scxpand.lightgbm
 
-
+   
 .. rubric:: Modules
 
 .. autosummary::

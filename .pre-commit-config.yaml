@@ -68,5 +68,4 @@ repos:
         stages: [pre-push]
         verbose: true
 
-exclude: |
-  ^docs/api/
+exclude: '^docs/api/'

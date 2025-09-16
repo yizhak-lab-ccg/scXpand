@@ -3,7 +3,7 @@ scxpand.pretrained
 
 .. automodule:: scxpand.pretrained
 
-
+   
 .. rubric:: Modules
 
 .. autosummary::
