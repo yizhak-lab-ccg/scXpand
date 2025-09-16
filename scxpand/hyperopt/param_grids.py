@@ -66,10 +66,7 @@ def create_optimized_lr_scheduler_config(
             }
         )
     elif lr_scheduler_type == LRSchedulerType.CONSTANT_LR.value:
-        # ConstantLR maintains the same learning rate throughout training using factor=1.0
-        lr_scheduler_config.update({})
-    elif lr_scheduler_type == LRSchedulerType.NO_SCHEDULER.value:
-        # NoScheduler results in lr_scheduler = None (no learning rate scheduling)
+        # ConstantLR maintains the same learning rate throughout training
         lr_scheduler_config.update({})
 
     return lr_scheduler_config
