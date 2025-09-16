@@ -85,7 +85,7 @@ See the :doc:`installation` for local development setup and other options.
    # Or use the command line
    # scxpand inference --data_path your_data.h5ad --model_name pan_cancer_autoencoder
 
-See :doc:`installation` for different installation methods and :doc:`user_guide` for comprehensive usage instructions.
+See our :doc:`user_guide` for comprehensive usage instructions.
 
 Tutorials
 ------------
