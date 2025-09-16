@@ -191,103 +191,6 @@ check_prerequisites() {
     print_success "Prerequisites check passed"
 }
 
-# Function to update CHANGELOG.md with new version
-update_changelog() {
-    local new_version="$1"
-    local changelog_file="CHANGELOG.md"
-
-    print_status "Updating CHANGELOG.md for version $new_version..."
-
-    if [ "$DRY_RUN" = true ]; then
-        print_status "DRY RUN: Would update CHANGELOG.md with version $new_version"
-        return
-    fi
-
-    # Check if CHANGELOG.md exists
-    if [ ! -f "$changelog_file" ]; then
-        print_error "CHANGELOG.md not found"
-        return 1
-    fi
-
-    # Get current date in YYYY-MM-DD format
-    local release_date=$(date +%Y-%m-%d)
-
-    # Check if the version already exists in CHANGELOG.md
-    if grep -q "## \[$new_version\]" "$changelog_file"; then
-        print_status "Version $new_version already exists in CHANGELOG.md"
-    else
-        # Create the new version section
-        local new_section="## [$new_version] - $release_date
-
-### Added
--
-
-### Changed
--
-
-### Fixed
--
-
-### Removed
--
-
-"
-
-        # Insert the new section after the [Unreleased] section
-        if grep -q "## \[Unreleased\]" "$changelog_file"; then
-            # Insert after [Unreleased] section
-            awk -v new_section="$new_section" '
-                /^## \[Unreleased\]/ {
-                    print $0
-                    getline
-                    print $0
-                    print ""
-                    print new_section
-                    next
-                }
-                { print }
-            ' "$changelog_file" > "$changelog_file.tmp" && mv "$changelog_file.tmp" "$changelog_file"
-        else
-            # If no [Unreleased] section, add at the beginning after the header
-            awk -v new_section="$new_section" '
-                /^## \[/ && !found {
-                    print new_section
-                    found = 1
-                }
-                { print }
-            ' "$changelog_file" > "$changelog_file.tmp" && mv "$changelog_file.tmp" "$changelog_file"
-        fi
-
-        print_success "Added version $new_version section to CHANGELOG.md"
-    fi
-
-    # Check if the new version section is empty (only has template content)
-    local version_section_start=$(grep -n "## \[$new_version\]" "$changelog_file" | cut -d: -f1)
-    if [ -n "$version_section_start" ]; then
-        local version_section_end=$(tail -n +$((version_section_start + 1)) "$changelog_file" | grep -n "^## \[" | head -1 | cut -d: -f1)
-        if [ -z "$version_section_end" ]; then
-            version_section_end=$(wc -l < "$changelog_file")
-        else
-            version_section_end=$((version_section_start + version_section_end - 1))
-        fi
-
-        # Extract the version section content
-        local section_content=$(sed -n "${version_section_start},${version_section_end}p" "$changelog_file")
-
-        # Check if section only contains template content (empty bullet points)
-        # Count non-empty bullet points (lines that start with "- " but have content after the dash)
-        local non_empty_bullets=$(echo "$section_content" | grep "^- " | grep -v "^- $" | wc -l)
-
-        if [ "$non_empty_bullets" -eq 0 ]; then
-            print_warning "Version $new_version section in CHANGELOG.md appears to be empty (only template content)"
-            echo
-            print_status "Please fill in the release notes for version $new_version"
-            print_status "You can edit CHANGELOG.md manually or use your preferred editor"
-            echo
-            read -p "Press Enter to continue after updating CHANGELOG.md, or Ctrl+C to abort..."
-        fi
-    fi
-}
 
 # Function to bump version
 bump_version() {
@@ -314,8 +217,6 @@ bump_version() {
     # Export for later use
     export NEW_VERSION="$new_version"
 
-    # Update CHANGELOG.md with the new version
-    update_changelog "$new_version"
 }
 
 # Function to clean build directories
@@ -732,8 +633,6 @@ publish_to_pypi() {
     echo
     print_warning "About to publish BOTH packages (scxpand and scxpand-cuda) version $NEW_VERSION to PyPI"
     echo
-    print_status "REMINDER: Please ensure CHANGELOG.md has been updated with release notes for version $NEW_VERSION"
-    print_status "You can edit CHANGELOG.md now if needed before proceeding with the release"
     echo
     read -p "Are you sure you want to continue? (y/N): " -r
     echo
@@ -839,6 +738,10 @@ show_summary() {
         echo "  - Documentation:              https://scxpand.readthedocs.io/en/latest/"
         echo "  - GitHub: https://github.com/yizhak-lab-ccg/scXpand/releases/tag/v$NEW_VERSION"
         echo "  - Changelog: https://github.com/yizhak-lab-ccg/scXpand/blob/main/CHANGELOG.md"
+        echo
+        print_warning "REMINDER: Please update CHANGELOG.md with release notes for version $NEW_VERSION"
+        print_status "Add your changes under the appropriate sections (Added, Changed, Fixed, Removed)"
+        print_status "Then commit and push the changelog update"
     fi
     echo
 }
