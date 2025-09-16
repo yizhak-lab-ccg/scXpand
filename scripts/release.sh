@@ -61,6 +61,7 @@ show_usage() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "This script publishes both standard (scxpand - CPU/MPS) and CUDA-enabled (scxpand-cuda) packages."
+    echo "It also automatically updates CHANGELOG.md and creates GitHub releases."
     echo ""
     echo "Options:"
     echo "  --dry-run          Perform a dry run (no actual changes)"
@@ -84,6 +85,11 @@ show_usage() {
     echo "  - scXpand publishes TWO packages: 'scxpand' and 'scxpand-cuda'"
     echo "  - Project-scoped tokens only work for one package"
     echo "  - Get token at: https://pypi.org/manage/account/token/"
+    echo ""
+    echo "GitHub CLI Requirements (for automated releases):"
+    echo "  - Install GitHub CLI: https://cli.github.com/"
+    echo "  - Authenticate with: gh auth login"
+    echo "  - Required for automated GitHub release creation"
 }
 
 # Parse command line arguments
@@ -136,6 +142,27 @@ check_prerequisites() {
     if ! command_exists uv; then
         print_error "uv is not installed. Please install uv first."
         exit 1
+    fi
+
+    # Check if GitHub CLI is installed (for automated releases)
+    if ! command_exists gh; then
+        print_warning "GitHub CLI (gh) is not installed. GitHub releases will not be automated."
+        print_status "To install GitHub CLI:"
+        print_status "  macOS: brew install gh"
+        print_status "  Linux: curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg"
+        print_status "  Windows: winget install GitHub.cli"
+        print_status "After installation, authenticate with: gh auth login"
+        export GITHUB_CLI_AVAILABLE=false
+    else
+        # Check if GitHub CLI is authenticated
+        if ! gh auth status >/dev/null 2>&1; then
+            print_warning "GitHub CLI is not authenticated. GitHub releases will not be automated."
+            print_status "To authenticate: gh auth login"
+            export GITHUB_CLI_AVAILABLE=false
+        else
+            print_success "GitHub CLI is available and authenticated"
+            export GITHUB_CLI_AVAILABLE=true
+        fi
     fi
 
     # Check if UV_PUBLISH_TOKEN is set (only for non-dry-run)
@@ -192,6 +219,125 @@ check_prerequisites() {
 }
 
 
+# Function to update CHANGELOG.md
+update_changelog() {
+    print_status "Updating CHANGELOG.md..."
+
+    if [ "$DRY_RUN" = true ]; then
+        print_status "DRY RUN: Would update CHANGELOG.md with version $NEW_VERSION"
+        return
+    fi
+
+    # Get current date in YYYY-MM-DD format
+    current_date=$(date +%Y-%m-%d)
+
+    # Create temporary file for new changelog
+    temp_changelog=$(mktemp)
+
+    # Interactive changelog entry
+    echo
+    print_status "Please provide changelog entries for version $NEW_VERSION"
+    print_status "Press Enter to skip a section, or type 'done' to finish early"
+    echo
+
+    # Initialize changelog sections
+    added_entries=""
+    changed_entries=""
+    fixed_entries=""
+    removed_entries=""
+
+    # Collect Added entries
+    echo "=== Added ==="
+    print_status "Enter new features (press Enter when done):"
+    while IFS= read -r line; do
+        if [ -z "$line" ]; then
+            break
+        fi
+        if [ "$line" = "done" ]; then
+            break
+        fi
+        added_entries="${added_entries}- $line\n"
+    done
+
+    # Collect Changed entries
+    echo
+    echo "=== Changed ==="
+    print_status "Enter changes in existing functionality (press Enter when done):"
+    while IFS= read -r line; do
+        if [ -z "$line" ]; then
+            break
+        fi
+        if [ "$line" = "done" ]; then
+            break
+        fi
+        changed_entries="${changed_entries}- $line\n"
+    done
+
+    # Collect Fixed entries
+    echo
+    echo "=== Fixed ==="
+    print_status "Enter bug fixes (press Enter when done):"
+    while IFS= read -r line; do
+        if [ -z "$line" ]; then
+            break
+        fi
+        if [ "$line" = "done" ]; then
+            break
+        fi
+        fixed_entries="${fixed_entries}- $line\n"
+    done
+
+    # Collect Removed entries
+    echo
+    echo "=== Removed ==="
+    print_status "Enter removed features (press Enter when done):"
+    while IFS= read -r line; do
+        if [ -z "$line" ]; then
+            break
+        fi
+        if [ "$line" = "done" ]; then
+            break
+        fi
+        removed_entries="${removed_entries}- $line\n"
+    done
+
+    # Build the new changelog entry
+    changelog_entry="## [$NEW_VERSION] - $current_date\n\n"
+
+    if [ -n "$added_entries" ]; then
+        changelog_entry="${changelog_entry}### Added\n${added_entries}\n"
+    fi
+
+    if [ -n "$changed_entries" ]; then
+        changelog_entry="${changelog_entry}### Changed\n${changed_entries}\n"
+    fi
+
+    if [ -n "$fixed_entries" ]; then
+        changelog_entry="${changelog_entry}### Fixed\n${fixed_entries}\n"
+    fi
+
+    if [ -n "$removed_entries" ]; then
+        changelog_entry="${changelog_entry}### Removed\n${removed_entries}\n"
+    fi
+
+    # If no entries were provided, add a default entry
+    if [ -z "$added_entries" ] && [ -z "$changed_entries" ] && [ -z "$fixed_entries" ] && [ -z "$removed_entries" ]; then
+        changelog_entry="${changelog_entry}### Changed\n- Version bump to $NEW_VERSION\n\n"
+    fi
+
+    # Create the new changelog content
+    {
+        echo -e "$changelog_entry"
+        # Remove the first "## [Unreleased]" section and add the rest
+        sed '1,/^## \[Unreleased\]/d' CHANGELOG.md
+    } > "$temp_changelog"
+
+    # Replace the original changelog
+    mv "$temp_changelog" CHANGELOG.md
+
+    print_success "CHANGELOG.md updated with version $NEW_VERSION"
+}
+
 # Function to bump version
 bump_version() {
     print_status "Bumping $VERSION_TYPE version..."
@@ -217,6 +363,8 @@ bump_version() {
     # Export for later use
     export NEW_VERSION="$new_version"
 
+    # Update CHANGELOG.md
+    update_changelog
 }
 
 # Function to clean build directories
@@ -652,6 +800,62 @@ publish_to_pypi() {
     print_success "Both packages successfully published to PyPI"
 }
 
+# Function to create GitHub release
+create_github_release() {
+    if [ "$DRY_RUN" = true ]; then
+        print_status "DRY RUN: Would create GitHub release v$NEW_VERSION..."
+        return
+    fi
+
+    if [ "$GITHUB_CLI_AVAILABLE" != "true" ]; then
+        print_warning "GitHub CLI not available, skipping automated GitHub release creation"
+        print_status "You can manually create a release at: https://github.com/yizhak-lab-ccg/scXpand/releases/new"
+        return
+    fi
+
+    print_status "Creating GitHub release v$NEW_VERSION..."
+
+    # Extract changelog content for this version
+    changelog_content=$(awk "/^## \[$NEW_VERSION\]/,/^## \[/" CHANGELOG.md | sed '$d')
+
+    # Create release notes
+    release_notes="## Release Notes
+
+$changelog_content
+
+## Installation
+
+### Standard Package (CPU/MPS)
+\`\`\`bash
+pip install scxpand==$NEW_VERSION
+\`\`\`
+
+### CUDA Package
+\`\`\`bash
+pip install scxpand-cuda==$NEW_VERSION --extra-index-url https://download.pytorch.org/whl/cu128
+\`\`\`
+
+## Documentation
+- [Documentation](https://scxpand.readthedocs.io/en/latest/)
+- [PyPI - Standard Package](https://pypi.org/project/scxpand/)
+- [PyPI - CUDA Package](https://pypi.org/project/scxpand-cuda/)
+
+## What's Changed
+This release includes both standard (CPU/MPS) and CUDA-enabled packages for optimal performance across different hardware configurations."
+
+    # Create the GitHub release
+    if gh release create "v$NEW_VERSION" \
+        --title "Release v$NEW_VERSION" \
+        --notes "$release_notes" \
+        --latest; then
+        print_success "GitHub release v$NEW_VERSION created successfully"
+        print_status "Release URL: https://github.com/yizhak-lab-ccg/scXpand/releases/tag/v$NEW_VERSION"
+    else
+        print_error "Failed to create GitHub release"
+        print_status "You can manually create a release at: https://github.com/yizhak-lab-ccg/scXpand/releases/new"
+    fi
+}
+
 # Function to trigger ReadTheDocs build
 trigger_readthedocs_build() {
     if [ "$DRY_RUN" = true ]; then
@@ -719,10 +923,12 @@ show_summary() {
         print_status "What would happen in a real dual release:"
         echo "  - Version: $NEW_VERSION ($VERSION_TYPE)"
         echo "  - Packages: scxpand (CPU/MPS) and scxpand-cuda (CUDA)"
+        echo "  - Interactive CHANGELOG.md update"
         echo "  - Commit message: 'Bump version to $NEW_VERSION and update CHANGELOG.md (dual package release)'"
         echo "  - Tag: v$NEW_VERSION"
         echo "  - Push to main branch"
         echo "  - Publish both packages to PyPI"
+        echo "  - Create GitHub release with changelog"
         echo "  - Trigger ReadTheDocs documentation build"
         echo
         print_warning "This was a DRY RUN - no actual changes were made to git or PyPI"
@@ -736,12 +942,11 @@ show_summary() {
         echo "  - Standard Package (CPU/MPS): https://pypi.org/project/scxpand/"
         echo "  - CUDA Package:               https://pypi.org/project/scxpand-cuda/"
         echo "  - Documentation:              https://scxpand.readthedocs.io/en/latest/"
-        echo "  - GitHub: https://github.com/yizhak-lab-ccg/scXpand/releases/tag/v$NEW_VERSION"
+        echo "  - GitHub Release: https://github.com/yizhak-lab-ccg/scXpand/releases/tag/v$NEW_VERSION"
         echo "  - Changelog: https://github.com/yizhak-lab-ccg/scXpand/blob/main/CHANGELOG.md"
         echo
-        print_success "REMINDER: Please update CHANGELOG.md with release notes for version $NEW_VERSION"
-        echo "Add your changes under the appropriate sections (Added, Changed, Fixed, Removed)"
-        echo "Then commit and push the changelog update"
+        print_success "CHANGELOG.md has been automatically updated with your input"
+        print_success "GitHub release has been created with changelog content"
     fi
     echo
 }
@@ -771,6 +976,7 @@ main() {
     commit_and_push
     create_and_push_tag
     publish_to_pypi
+    create_github_release
     trigger_readthedocs_build
     verify_releases
     show_summary
