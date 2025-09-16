@@ -59,20 +59,6 @@ print_package() {
     echo -e "${PURPLE}[PACKAGE]${NC} $1"
 }
 
-# Consolidated error handling
-handle_error() {
-    local exit_code="$1"
-    local error_message="$2"
-    local cleanup_function="${3:-}"
-
-    if [ "$exit_code" -ne 0 ]; then
-        print_error "$error_message"
-        if [ -n "$cleanup_function" ]; then
-            "$cleanup_function"
-        fi
-        exit "$exit_code"
-    fi
-}
 
 # Check if command exists (consolidated)
 require_command() {
@@ -168,7 +154,8 @@ check_prerequisites() {
 
     # Check if we're in a git repository
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        handle_error 1 "Not in a git repository"
+        print_error "Not in a git repository"
+        exit 1
     fi
 
     # Check required commands
@@ -375,10 +362,10 @@ preview_and_validate() {
     local new_version
     if [ "$DRY_RUN" = false ]; then
         # Backup and temporarily bump to get new version
-        backup_original_pyproject
+        backup_file "pyproject.toml" "original"
         uv version --bump "$VERSION_TYPE" >/dev/null 2>&1
         new_version=$(uv version | cut -d' ' -f2)
-        restore_original_pyproject
+        restore_file "pyproject.toml" "original" "false"
     else
         # For dry run, simulate version calculation
         case "$VERSION_TYPE" in
@@ -414,7 +401,7 @@ bump_version() {
 
     # Backup original pyproject.toml before version bump (for restoration on cancellation)
     if [ "$DRY_RUN" = false ]; then
-        backup_original_pyproject
+        backup_file "pyproject.toml" "original"
     fi
 
     # Bump version in main pyproject.toml
@@ -486,26 +473,7 @@ cleanup_backups() {
     rm -f pyproject.toml.original pyproject.toml.backup pyproject.toml.temp
 }
 
-# Convenience wrappers for pyproject.toml
-backup_pyproject() {
-    backup_file "pyproject.toml" "backup"
-}
 
-restore_pyproject() {
-    restore_file "pyproject.toml" "backup" "false"
-}
-
-backup_original_pyproject() {
-    backup_file "pyproject.toml" "original"
-}
-
-restore_original_pyproject() {
-    restore_file "pyproject.toml" "original" "false"
-}
-
-restore_original_version() {
-    restore_file "pyproject.toml" "original" "true"
-}
 
 # Function to create CUDA variant of pyproject.toml using Python script
 create_cuda_pyproject() {
@@ -608,9 +576,9 @@ build_package() {
 
     # Handle CUDA package special case
     if [ "$package_type" = "cuda" ]; then
-        backup_pyproject
+        backup_file "pyproject.toml" "backup"
         create_cuda_pyproject || {
-            restore_pyproject
+            restore_file "pyproject.toml" "backup" "false"
         return 1
         }
         mv temp/pyproject-cuda.toml pyproject.toml
@@ -619,12 +587,12 @@ build_package() {
     # Build package
     if ! uv build; then
         print_error "Failed to build $description"
-        [ "$package_type" = "cuda" ] && restore_pyproject
+        [ "$package_type" = "cuda" ] && restore_file "pyproject.toml" "backup" "false"
         return 1
     fi
 
     # Restore original pyproject.toml for CUDA package
-    [ "$package_type" = "cuda" ] && restore_pyproject
+    [ "$package_type" = "cuda" ] && restore_file "pyproject.toml" "backup" "false"
 
     print_success "$description built successfully"
     return 0
@@ -1124,8 +1092,8 @@ main() {
 
 # Consolidated cleanup on exit
 cleanup_on_exit() {
-    restore_pyproject 2>/dev/null || true
-    restore_original_pyproject 2>/dev/null || true
+    restore_file "pyproject.toml" "backup" "false" 2>/dev/null || true
+    restore_file "pyproject.toml" "original" "false" 2>/dev/null || true
     rm -f temp/pyproject-cuda*.toml pyproject-cuda-temp*.toml 2>/dev/null || true
 }
 
