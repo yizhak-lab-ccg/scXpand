@@ -86,37 +86,3 @@ Then activate the environment:
 
     # Windows PowerShell
     .\.venv\Scripts\activate
-
-Quick Start
------------
-
-After installation, you can immediately start using scXpand:
-
-.. code-block:: python
-
-    import scxpand
-    # Make sure that "your_data.h5ad" includes only T cells for the results to be meaningful
-    # Ensure that "your_data.var_names" are provided as Ensembl IDs (as the pre-trained models were trained using this gene representation)
-    # Please refer to our documentation for more information
-
-    # List available pre-trained models
-    scxpand.list_pretrained_models()
-
-    # Run inference with a pre-trained model
-    results = scxpand.run_inference(
-        model_name="pan_cancer_autoencoder",
-        data_path="your_data.h5ad"
-    )
-
-Or use the command line interface:
-
-.. code-block:: bash
-
-    # List pre-trained models
-    scxpand list-models
-
-    # Run inference with pre-trained model
-    scxpand inference --data_path your_data.h5ad --model_name pan_cancer_autoencoder
-
-    # Run inference with local model
-    scxpand inference --data_path your_data.h5ad --model_path results/my_model
