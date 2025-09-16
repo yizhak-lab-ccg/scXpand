@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.1.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-09-16
+
+### Added
+- Interactive changelog validation with template creation
+- Pre-release changelog checking to ensure proper documentation
+
+### Changed
+- Release script now validates changelog entries before running tests and builds
+- Improved user experience by separating changelog editing from release process
+- Enhanced PUBLISHING.md documentation with step-by-step workflow
+
+### Fixed
+- Changelog workflow now allows manual editing with preferred editors
+
+
+
 
 ## [0.3.4] - 2025-09-16
 
