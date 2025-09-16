@@ -12,6 +12,7 @@ This guide explains how to publish new versions of scXpand to PyPI.
   - [Prerequisites](#prerequisites)
   - [Usage](#usage)
   - [What the script does](#what-the-script-does)
+  - [Interactive Changelog Process](#interactive-changelog-process)
   - [PyPI Token Requirements](#pypi-token-requirements)
 - [Troubleshooting](#troubleshooting)
 
@@ -19,7 +20,11 @@ This guide explains how to publish new versions of scXpand to PyPI.
 
 ### `release.sh` (Dual Package Release Script)
 
-Automates patch, minor, and major releases for both package variants.
+**Fully automated release pipeline** for both package variants with:
+- 📝 **Interactive changelog updates** with organized entry collection
+- 🚀 **Automatic GitHub release creation** with auto-generated release notes
+- 📦 **Dual package publishing** (CPU/MPS + CUDA variants)
+- 🔄 **Complete automation** from version bump to PyPI publishing
 
 ### Prerequisites
 
@@ -58,6 +63,19 @@ Automates patch, minor, and major releases for both package variants.
    export UV_PUBLISH_TOKEN=pypi-your_actual_token_here
    ```
 
+   **GitHub CLI Setup (Optional - for GitHub Releases):**
+
+   ```bash
+   # Install GitHub CLI
+   brew install gh  # macOS
+   # or visit https://cli.github.com/ for other platforms
+
+   # Authenticate with GitHub
+   gh auth login
+   ```
+
+   *Note: GitHub CLI is optional. If not available, the script will skip GitHub release creation.*
+
 
 2. **Repository State**:
    - Must be on `main` branch
@@ -92,20 +110,29 @@ Automates patch, minor, and major releases for both package variants.
 1. **Prerequisites Check**:
    - Verifies you're in a git repository
    - Checks that `uv` is installed
+   - Checks for GitHub CLI availability (optional for GitHub releases)
    - Confirms `UV_PUBLISH_TOKEN` is set
    - Ensures you're on the `main` branch
    - Verifies working directory is clean
    - Checks if local branch is up to date with remote
    - Ensures no unpushed commits exist
 
-2. **Pre-commit Verification**:
-   - Checks if pre-commit hooks are installed
-   - Notes that tests will run automatically on push
-
-3. **Version Management**:
+2. **Version Management**:
    - Bumps version using `uv version --bump [patch|minor|major]`
    - Shows current and new version numbers
    - Supports patch (default), minor, and major version bumps
+
+3. **📝 Interactive Changelog Update**:
+   - **Prompts for changelog entries** organized by category:
+     - **Added**: New features
+     - **Changed**: Changes in existing functionality
+     - **Fixed**: Bug fixes
+     - **Removed**: Removed features
+   - You can press Enter to skip sections or type entries one per line
+   - Type 'done' to finish a section
+   - Automatically formats entries with proper markdown
+   - Updates CHANGELOG.md with version number and current date
+   - Shows preview and waits for confirmation before continuing
 
 4. **Package Building**:
    - Cleans build directories
@@ -115,16 +142,22 @@ Automates patch, minor, and major releases for both package variants.
    - Tests import functionality for both packages
 
 5. **Git Operations**:
-   - Commits version bump changes
+   - Commits version bump and changelog changes
    - Pushes to main branch
    - Creates and pushes version tag
 
-6. **Publishing**:
+6. **🚀 GitHub Release Creation** (if GitHub CLI is available):
+   - Automatically creates GitHub release with version tag
+   - Generates release notes from changelog content
+   - Includes installation instructions for both packages
+   - Links to documentation and PyPI packages
+
+7. **Publishing**:
    - Publishes both packages to PyPI using `uv publish`
    - Includes confirmation prompt before publishing
    - Requires "Entire account" scoped token
 
-7. **Verification**:
+8. **Verification**:
    - Tests installation of both packages from PyPI
    - Verifies that `scxpand-cuda` installs CUDA-enabled PyTorch (version should show `+cu128`)
    - Provides links to PyPI and GitHub release
@@ -143,6 +176,97 @@ The `scxpand-cuda` package uses a sophisticated configuration to ensure CUDA PyT
 
 ```bash
 python scripts/create_cuda_pyproject.py -c cu124  # example for CUDA 12.4
+```
+
+## Interactive Changelog Process
+
+### When You'll Be Prompted
+
+During the release process, **after version bumping but before building packages**, the script will prompt you to enter changelog entries interactively.
+
+### How It Works
+
+1. **The script will show:**
+   ```
+   === CHANGELOG ENTRY FOR VERSION 0.3.5 ===
+
+   Please provide changelog entries for this release.
+   Press Enter to skip a section, or type entries one per line.
+   Type 'done' on a new line when finished with a section.
+   ```
+
+2. **You'll be prompted for each category:**
+
+   **Added (new features):**
+   ```
+   === ADDED (new features) ===
+   Enter new features added in this release:
+   ```
+   - Type each new feature on a separate line
+   - Press Enter on an empty line to skip this section
+   - Type 'done' to finish this section
+
+   **Changed (changes in existing functionality):**
+   ```
+   === CHANGED (changes in existing functionality) ===
+   Enter changes to existing functionality:
+   ```
+
+   **Fixed (bug fixes):**
+   ```
+   === FIXED (bug fixes) ===
+   Enter bug fixes:
+   ```
+
+   **Removed (removed features):**
+   ```
+   === REMOVED (removed features) ===
+   Enter removed features:
+   ```
+
+3. **Example interaction:**
+   ```
+   === ADDED (new features) ===
+   Enter new features added in this release:
+   New hyperparameter optimization for MLP models
+   Support for custom loss functions
+   done
+
+   === CHANGED (changes in existing functionality) ===
+   Enter changes to existing functionality:
+   Improved memory efficiency in data loading
+
+   === FIXED (bug fixes) ===
+   Enter bug fixes:
+   Fixed CUDA memory leak in autoencoder training
+   Fixed validation metric calculation bug
+   done
+
+   === REMOVED (removed features) ===
+   Enter removed features:
+   [Press Enter to skip]
+   ```
+
+4. **The script will:**
+   - Automatically format your entries with markdown bullets
+   - Add the current date
+   - Update CHANGELOG.md
+   - Show you a preview
+   - Wait for you to press Enter before continuing
+
+### Tips for Good Changelog Entries
+
+- **Be specific**: "Fixed CUDA memory leak" vs "Fixed bug"
+- **User-focused**: Describe impact on users, not internal changes
+- **One feature per line**: Each bullet should be one distinct change
+- **Use active voice**: "Added support for..." vs "Support was added for..."
+
+### If You Skip All Sections
+
+If you press Enter for all sections without adding entries, the script will add a default entry:
+```markdown
+### Changed
+- Version bump to 0.3.5
 ```
 
 ## PyPI Token Requirements

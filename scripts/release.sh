@@ -223,7 +223,7 @@ update_changelog() {
     print_status "Updating CHANGELOG.md..."
 
     if [ "$DRY_RUN" = true ]; then
-        print_status "DRY RUN: Would update CHANGELOG.md with version $NEW_VERSION"
+        print_status "DRY RUN: Would prompt for changelog entries and update CHANGELOG.md with version $NEW_VERSION"
         return
     fi
 
@@ -236,8 +236,90 @@ update_changelog() {
         return 1
     fi
 
+    # Interactive changelog entry collection
+    echo
+    print_status "=== CHANGELOG ENTRY FOR VERSION $NEW_VERSION ==="
+    echo
+    print_status "Please provide changelog entries for this release."
+    print_status "Press Enter to skip a section, or type entries one per line."
+    print_status "Type 'done' on a new line when finished with a section."
+    echo
+
+    # Initialize changelog sections
+    local added_entries=""
+    local changed_entries=""
+    local fixed_entries=""
+    local removed_entries=""
+
+    # Collect Added entries
+    echo "=== ADDED (new features) ==="
+    print_status "Enter new features added in this release:"
+    while IFS= read -r line; do
+        if [ -z "$line" ] || [ "$line" = "done" ]; then
+            break
+        fi
+        added_entries="${added_entries}- $line\n"
+    done
+
+    # Collect Changed entries
+    echo
+    echo "=== CHANGED (changes in existing functionality) ==="
+    print_status "Enter changes to existing functionality:"
+    while IFS= read -r line; do
+        if [ -z "$line" ] || [ "$line" = "done" ]; then
+            break
+        fi
+        changed_entries="${changed_entries}- $line\n"
+    done
+
+    # Collect Fixed entries
+    echo
+    echo "=== FIXED (bug fixes) ==="
+    print_status "Enter bug fixes:"
+    while IFS= read -r line; do
+        if [ -z "$line" ] || [ "$line" = "done" ]; then
+            break
+        fi
+        fixed_entries="${fixed_entries}- $line\n"
+    done
+
+    # Collect Removed entries
+    echo
+    echo "=== REMOVED (removed features) ==="
+    print_status "Enter removed features:"
+    while IFS= read -r line; do
+        if [ -z "$line" ] || [ "$line" = "done" ]; then
+            break
+        fi
+        removed_entries="${removed_entries}- $line\n"
+    done
+
     # Create a temporary file for the updated changelog
     local temp_changelog=$(mktemp)
+
+    # Build the changelog entry
+    local changelog_entry="## [$NEW_VERSION] - $today\n\n"
+
+    if [ -n "$added_entries" ]; then
+        changelog_entry="${changelog_entry}### Added\n${added_entries}\n"
+    fi
+
+    if [ -n "$changed_entries" ]; then
+        changelog_entry="${changelog_entry}### Changed\n${changed_entries}\n"
+    fi
+
+    if [ -n "$fixed_entries" ]; then
+        changelog_entry="${changelog_entry}### Fixed\n${fixed_entries}\n"
+    fi
+
+    if [ -n "$removed_entries" ]; then
+        changelog_entry="${changelog_entry}### Removed\n${removed_entries}\n"
+    fi
+
+    # If no entries were provided, add a default entry
+    if [ -z "$added_entries" ] && [ -z "$changed_entries" ] && [ -z "$fixed_entries" ] && [ -z "$removed_entries" ]; then
+        changelog_entry="${changelog_entry}### Changed\n- Version bump to $NEW_VERSION\n\n"
+    fi
 
     # Read the changelog and update it
     {
@@ -246,14 +328,7 @@ update_changelog() {
 
         # Add the new version section
         echo ""
-        echo "## [$NEW_VERSION] - $today"
-        echo ""
-        echo "### Added"
-        echo "- Release automation improvements"
-        echo ""
-        echo "### Changed"
-        echo "- Enhanced release script with automatic changelog and GitHub release creation"
-        echo ""
+        echo -e "$changelog_entry"
 
         # Copy the rest of the changelog (skip the old [Unreleased] section)
         sed -n '/## \[Unreleased\]/,$p' "$changelog_file" | tail -n +2
@@ -262,7 +337,11 @@ update_changelog() {
     # Replace the original changelog
     mv "$temp_changelog" "$changelog_file"
 
+    echo
     print_success "CHANGELOG.md updated with version $NEW_VERSION"
+    print_status "Review the changelog entry above before the script continues."
+    echo
+    read -p "Press Enter to continue with the release process..."
 }
 
 # Function to bump version
