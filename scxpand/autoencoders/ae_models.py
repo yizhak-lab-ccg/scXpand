@@ -1,7 +1,6 @@
 import json
 
 from pathlib import Path
-from typing import Tuple
 
 import torch
 
@@ -36,9 +35,9 @@ class AutoencoderModel(BaseAutoencoder):
         self,
         data_format: DataFormat,
         latent_dim: int,
-        encoder_hidden_dims: Tuple[int, ...],
-        decoder_hidden_dims: Tuple[int, ...],
-        classifier_hidden_dims: Tuple[int, ...],
+        encoder_hidden_dims: tuple[int, ...],
+        decoder_hidden_dims: tuple[int, ...],
+        classifier_hidden_dims: tuple[int, ...],
         dropout_rate: float,
         needs_pi: bool = True,
         needs_theta: bool = True,
@@ -93,9 +92,9 @@ class ForkAutoencoder(BaseAutoencoder):
         self,
         data_format: DataFormat,
         latent_dim: int,
-        encoder_hidden_dims: Tuple[int, ...],
-        decoder_hidden_dims: Tuple[int, ...],
-        classifier_hidden_dims: Tuple[int, ...],
+        encoder_hidden_dims: tuple[int, ...],
+        decoder_hidden_dims: tuple[int, ...],
+        classifier_hidden_dims: tuple[int, ...],
         dropout_rate: float,
         needs_pi: bool = True,
         needs_theta: bool = True,
@@ -158,7 +157,7 @@ class ForkAutoencoder(BaseAutoencoder):
             self.pi_decoder = None
             self.pi_head = None
 
-    def _build_decoder_path(self, latent_dim: int, hidden_dims: Tuple[int, ...], dropout_rate: float) -> nn.Sequential:
+    def _build_decoder_path(self, latent_dim: int, hidden_dims: tuple[int, ...], dropout_rate: float) -> nn.Sequential:
         """Build a decoder path with proper handling of empty hidden_dims."""
         if not hidden_dims:
             # If no hidden layers, return identity

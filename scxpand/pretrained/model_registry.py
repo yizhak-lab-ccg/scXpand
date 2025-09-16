@@ -5,7 +5,6 @@ and associated metadata for automatic download and inference.
 """
 
 from dataclasses import dataclass
-from typing import Dict
 
 
 @dataclass
@@ -20,7 +19,7 @@ class PretrainedModelInfo:
 # Registry of available pre-trained models
 # Key: model_name (registry identifier - can be any descriptive string)
 # Note: model_type is auto-detected from model_type.txt file in each model archive
-PRETRAINED_MODELS: Dict[str, PretrainedModelInfo] = {
+PRETRAINED_MODELS: dict[str, PretrainedModelInfo] = {
     "pan_cancer_autoencoder": PretrainedModelInfo(
         name="pan_cancer_autoencoder",
         url="https://figshare.com/ndownloader/articles/30067666/versions/1?folder_path=autoencoder",

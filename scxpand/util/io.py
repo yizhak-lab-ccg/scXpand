@@ -264,7 +264,7 @@ def save_predictions_to_csv(
     predictions: np.ndarray,
     obs_df: pd.DataFrame,
     model_type: "ModelType | str",
-    save_path: Path,
+    save_path: Path | None,
 ) -> None:
     """Save predictions to a CSV file.
 
@@ -272,7 +272,7 @@ def save_predictions_to_csv(
         predictions: Model predictions (probabilities)
         obs_df: DataFrame with cell metadata
         model_type: Type of model used for predictions
-        save_path: Directory to save predictions
+        save_path: Directory to save predictions (None to skip saving)
 
     Raises:
         ValueError: If predictions and obs_df have mismatched lengths
@@ -287,13 +287,15 @@ def save_predictions_to_csv(
     predictions_df = obs_df.copy()
     predictions_df[f"{model_type_str}_prediction"] = predictions
 
-    # Ensure save directory exists
-    save_path.mkdir(parents=True, exist_ok=True)
+    # Save predictions only if save_path is provided
+    if save_path is not None:
+        # Ensure save directory exists
+        save_path.mkdir(parents=True, exist_ok=True)
 
-    # Save predictions
-    output_file = save_path / f"{model_type_str}_predictions.csv"
-    predictions_df.to_csv(output_file, index=False)
-    logger.info(f"Predictions saved to {output_file}")
+        # Save predictions
+        output_file = save_path / f"{model_type_str}_predictions.csv"
+        predictions_df.to_csv(output_file, index=False)
+        logger.info(f"Predictions saved to {output_file}")
 
 
 def ensure_directory_exists(path: Path) -> None:

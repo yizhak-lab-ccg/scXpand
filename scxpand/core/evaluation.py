@@ -30,7 +30,7 @@ def evaluate_predictions_and_save(
     y_pred_prob: np.ndarray,
     obs_df: pd.DataFrame,
     model_type: "ModelType | str",
-    save_path: Path,
+    save_path: Path | None,
     eval_name: str = "dev",
     score_metric: str = "harmonic_avg/AUROC",
     trial: optuna.Trial | None = None,
@@ -47,7 +47,7 @@ def evaluate_predictions_and_save(
         y_pred_prob: Predicted probabilities from model
         obs_df: DataFrame with cell metadata and ground truth labels
         model_type: Type of model used for predictions
-        save_path: Directory to save evaluation results
+        save_path: Directory to save evaluation results (None to skip saving)
         eval_name: Name for this evaluation (used in filenames)
         score_metric: Primary metric to optimize/report
         trial: Optional Optuna trial for hyperparameter optimization
@@ -62,26 +62,28 @@ def evaluate_predictions_and_save(
     if missing_columns:
         logger.info(f"Missing {missing_columns} columns in observation data. Skipping metrics evaluation.")
 
-        # Still save predictions even if we can't evaluate
-        save_predictions_to_csv(
-            predictions=y_pred_prob,
-            obs_df=obs_df,
-            model_type=model_type,
-            save_path=save_path,
-        )
+        # Still save predictions even if we can't evaluate (if save_path provided)
+        if save_path is not None:
+            save_predictions_to_csv(
+                predictions=y_pred_prob,
+                obs_df=obs_df,
+                model_type=model_type,
+                save_path=save_path,
+            )
 
         return {}
 
     # Extract ground truth labels
     y_true = extract_is_expanded(obs_df)
 
-    # Save predictions to CSV file
-    save_predictions_to_csv(
-        predictions=y_pred_prob,
-        obs_df=obs_df,
-        model_type=model_type,
-        save_path=save_path,
-    )
+    # Save predictions to CSV file (if save_path provided)
+    if save_path is not None:
+        save_predictions_to_csv(
+            predictions=y_pred_prob,
+            obs_df=obs_df,
+            model_type=model_type,
+            save_path=save_path,
+        )
 
     # Compute and save evaluation metrics
     results = evaluate_and_save(

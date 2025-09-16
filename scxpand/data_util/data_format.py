@@ -369,14 +369,12 @@ def load_data_format(load_path: Path) -> DataFormat:
         >>> data_format = load_data_format(Path("results/data_format.json"))
         >>> print(f"Loaded {data_format.n_genes} genes")
     """
-    logger.info(f"Loading data format from: {load_path}")
     with load_path.open(mode="r") as f:
         data = json.load(f)
     npz_path = load_path.with_suffix(".npz")
     with np.load(npz_path) as npz:
         data["genes_mu"] = npz["genes_mu"]
         data["genes_sigma"] = npz["genes_sigma"]
-        logger.info(
-            f"Loaded normalization statistics: mu array {npz['genes_mu'].shape}, sigma array {npz['genes_sigma'].shape}"
-        )
+    logger.info(f"Loaded data format from: {load_path}")
+
     return DataFormat.model_validate(data)

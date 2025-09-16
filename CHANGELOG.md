@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.1.0
 
 ## [Unreleased]
 
+### Changed
+- Less redundant log messages
+- Code formatting improvements
+- `save_path` parameter in inference function - now `None` means no saving results to file
+- Set scikit-learn dependency to version 1.7.1
+
 ## [0.3.5] - 2025-09-16
 
 ### Added

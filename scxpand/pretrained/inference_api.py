@@ -5,7 +5,6 @@ handling automatic model downloading and loading. For external use, use scxpand.
 """
 
 from pathlib import Path
-from typing import Union
 
 import anndata as ad
 
@@ -24,9 +23,9 @@ logger = get_logger()
 def fetch_model_and_run_inference(
     model_name: str | None = None,
     model_url: str | None = None,
-    data_path: Union[str, Path] | None = None,
+    data_path: str | Path | None = None,
     adata: ad.AnnData | None = None,
-    save_path: Union[str, Path] | None = None,
+    save_path: str | Path | None = None,
     batch_size: int | None = None,
     num_workers: int = 4,
     eval_row_inds=None,

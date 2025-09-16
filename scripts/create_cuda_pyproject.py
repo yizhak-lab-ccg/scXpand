@@ -11,12 +11,11 @@ import sys
 import tomllib
 
 from pathlib import Path
-from typing import List
 
 from scripts.constants import CUDA_VERSION as DEFAULT_CUDA_VERSION, TORCH_VERSION
 
 
-def load_toml_lines(file_path: Path) -> List[str]:
+def load_toml_lines(file_path: Path) -> list[str]:
     """Load TOML file as lines for processing."""
     try:
         with open(file_path, encoding="utf-8") as f:
@@ -29,7 +28,7 @@ def load_toml_lines(file_path: Path) -> List[str]:
         sys.exit(1)
 
 
-def save_toml_lines(lines: List[str], file_path: Path) -> None:
+def save_toml_lines(lines: list[str], file_path: Path) -> None:
     """Save lines to TOML file."""
     try:
         with open(file_path, "w", encoding="utf-8") as f:

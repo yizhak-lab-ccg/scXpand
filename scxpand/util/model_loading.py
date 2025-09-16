@@ -7,7 +7,7 @@ to prevent silent failures and ensure proper error handling.
 import json
 
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any
 
 import torch
 
@@ -29,9 +29,9 @@ class ModelLoadingError(Exception):
 
 def load_model_state_dict(
     model_dir: Path,
-    device: Union[torch.device, str],
+    device: torch.device | str,
     model_name: str = "model",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Load model state dictionary from training checkpoint.
 
     This function loads model state dictionary from best_ckpt.pt only.
@@ -130,7 +130,7 @@ def load_model_parameters(model_dir: Path, param_class: type, param_file: str = 
 
 
 def load_and_validate_model(
-    model: nn.Module, model_dir: Path, device: Union[torch.device, str], model_name: str = "model"
+    model: nn.Module, model_dir: Path, device: torch.device | str, model_name: str = "model"
 ) -> nn.Module:
     """Load state dict into model with validation.
 

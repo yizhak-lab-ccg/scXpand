@@ -6,7 +6,6 @@ PyTorch tensors, and sparse matrices for single-cell RNA expression data preproc
 
 from copy import copy
 from pathlib import Path
-from typing import Union
 
 import anndata as ad
 import numpy as np
@@ -27,7 +26,7 @@ DEFAULT_SIGMA_CLIP_FACTOR = 6.0  # Default factor for outlier clipping
 logger = get_logger()
 
 # Type aliases
-ArrayLike = Union[np.ndarray, torch.Tensor, sp.spmatrix]
+ArrayLike = np.ndarray | torch.Tensor | sp.spmatrix
 
 # Constants
 EXPANSION_LABEL_TRUE = "expanded"

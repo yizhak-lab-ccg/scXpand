@@ -51,6 +51,13 @@ Use the high-level ``scxpand.run_inference`` function for all model types:
        batch_size=1024
    )
 
+   # Inference without saving results (save_path=None)
+   results = scxpand.run_inference(
+       model_name='pan_cancer_autoencoder',
+       data_path='test_data.h5ad',
+       save_path=None  # Results returned but not saved to disk
+   )
+
 .. note::
    **Unified Inference API Features:**
 
@@ -61,8 +68,9 @@ Use the high-level ``scxpand.run_inference`` function for all model types:
    - **Automatic device detection**: Device is automatically detected for optimal performance
    - **Automatic caching**: Pre-trained models are cached automatically using `Pooch <https://github.com/fatiando/pooch>`_
    - **Seamless model sharing**: Use any ZIP file URL for instant model sharing
+   - **Flexible saving**: Set ``save_path=None`` to return results without saving to disk
    - All model types (autoencoder, mlp, lightgbm, logistic, svm) use the same unified API
-   - Results include evaluation metrics (when ground truth is available) and saved prediction files
+   - Results include evaluation metrics (when ground truth is available) and optionally saved prediction files
 
 Handling Data Format Mismatches
 --------------------------------

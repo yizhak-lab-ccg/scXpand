@@ -76,12 +76,9 @@ def run_prediction_pipeline(
         model_type = infer_model_type_from_parameters(model_path)
 
     # Setup save path
-    if save_path is None:
-        save_path = model_path / "predictions"
-    else:
+    if save_path is not None:
         save_path = Path(save_path)
-
-    ensure_directory_exists(save_path)
+        ensure_directory_exists(save_path)
 
     # Setup inference environment (load model, data format, device)
     data_format, model, device = inference_utils.setup_inference_environment(

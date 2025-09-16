@@ -5,7 +5,6 @@ with any type of scXpand model (local, registry, or URL-based).
 """
 
 from pathlib import Path
-from typing import Union
 
 import anndata as ad
 
@@ -22,12 +21,12 @@ DEFAULT_MODEL_NAME = "pan_cancer_autoencoder"
 
 
 def run_inference(
-    data_path: Union[str, Path] | None = None,
+    data_path: str | Path | None = None,
     adata: ad.AnnData | None = None,
-    model_path: Union[str, Path] | None = None,
+    model_path: str | Path | None = None,
     model_name: str | None = None,
     model_url: str | None = None,
-    save_path: Union[str, Path] | None = None,
+    save_path: str | Path | None = None,
     batch_size: int = 1024,
     num_workers: int = 4,
     eval_row_inds=None,
@@ -45,7 +44,7 @@ def run_inference(
         model_path: Path to local trained model directory (for local models).
         model_name: Name of pre-trained model from registry (for registry models).
         model_url: Direct URL to model ZIP file (for any external model).
-        save_path: Directory to save prediction results (optional).
+        save_path: Directory to save prediction results (None to skip saving, just return results).
         batch_size: Batch size for inference.
         num_workers: Number of workers for data loading.
         eval_row_inds: Specific cell indices to evaluate (None for all cells, only supported for local models).
@@ -78,12 +77,13 @@ def run_inference(
         ...     data_path="my_data.h5ad",
         ...     model_url="https://your-platform.com/model.zip",
         ... )
-        >>> # In-memory inference with any model type
+        >>> # In-memory inference with any model type (no saving)
         >>> import scanpy as sc
         >>> adata = sc.read_h5ad("my_data.h5ad")
         >>> results = scxpand.run_inference(
-        ...     adata=adata, model_name="pan_cancer_autoencoder"
+        ...     adata=adata, model_name="pan_cancer_autoencoder", save_path=None
         ... )
+        >>> # Results are returned but not saved to disk
     """
     # Validate data input
     if adata is None and data_path is None:

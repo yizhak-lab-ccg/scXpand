@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, Literal, Tuple
+from typing import Any, Literal
 
 from scxpand.util.classes import (
     BaseParams,
@@ -58,7 +58,7 @@ class AutoEncoderParams(BaseParams):
     cat_loss_weight: float = 1.0  # Coefficient for weighting the categorical loss
     weight_decay: float = 1e-3
     max_grad_norm: float = 1.0
-    lr_scheduler_config: Dict[str, Any] | None = field(
+    lr_scheduler_config: dict[str, Any] | None = field(
         default_factory=lambda: {
             "type": LRSchedulerType.REDUCE_LR_ON_PLATEAU.value,
             "factor": 0.5,
@@ -68,14 +68,14 @@ class AutoEncoderParams(BaseParams):
     )
     lr_scheduler_type: LRSchedulerType = LRSchedulerType.REDUCE_LR_ON_PLATEAU
     optimizer_type: OptimizerType = OptimizerType.ADAMW
-    adam_betas: Tuple[float, float] = (0.9, 0.999)
+    adam_betas: tuple[float, float] = (0.9, 0.999)
     train_batch_size: int = 2048
     inference_batch_size: int = 2048
     sampler_type: SamplerType = SamplerType.RANDOM
     latent_dim: int = 32
-    encoder_hidden_dims: Tuple[int, ...] = (64,)
-    decoder_hidden_dims: Tuple[int, ...] = (64,)
-    classifier_hidden_dims: Tuple[int, ...] = (16,)
+    encoder_hidden_dims: tuple[int, ...] = (64,)
+    decoder_hidden_dims: tuple[int, ...] = (64,)
+    classifier_hidden_dims: tuple[int, ...] = (16,)
     dropout_rate: float = 0.1
     mask_rate: float = 0.1
     noise_std: float = 1e-4
@@ -87,7 +87,7 @@ class AutoEncoderParams(BaseParams):
     model_type: Literal["standard", "fork"] = "standard"
     loss_type: Literal["zinb", "nb", "mse"] = "mse"
     # Optional categorical types to be used as auxiliary classification targets (for example, tissue_type, imputed_labels, etc.)
-    aux_categorical_types: Tuple[str, ...] = field(default_factory=tuple)
+    aux_categorical_types: tuple[str, ...] = field(default_factory=tuple)
 
     def get_dataset_params(self) -> DataAugmentParams:
         return DataAugmentParams(
