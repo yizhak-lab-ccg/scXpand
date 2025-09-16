@@ -218,117 +218,71 @@ check_prerequisites() {
 }
 
 
-# Function to update changelog
-update_changelog() {
-    print_status "Updating CHANGELOG.md..."
+# Function to check if changelog has entry for version
+check_changelog_entry() {
+    local version="$1"
+    local changelog_file="CHANGELOG.md"
 
-    if [ "$DRY_RUN" = true ]; then
-        print_status "DRY RUN: Would prompt for changelog entries and update CHANGELOG.md with version $NEW_VERSION"
-        return
+    if [ ! -f "$changelog_file" ]; then
+        return 1  # Changelog doesn't exist
     fi
 
+    # Check if there's a section for this version
+    if ! grep -q "^## \[$version\]" "$changelog_file"; then
+        return 1  # No entry for this version
+    fi
+
+    # Extract the content for this version and check if it has meaningful content
+    local version_content
+    version_content=$(sed -n "/^## \[$version\]/,/^## \[/p" "$changelog_file" | sed '$d' | tail -n +2)
+
+    # Check if the content has any bullet points (actual entries)
+    if echo "$version_content" | grep -q "^- "; then
+        return 0  # Has content
+    else
+        return 1  # Empty or no meaningful content
+    fi
+}
+
+# Function to create changelog entry template
+create_changelog_template() {
+    local version="$1"
     local changelog_file="CHANGELOG.md"
     local today=$(date +%Y-%m-%d)
 
-    # Check if changelog exists
     if [ ! -f "$changelog_file" ]; then
         print_error "CHANGELOG.md not found"
         return 1
     fi
 
-    # Interactive changelog entry collection
-    echo
-    print_status "=== CHANGELOG ENTRY FOR VERSION $NEW_VERSION ==="
-    echo
-    print_status "Please provide changelog entries for this release."
-    print_status "Press Enter to skip a section, or type entries one per line."
-    print_status "Type 'done' on a new line when finished with a section."
-    echo
-
-    # Initialize changelog sections
-    local added_entries=""
-    local changed_entries=""
-    local fixed_entries=""
-    local removed_entries=""
-
-    # Collect Added entries
-    echo "=== ADDED (new features) ==="
-    print_status "Enter new features added in this release:"
-    while IFS= read -r line; do
-        if [ -z "$line" ] || [ "$line" = "done" ]; then
-            break
-        fi
-        added_entries="${added_entries}- $line\n"
-    done
-
-    # Collect Changed entries
-    echo
-    echo "=== CHANGED (changes in existing functionality) ==="
-    print_status "Enter changes to existing functionality:"
-    while IFS= read -r line; do
-        if [ -z "$line" ] || [ "$line" = "done" ]; then
-            break
-        fi
-        changed_entries="${changed_entries}- $line\n"
-    done
-
-    # Collect Fixed entries
-    echo
-    echo "=== FIXED (bug fixes) ==="
-    print_status "Enter bug fixes:"
-    while IFS= read -r line; do
-        if [ -z "$line" ] || [ "$line" = "done" ]; then
-            break
-        fi
-        fixed_entries="${fixed_entries}- $line\n"
-    done
-
-    # Collect Removed entries
-    echo
-    echo "=== REMOVED (removed features) ==="
-    print_status "Enter removed features:"
-    while IFS= read -r line; do
-        if [ -z "$line" ] || [ "$line" = "done" ]; then
-            break
-        fi
-        removed_entries="${removed_entries}- $line\n"
-    done
-
     # Create a temporary file for the updated changelog
     local temp_changelog=$(mktemp)
 
-    # Build the changelog entry
-    local changelog_entry="## [$NEW_VERSION] - $today\n\n"
+    # Build the changelog template
+    local changelog_template="## [$version] - $today
 
-    if [ -n "$added_entries" ]; then
-        changelog_entry="${changelog_entry}### Added\n${added_entries}\n"
-    fi
+### Added
+-
 
-    if [ -n "$changed_entries" ]; then
-        changelog_entry="${changelog_entry}### Changed\n${changed_entries}\n"
-    fi
+### Changed
+-
 
-    if [ -n "$fixed_entries" ]; then
-        changelog_entry="${changelog_entry}### Fixed\n${fixed_entries}\n"
-    fi
+### Fixed
+-
 
-    if [ -n "$removed_entries" ]; then
-        changelog_entry="${changelog_entry}### Removed\n${removed_entries}\n"
-    fi
+### Removed
+-
 
-    # If no entries were provided, add a default entry
-    if [ -z "$added_entries" ] && [ -z "$changed_entries" ] && [ -z "$fixed_entries" ] && [ -z "$removed_entries" ]; then
-        changelog_entry="${changelog_entry}### Changed\n- Version bump to $NEW_VERSION\n\n"
-    fi
+"
 
-    # Read the changelog and update it
+    # Read the changelog and add the template
     {
         # Copy everything up to the [Unreleased] section
         sed -n '1,/## \[Unreleased\]/p' "$changelog_file"
 
-        # Add the new version section
+        # Add the new version template
         echo ""
-        echo -e "$changelog_entry"
+        echo "$changelog_template"
 
         # Copy the rest of the changelog (skip the old [Unreleased] section)
         sed -n '/## \[Unreleased\]/,$p' "$changelog_file" | tail -n +2
@@ -337,11 +291,54 @@ update_changelog() {
     # Replace the original changelog
     mv "$temp_changelog" "$changelog_file"
 
-    echo
-    print_success "CHANGELOG.md updated with version $NEW_VERSION"
-    print_status "Review the changelog entry above before the script continues."
-    echo
-    read -p "Press Enter to continue with the release process..."
+    return 0
+}
+
+# Function to validate changelog entry
+validate_changelog() {
+    print_status "Checking CHANGELOG.md for version $NEW_VERSION..."
+
+    if [ "$DRY_RUN" = true ]; then
+        print_status "DRY RUN: Would check if CHANGELOG.md has entry for version $NEW_VERSION"
+        return
+    fi
+
+    local changelog_file="CHANGELOG.md"
+
+    # Check if changelog exists
+    if [ ! -f "$changelog_file" ]; then
+        print_error "CHANGELOG.md not found"
+        return 1
+    fi
+
+    # Check if there's a meaningful entry for the new version
+    if check_changelog_entry "$NEW_VERSION"; then
+        print_success "CHANGELOG.md has entry for version $NEW_VERSION"
+        return 0
+    else
+        # No entry exists or it's empty, create template
+        print_warning "No changelog entry found for version $NEW_VERSION"
+        print_status "Creating changelog template..."
+
+        if create_changelog_template "$NEW_VERSION"; then
+            print_success "Created changelog template for version $NEW_VERSION"
+            echo
+            print_error "CHANGELOG.md has been updated with a template for version $NEW_VERSION"
+            print_status "Please:"
+            print_status "  1. Edit CHANGELOG.md and fill in the release notes"
+            print_status "  2. Remove empty sections (### Added, ### Changed, etc.) that you don't need"
+            print_status "  3. Add meaningful entries under the relevant sections"
+            print_status "  4. Run the release script again: $0 $*"
+            echo
+            print_status "Template location: $changelog_file"
+            print_status "Look for the section: ## [$NEW_VERSION] - $(date +%Y-%m-%d)"
+            echo
+            exit 1
+        else
+            print_error "Failed to create changelog template"
+            return 1
+        fi
+    fi
 }
 
 # Function to bump version
@@ -369,8 +366,8 @@ bump_version() {
     # Export for later use
     export NEW_VERSION="$new_version"
 
-    # Update changelog
-    update_changelog
+    # Validate changelog entry (will exit if not found/empty)
+    validate_changelog
 }
 
 # Function to clean build directories
@@ -966,7 +963,7 @@ show_summary() {
         print_status "What would happen in a real dual release:"
         echo "  - Version: $NEW_VERSION ($VERSION_TYPE)"
         echo "  - Packages: scxpand (CPU/MPS) and scxpand-cuda (CUDA)"
-        echo "  - Update CHANGELOG.md automatically"
+        echo "  - Check CHANGELOG.md for version entry (create template if missing)"
         echo "  - Commit message: 'Bump version to $NEW_VERSION and update CHANGELOG.md (dual package release)'"
         echo "  - Tag: v$NEW_VERSION"
         echo "  - Push to main branch"
@@ -988,7 +985,7 @@ show_summary() {
         echo "  - GitHub: https://github.com/yizhak-lab-ccg/scXpand/releases/tag/v$NEW_VERSION"
         echo "  - Changelog: https://github.com/yizhak-lab-ccg/scXpand/blob/main/CHANGELOG.md"
         echo
-        print_success "CHANGELOG.md automatically updated with version $NEW_VERSION"
+        print_success "CHANGELOG.md entry validated for version $NEW_VERSION"
         if [ "$SKIP_GITHUB_RELEASE" != true ]; then
             print_success "GitHub release automatically created at: https://github.com/yizhak-lab-ccg/scXpand/releases/tag/v$NEW_VERSION"
         fi

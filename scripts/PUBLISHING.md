@@ -12,7 +12,7 @@ This guide explains how to publish new versions of scXpand to PyPI.
   - [Prerequisites](#prerequisites)
   - [Usage](#usage)
   - [What the script does](#what-the-script-does)
-  - [Interactive Changelog Process](#interactive-changelog-process)
+  - [Changelog Workflow](#changelog-workflow)
   - [PyPI Token Requirements](#pypi-token-requirements)
 - [Troubleshooting](#troubleshooting)
 
@@ -122,17 +122,16 @@ This guide explains how to publish new versions of scXpand to PyPI.
    - Shows current and new version numbers
    - Supports patch (default), minor, and major version bumps
 
-3. **📝 Interactive Changelog Update**:
-   - **Prompts for changelog entries** organized by category:
+3. **📝 Changelog Validation**:
+   - **Checks for existing changelog entry** for the new version
+   - If no entry exists or it's empty, **creates a template** and exits
+   - **Template includes organized sections**:
      - **Added**: New features
      - **Changed**: Changes in existing functionality
      - **Fixed**: Bug fixes
      - **Removed**: Removed features
-   - You can press Enter to skip sections or type entries one per line
-   - Type 'done' to finish a section
-   - Automatically formats entries with proper markdown
-   - Updates CHANGELOG.md with version number and current date
-   - Shows preview and waits for confirmation before continuing
+   - You manually edit CHANGELOG.md with your preferred editor
+   - **Re-run the script** after filling in the changelog
 
 4. **Package Building**:
    - Cleans build directories
@@ -178,81 +177,87 @@ The `scxpand-cuda` package uses a sophisticated configuration to ensure CUDA PyT
 python scripts/create_cuda_pyproject.py -c cu124  # example for CUDA 12.4
 ```
 
-## Interactive Changelog Process
-
-### When You'll Be Prompted
-
-During the release process, **after version bumping but before building packages**, the script will prompt you to enter changelog entries interactively.
+## Changelog Workflow
 
 ### How It Works
 
-1. **The script will show:**
-   ```
-   === CHANGELOG ENTRY FOR VERSION 0.3.5 ===
+1. **First Run**: The script checks if CHANGELOG.md has an entry for the new version
+2. **If missing**: Creates a template and exits with instructions
+3. **Manual editing**: You edit CHANGELOG.md with your preferred editor
+4. **Second run**: Script validates the entry and continues with the release
 
-   Please provide changelog entries for this release.
-   Press Enter to skip a section, or type entries one per line.
-   Type 'done' on a new line when finished with a section.
-   ```
+### Step-by-Step Process
 
-2. **You'll be prompted for each category:**
+#### 1. Run the Release Script
+```bash
+./scripts/release.sh --patch
+```
 
-   **Added (new features):**
-   ```
-   === ADDED (new features) ===
-   Enter new features added in this release:
-   ```
-   - Type each new feature on a separate line
-   - Press Enter on an empty line to skip this section
-   - Type 'done' to finish this section
+#### 2. If No Changelog Entry Exists
+The script will:
+- Bump the version (e.g., 0.3.4 → 0.3.5)
+- Check CHANGELOG.md for a `## [0.3.5]` section
+- If not found or empty, create a template and exit with:
 
-   **Changed (changes in existing functionality):**
-   ```
-   === CHANGED (changes in existing functionality) ===
-   Enter changes to existing functionality:
-   ```
+```
+[ERROR] CHANGELOG.md has been updated with a template for version 0.3.5
+Please:
+  1. Edit CHANGELOG.md and fill in the release notes
+  2. Remove empty sections (### Added, ### Changed, etc.) that you don't need
+  3. Add meaningful entries under the relevant sections
+  4. Run the release script again: ./scripts/release.sh --patch
+```
 
-   **Fixed (bug fixes):**
-   ```
-   === FIXED (bug fixes) ===
-   Enter bug fixes:
-   ```
+#### 3. Edit the Changelog Template
+The script creates a template like this:
+```markdown
+## [0.3.5] - 2025-01-15
 
-   **Removed (removed features):**
-   ```
-   === REMOVED (removed features) ===
-   Enter removed features:
-   ```
+### Added
+-
 
-3. **Example interaction:**
-   ```
-   === ADDED (new features) ===
-   Enter new features added in this release:
-   New hyperparameter optimization for MLP models
-   Support for custom loss functions
-   done
+### Changed
+-
 
-   === CHANGED (changes in existing functionality) ===
-   Enter changes to existing functionality:
-   Improved memory efficiency in data loading
+### Fixed
+-
 
-   === FIXED (bug fixes) ===
-   Enter bug fixes:
-   Fixed CUDA memory leak in autoencoder training
-   Fixed validation metric calculation bug
-   done
+### Removed
+-
+```
 
-   === REMOVED (removed features) ===
-   Enter removed features:
-   [Press Enter to skip]
-   ```
+**Edit with your preferred editor:**
+```bash
+# Use any editor you prefer
+code CHANGELOG.md        # VS Code
+vim CHANGELOG.md         # Vim
+nano CHANGELOG.md        # Nano
+```
 
-4. **The script will:**
-   - Automatically format your entries with markdown bullets
-   - Add the current date
-   - Update CHANGELOG.md
-   - Show you a preview
-   - Wait for you to press Enter before continuing
+**Example filled template:**
+```markdown
+## [0.3.5] - 2025-01-15
+
+### Added
+- New hyperparameter optimization for MLP models
+- Support for custom loss functions
+
+### Changed
+- Improved memory efficiency in data loading
+
+### Fixed
+- Fixed CUDA memory leak in autoencoder training
+- Fixed validation metric calculation bug
+```
+
+#### 4. Re-run the Release Script
+```bash
+./scripts/release.sh --patch
+```
+
+The script will now:
+- Validate that the changelog has content
+- Continue with building, publishing, and creating GitHub releases
 
 ### Tips for Good Changelog Entries
 
@@ -260,14 +265,7 @@ During the release process, **after version bumping but before building packages
 - **User-focused**: Describe impact on users, not internal changes
 - **One feature per line**: Each bullet should be one distinct change
 - **Use active voice**: "Added support for..." vs "Support was added for..."
-
-### If You Skip All Sections
-
-If you press Enter for all sections without adding entries, the script will add a default entry:
-```markdown
-### Changed
-- Version bump to 0.3.5
-```
+- **Remove empty sections**: Delete `### Added`, `### Changed`, etc. sections you don't use
 
 ## PyPI Token Requirements
 
