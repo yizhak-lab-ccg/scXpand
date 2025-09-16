@@ -86,13 +86,14 @@ def evaluate_predictions_and_save(
         )
 
     # Compute and save evaluation metrics
+    plots_dir = save_path / "plots" if save_path is not None else None
     results = evaluate_and_save(
         y_true=y_true,
         y_pred_prob=y_pred_prob,
         obs_df=obs_df,
         eval_name=eval_name,
         save_path=save_path,
-        plots_dir=save_path / "plots",
+        plots_dir=plots_dir,
         score_metric=score_metric,
         trial=trial,
     )
