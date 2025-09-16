@@ -40,36 +40,37 @@ A framework for predicting T-cell clonal expansion from single-cell RNA sequenci
 ## Installation
 
 This section explains the two ways to install scXpand:
-- **Installing the Published Package**: For regular use.
-- **Local Development Setup**: For contributing or working with the source code.
+
+- **Installing the Published Package**: For regular use
+- **Local Development Setup**: For contributing or working with the source code
 
 ### Installing the Published Package
 
 scXpand is available in two variants to match your hardware:
 
-**If you have an NVIDIA GPU with CUDA support:**
+#### NVIDIA GPU with CUDA Support
 
-- With plain *pip* (add CUDA index):
+- **Using pip:**
   ```bash
   pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
   ```
-- With **uv**:
+- **Using uv:**
   ```bash
   uv pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
   ```
 
-**Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):**
+#### CPU, Apple Silicon, or Non-CUDA GPUs
 
-- With plain *pip*:
+- **Using pip:**
   ```bash
   pip install --upgrade scxpand
   ```
-- With **uv**:
+- **Using uv:**
   ```bash
   uv pip install --upgrade scxpand
   ```
 
-See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
+> 📖 See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
 
 ---
 
@@ -94,6 +95,7 @@ If you want to contribute or work with the latest source code, follow these step
      ```
 
 For more details, refer to the [installation guide](https://scxpand.readthedocs.io/en/latest/installation.html).
+
 ---
 
 ## Quick Start
