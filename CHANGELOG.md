@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.1.0
 
 ## [Unreleased]
 
-## [0.4.0] - 2025-09-16
+## [0.3.5] - 2025-09-16
+
+### Added
+- test release
+
 
 ### Added
 - Interactive changelog validation with template creation
