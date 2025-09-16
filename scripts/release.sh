@@ -297,6 +297,11 @@ bump_version() {
     current_version=$(uv version | cut -d' ' -f2)
     print_status "Current version: $current_version"
 
+    # Backup original pyproject.toml before version bump (for restoration on cancellation)
+    if [ "$DRY_RUN" = false ]; then
+        backup_original_pyproject
+    fi
+
     # Bump version in main pyproject.toml
     if [ "$DRY_RUN" = false ]; then
         uv version --bump "$VERSION_TYPE"
@@ -336,6 +341,23 @@ restore_pyproject() {
     if [ -f pyproject.toml.backup ]; then
         mv pyproject.toml.backup pyproject.toml
     fi
+}
+
+# Function to backup original pyproject.toml before version bump
+backup_original_pyproject() {
+    cp pyproject.toml pyproject.toml.original
+}
+
+# Function to restore original pyproject.toml (for version restoration)
+restore_original_pyproject() {
+    if [ -f pyproject.toml.original ]; then
+        mv pyproject.toml.original pyproject.toml
+    fi
+}
+
+# Function to clean up backup files after successful completion
+cleanup_backups() {
+    rm -f pyproject.toml.original pyproject.toml.backup
 }
 
 # Function to create CUDA variant of pyproject.toml using Python script
@@ -849,10 +871,15 @@ main() {
     trigger_readthedocs_build
     verify_releases
     show_summary
+
+    # Clean up backup files after successful completion
+    if [ "$DRY_RUN" = false ]; then
+        cleanup_backups
+    fi
 }
 
 # Trap to ensure cleanup on exit
-trap 'restore_pyproject; rm -f temp/pyproject-cuda*.toml pyproject-cuda-temp*.toml' EXIT
+trap 'restore_pyproject; restore_original_pyproject; rm -f temp/pyproject-cuda*.toml pyproject-cuda-temp*.toml' EXIT
 
 # Run main function
 main "$@"
