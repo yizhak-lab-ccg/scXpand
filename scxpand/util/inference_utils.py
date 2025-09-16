@@ -165,14 +165,13 @@ def run_model_inference(
 
 
 def setup_inference_environment(
-    model_type: ModelType | str, model_path: str | Path, device: str | None = None
+    model_type: ModelType | str, model_path: str | Path
 ) -> tuple[DataFormat, BaseEstimator | Module, torch.device | str]:
     """Setup the inference environment by loading data format, model, and determining device.
 
     Args:
         model_type: Type of model to setup
         model_path: Path to directory containing trained model and data format
-        device: Device for computation (e.g., 'cpu', 'cuda', 'mps'). If None, auto-detected
 
     Returns:
         Tuple of (data_format, model, device)

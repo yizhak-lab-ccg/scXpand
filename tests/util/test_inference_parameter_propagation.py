@@ -258,7 +258,6 @@ class TestFunctionSignatureCompatibility:
         assert "batch_size" in params
         assert "num_workers" in params
         assert "eval_row_inds" in params
-        assert "device" in params
 
         # Check default values
         assert params["adata"].default is None
@@ -267,7 +266,6 @@ class TestFunctionSignatureCompatibility:
         assert params["model_name"].default is None
         assert params["model_url"].default is None
         assert params["save_path"].default is None
-        assert params["device"].default is None
         assert params["batch_size"].default == 1024
         assert params["num_workers"].default == 4
         assert params["eval_row_inds"].default is None

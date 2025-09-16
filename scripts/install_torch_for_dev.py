@@ -2,6 +2,12 @@ import os
 import subprocess
 import sys
 
+
+# Add the project root to Python path to allow importing from scripts module
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from scripts.constants import CUDA_VERSION
 
 

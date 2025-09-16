@@ -13,8 +13,8 @@ scXpand is a framework for predicting T-cell clonal expansion from single-cell R
 
    user_guide
    tutorials
-   api_reference
    contributing
+   api/index
 
 ..
    The toctree below is for structuring the landing page, not the sidebar.
@@ -29,7 +29,7 @@ Features
 Quick Start
 -----------
 
-**Installation:**
+**Installation (Published Package):**
 
 If you have an NVIDIA GPU with CUDA support:
 
@@ -59,7 +59,7 @@ With **uv**:
 
    uv pip install --upgrade scxpand
 
-See the `full installation guide <https://scxpand.readthedocs.io/en/latest/installation.html>`_ for detailed setup instructions.
+See the :doc:`installation` for local development setup and other options.
 
 .. code-block:: python
 
@@ -77,10 +77,15 @@ See the `full installation guide <https://scxpand.readthedocs.io/en/latest/insta
        data_path="your_data.h5ad"
    )
 
+   # Access predictions
+   predictions = results.predictions
+   if results.has_metrics:
+       print(f"AUROC: {results.get_auroc():.3f}")
+
    # Or use the command line
    # scxpand inference --data_path your_data.h5ad --model_name pan_cancer_autoencoder
 
-See :doc:`installation` for different installation methods and :doc:`usage_examples` for more examples.
+See our :doc:`user_guide` for comprehensive usage instructions.
 
 Tutorials
 ------------

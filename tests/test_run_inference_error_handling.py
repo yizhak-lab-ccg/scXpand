@@ -179,13 +179,13 @@ class TestRunInferenceErrorHandling:
             mock_pipeline.return_value = None
 
             # Test with None parameters (should use defaults)
-            run_inference(adata=sample_adata, model_path="fake_path", save_path=None, eval_row_inds=None, device=None)
+            run_inference(adata=sample_adata, model_path="fake_path", save_path=None, eval_row_inds=None)
 
             mock_pipeline.assert_called_once()
             call_kwargs = mock_pipeline.call_args[1]
             assert call_kwargs["save_path"] is None
             assert call_kwargs["eval_row_inds"] is None
-            assert call_kwargs["device"] is None
+            assert "device" not in call_kwargs
 
     def test_run_inference_pipeline_exception(self, sample_adata):
         """Test run_inference when prediction pipeline raises exception."""
@@ -206,18 +206,6 @@ class TestRunInferenceErrorHandling:
             # Should propagate the exception
             with pytest.raises(RuntimeError, match="Download failed"):
                 run_inference(adata=sample_adata, model_name="fake_model")
-
-    def test_run_inference_invalid_device(self, sample_adata):
-        """Test run_inference with invalid device parameter (passed through to pipeline)."""
-        with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
-            mock_pipeline.return_value = None
-
-            # Test with invalid device string - should pass through to pipeline
-            run_inference(adata=sample_adata, model_path="fake_path", device="invalid_device")
-
-            mock_pipeline.assert_called_once()
-            call_kwargs = mock_pipeline.call_args[1]
-            assert call_kwargs["device"] == "invalid_device"
 
     def test_run_inference_large_batch_size(self, sample_adata):
         """Test run_inference with very large batch size."""
@@ -301,7 +289,6 @@ class TestRunInferenceErrorHandling:
         edge_cases = [
             {"batch_size": 1},  # Minimum batch size
             {"num_workers": 0},  # No multiprocessing
-            {"device": "cpu"},  # CPU device
             {"eval_row_inds": np.array([])},  # Empty eval indices
         ]
 

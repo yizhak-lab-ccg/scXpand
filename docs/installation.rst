@@ -3,15 +3,15 @@ Installation Guide
 
 .. note::
 
-   **There are two ways to install scXpand:**
+   This guide covers two installation methods:
 
-   - **Standard Installation** (recommended for most users):
-     Use this if you simply want to use scXpand for analysis or inference.
-   - **Development Setup** (for contributors/developers):
+   - **Installing the Published Package** (recommended for most users):
+     Use this if you want to use scXpand for analysis or inference.
+   - **Local Development Setup** (for contributors/developers):
      Use this if you want to contribute to scXpand or work with the latest source code from GitHub.
 
-Standard Installation
----------------------
+Installing the Published Package
+--------------------------------
 
 scXpand is available in two variants to match your hardware:
 

@@ -30,7 +30,6 @@ def fetch_model_and_run_inference(
     batch_size: int | None = None,
     num_workers: int = 4,
     eval_row_inds=None,
-    device: str | None = None,
 ) -> InferenceResults:
     """Internal function for running inference with pre-trained models.
 
@@ -47,7 +46,6 @@ def fetch_model_and_run_inference(
         batch_size: Batch size for inference (uses model default if None)
         num_workers: Number of workers for data loading
         eval_row_inds: Specific cell indices to evaluate (None for all cells)
-        device: Device for computation (e.g., 'cpu', 'cuda', 'mps'). If None, auto-detected
 
     Returns:
         InferenceResults: Structured results containing predictions, metrics (if available), and model info
@@ -111,7 +109,6 @@ def fetch_model_and_run_inference(
         batch_size=batch_size,
         num_workers=num_workers,
         eval_row_inds=eval_row_inds,
-        device=device,
     )
 
     # Load actual model type from model_type.txt file

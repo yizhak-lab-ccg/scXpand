@@ -161,6 +161,6 @@ html_theme_options = {
         "image_dark": "https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_logo_gray.png",
     },
     "show_navbar_depth": 1,
-    "pygments_light_style": "github-light",
-    "pygments_dark_style": "github-dark",
+    "pygments_light_style": "friendly",
+    "pygments_dark_style": "monokai",
 }

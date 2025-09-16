@@ -11,7 +11,7 @@
     <a href="https://scxpand.readthedocs.io/en/latest/" style="margin: 0 8px;">Documentation</a> •
     <a href="#installation" style="margin: 0 8px;">Installation</a> •
     <a href="#quick-start" style="margin: 0 8px;">Quick Start</a> •
-    <a href="https://scxpand.readthedocs.io/en/latest/usage_examples.html" style="margin: 0 8px;">Examples</a> •
+    <a href="https://scxpand.readthedocs.io/en/latest/user_guide.html" style="margin: 0 8px;">Usage Guide</a> •
     <a href="#citation" style="margin: 0 8px;">Citation</a>
   </p>
 </div>
@@ -39,36 +39,62 @@ A framework for predicting T-cell clonal expansion from single-cell RNA sequenci
 
 ## Installation
 
+This section explains the two ways to install scXpand:
+- **Installing the Published Package**: For regular use.
+- **Local Development Setup**: For contributing or working with the source code.
+
+### Installing the Published Package
+
 scXpand is available in two variants to match your hardware:
 
 **If you have an NVIDIA GPU with CUDA support:**
 
-With plain *pip* (add CUDA index):
-
-```bash
-pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
-```
-
-With **uv**:
-
-```bash
-uv pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
-```
+- With plain *pip* (add CUDA index):
+  ```bash
+  pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
+  ```
+- With **uv**:
+  ```bash
+  uv pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
+  ```
 
 **Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):**
 
-With plain *pip*:
-
-```bash
-pip install --upgrade scxpand
-```
-
-With **uv**:
-```bash
-uv pip install --upgrade scxpand
-```
+- With plain *pip*:
+  ```bash
+  pip install --upgrade scxpand
+  ```
+- With **uv**:
+  ```bash
+  uv pip install --upgrade scxpand
+  ```
 
 See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
+
+---
+
+### Local Development Setup
+
+If you want to contribute or work with the latest source code, follow these steps:
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yizhak-lab-ccg/scXpand.git
+   cd scXpand
+   ```
+
+2. **Run the install script:**
+   - **Windows PowerShell:**
+     ```bash
+     .\install.bat
+     ```
+   - **macOS/Linux:**
+     ```bash
+     ./install.sh
+     ```
+
+For more details, refer to the [installation guide](https://scxpand.readthedocs.io/en/latest/installation.html).
+---
 
 ## Quick Start
 
@@ -86,6 +112,11 @@ results = scxpand.run_inference(
     model_name="pan_cancer_autoencoder",  # default model
     data_path="your_data.h5ad"
 )
+
+# Access predictions
+predictions = results.predictions
+if results.has_metrics:
+    print(f"AUROC: {results.get_auroc():.3f}")
 ```
 
 
@@ -94,19 +125,22 @@ results = scxpand.run_inference(
 See our **[Tutorial Notebook](docs/notebooks/scxpand_tutorial.ipynb)** for a complete example with data preprocessing, T-cell filtering, gene ID conversion, and model application using a real breast cancer dataset.
 
 
-**Getting Started:**
-- **[Development Guide](docs/installation.rst)** - Setup for local development of scXpand
-- **[Usage Examples](docs/usage_examples.rst)** - Detailed tutorials and CLI examples
-- **[Data Format](docs/data_format.rst)** - Input data requirements and specifications
+**Setup & Getting Started:**
+- **[Installation Guide](https://scxpand.readthedocs.io/en/latest/installation.html)** - Setup for local development of scXpand
+- **[User Guide](https://scxpand.readthedocs.io/en/latest/user_guide.html)** - Quick start and comprehensive workflow guide
+- **[Data Format](https://scxpand.readthedocs.io/en/latest/data_format.html)** - Input data requirements and specifications
 
-**Model Training & Optimization:**
-- **[Model Architectures](docs/model_architectures.rst)** - Detailed architecture descriptions and configurations
-- **[Hyperparameter Optimization](docs/hyperparameter_optimization.rst)** - Automated model tuning with Optuna
-- **[Data Pipeline](docs/data_pipeline.rst)** - Preprocessing and normalization details
+**Using Pre-trained Models:**
+- **[Model Inference](https://scxpand.readthedocs.io/en/latest/model_inference.html)** - Run predictions on new data with pre-trained models
 
-**Analysis & Evaluation:**
-- **[Evaluation Metrics](docs/evaluation_metrics.rst)** - Performance assessment and stratified analysis
-- **[Output Format](docs/output_format.rst)** - Understanding model outputs and results
+**Training Your Own Models:**
+- **[Model Training](https://scxpand.readthedocs.io/en/latest/model_training.html)** - Train models with CLI and programmatic API
+- **[Hyperparameter Optimization](https://scxpand.readthedocs.io/en/latest/hyperparameter_optimization.html)** - Automated model tuning with Optuna
+
+**Understanding Results:**
+- **[Model Architectures](https://scxpand.readthedocs.io/en/latest/model_architectures.html)** - Detailed architecture descriptions and configurations
+- **[Evaluation Metrics](https://scxpand.readthedocs.io/en/latest/evaluation_metrics.html)** - Performance assessment and interpretation
+- **[Output Format](https://scxpand.readthedocs.io/en/latest/output_format.html)** - Understanding model outputs and results
 
 **[📖 Full Documentation](https://scxpand.readthedocs.io/en/latest/)** - Complete guides, API reference, and interactive tutorials
 

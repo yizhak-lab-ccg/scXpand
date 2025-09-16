@@ -90,9 +90,7 @@ class TestRunInferenceIntegration:
             )
 
             # Run inference
-            results = run_inference(
-                adata=sample_adata, model_path=str(mock_model_path), batch_size=32, num_workers=2, device="cpu"
-            )
+            results = run_inference(adata=sample_adata, model_path=str(mock_model_path), batch_size=32, num_workers=2)
 
             # Verify results
             assert isinstance(results, InferenceResults)
@@ -106,7 +104,6 @@ class TestRunInferenceIntegration:
             assert call_kwargs["adata"] is sample_adata
             assert call_kwargs["batch_size"] == 32
             assert call_kwargs["num_workers"] == 2
-            assert call_kwargs["device"] == "cpu"
 
     def test_run_inference_with_data_path(self, sample_adata, mock_model_path, tmp_path):
         """Test run_inference with data_path instead of adata."""
@@ -268,7 +265,6 @@ class TestRunInferenceIntegration:
             call_kwargs = mock_pipeline.call_args[1]
             assert call_kwargs["batch_size"] == 1024  # Default batch size
             assert call_kwargs["num_workers"] == 4  # Default num_workers
-            assert call_kwargs["device"] is None  # Default device (auto-detect)
             assert call_kwargs["eval_row_inds"] is None  # Default eval_row_inds
 
     def test_run_inference_with_missing_expansion_column(self, sample_adata, mock_model_path):
@@ -319,22 +315,19 @@ class TestRunInferenceIntegration:
             stratified_keys = [key for key in results.metrics if "__" in key]
             assert len(stratified_keys) > 0
 
-    def test_run_inference_device_parameter(self, sample_adata, mock_model_path):
-        """Test run_inference with different device parameters."""
-        test_devices = ["cpu", "cuda", "mps", None]
+    def test_run_inference_auto_device_detection(self, sample_adata, mock_model_path):
+        """Test run_inference with automatic device detection."""
+        with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
+            mock_predictions = np.random.random(len(sample_adata))
+            mock_pipeline.return_value = InferenceResults(predictions=mock_predictions, metrics={"AUROC": 0.85})
 
-        for device in test_devices:
-            with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
-                mock_predictions = np.random.random(len(sample_adata))
-                mock_pipeline.return_value = InferenceResults(predictions=mock_predictions, metrics={"AUROC": 0.85})
+            # Run inference without device parameter (auto-detection)
+            _results = run_inference(adata=sample_adata, model_path=str(mock_model_path))
 
-                # Run inference with specific device
-                _results = run_inference(adata=sample_adata, model_path=str(mock_model_path), device=device)
-
-                # Verify device parameter was passed
-                mock_pipeline.assert_called_once()
-                call_kwargs = mock_pipeline.call_args[1]
-                assert call_kwargs["device"] == device
+            # Verify device parameter was not passed (auto-detection happens internally)
+            mock_pipeline.assert_called_once()
+            call_kwargs = mock_pipeline.call_args[1]
+            assert "device" not in call_kwargs
 
     def test_run_inference_batch_size_variations(self, sample_adata, mock_model_path):
         """Test run_inference with different batch sizes."""

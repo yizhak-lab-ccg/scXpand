@@ -1,15 +1,23 @@
+"""Hyperparameter configuration functions for Optuna optimization.
+
+This module defines the parameter search spaces for all supported model types.
+Each function suggests hyperparameters for a specific model architecture using
+Optuna's trial.suggest_* methods with appropriate ranges and distributions.
+"""
+
 import optuna
 
 from scxpand.lightgbm.lightgbm_params import BoostingType, MetricType, ObjectiveType
 from scxpand.util.classes import LRSchedulerType, SamplerType
 
 
-# Fixed choices for Optuna categorical parameter, stored as strings for persistence
+# Fixed choices for auxiliary categorical tasks, stored as strings for Optuna persistence
+# These represent additional classification tasks that can be learned alongside the main task
 AUX_CATEGORICAL_OPTIONS = (
-    "none",
-    "tissue_type",
-    "imputed_labels",
-    "tissue_type,imputed_labels",
+    "none",  # No auxiliary tasks
+    "tissue_type",  # Predict tissue type from gene expression
+    "imputed_labels",  # Predict imputed cell type labels
+    "tissue_type,imputed_labels",  # Both auxiliary tasks simultaneously
 )
 
 
@@ -60,57 +68,96 @@ def create_optimized_lr_scheduler_config(
     elif lr_scheduler_type == LRSchedulerType.CONSTANT_LR.value:
         # ConstantLR maintains the same learning rate throughout training
         lr_scheduler_config.update({})
-    # NoScheduler needs no additional params
 
     return lr_scheduler_config
 
 
 def configure_mlp_trial_params(trial: optuna.Trial) -> dict:
-    """Suggest MLP parameters (prefixed for Optuna) and return them unprefixed."""
+    """Configure MLP (Multi-layer Perceptron) hyperparameters for Optuna optimization.
+
+    This function defines the search space for neural network hyperparameters including:
+    - Architecture: Number of layers (2-5) and layer sizes (512-4096 units)
+    - Training: Learning rate (1e-5 to 1e-3), batch size (2048 or 4096), 30 epochs
+    - Regularization: Dropout (0.1-0.3), weight decay (1e-5 to 1e-2), data augmentation
+    - Optimization: Adam optimizer with configurable learning rate schedulers
+    - Advanced: Soft loss, auxiliary tasks, balanced sampling strategies
+
+    Args:
+        trial: Optuna trial object for parameter suggestion
+
+    Returns:
+        Dictionary of MLP parameters (unprefixed for model instantiation)
+    """
+    # Data preprocessing: log transform can help with gene expression data distribution
     use_log_transform = trial.suggest_categorical("mlp_use_log_transform", (True, False))
+
+    # Training configuration: fixed 30 epochs for consistent comparison across trials
+    # This provides sufficient training time while keeping optimization tractable
     n_epochs = 30
-    init_learning_rate = trial.suggest_float("mlp_init_learning_rate", 1e-5, 1e-3, log=True)  # More conservative
+
+    # Learning rate: conservative range (1e-5 to 1e-3) based on neural network best practices
+    # Log-uniform distribution allows exploration of different orders of magnitude
+    # Lower bound prevents gradient explosion, upper bound ensures stable convergence
+    init_learning_rate = trial.suggest_float("mlp_init_learning_rate", 1e-5, 1e-3, log=True)
+
+    # Batch size: larger batches (2048, 4096) for stable gradient estimates
+    # These sizes balance memory usage with gradient stability for gene expression data
     train_batch_size = trial.suggest_categorical("mlp_train_batch_size", (2048, 4096))
+
+    # Regularization: moderate dropout to prevent overfitting without losing capacity
     dropout_rate = trial.suggest_float("mlp_dropout_rate", 0.1, 0.3)
+
+    # Architecture: 2-5 layers provides good expressiveness without excessive complexity
     num_layers = trial.suggest_int("mlp_num_layers", 2, 5)
+
+    # Weight decay: L2 regularization with log-uniform distribution
     weight_decay = trial.suggest_float("mlp_weight_decay", 1e-5, 1e-2, log=True)
-    mask_rate = trial.suggest_float("mlp_mask_rate", 0.05, 0.3)
-    noise_std = trial.suggest_float("mlp_noise_std", 1e-5, 1e-3, log=True)
+
+    # Data augmentation: masking and noise injection for robustness
+    mask_rate = trial.suggest_float("mlp_mask_rate", 0.05, 0.3)  # 5-30% feature masking
+    noise_std = trial.suggest_float("mlp_noise_std", 1e-5, 1e-3, log=True)  # Gaussian noise
+
+    # Class balancing: handle imbalanced datasets
     positives_weight = trial.suggest_float("mlp_positives_weight", 0.1, 10.0)
+
+    # Soft loss: alternative loss function that can improve generalization
     use_soft_loss = trial.suggest_categorical("mlp_use_soft_loss", (True, False))
+    # Sampling strategy: different approaches for handling class imbalance
     sampler_type_str = trial.suggest_categorical(
         "mlp_sampler_type",
         (SamplerType.BALANCED_LABELS.value, SamplerType.BALANCED_TYPES.value, SamplerType.RANDOM.value),
     )
     sampler_type = SamplerType(sampler_type_str)
 
-    # Set inference batch size equal to train batch size
+    # Inference configuration: match training batch size for consistency
     inference_batch_size = train_batch_size
 
+    # Auxiliary task weight: balance between main task and auxiliary classification
     cat_loss_weight = trial.suggest_float("mlp_cat_loss_weight", 0.1, 10.0, log=True)
 
-    # Learning rate scheduler parameters
+    # Learning rate scheduling: various strategies for adaptive learning rates
     lr_scheduler_type_str = trial.suggest_categorical(
         "mlp_lr_scheduler_type",
         (
-            LRSchedulerType.REDUCE_LR_ON_PLATEAU.value,
-            LRSchedulerType.ONE_CYCLE_LR.value,
-            LRSchedulerType.STEP_LR.value,
-            LRSchedulerType.COSINE_ANNEALING_LR.value,
-            LRSchedulerType.CONSTANT_LR.value,
-            LRSchedulerType.NO_SCHEDULER.value,
+            LRSchedulerType.REDUCE_LR_ON_PLATEAU.value,  # Reduce on plateau
+            LRSchedulerType.ONE_CYCLE_LR.value,  # One cycle policy
+            LRSchedulerType.STEP_LR.value,  # Step decay
+            LRSchedulerType.COSINE_ANNEALING_LR.value,  # Cosine annealing
+            LRSchedulerType.CONSTANT_LR.value,  # Constant rate
+            LRSchedulerType.NO_SCHEDULER.value,  # No scheduling
         ),
     )
     lr_scheduler_type = LRSchedulerType(lr_scheduler_type_str)
 
-    # Adam optimizer parameters
-    adam_beta1 = trial.suggest_float("mlp_adam_beta1", 0.8, 0.95)
-    adam_beta2 = trial.suggest_float("mlp_adam_beta2", 0.95, 0.999)
+    # Adam optimizer: momentum parameters for adaptive learning
+    adam_beta1 = trial.suggest_float("mlp_adam_beta1", 0.8, 0.95)  # First moment decay
+    adam_beta2 = trial.suggest_float("mlp_adam_beta2", 0.95, 0.999)  # Second moment decay
     adam_betas = (adam_beta1, adam_beta2)
 
+    # Generate scheduler-specific configuration with optimized parameters
     lr_scheduler_config = create_optimized_lr_scheduler_config(trial, lr_scheduler_type, n_epochs, "mlp_")
 
-    # Auxiliary categorical types for classification - use fixed choices directly
+    # Auxiliary tasks: additional classification objectives for multi-task learning
     aux_categorical_types_str = trial.suggest_categorical(
         "mlp_aux_categorical_types",
         AUX_CATEGORICAL_OPTIONS,
@@ -120,11 +167,14 @@ def configure_mlp_trial_params(trial: optuna.Trial) -> dict:
     else:
         aux_categorical_types = tuple(aux_categorical_types_str.split(","))
 
+    # Layer architecture: variable number of layers with configurable sizes
     layer_units = []
     for i in range(num_layers):
         layer_name = f"mlp_layer_{i}_units"
         units = trial.suggest_categorical(layer_name, (512, 1024, 2048, 4096))
         layer_units.append(units)
+
+    # Soft loss parameters: only used when soft loss is enabled
     soft_loss_beta = 1.0
     soft_loss_start_epoch = -1
     if use_soft_loss:
@@ -156,61 +206,87 @@ def configure_mlp_trial_params(trial: optuna.Trial) -> dict:
 
 
 def configure_ae_trial_params(trial: optuna.Trial) -> dict:
-    """Suggest autoencoder parameters for Optuna trials.
+    """Configure Autoencoder hyperparameters for Optuna optimization.
 
-    Optimizes both:
-    - model_type: autoencoder architecture ('standard' or 'fork')
-    - loss_type: loss function ('zinb', 'nb', 'mse')
+    This function defines the search space for autoencoder hyperparameters including:
+    - Architecture: Standard vs fork variants, encoder/decoder layers (1-3), latent dimensions (16-128)
+    - Loss Functions: MSE (mean squared error), NB (negative binomial), ZINB (zero-inflated negative binomial)
+    - Training: Learning rate (1e-6 to 1e-3), batch size (2048 or 4096), 30 epochs
+    - Regularization: Dropout (0.1-0.5), L1/L2 regularization, data augmentation
+    - Multi-task: Configurable loss weights for reconstruction, classification, and auxiliary tasks
+
+    Args:
+        trial: Optuna trial object for parameter suggestion
+
+    Returns:
+        Dictionary of autoencoder parameters (unprefixed for model instantiation)
     """
+    # Data preprocessing: log transform for gene expression data normalization
     use_log_transform = trial.suggest_categorical("ae_use_log_transform", (True, False))
+
+    # Training configuration: fixed 30 epochs for consistent comparison
     n_epochs = 30
-    init_learning_rate = trial.suggest_float("ae_init_learning_rate", 1e-6, 1e-3, log=True)  # Ultra-conservative range
+
+    # Learning rate: ultra-conservative range (1e-6 to 1e-3) for autoencoder stability
+    # Autoencoders can be sensitive to learning rate, especially with reconstruction loss
+    # Lower bound prevents reconstruction instability, upper bound ensures convergence
+    init_learning_rate = trial.suggest_float("ae_init_learning_rate", 1e-6, 1e-3, log=True)
+
+    # Batch size: larger batches for stable reconstruction learning
     train_batch_size = trial.suggest_categorical("ae_train_batch_size", (2048, 4096))
+
+    # Sampling strategy: handle class imbalance in multi-task learning
     sampler_type_str = trial.suggest_categorical(
         "ae_sampler_type",
         (SamplerType.BALANCED_LABELS.value, SamplerType.BALANCED_TYPES.value, SamplerType.RANDOM.value),
     )
     sampler_type = SamplerType(sampler_type_str)
 
-    # Set inference batch size equal to train batch size
+    # Inference configuration: match training batch size
     inference_batch_size = train_batch_size
 
-    # Learning rate scheduler parameters
+    # Learning rate scheduling: adaptive learning rates for complex autoencoder training
     lr_scheduler_type_str = trial.suggest_categorical(
         "ae_lr_scheduler_type",
         (
-            LRSchedulerType.REDUCE_LR_ON_PLATEAU.value,
-            LRSchedulerType.ONE_CYCLE_LR.value,
-            LRSchedulerType.STEP_LR.value,
-            LRSchedulerType.COSINE_ANNEALING_LR.value,
-            LRSchedulerType.CONSTANT_LR.value,
-            LRSchedulerType.NO_SCHEDULER.value,
+            LRSchedulerType.REDUCE_LR_ON_PLATEAU.value,  # Reduce on plateau
+            LRSchedulerType.ONE_CYCLE_LR.value,  # One cycle policy
+            LRSchedulerType.STEP_LR.value,  # Step decay
+            LRSchedulerType.COSINE_ANNEALING_LR.value,  # Cosine annealing
+            LRSchedulerType.CONSTANT_LR.value,  # Constant rate
+            LRSchedulerType.NO_SCHEDULER.value,  # No scheduling
         ),
     )
     lr_scheduler_type = LRSchedulerType(lr_scheduler_type_str)
 
-    # Adam optimizer parameters
-    adam_beta1 = trial.suggest_float("ae_adam_beta1", 0.8, 0.95)
-    adam_beta2 = trial.suggest_float("ae_adam_beta2", 0.95, 0.999)
+    # Adam optimizer: momentum parameters for stable autoencoder training
+    adam_beta1 = trial.suggest_float("ae_adam_beta1", 0.8, 0.95)  # First moment decay
+    adam_beta2 = trial.suggest_float("ae_adam_beta2", 0.95, 0.999)  # Second moment decay
     adam_betas = (adam_beta1, adam_beta2)
 
-    # LR scheduler config (type-specific parameters with optimization)
+    # Generate scheduler-specific configuration with optimized parameters
     lr_scheduler_config = create_optimized_lr_scheduler_config(trial, lr_scheduler_type, n_epochs, "ae_")
 
-    # Architecture and loss type params
-    model_type = trial.suggest_categorical("ae_model_type", ("standard", "fork"))  # autoencoder type
-    loss_type = trial.suggest_categorical("ae_loss_type", ("mse", "nb", "zinb"))  # MSE first for stability
+    # Architecture variants: different autoencoder designs
+    model_type = trial.suggest_categorical("ae_model_type", ("standard", "fork"))  # Standard vs fork architecture
+
+    # Loss functions: different approaches for count data modeling
+    loss_type = trial.suggest_categorical(
+        "ae_loss_type", ("mse", "nb", "zinb")
+    )  # MSE, Negative Binomial, Zero-inflated NB
+
+    # Latent dimension: bottleneck size affects reconstruction quality vs compression
     latent_dim = trial.suggest_categorical("ae_latent_dim", (16, 32, 64, 128))
 
-    # Loss weights
-    recon_loss_weight = trial.suggest_float("ae_recon_loss_weight", 0.1, 10.0, log=True)
-    cls_loss_weight = trial.suggest_float("ae_cls_loss_weight", 0.1, 10.0, log=True)
-    cat_loss_weight = trial.suggest_float("ae_cat_loss_weight", 0.1, 10.0, log=True)
+    # Multi-task loss weights: balance reconstruction vs classification objectives
+    recon_loss_weight = trial.suggest_float("ae_recon_loss_weight", 0.1, 10.0, log=True)  # Reconstruction loss weight
+    cls_loss_weight = trial.suggest_float("ae_cls_loss_weight", 0.1, 10.0, log=True)  # Classification loss weight
+    cat_loss_weight = trial.suggest_float("ae_cat_loss_weight", 0.1, 10.0, log=True)  # Auxiliary task loss weight
 
-    # Data augmentation params
-    mask_rate = trial.suggest_float("ae_mask_rate", 0.05, 0.5)
-    noise_std = trial.suggest_float("ae_noise_std", 1e-5, 1e-3, log=True)
-    positives_weight = trial.suggest_float("ae_positives_weight", 0.1, 10.0)
+    # Data augmentation: improve robustness and prevent overfitting
+    mask_rate = trial.suggest_float("ae_mask_rate", 0.05, 0.5)  # 5-50% feature masking (higher range than MLP)
+    noise_std = trial.suggest_float("ae_noise_std", 1e-5, 1e-3, log=True)  # Gaussian noise injection
+    positives_weight = trial.suggest_float("ae_positives_weight", 0.1, 10.0)  # Class balancing
 
     # Encoder hidden dims
     encoder_num_layers = trial.suggest_int("ae_encoder_num_layers", 1, 3)
@@ -288,6 +364,8 @@ def configure_ae_trial_params(trial: optuna.Trial) -> dict:
         "soft_loss_beta": soft_loss_beta,
         "soft_loss_start_epoch": soft_loss_start_epoch,
     }
+    # Ridge regularization: L2 penalty on zero-inflation parameters (pi)
+    # Only added to params when using ZINB loss, but ridge_lambda exists in AutoEncoderParams for all loss types
     if loss_type == "zinb":
         params["ridge_lambda"] = trial.suggest_float("ae_ridge_lambda", 1e-4, 1e-1, log=True)
 
@@ -295,29 +373,67 @@ def configure_ae_trial_params(trial: optuna.Trial) -> dict:
 
 
 def configure_logistic_trial_params(trial: optuna.Trial) -> dict:
-    """Suggest Logistic Regression parameters (prefixed) and return them unprefixed."""
+    """Configure Logistic Regression hyperparameters for Optuna optimization.
+
+    This function defines the search space for logistic regression hyperparameters including:
+    - Optimization: SGD with 30 epochs, learning rates 1e-5 to 1e-2 (log-uniform)
+    - Regularization: L2 and elasticnet penalties (alpha: 1e-6 to 1e-1)
+    - Scheduling: Multiple learning rate schedules (optimal, constant, invscaling, adaptive)
+    - Data: Optional log transform, configurable batch sizes (512-2048)
+    - Features: Warm start, averaging, early stopping, data augmentation
+
+    Args:
+        trial: Optuna trial object for parameter suggestion
+
+    Returns:
+        Dictionary of logistic regression parameters (unprefixed for model instantiation)
+    """
+    # Data preprocessing: log transform for gene expression data normalization
     use_log_transform = trial.suggest_categorical("logistic_use_log_transform", (True, False))
-    # L2 and elasticnet are most stable for logistic regression with SGD
+
+    # Regularization: L2 and elasticnet are most stable for logistic regression with SGD
     penalty = trial.suggest_categorical("logistic_penalty", ("l2", "elasticnet"))
-    alpha = trial.suggest_float("logistic_alpha", 1e-6, 1e-1, log=True)  # More conservative range
+
+    # Regularization strength: conservative range for stable convergence
+    alpha = trial.suggest_float("logistic_alpha", 1e-6, 1e-1, log=True)
+
+    # Training configuration: fixed 30 epochs for consistent comparison across model types
+    # Provides sufficient training time while maintaining optimization efficiency
     n_epochs = 30
-    tol = trial.suggest_float("logistic_tol", 1e-6, 1e-3, log=True)  # Tighter tolerance range
+
+    # Convergence tolerance: tighter range for precise optimization
+    tol = trial.suggest_float("logistic_tol", 1e-6, 1e-3, log=True)
+
+    # Class balancing: handle imbalanced datasets
     class_weight = trial.suggest_categorical("logistic_class_weight", ("balanced", None))
+
+    # Batch size: smaller batches for SGD stability
     batch_size = trial.suggest_categorical("logistic_batch_size", (512, 1024, 2048))
+    # Sampling strategy: handle class imbalance in SGD training
     sampler_type_str = trial.suggest_categorical(
         "logistic_sampler_type",
         (SamplerType.BALANCED_LABELS.value, SamplerType.BALANCED_TYPES.value, SamplerType.RANDOM.value),
     )
     sampler_type = SamplerType(sampler_type_str)
 
-    # Learning rate and optimizer parameters - aligned with scikit-learn defaults
+    # Learning rate configuration: aligned with scikit-learn SGD defaults
+    # Range (1e-5 to 1e-2) balances convergence speed with stability for linear models
     init_learning_rate = trial.suggest_float("logistic_init_learning_rate", 1e-5, 1e-2, log=True)
+
+    # Learning rate scheduling: different strategies for adaptive learning
     learning_rate = trial.suggest_categorical(
         "logistic_learning_rate", ("optimal", "constant", "invscaling", "adaptive")
     )
-    # eta0 is only used when learning_rate is not 'optimal'
-    eta0 = trial.suggest_float("logistic_eta0", 1e-3, 1.0, log=True)  # Better range for initial learning rate
-    power_t = trial.suggest_float("logistic_power_t", 0.25, 0.75)  # More focused around default 0.5
+    # optimal: adaptive learning rate based on regularization
+    # constant: fixed learning rate
+    # invscaling: inverse scaling with power_t
+    # adaptive: adaptive learning rate that decreases on plateau
+
+    # Initial learning rate: only used when learning_rate is not 'optimal'
+    eta0 = trial.suggest_float("logistic_eta0", 1e-3, 1.0, log=True)
+
+    # Power parameter: controls inverse scaling decay (default 0.5)
+    power_t = trial.suggest_float("logistic_power_t", 0.25, 0.75)
 
     # Learning rate scheduler parameters
     lr_scheduler_type_str = trial.suggest_categorical(
@@ -337,11 +453,11 @@ def configure_logistic_trial_params(trial: optuna.Trial) -> dict:
     # SGD-specific parameters - aligned with scikit-learn recommendations
     warm_start = trial.suggest_categorical("logistic_warm_start", (True, False))
     average = trial.suggest_categorical("logistic_average", (True, False))
-    # Note: n_iter_no_change and validation_fraction are only used with early_stopping=True
-    # but we include them for potential future use or different training strategies
+    # Note: n_iter_no_change and validation_fraction are included for completeness
+    # but are not used in the current implementation since early_stopping=False with partial_fit()
     n_iter_no_change = trial.suggest_int("logistic_n_iter_no_change", 3, 10)
     validation_fraction = trial.suggest_float("logistic_validation_fraction", 0.05, 0.2)
-    # Note: early_stopping is always False when using partial_fit() - set in LinearClassifierParam
+    # Note: early_stopping is always False when using partial_fit() - set in model initialization
 
     # Additional regularization parameters
     fit_intercept = trial.suggest_categorical("logistic_fit_intercept", (True, False))
@@ -388,14 +504,43 @@ def configure_logistic_trial_params(trial: optuna.Trial) -> dict:
 
 
 def configure_svm_trial_params(trial: optuna.Trial) -> dict:
-    """Suggest SVM parameters (prefixed) and return them unprefixed."""
+    """Configure SVM (Support Vector Machine) hyperparameters for Optuna optimization.
+
+    This function defines the search space for SVM hyperparameters including:
+    - Optimization: SGD with 30 epochs, learning rates 1e-5 to 1e-2 (log-uniform)
+    - Regularization: L2 and elasticnet penalties (alpha: 1e-6 to 1e-1)
+    - Scheduling: Multiple learning rate schedules (optimal, constant, invscaling, adaptive)
+    - Data: Optional log transform, configurable batch sizes (512-2048)
+    - Features: Warm start, averaging, early stopping, data augmentation
+
+    Note: SVM uses hinge loss, which only supports L2 and elasticnet penalties (not L1).
+
+    Args:
+        trial: Optuna trial object for parameter suggestion
+
+    Returns:
+        Dictionary of SVM parameters (unprefixed for model instantiation)
+    """
+    # Data preprocessing: log transform for gene expression data normalization
     use_log_transform = trial.suggest_categorical("svm_use_log_transform", (True, False))
-    # For SVM (hinge loss), L1 penalty is not supported - only L2 and elasticnet
+
+    # Regularization: For SVM (hinge loss), L1 penalty is not supported - only L2 and elasticnet
     penalty = trial.suggest_categorical("svm_penalty", ("l2", "elasticnet"))
-    alpha = trial.suggest_float("svm_alpha", 1e-6, 1e-1, log=True)  # More conservative range for SVM
+
+    # Regularization strength: conservative range for SVM stability
+    alpha = trial.suggest_float("svm_alpha", 1e-6, 1e-1, log=True)
+
+    # Training configuration: fixed 30 epochs for consistent comparison across model types
+    # Provides sufficient training time while maintaining optimization efficiency
     n_epochs = 30
-    tol = trial.suggest_float("svm_tol", 1e-6, 1e-3, log=True)  # Tighter tolerance range
+
+    # Convergence tolerance: tighter range for precise optimization
+    tol = trial.suggest_float("svm_tol", 1e-6, 1e-3, log=True)
+
+    # Class balancing: handle imbalanced datasets
     class_weight = trial.suggest_categorical("svm_class_weight", ("balanced", None))
+
+    # Batch size: smaller batches for SGD stability
     batch_size = trial.suggest_categorical("svm_batch_size", (512, 1024, 2048))
     sampler_type_str = trial.suggest_categorical(
         "svm_sampler_type",
@@ -404,6 +549,7 @@ def configure_svm_trial_params(trial: optuna.Trial) -> dict:
     sampler_type = SamplerType(sampler_type_str)
 
     # Learning rate and optimizer parameters - aligned with scikit-learn defaults
+    # Range (1e-5 to 1e-2) balances convergence speed with stability for SVM with hinge loss
     init_learning_rate = trial.suggest_float("svm_init_learning_rate", 1e-5, 1e-2, log=True)
     learning_rate = trial.suggest_categorical("svm_learning_rate", ("optimal", "constant", "invscaling", "adaptive"))
     # eta0 is only used when learning_rate is not 'optimal'
@@ -428,9 +574,11 @@ def configure_svm_trial_params(trial: optuna.Trial) -> dict:
     # SGD-specific parameters - aligned with scikit-learn recommendations
     warm_start = trial.suggest_categorical("svm_warm_start", (True, False))
     average = trial.suggest_categorical("svm_average", (True, False))
+    # Note: n_iter_no_change and validation_fraction are included for completeness
+    # but are not used in the current implementation since early_stopping=False with partial_fit()
     n_iter_no_change = trial.suggest_int("svm_n_iter_no_change", 3, 10)
     validation_fraction = trial.suggest_float("svm_validation_fraction", 0.05, 0.2)
-    # Note: early_stopping is always False when using partial_fit() - set in LinearClassifierParam
+    # Note: early_stopping is always False when using partial_fit() - set in model initialization
 
     # Additional regularization parameters
     fit_intercept = trial.suggest_categorical("svm_fit_intercept", (True, False))
@@ -477,33 +625,68 @@ def configure_svm_trial_params(trial: optuna.Trial) -> dict:
 
 
 def configure_lightgbm_trial_params(trial: optuna.Trial) -> dict:
-    """Suggest LightGBM parameters (prefixed) and return them unprefixed."""
+    """Configure LightGBM hyperparameters for Optuna optimization.
+
+    This function defines the search space for gradient boosting hyperparameters including:
+    - Tree Structure: Max depth (3-12), number of leaves (15-127), estimators (50-300)
+    - Learning: Learning rate (1e-3 to 0.1), min child samples (5-100)
+    - Regularization: Feature/bagging fractions (0.7-0.95), alpha/lambda regularization
+    - Boosting: GBDT, DART, GOSS variants with binary objective
+    - Preprocessing: Optional log transform and z-score normalization
+
+    Args:
+        trial: Optuna trial object for parameter suggestion
+
+    Returns:
+        Dictionary of LightGBM parameters (unprefixed for model instantiation)
+    """
+    # Data preprocessing: log transform for gene expression data normalization
     use_log_transform = trial.suggest_categorical("lgbm_use_log_transform", (True, False))
+
+    # Additional normalization: z-score standardization
     use_zscore_norm = trial.suggest_categorical("lgbm_use_zscore_norm", (True, False))
-    num_leaves = trial.suggest_int("lgbm_num_leaves", 15, 127)  # Original wider range for hyperopt to explore
-    max_depth = trial.suggest_int("lgbm_max_depth", 3, 12)  # Original wider range
-    learning_rate = trial.suggest_float("lgbm_learning_rate", 1e-3, 0.1, log=True)  # Original range
-    n_estimators = trial.suggest_int("lgbm_n_estimators", 50, 300)  # Original range
-    min_child_samples = trial.suggest_int("lgbm_min_child_samples", 5, 100)  # Original range
-    reg_alpha = trial.suggest_float("lgbm_reg_alpha", 1e-8, 10.0, log=True)
-    reg_lambda = trial.suggest_float("lgbm_reg_lambda", 1e-8, 10.0, log=True)
+
+    # Tree structure: balance between model complexity and overfitting
+    num_leaves = trial.suggest_int("lgbm_num_leaves", 15, 127)  # Number of leaves per tree
+    max_depth = trial.suggest_int("lgbm_max_depth", 3, 12)  # Maximum tree depth
+
+    # Learning configuration: conservative learning rate with sufficient iterations
+    # Learning rate range (1e-3 to 0.1) prevents overfitting while ensuring convergence
+    learning_rate = trial.suggest_float("lgbm_learning_rate", 1e-3, 0.1, log=True)
+    # Number of boosting rounds: 50-300 provides good bias-variance tradeoff
+    n_estimators = trial.suggest_int("lgbm_n_estimators", 50, 300)
+
+    # Tree regularization: prevent overfitting on small samples
+    min_child_samples = trial.suggest_int("lgbm_min_child_samples", 5, 100)  # Minimum samples per leaf
+
+    # L1 and L2 regularization: control model complexity
+    reg_alpha = trial.suggest_float("lgbm_reg_alpha", 1e-8, 10.0, log=True)  # L1 regularization
+    reg_lambda = trial.suggest_float("lgbm_reg_lambda", 1e-8, 10.0, log=True)  # L2 regularization
+
+    # Class balancing: handle imbalanced datasets
     class_weight = trial.suggest_categorical("lgbm_class_weight", ("balanced", None))
-    # Use feature_fraction and bagging_fraction to simulate dropout/masking as in neural nets.
-    # For example, feature_fraction=0.7 means 30% of features are randomly dropped per tree,
-    # which is analogous to a 30% dropout rate in neural networks. The range 0.7-.95
-    # corresponds to 5-30% masking, matching typical neural net dropout rates.
-    feature_fraction = trial.suggest_float("lgbm_feature_fraction", 0.7, 0.95)
-    bagging_fraction = trial.suggest_float("lgbm_bagging_fraction", 0.7, 0.95)
-    # Original wider range - let hyperopt find the best values
-    min_split_gain = trial.suggest_float("lgbm_min_split_gain", 0.0, 1.0)
-    min_child_weight = trial.suggest_float("lgbm_min_child_weight", 1e-3, 10.0, log=True)
 
-    # Additional LightGBM parameters
+    # Feature and bagging fractions: LightGBM's equivalent to neural network dropout
+    # feature_fraction=0.7 means 30% of features are randomly dropped per tree
+    # This is analogous to a 30% dropout rate in neural networks
+    feature_fraction = trial.suggest_float("lgbm_feature_fraction", 0.7, 0.95)  # Feature sampling ratio
+    bagging_fraction = trial.suggest_float("lgbm_bagging_fraction", 0.7, 0.95)  # Sample sampling ratio
+
+    # Split criteria: minimum gain required for splits
+    min_split_gain = trial.suggest_float("lgbm_min_split_gain", 0.0, 1.0)  # Minimum split gain
+    min_child_weight = trial.suggest_float("lgbm_min_child_weight", 1e-3, 10.0, log=True)  # Minimum child weight
+
+    # Boosting algorithm variants: different approaches to gradient boosting
     boosting_type_str = trial.suggest_categorical("lgbm_boosting_type", ("gbdt", "dart", "goss"))
-    objective_str = trial.suggest_categorical("lgbm_objective", ("binary",))
-    metric_str = trial.suggest_categorical("lgbm_metric", ("binary_logloss", "auc"))
+    # gbdt: Gradient Boosting Decision Tree (standard)
+    # dart: Dropouts meet Multiple Additive Regression Trees (regularized)
+    # goss: Gradient-based One-Side Sampling (efficient)
 
-    # Convert strings to enum objects
+    # Objective and metric: binary classification setup
+    objective_str = trial.suggest_categorical("lgbm_objective", ("binary",))  # Binary classification
+    metric_str = trial.suggest_categorical("lgbm_metric", ("binary_logloss", "auc"))  # Evaluation metrics
+
+    # Convert strings to enum objects for type safety
     boosting_type = BoostingType(boosting_type_str)
     objective = ObjectiveType(objective_str)
     metric = MetricType(metric_str)
