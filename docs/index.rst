@@ -1,7 +1,9 @@
-scXpand Documentation
-=====================
+scXpand: Pan-cancer Detection of T-cell Clonal Expansion
+=========================================================
 
-scXpand is a framework for predicting T-cell clonal expansion from single-cell RNA sequencing data. It provides multiple methods for training and inference.
+scXpand is a framework for predicting T-cell clonal expansion from single-cell RNA sequencing data without paired TCR sequencing. It provides multiple methods for training and inference.
+
+**GitHub Repository:** `https://github.com/yizhak-lab-ccg/scXpand <https://github.com/yizhak-lab-ccg/scXpand>`_
 
 .. image:: _static/images/scXpand_datasets.jpeg
    :width: 100%
