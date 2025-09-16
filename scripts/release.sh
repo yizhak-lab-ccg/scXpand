@@ -13,6 +13,9 @@ TOKEN_FILE="$SCRIPT_DIR/pypi_token.txt"
 CUDA_VERSION=$(python3 -c "import sys; sys.path.append('$SCRIPT_DIR'); from constants import CUDA_VERSION; print(CUDA_VERSION)")
 TORCH_VERSION=$(python3 -c "import sys; sys.path.append('$SCRIPT_DIR'); from constants import TORCH_VERSION; print(TORCH_VERSION)")
 
+# Repository configuration
+REPO_URL="https://github.com/yizhak-lab-ccg/scXpand"
+
 if [ -f "$TOKEN_FILE" ]; then
     # Extract token from file (line starting with 'pypi-')
     UV_PUBLISH_TOKEN=$(grep "^pypi-" "$TOKEN_FILE" | head -1)
@@ -974,10 +977,10 @@ create_github_release() {
         --notes-file "$release_notes_file" \
         --latest; then
         print_success "GitHub release v$NEW_VERSION created successfully"
-        print_status "Release URL: https://github.com/yizhak-lab-ccg/scXpand/releases/tag/v$NEW_VERSION"
+        print_status "Release URL: $REPO_URL/releases/tag/v$NEW_VERSION"
     else
         print_error "Failed to create GitHub release"
-        print_status "You can create it manually at: https://github.com/yizhak-lab-ccg/scXpand/releases/new"
+        print_status "You can create it manually at: $REPO_URL/releases/new"
     fi
 
     # Clean up temporary file
@@ -1071,12 +1074,12 @@ show_summary() {
         echo "  - Standard Package (CPU/MPS): https://pypi.org/project/scxpand/"
         echo "  - CUDA Package:               https://pypi.org/project/scxpand-cuda/"
         echo "  - Documentation:              https://scxpand.readthedocs.io/en/latest/"
-        echo "  - GitHub: https://github.com/yizhak-lab-ccg/scXpand/releases/tag/v$NEW_VERSION"
-        echo "  - Changelog: https://github.com/yizhak-lab-ccg/scXpand/blob/main/CHANGELOG.md"
+        echo "  - GitHub: $REPO_URL/releases/tag/v$NEW_VERSION"
+        echo "  - Changelog: $REPO_URL/blob/main/CHANGELOG.md"
         echo
         print_success "CHANGELOG.md entry validated for version $NEW_VERSION"
         if [ "$SKIP_GITHUB_RELEASE" != true ]; then
-            print_success "GitHub release automatically created at: https://github.com/yizhak-lab-ccg/scXpand/releases/tag/v$NEW_VERSION"
+            print_success "GitHub release automatically created at: $REPO_URL/releases/tag/v$NEW_VERSION"
         fi
     fi
     echo
