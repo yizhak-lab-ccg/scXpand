@@ -56,6 +56,36 @@ print_package() {
     echo -e "${PURPLE}[PACKAGE]${NC} $1"
 }
 
+# Consolidated error handling
+handle_error() {
+    local exit_code="$1"
+    local error_message="$2"
+    local cleanup_function="${3:-}"
+
+    if [ "$exit_code" -ne 0 ]; then
+        print_error "$error_message"
+        if [ -n "$cleanup_function" ]; then
+            "$cleanup_function"
+        fi
+        exit "$exit_code"
+    fi
+}
+
+# Check if command exists (consolidated)
+require_command() {
+    local cmd="$1"
+    local install_hint="${2:-}"
+
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        print_error "$cmd is not installed"
+        if [ -n "$install_hint" ]; then
+            print_status "$install_hint"
+        fi
+        return 1
+    fi
+    return 0
+}
+
 # Function to show usage
 show_usage() {
     echo "Usage: $0 [OPTIONS]"
@@ -129,39 +159,29 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Function to check if command exists
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
-}
-
 # Function to check prerequisites
 check_prerequisites() {
     print_status "Checking prerequisites for dual package release..."
 
     # Check if we're in a git repository
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        print_error "Not in a git repository"
-        exit 1
+        handle_error 1 "Not in a git repository"
     fi
 
-    # Check if uv is installed
-    if ! command_exists uv; then
-        print_error "uv is not installed. Please install uv first."
-        exit 1
-    fi
+    # Check required commands
+    require_command "uv" "Please install uv first: https://docs.astral.sh/uv/getting-started/installation/" || exit 1
 
-    # Check if GitHub CLI is installed (for GitHub releases)
-    if ! command_exists gh; then
+    # Check if GitHub CLI is installed (optional for GitHub releases)
+    if ! require_command "gh" "To enable GitHub releases, install gh: brew install gh (macOS) or visit https://cli.github.com/"; then
         print_warning "GitHub CLI (gh) is not installed. GitHub release creation will be skipped."
-        print_status "To enable GitHub releases, install gh: brew install gh (macOS) or visit https://cli.github.com/"
         export SKIP_GITHUB_RELEASE=true
-    else
-        # Check if gh is authenticated
-        if ! gh auth status >/dev/null 2>&1; then
-            print_warning "GitHub CLI is not authenticated. GitHub release creation will be skipped."
-            print_status "To enable GitHub releases, run: gh auth login"
-            export SKIP_GITHUB_RELEASE=true
-        fi
+    elif ! gh auth status >/dev/null 2>&1; then
+        print_warning "GitHub CLI is not authenticated. GitHub release creation will be skipped."
+        print_status "To enable GitHub releases, run: gh auth login"
+        export SKIP_GITHUB_RELEASE=true
+        else
+            print_success "GitHub CLI is available and authenticated"
+        export SKIP_GITHUB_RELEASE=false
     fi
 
     # Check if UV_PUBLISH_TOKEN is set (only for non-dry-run)
@@ -341,11 +361,51 @@ validate_changelog() {
     fi
 }
 
-# Function to bump version
+# Function to preview version bump and validate changelog
+preview_and_validate() {
+    print_status "Previewing $VERSION_TYPE version bump..."
+
+    local current_version=$(uv version | cut -d' ' -f2)
+    print_status "Current version: $current_version"
+
+    # Calculate what the new version would be
+    local new_version
+    if [ "$DRY_RUN" = false ]; then
+        # Backup and temporarily bump to get new version
+        backup_original_pyproject
+        uv version --bump "$VERSION_TYPE" >/dev/null 2>&1
+        new_version=$(uv version | cut -d' ' -f2)
+        restore_original_pyproject
+    else
+        # For dry run, simulate version calculation
+        case "$VERSION_TYPE" in
+            "major")
+                new_version=$(echo "$current_version" | awk -F. '{print ($1+1)".0.0"}')
+                ;;
+            "minor")
+                new_version=$(echo "$current_version" | awk -F. '{print $1"."($2+1)".0"}')
+                ;;
+            "patch")
+                new_version=$(echo "$current_version" | awk -F. '{print $1"."$2"."($3+1)}')
+                ;;
+            *)
+                new_version="$current_version"
+                ;;
+        esac
+    fi
+
+    print_status "Would bump to version: $new_version"
+    export NEW_VERSION="$new_version"
+
+    # Validate changelog entry BEFORE actually bumping version
+    validate_changelog
+}
+
+# Function to bump version (only called after validation passes)
 bump_version() {
     print_status "Bumping $VERSION_TYPE version..."
 
-    # Get current version from main pyproject.toml ()
+    # Get current version from main pyproject.toml
     current_version=$(uv version | cut -d' ' -f2)
     print_status "Current version: $current_version"
 
@@ -365,9 +425,6 @@ bump_version() {
 
     # Export for later use
     export NEW_VERSION="$new_version"
-
-    # Validate changelog entry (will exit if not found/empty)
-    validate_changelog
 }
 
 # Function to clean build directories
@@ -384,32 +441,67 @@ clean_build_dirs() {
     print_success "Build directories cleaned"
 }
 
-# Function to backup and restore pyproject.toml
+# Consolidated backup/restore functionality for pyproject.toml
+backup_file() {
+    local source="$1"
+    local backup_suffix="$2"
+    local backup_file="${source}.${backup_suffix}"
+
+    if [ -f "$source" ]; then
+        cp "$source" "$backup_file"
+        return 0
+    else
+        print_error "Source file $source not found for backup"
+        return 1
+    fi
+}
+
+restore_file() {
+    local source="$1"
+    local backup_suffix="$2"
+    local backup_file="${source}.${backup_suffix}"
+    local show_messages="${3:-true}"
+
+    if [ -f "$backup_file" ]; then
+        if [ "$show_messages" = "true" ]; then
+            print_status "Restoring $source from backup..."
+        fi
+        mv "$backup_file" "$source"
+        if [ "$show_messages" = "true" ]; then
+            print_success "File restored from backup"
+        fi
+        return 0
+    else
+        if [ "$show_messages" = "true" ]; then
+            print_warning "No backup found: $backup_file"
+        fi
+        return 1
+    fi
+}
+
+cleanup_backups() {
+    rm -f pyproject.toml.original pyproject.toml.backup pyproject.toml.temp
+}
+
+# Convenience wrappers for pyproject.toml
 backup_pyproject() {
-    cp pyproject.toml pyproject.toml.backup
+    backup_file "pyproject.toml" "backup"
 }
 
 restore_pyproject() {
-    if [ -f pyproject.toml.backup ]; then
-        mv pyproject.toml.backup pyproject.toml
-    fi
+    restore_file "pyproject.toml" "backup" "false"
 }
 
-# Function to backup original pyproject.toml before version bump
 backup_original_pyproject() {
-    cp pyproject.toml pyproject.toml.original
+    backup_file "pyproject.toml" "original"
 }
 
-# Function to restore original pyproject.toml (for version restoration)
 restore_original_pyproject() {
-    if [ -f pyproject.toml.original ]; then
-        mv pyproject.toml.original pyproject.toml
-    fi
+    restore_file "pyproject.toml" "original" "false"
 }
 
-# Function to clean up backup files after successful completion
-cleanup_backups() {
-    rm -f pyproject.toml.original pyproject.toml.backup
+restore_original_version() {
+    restore_file "pyproject.toml" "original" "true"
 }
 
 # Function to create CUDA variant of pyproject.toml using Python script
@@ -498,53 +590,51 @@ verify_cuda_pyproject() {
     print_success "CUDA pyproject.toml verification passed"
 }
 
-# Function to build standard package
-build_standard_package() {
-    print_package "Building standard package (scxpand - CPU/MPS support)..."
+# Consolidated package building with error handling
+build_package() {
+    local package_type="$1"
+    local description="$2"
+    local dry_run_message="$3"
+
+    print_package "Building $description..."
 
     if [ "$DRY_RUN" = true ]; then
-        print_status "DRY RUN: Would build standard package with CPU/MPS support"
-        return
+        print_status "DRY RUN: $dry_run_message"
+        return 0
     fi
 
-    # Build using original pyproject.toml
+    # Handle CUDA package special case
+    if [ "$package_type" = "cuda" ]; then
+        backup_pyproject
+        create_cuda_pyproject || {
+            restore_pyproject
+        return 1
+        }
+        mv temp/pyproject-cuda.toml pyproject.toml
+    fi
+
+    # Build package
     if ! uv build; then
-        print_error "Failed to build standard package"
+        print_error "Failed to build $description"
+        [ "$package_type" = "cuda" ] && restore_pyproject
         return 1
     fi
 
-    print_success "Standard package built successfully"
+    # Restore original pyproject.toml for CUDA package
+    [ "$package_type" = "cuda" ] && restore_pyproject
+
+    print_success "$description built successfully"
+    return 0
+}
+
+# Function to build standard package
+build_standard_package() {
+    build_package "standard" "standard package (scxpand - CPU/MPS support)" "Would build standard package with CPU/MPS support"
 }
 
 # Function to build CUDA package
 build_cuda_package() {
-    print_package "Building CUDA package (scxpand-cuda - CUDA support)..."
-
-    if [ "$DRY_RUN" = true ]; then
-        print_status "DRY RUN: Would build CUDA package with CUDA support"
-        return
-    fi
-
-    # Backup original pyproject.toml
-    backup_pyproject
-
-    # Create CUDA variant configuration
-    create_cuda_pyproject
-
-    # Replace the original with CUDA version temporarily
-    mv temp/pyproject-cuda.toml pyproject.toml
-
-    # Build using CUDA configuration
-    if ! uv build; then
-        print_error "Failed to build CUDA package"
-        restore_pyproject
-        return 1
-    fi
-
-    # Restore original pyproject.toml
-    restore_pyproject
-
-    print_success "CUDA package built successfully"
+    build_package "cuda" "CUDA package (scxpand-cuda - CUDA support)" "Would build CUDA package with CUDA support"
 }
 
 # Function to test package imports and CUDA configuration
@@ -732,43 +822,41 @@ show_changes() {
     fi
 }
 
-# Function to commit and push changes
-commit_and_push() {
+# Consolidated git operations with error handling
+execute_git_command() {
+    local command="$1"
+    local description="$2"
+    local dry_run_message="$3"
+
     if [ "$DRY_RUN" = true ]; then
-        print_status "DRY RUN: Would commit and push changes..."
-        return
+        print_status "DRY RUN: $dry_run_message"
+        return 0
     fi
 
-    print_status "Committing and pushing changes..."
+    print_status "$description..."
+    if eval "$command"; then
+        print_success "$description completed"
+        return 0
+    else
+        print_error "$description failed"
+        return 1
+    fi
+}
 
-    # Add all changes
-    git add -A
-
-    # Commit with version bump message
-    git commit -m "Bump version to $NEW_VERSION and update CHANGELOG.md (dual package release)"
-
-    # Push to main
-    git push origin main
-
-    print_success "Changes committed and pushed to main"
+# Function to commit and push changes
+commit_and_push() {
+    execute_git_command \
+        "git add -A && git commit -m 'Bump version to $NEW_VERSION and update CHANGELOG.md (dual package release)' && git push origin main" \
+        "Committing and pushing changes" \
+        "Would commit and push changes"
 }
 
 # Function to create and push tag
 create_and_push_tag() {
-    if [ "$DRY_RUN" = true ]; then
-        print_status "DRY RUN: Would create and push tag v$NEW_VERSION..."
-        return
-    fi
-
-    print_status "Creating and pushing tag..."
-
-    # Create tag
-    git tag "v$NEW_VERSION"
-
-    # Push tag
-    git push origin "v$NEW_VERSION"
-
-    print_success "Tag v$NEW_VERSION created and pushed"
+    execute_git_command \
+        "git tag 'v$NEW_VERSION' && git push origin 'v$NEW_VERSION'" \
+        "Creating and pushing tag v$NEW_VERSION" \
+        "Would create and push tag v$NEW_VERSION"
 }
 
 # Function to publish both packages to PyPI
@@ -961,9 +1049,10 @@ show_summary() {
         print_success "DRY RUN completed successfully!"
         echo
         print_status "What would happen in a real dual release:"
-        echo "  - Version: $NEW_VERSION ($VERSION_TYPE)"
+        echo "  - Preview version bump: $NEW_VERSION ($VERSION_TYPE)"
+        echo "  - Validate CHANGELOG.md entry (create template if missing)"
+        echo "  - Bump version in pyproject.toml"
         echo "  - Packages: scxpand (CPU/MPS) and scxpand-cuda (CUDA)"
-        echo "  - Check CHANGELOG.md for version entry (create template if missing)"
         echo "  - Commit message: 'Bump version to $NEW_VERSION and update CHANGELOG.md (dual package release)'"
         echo "  - Tag: v$NEW_VERSION"
         echo "  - Push to main branch"
@@ -1012,6 +1101,7 @@ main() {
 
     # Run all steps
     check_prerequisites
+    preview_and_validate
     bump_version
     build_and_test_packages
     show_changes
@@ -1029,8 +1119,15 @@ main() {
     fi
 }
 
+# Consolidated cleanup on exit
+cleanup_on_exit() {
+    restore_pyproject 2>/dev/null || true
+    restore_original_pyproject 2>/dev/null || true
+    rm -f temp/pyproject-cuda*.toml pyproject-cuda-temp*.toml 2>/dev/null || true
+}
+
 # Trap to ensure cleanup on exit
-trap 'restore_pyproject; restore_original_pyproject; rm -f temp/pyproject-cuda*.toml pyproject-cuda-temp*.toml' EXIT
+trap cleanup_on_exit EXIT
 
 # Run main function
 main "$@"
