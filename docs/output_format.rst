@@ -88,7 +88,7 @@ PyTorch models (autoencoder and mlp) use the TrainLogger and create additional t
 Autoencoder and MLP-Specific Files
 --------------------------
 
-Only the autoencoder anf the MLP models create checkpoint files for training resumption:
+Only the autoencoder and the MLP models create checkpoint files for training resumption:
 
 .. list-table::
    :header-rows: 1
