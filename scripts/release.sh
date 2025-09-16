@@ -739,9 +739,9 @@ show_summary() {
         echo "  - GitHub: https://github.com/yizhak-lab-ccg/scXpand/releases/tag/v$NEW_VERSION"
         echo "  - Changelog: https://github.com/yizhak-lab-ccg/scXpand/blob/main/CHANGELOG.md"
         echo
-        print_warning "REMINDER: Please update CHANGELOG.md with release notes for version $NEW_VERSION"
-        print_status "Add your changes under the appropriate sections (Added, Changed, Fixed, Removed)"
-        print_status "Then commit and push the changelog update"
+        print_success "REMINDER: Please update CHANGELOG.md with release notes for version $NEW_VERSION"
+        echo "Add your changes under the appropriate sections (Added, Changed, Fixed, Removed)"
+        echo "Then commit and push the changelog update"
     fi
     echo
 }
