@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.1.0
 
 ## [Unreleased]
 
+
+## [0.3.3] - 2025-09-16
+
 ### Changed
 - Removed `device` parameter from `run_inference()` function - device is now automatically detected for optimal performance
 -  Reorganize the documentation
