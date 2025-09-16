@@ -36,7 +36,7 @@ Preprocessing Pipeline
 
 The preprocessing pipeline applies three sequential transformations to raw gene expression data:
 
-**Notation**: Throughout this section, :math:`X_{raw}[i,j]` represents the raw read count for cell *i* and gene *j* from the single-cell RNA sequencing experiment.
+**Notation**: Throughout this section, :math:`X_{raw}[i,j]` represents the raw unique molecular identifier (UMI) count for cell *i* and gene *j* from the single-cell RNA sequencing experiment.
 
 **Step 1: Row Normalization**
    Normalizes each cell's total gene expression to a target sum (default: 10,000). This accounts for differences in sequencing depth between cells.
