@@ -197,7 +197,7 @@ check_prerequisites() {
     remote_commit=$(git rev-parse origin/main)
     if [ "$local_commit" != "$remote_commit" ]; then
         print_error "Local branch is not up to date with remote origin/main"
-        print_status "Please pull latest changes: git pull origin main"
+        print_status "Please pull latest changes: git pull origin main, and push your changes: git push origin main"
         exit 1
     fi
 
