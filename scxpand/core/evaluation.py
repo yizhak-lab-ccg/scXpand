@@ -60,7 +60,7 @@ def evaluate_predictions_and_save(
     missing_columns = [col for col in required_columns if col not in obs_df.columns]
 
     if missing_columns:
-        logger.info(f"Cannot evaluate metrics: missing required columns {missing_columns}")
+        logger.info(f"Missing {missing_columns} columns in observation data. Skipping metrics evaluation.")
 
         # Still save predictions even if we can't evaluate
         save_predictions_to_csv(
@@ -98,6 +98,6 @@ def evaluate_predictions_and_save(
     # Log completion
     auroc = results.get("AUROC", "N/A")
     auroc_formatted = format_float(auroc) if isinstance(auroc, float) else auroc
-    logger.info(f"Evaluation completed for {eval_name}. AUROC: {auroc_formatted}")
+    logger.info(f"Metrics evaluation completed for {eval_name}. AUROC: {auroc_formatted}")
 
     return results

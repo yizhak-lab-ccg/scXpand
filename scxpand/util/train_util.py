@@ -168,9 +168,7 @@ def report_to_optuna_and_handle_pruning(
         return
 
     # Check for duplicate reports to prevent issues when resuming
-    if _is_duplicate_epoch_report(trial, epoch):
-        logger.debug(f"Skipping duplicate report for epoch {epoch} in trial {trial.number}")
-    else:
+    if not _is_duplicate_epoch_report(trial, epoch):
         _report_epoch_score(trial, current_score, epoch)
 
     # Handle pruning regardless of whether we reported

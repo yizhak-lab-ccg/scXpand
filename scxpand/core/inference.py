@@ -116,11 +116,6 @@ def run_inference(
         return results
     else:
         # Pre-trained model inference (registry or URL)
-        if model_name is not None:
-            logger.info(f"Using registry model: {model_name}")
-        else:
-            logger.info(f"Using URL model: {model_url}")
-
         results = fetch_model_and_run_inference(
             model_name=model_name,
             model_url=model_url,

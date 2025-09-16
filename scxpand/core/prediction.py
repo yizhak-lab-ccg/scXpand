@@ -74,7 +74,6 @@ def run_prediction_pipeline(
     # Auto-detect model type if not provided
     if model_type is None:
         model_type = infer_model_type_from_parameters(model_path)
-        logger.info(f"Loaded model type: {model_type}")
 
     # Setup save path
     if save_path is None:
@@ -84,18 +83,13 @@ def run_prediction_pipeline(
 
     ensure_directory_exists(save_path)
 
-    # Log pipeline start
-    logger.info(f"Starting prediction pipeline for {model_type}")
-    logger.info(f"Model path: {model_path}")
-    logger.info(f"Save path: {save_path}")
-
     # Setup inference environment (load model, data format, device)
     data_format, model, device = inference_utils.setup_inference_environment(
         model_type=model_type, model_path=model_path
     )
 
     # Run inference
-    logger.info("Running model inference...")
+    logger.info("Running inference...")
     y_pred_prob = inference_utils.run_model_inference(
         model_type=model_type,
         model=model,
@@ -112,7 +106,6 @@ def run_prediction_pipeline(
 
     # Evaluate and save results if ground truth is available
     metrics_results = None
-    logger.info("Evaluating predictions...")
 
     # Load data if not provided (for evaluation)
     if adata is None:
@@ -134,7 +127,6 @@ def run_prediction_pipeline(
         score_metric="harmonic_avg/AUROC",
     )
 
-    logger.info("Prediction pipeline completed successfully")
     return InferenceResults(
         predictions=y_pred_prob,
         metrics=metrics_results,

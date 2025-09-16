@@ -76,10 +76,6 @@ def fetch_model_and_run_inference(
     if model_name is not None:
         # Use registry model
         model_info = get_pretrained_model_info(model_name)
-        logger.info(f"Using registry model: {model_info.name}")
-        logger.info(f"Model version: {model_info.version}")
-        logger.info("Model type will be auto-detected from model_type.txt")
-
         # Download using registry
         model_path = download_pretrained_model(model_name=model_name)
 
@@ -97,8 +93,6 @@ def fetch_model_and_run_inference(
     # Set default batch size if not provided
     if batch_size is None:
         batch_size = 1024  # Default batch size
-
-    logger.info(f"Running inference with batch size: {batch_size}")
 
     # Run the unified prediction pipeline
     results = run_prediction_pipeline(
@@ -131,7 +125,6 @@ def fetch_model_and_run_inference(
             url=model_url,
         )
 
-    logger.info("Inference completed successfully")
     return InferenceResults(
         predictions=results.predictions,
         metrics=results.metrics,

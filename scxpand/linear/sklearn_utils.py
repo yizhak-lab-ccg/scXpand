@@ -45,16 +45,12 @@ def run_linear_inference(
     # Use the same batch predictor as in training
     predictor = LinearBatchPredictor(dataset=dataset, dataloader=dataloader)
     predictions = predictor.predict_all(model=model)
-
-    logger.info(f"Inference complete. Predictions shape: {predictions.shape}")
     return predictions
 
 
 def load_sklearn_model(results_path: Path) -> BaseEstimator:
     """Loads a trained scikit-learn model."""
-    logger.info(f"Loading scikit-learn model from: {results_path}")
     model_file = results_path / SKLEARN_MODEL_FILE
     model = joblib.load(model_file)
-    logger.info("Scikit-learn model loaded successfully.")
 
     return model

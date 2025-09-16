@@ -257,9 +257,9 @@ class HyperparameterOptimizer:
         trial_should_resume = self.resume and _has_results_indicators(save_dir)
 
         if trial_should_resume:
-            logger.debug(f"Trial {trial.number} will resume from checkpoints")
+            logger.info(f"Trial {trial.number} will resume from checkpoints")
         else:
-            logger.debug(f"Trial {trial.number} will start fresh")
+            logger.info(f"Trial {trial.number} will start fresh")
 
         # Prepare runner arguments
         runner_args = {
@@ -331,7 +331,7 @@ class HyperparameterOptimizer:
         resumable_trials = [t for t in study.trials if t.state.name in resumable_states]
 
         if not resumable_trials:
-            logger.debug("No resumable trials found")
+            logger.info("No resumable trials found")
             return 0
 
         logger.info(

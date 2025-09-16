@@ -103,7 +103,6 @@ def infer_model_type_from_parameters(results_path: Path | str) -> str:
     # Try to load from saved model type file
     model_type = load_model_type(results_path)
     if model_type:
-        logger.info(f"Loaded model type: {model_type}")
         return model_type
 
     # If not found, show helpful error message

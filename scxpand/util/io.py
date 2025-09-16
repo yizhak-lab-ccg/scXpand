@@ -222,7 +222,6 @@ def safe_read_adata_slice(adata_obj, indices: np.ndarray) -> np.ndarray:
 
     for strategy_name, strategy_func in strategies:
         try:
-            logger.debug(f"Attempting {strategy_name} for {len(indices)} indices")
             return retry_hdf5_operation(strategy_func, operation_name=strategy_name)
         except Exception as e:
             last_exception = e
@@ -316,7 +315,6 @@ def close_adata_file_safely(adata_obj: ad.AnnData) -> None:
     try:
         if hasattr(adata_obj, "file") and adata_obj.file is not None:
             adata_obj.file.close()
-            logger.debug("Closed AnnData file handle")
     except OSError as e:
         logger.warning(f"Error closing AnnData file handle: {e}")
         # Don't re-raise - closing errors shouldn't stop execution
@@ -365,7 +363,6 @@ def open_adata_multiprocessing_safe(
         raise ValueError("Either data_path or adata must be provided")
 
     # Each worker process opens its own file handle - this is the key to multiprocessing safety
-    logger.debug(f"Opening AnnData file with backed='r' for worker-safe access: {data_path}")
     adata_obj = open_adata_file_with_retry(data_path)
 
     try:
