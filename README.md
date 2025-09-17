@@ -18,7 +18,7 @@
     Detect T-cell clonal expansion from single-cell RNA sequencing data without paired TCR sequencing
   </p>
 
-  <p style="margin: 0;">
+  <p style="margin: 0; text-align: center;">
     <a href="https://scxpand.readthedocs.io/en/latest/" style="margin: 0 8px;">Documentation</a> •
     <a href="#installation" style="margin: 0 8px;">Installation</a> •
     <a href="#quick-start" style="margin: 0 8px;">Quick Start</a> •
