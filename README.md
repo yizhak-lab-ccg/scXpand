@@ -7,10 +7,18 @@
     Detect T-cell clonal expansion from single-cell RNA sequencing data without paired TCR sequencing
   </p>
 
+  <p style="margin: 0 0 20px 0;">
+    <img src="https://img.shields.io/pypi/v/scxpand?style=flat-square&logo=pypi&logoColor=white" alt="PyPI version" />
+    <img src="https://img.shields.io/pypi/pyversions/scxpand?style=flat-square&logo=python&logoColor=white" alt="Python versions" />
+    <img src="https://img.shields.io/github/license/yizhak-lab-ccg/scXpand?style=flat-square" alt="License" />
+    <img src="https://img.shields.io/pypi/dm/scxpand?style=flat-square&logo=pypi&logoColor=white" alt="Downloads" />
+    <img src="https://img.shields.io/readthedocs/scxpand?style=flat-square&logo=readthedocs&logoColor=white" alt="Documentation Status" />
+  </p>
+
   <p style="margin: 0;">
     <a href="https://scxpand.readthedocs.io/en/latest/" style="margin: 0 8px;">Documentation</a> •
     <a href="#installation" style="margin: 0 8px;">Installation</a> •
-    <a href="#quick-start" style="margin: 0 8px;">Quick Start</a> •
+    <a href="#tutorial" style="margin: 0 8px;">Tutorial</a> •
     <a href="https://scxpand.readthedocs.io/en/latest/user_guide.html" style="margin: 0 8px;">Usage Guide</a> •
     <a href="#citation" style="margin: 0 8px;">Citation</a>
   </p>
@@ -39,12 +47,8 @@ A framework for predicting T-cell clonal expansion from single-cell RNA sequenci
 
 ## Installation
 
-This section explains the two ways to install scXpand:
-
-- **Installing the Published Package**: For regular use
-- **Local Development Setup**: For contributing or working with the source code
-
-### Installing the Published Package
+<details>
+<summary><b>Installing the Published Package: For regular use</b></summary>
 
 scXpand is available in two variants to match your hardware:
 
@@ -70,11 +74,10 @@ scXpand is available in two variants to match your hardware:
   uv pip install --upgrade scxpand
   ```
 
-> 📖 See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
+</details>
 
----
-
-### Local Development Setup
+<details>
+<summary><b>Local Development Setup: For contributing or working with the source code</b></summary>
 
 If you want to contribute or work with the latest source code, follow these steps:
 
@@ -94,7 +97,9 @@ If you want to contribute or work with the latest source code, follow these step
      ./install.sh
      ```
 
-For more details, refer to the [installation guide](https://scxpand.readthedocs.io/en/latest/installation.html).
+</details>
+
+> 📖 See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
 
 ---
 
@@ -122,10 +127,9 @@ if results.has_metrics:
 ```
 
 
-## Documentation
-
 See our **[Tutorial Notebook](docs/notebooks/scxpand_tutorial.ipynb)** for a complete example with data preprocessing, T-cell filtering, gene ID conversion, and model application using a real breast cancer dataset.
 
+## Documentation
 
 **Setup & Getting Started:**
 - **[Installation Guide](https://scxpand.readthedocs.io/en/latest/installation.html)** - Setup for local development of scXpand
