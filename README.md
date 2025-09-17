@@ -1,4 +1,4 @@
-<div align="center">
+<div align="left">
   <p style="margin: 0 0 20px 0;">
     <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/v/scxpand" alt="PyPI version" /></a>
     <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/pyversions/scxpand" alt="Python versions" /></a>
@@ -6,9 +6,13 @@
     <a href="#"><img src="https://visitor-badge.laobi.icu/badge?page_id=yizhak-lab-ccg.scXpand&left_text=scXpand%20Visitors" alt="Visitors" /></a>
   </p>
 
+---
+
+<div align="center">
   <img src="https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_logo_gray.png" alt="scXpand Logo" width="280"/>
 
   <h1 style="margin: 10px 0 5px 0;">scXpand: Pan-cancer Detection of T-cell Clonal Expansion</h1>
+</div>
 
   <p style="margin: 0 0 25px 0; font-size: 0.95em; max-width: 800px; line-height: 1.4;">
     Detect T-cell clonal expansion from single-cell RNA sequencing data without paired TCR sequencing
