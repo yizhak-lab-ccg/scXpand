@@ -11,8 +11,6 @@
     <img src="https://img.shields.io/pypi/v/scxpand?style=flat-square&logo=pypi&logoColor=white" alt="PyPI version" />
     <img src="https://img.shields.io/pypi/pyversions/scxpand?style=flat-square&logo=python&logoColor=white" alt="Python versions" />
     <img src="https://img.shields.io/github/license/yizhak-lab-ccg/scXpand?style=flat-square" alt="License" />
-    <img src="https://img.shields.io/pypi/dm/scxpand?style=flat-square&logo=pypi&logoColor=white" alt="Downloads" />
-    <img src="https://img.shields.io/readthedocs/scxpand?style=flat-square&logo=readthedocs&logoColor=white" alt="Documentation Status" />
   </p>
 
   <p style="margin: 0;">
