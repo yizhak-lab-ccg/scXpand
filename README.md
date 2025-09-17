@@ -1,4 +1,11 @@
 <div align="center">
+  <p style="margin: 0 0 20px 0;">
+    <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/v/scxpand" alt="PyPI version" /></a>
+    <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/pyversions/scxpand" alt="Python versions" /></a>
+    <a href="https://github.com/yizhak-lab-ccg/scXpand/blob/main/LICENSE"><img src="https://img.shields.io/github/license/yizhak-lab-ccg/scXpand" alt="License" /></a>
+    <a href="#"><img src="https://visitor-badge.laobi.icu/badge?page_id=yizhak-lab-ccg.scXpand&left_text=scXpand%20Visitors" alt="Visitors" /></a>
+  </p>
+
   <img src="https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_logo_gray.png" alt="scXpand Logo" width="280"/>
 
   <h1 style="margin: 10px 0 5px 0;">scXpand: Pan-cancer Detection of T-cell Clonal Expansion</h1>
@@ -39,12 +46,8 @@ A framework for predicting T-cell clonal expansion from single-cell RNA sequenci
 
 ## Installation
 
-This section explains the two ways to install scXpand:
-
-- **Installing the Published Package**: For regular use
-- **Local Development Setup**: For contributing or working with the source code
-
-### Installing the Published Package
+<details>
+<summary><b>Installing the Published Package: For regular use</b></summary>
 
 scXpand is available in two variants to match your hardware:
 
@@ -70,11 +73,10 @@ scXpand is available in two variants to match your hardware:
   uv pip install --upgrade scxpand
   ```
 
-> 📖 See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
+</details>
 
----
-
-### Local Development Setup
+<details>
+<summary><b>Local Development Setup: For contributing or working with the source code</b></summary>
 
 If you want to contribute or work with the latest source code, follow these steps:
 
@@ -94,7 +96,11 @@ If you want to contribute or work with the latest source code, follow these step
      ./install.sh
      ```
 
-For more details, refer to the [installation guide](https://scxpand.readthedocs.io/en/latest/installation.html).
+</details>
+
+---
+
+> See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
 
 ---
 
@@ -122,10 +128,9 @@ if results.has_metrics:
 ```
 
 
-## Documentation
-
 See our **[Tutorial Notebook](docs/notebooks/scxpand_tutorial.ipynb)** for a complete example with data preprocessing, T-cell filtering, gene ID conversion, and model application using a real breast cancer dataset.
 
+## Documentation
 
 **Setup & Getting Started:**
 - **[Installation Guide](https://scxpand.readthedocs.io/en/latest/installation.html)** - Setup for local development of scXpand
@@ -170,10 +175,5 @@ We hope you’ll find this repository helpful, and we warmly welcome any request
 <p align="center">
   <a href="https://mapmyvisitors.com/web/1bz9s">
      <img src="https://mapmyvisitors.com/map.png?d=hwaNi7bepoJeL9CYnuB3WjMT-liNG4MvcmwecZk3aNA&cl=ffffff">
-   </a>
-</p>
-<p align="center">
-  <a href="#">
-     <img src="https://visitor-badge.laobi.icu/badge?page_id=yizhak-lab-ccg.scXpand&left_text=scXpand%20Visitors" alt="Visitors" />
    </a>
 </p>
