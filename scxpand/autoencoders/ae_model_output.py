@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict
 
 import torch
 
@@ -66,7 +65,7 @@ class ModelOutput:
     class_logit: torch.Tensor
     pi: torch.Tensor | None = None
     theta: torch.Tensor | None = None
-    categorical_logits: Dict[str, torch.Tensor] | None = None
+    categorical_logits: dict[str, torch.Tensor] | None = None
 
     def __post_init__(self):
         """Ensure categorical_logits is initialized as a dict."""

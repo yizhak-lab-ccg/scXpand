@@ -6,7 +6,6 @@ PyTorch tensors, and sparse matrices for single-cell RNA expression data preproc
 
 from copy import copy
 from pathlib import Path
-from typing import Union
 
 import anndata as ad
 import numpy as np
@@ -27,7 +26,7 @@ DEFAULT_SIGMA_CLIP_FACTOR = 6.0  # Default factor for outlier clipping
 logger = get_logger()
 
 # Type aliases
-ArrayLike = Union[np.ndarray, torch.Tensor, sp.spmatrix]
+ArrayLike = np.ndarray | torch.Tensor | sp.spmatrix
 
 # Constants
 EXPANSION_LABEL_TRUE = "expanded"
@@ -422,7 +421,6 @@ def load_and_preprocess_data_numpy(
         row_indices = np.arange(adata.n_obs)
 
     # 1. Load raw data for ALL genes to correctly compute row sums for normalization.
-    logger.debug(f"Loading all genes for {len(row_indices)} cells for row normalization...")
     X_raw_full = adata.X[row_indices, :]
 
     # 2. Make a writeable copy.
@@ -440,7 +438,6 @@ def load_and_preprocess_data_numpy(
         subset_data_format, gene_indices_in_adata = _create_gene_subset_data_format(
             adata=adata, original_data_format=data_format, gene_subset=gene_subset
         )
-        logger.debug(f"Subsetting to {len(gene_indices_in_adata)} genes after row-level operations.")
         X_processed = X_processed[:, gene_indices_in_adata]
     else:
         subset_data_format = data_format

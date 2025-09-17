@@ -222,7 +222,6 @@ def safe_read_adata_slice(adata_obj, indices: np.ndarray) -> np.ndarray:
 
     for strategy_name, strategy_func in strategies:
         try:
-            logger.debug(f"Attempting {strategy_name} for {len(indices)} indices")
             return retry_hdf5_operation(strategy_func, operation_name=strategy_name)
         except Exception as e:
             last_exception = e
@@ -265,7 +264,7 @@ def save_predictions_to_csv(
     predictions: np.ndarray,
     obs_df: pd.DataFrame,
     model_type: "ModelType | str",
-    save_path: Path,
+    save_path: Path | None,
 ) -> None:
     """Save predictions to a CSV file.
 
@@ -273,7 +272,7 @@ def save_predictions_to_csv(
         predictions: Model predictions (probabilities)
         obs_df: DataFrame with cell metadata
         model_type: Type of model used for predictions
-        save_path: Directory to save predictions
+        save_path: Directory to save predictions (None to skip saving)
 
     Raises:
         ValueError: If predictions and obs_df have mismatched lengths
@@ -288,13 +287,15 @@ def save_predictions_to_csv(
     predictions_df = obs_df.copy()
     predictions_df[f"{model_type_str}_prediction"] = predictions
 
-    # Ensure save directory exists
-    save_path.mkdir(parents=True, exist_ok=True)
+    # Save predictions only if save_path is provided
+    if save_path is not None:
+        # Ensure save directory exists
+        save_path.mkdir(parents=True, exist_ok=True)
 
-    # Save predictions
-    output_file = save_path / f"{model_type_str}_predictions.csv"
-    predictions_df.to_csv(output_file, index=False)
-    logger.info(f"Predictions saved to {output_file}")
+        # Save predictions
+        output_file = save_path / f"{model_type_str}_predictions.csv"
+        predictions_df.to_csv(output_file, index=False)
+        logger.info(f"Predictions saved to {output_file}")
 
 
 def ensure_directory_exists(path: Path) -> None:
@@ -316,7 +317,6 @@ def close_adata_file_safely(adata_obj: ad.AnnData) -> None:
     try:
         if hasattr(adata_obj, "file") and adata_obj.file is not None:
             adata_obj.file.close()
-            logger.debug("Closed AnnData file handle")
     except OSError as e:
         logger.warning(f"Error closing AnnData file handle: {e}")
         # Don't re-raise - closing errors shouldn't stop execution
@@ -365,7 +365,6 @@ def open_adata_multiprocessing_safe(
         raise ValueError("Either data_path or adata must be provided")
 
     # Each worker process opens its own file handle - this is the key to multiprocessing safety
-    logger.debug(f"Opening AnnData file with backed='r' for worker-safe access: {data_path}")
     adata_obj = open_adata_file_with_retry(data_path)
 
     try:

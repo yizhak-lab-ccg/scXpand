@@ -117,8 +117,6 @@ def run_model_inference(
         # Re-raise with the expected error message format for backward compatibility
         raise ValueError(f"Unsupported model_type for inference: '{model_type}'") from None
 
-    logger.info(f"Running {model_type_enum.value} inference")
-
     # Route to appropriate inference function
     if model_type_enum == ModelType.AUTOENCODER:
         return run_ae_inference(
@@ -187,8 +185,6 @@ def setup_inference_environment(
     data_format_path = model_path / "data_format.json"
     if not data_format_path.exists():
         raise FileNotFoundError(f"Data format file not found: {data_format_path}")
-
-    logger.info(f"Loading data format from {data_format_path}")
     data_format = load_data_format(data_format_path)
 
     # Get device

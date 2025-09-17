@@ -5,7 +5,7 @@ way to return inference results instead of using dictionaries.
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
 
@@ -54,7 +54,7 @@ class InferenceResults:
     """
 
     predictions: np.ndarray
-    metrics: Dict[str, Any] | None = None
+    metrics: dict[str, Any] | None = None
     model_info: ModelInfo | None = None
 
     def __post_init__(self):
@@ -98,7 +98,7 @@ class InferenceResults:
             return harmonic_avg.get("AUROC")
         return None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary format for backward compatibility."""
         result = {"predictions": self.predictions}
 

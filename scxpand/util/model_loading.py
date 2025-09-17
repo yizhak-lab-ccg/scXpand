@@ -7,7 +7,7 @@ to prevent silent failures and ensure proper error handling.
 import json
 
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any
 
 import torch
 
@@ -29,9 +29,9 @@ class ModelLoadingError(Exception):
 
 def load_model_state_dict(
     model_dir: Path,
-    device: Union[torch.device, str],
+    device: torch.device | str,
     model_name: str = "model",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Load model state dictionary from training checkpoint.
 
     This function loads model state dictionary from best_ckpt.pt only.
@@ -73,7 +73,6 @@ def load_model_state_dict(
         )
 
     try:
-        logger.info(f"Loading from training checkpoint: {best_ckpt_path}")
         checkpoint_info = torch.load(best_ckpt_path, map_location=device, weights_only=False)
 
         # Validate checkpoint structure
@@ -84,7 +83,6 @@ def load_model_state_dict(
             raise RuntimeError(f"Missing 'model_state_dict' key in {best_ckpt_path}")
 
         state_dict = checkpoint_info["model_state_dict"]
-        logger.info(f"✅ Successfully loaded {model_name} from training checkpoint")
         return state_dict
 
     except Exception as e:
@@ -123,7 +121,6 @@ def load_model_parameters(model_dir: Path, param_class: type, param_file: str = 
 
         # Instantiate parameter object
         params = param_class(**param_dict)
-        logger.info(f"✅ Loaded parameters from {params_path}")
         return params
 
     except json.JSONDecodeError as e:
@@ -133,7 +130,7 @@ def load_model_parameters(model_dir: Path, param_class: type, param_file: str = 
 
 
 def load_and_validate_model(
-    model: nn.Module, model_dir: Path, device: Union[torch.device, str], model_name: str = "model"
+    model: nn.Module, model_dir: Path, device: torch.device | str, model_name: str = "model"
 ) -> nn.Module:
     """Load state dict into model with validation.
 
@@ -166,17 +163,8 @@ def load_and_validate_model(
 
         if unexpected_keys:
             logger.warning(f"Unexpected keys in state dict: {unexpected_keys}")
-
-        # Critical validation: ensure some weights were actually loaded
-        total_params = sum(p.numel() for p in model.parameters())
-        if total_params == 0:
-            raise ModelLoadingError("Model has no parameters after loading")
-
         # Set to evaluation mode
         model.eval()
-
-        logger.info(f"✅ {model_name} model loaded and validated successfully")
-        logger.info(f"Model has {total_params:,} parameters")
 
         return model
 

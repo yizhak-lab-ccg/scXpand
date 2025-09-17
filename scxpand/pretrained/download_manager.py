@@ -60,8 +60,6 @@ def _normalize_model_filenames(model_dir: Path) -> None:
                 original_filename = match.group(1)
                 if original_filename in expected_files:
                     new_path = model_dir / original_filename
-                    # Simply rename - Pooch ensures we're in a fresh directory for new versions
-                    logger.info(f"Normalizing filename: {file_path.name} -> {original_filename}")
                     shutil.move(str(file_path), str(new_path))
 
 
@@ -127,7 +125,6 @@ def download_pretrained_model(
         cache_dir_path = current_dir / ".scxpand_cache"
         cache_dir_path.mkdir(exist_ok=True)
         cache_path = str(cache_dir_path)
-        logger.info(f"Using cache directory: {cache_dir_path}")
 
     if model_name is not None:
         # Use registry model
@@ -141,12 +138,12 @@ def download_pretrained_model(
 
         download_url = model_info.url
 
-        logger.info(f"Downloading registry model '{model_name}' from: {download_url}")
+        logger.info(f"Downloading registry model '{model_name}' to cache directory: {cache_path}")
     else:
         # Use direct URL
         download_url = model_url
 
-        logger.info(f"Downloading model from URL: {model_url}")
+        logger.info(f"Downloading model from URL: {model_url} to cache directory: {cache_path}")
 
     # Let Pooch handle everything - it will:
     # 1. Download the file if not cached
@@ -179,7 +176,6 @@ def download_pretrained_model(
     # Normalize filenames to remove any numeric prefixes
     _normalize_model_filenames(result_path)
 
-    logger.info(f"Model successfully downloaded and cached at: {result_path}")
     return result_path
 
 

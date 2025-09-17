@@ -181,27 +181,6 @@ class TestOpenAdataMultiprocessingSafe:
         assert len(results) == 3
         assert all(shape == (3, 50) for shape in results)
 
-    @patch("scxpand.util.io.logger")
-    def test_logging_debug_messages(self, mock_logger, temp_h5ad_file):
-        """Test that appropriate debug messages are logged."""
-        with open_adata_multiprocessing_safe(
-            data_path=temp_h5ad_file,
-            adata=None,
-        ) as (adata, indices):
-            pass
-
-        # Check that debug messages were logged
-        debug_calls = list(mock_logger.debug.call_args_list)
-        assert len(debug_calls) >= 2  # Should have opening and closing debug messages
-
-        # Check opening message
-        opening_call = debug_calls[0][0][0]
-        assert "Opening AnnData file with backed='r'" in opening_call
-
-        # Check closing message
-        closing_call = debug_calls[1][0][0]
-        assert "Closed AnnData file handle" in closing_call
-
 
 class TestIntegrationWithDataset:
     """Integration tests with CellsDataset to ensure the utility works in practice."""

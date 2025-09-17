@@ -5,7 +5,6 @@ handling automatic model downloading and loading. For external use, use scxpand.
 """
 
 from pathlib import Path
-from typing import Union
 
 import anndata as ad
 
@@ -24,9 +23,9 @@ logger = get_logger()
 def fetch_model_and_run_inference(
     model_name: str | None = None,
     model_url: str | None = None,
-    data_path: Union[str, Path] | None = None,
+    data_path: str | Path | None = None,
     adata: ad.AnnData | None = None,
-    save_path: Union[str, Path] | None = None,
+    save_path: str | Path | None = None,
     batch_size: int | None = None,
     num_workers: int = 4,
     eval_row_inds=None,
@@ -76,10 +75,6 @@ def fetch_model_and_run_inference(
     if model_name is not None:
         # Use registry model
         model_info = get_pretrained_model_info(model_name)
-        logger.info(f"Using registry model: {model_info.name}")
-        logger.info(f"Model version: {model_info.version}")
-        logger.info("Model type will be auto-detected from model_type.txt")
-
         # Download using registry
         model_path = download_pretrained_model(model_name=model_name)
 
@@ -97,8 +92,6 @@ def fetch_model_and_run_inference(
     # Set default batch size if not provided
     if batch_size is None:
         batch_size = 1024  # Default batch size
-
-    logger.info(f"Running inference with batch size: {batch_size}")
 
     # Run the unified prediction pipeline
     results = run_prediction_pipeline(
@@ -131,7 +124,6 @@ def fetch_model_and_run_inference(
             url=model_url,
         )
 
-    logger.info("Inference completed successfully")
     return InferenceResults(
         predictions=results.predictions,
         metrics=results.metrics,

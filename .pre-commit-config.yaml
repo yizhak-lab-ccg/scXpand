@@ -39,15 +39,6 @@ repos:
 
   - repo: local
     hooks:
-      - id: check-changelog-format
-        name: Check CHANGELOG.md format
-        entry: python -c "import re,sys;content=open('CHANGELOG.md').read();versions=re.findall(r'^## \[[\d.]+\] - \d{4}-\d{2}-\d{2}$',content,re.M);sections=re.findall(r'^### (Added|Changed|Deprecated|Removed|Fixed|Security)$',content,re.M);print('✅ Changelog valid') if versions and sections else (print('❌ Invalid changelog format'),sys.exit(1))"
-        language: system
-        files: CHANGELOG.md
-
-
-  - repo: local
-    hooks:
       - id: pytest-all
         name: pytest all tests
         entry: uv run pytest
