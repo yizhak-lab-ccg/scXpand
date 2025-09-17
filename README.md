@@ -99,7 +99,9 @@ If you want to contribute or work with the latest source code, follow these step
 
 </details>
 
-> 📖 See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
+---
+
+> See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
 
 ---
 
