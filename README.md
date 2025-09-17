@@ -1,16 +1,17 @@
 <div align="center">
+  <p style="margin: 0 0 20px 0;">
+    <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/v/scxpand" alt="PyPI version" /></a>
+    <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/pyversions/scxpand" alt="Python versions" /></a>
+    <a href="https://github.com/yizhak-lab-ccg/scXpand/blob/main/LICENSE"><img src="https://img.shields.io/github/license/yizhak-lab-ccg/scXpand" alt="License" /></a>
+    <a href="#"><img src="https://visitor-badge.laobi.icu/badge?page_id=yizhak-lab-ccg.scXpand&left_text=scXpand%20Visitors" alt="Visitors" /></a>
+  </p>
+
   <img src="https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_logo_gray.png" alt="scXpand Logo" width="280"/>
 
   <h1 style="margin: 10px 0 5px 0;">scXpand: Pan-cancer Detection of T-cell Clonal Expansion</h1>
 
   <p style="margin: 0 0 25px 0; font-size: 0.95em; max-width: 800px; line-height: 1.4;">
     Detect T-cell clonal expansion from single-cell RNA sequencing data without paired TCR sequencing
-  </p>
-
-  <p style="margin: 0 0 20px 0;">
-    <img src="https://img.shields.io/pypi/v/scxpand?style=flat-square&logo=pypi&logoColor=white" alt="PyPI version" />
-    <img src="https://img.shields.io/pypi/pyversions/scxpand?style=flat-square&logo=python&logoColor=white" alt="Python versions" />
-    <img src="https://img.shields.io/github/license/yizhak-lab-ccg/scXpand?style=flat-square" alt="License" />
   </p>
 
   <p style="margin: 0;">
@@ -174,10 +175,5 @@ We hope you’ll find this repository helpful, and we warmly welcome any request
 <p align="center">
   <a href="https://mapmyvisitors.com/web/1bz9s">
      <img src="https://mapmyvisitors.com/map.png?d=hwaNi7bepoJeL9CYnuB3WjMT-liNG4MvcmwecZk3aNA&cl=ffffff">
-   </a>
-</p>
-<p align="center">
-  <a href="#">
-     <img src="https://visitor-badge.laobi.icu/badge?page_id=yizhak-lab-ccg.scXpand&left_text=scXpand%20Visitors" alt="Visitors" />
    </a>
 </p>
