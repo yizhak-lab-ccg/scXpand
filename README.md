@@ -16,7 +16,7 @@
   <p style="margin: 0;">
     <a href="https://scxpand.readthedocs.io/en/latest/" style="margin: 0 8px;">Documentation</a> •
     <a href="#installation" style="margin: 0 8px;">Installation</a> •
-    <a href="#tutorial" style="margin: 0 8px;">Tutorial</a> •
+    <a href="#quick-start" style="margin: 0 8px;">Quick Start</a> •
     <a href="https://scxpand.readthedocs.io/en/latest/user_guide.html" style="margin: 0 8px;">Usage Guide</a> •
     <a href="#citation" style="margin: 0 8px;">Citation</a>
   </p>
