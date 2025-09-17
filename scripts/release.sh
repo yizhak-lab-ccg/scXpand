@@ -244,10 +244,10 @@ check_changelog_entry() {
 
     # Extract the content for this version and check if it has meaningful content
     local version_content
-    version_content=$(sed -n "/^## \[$version\]/,/^## \[/p" "$changelog_file" | sed '$d' | tail -n +2)
+    version_content=$(sed -n "/^## \[$version\]/,/^## \[/p" "$changelog_file" | sed '$d' | tail -n +3 | sed '/^$/d')
 
-    # Check if the content has any bullet points (actual entries)
-    if echo "$version_content" | grep -q "^- "; then
+    # Check if the content has any bullet points (actual entries) and is not just a placeholder dash
+    if echo "$version_content" | grep -q "^- " && ! echo "$version_content" | grep -q "^-$"; then
         return 0  # Has content
     else
         return 1  # Empty or no meaningful content
@@ -268,34 +268,39 @@ create_changelog_template() {
     # Create a temporary file for the updated changelog
     local temp_changelog=$(mktemp)
 
-    # Build the changelog template
-    local changelog_template="## [$version] - $today
+    # Extract content from [Unreleased] section
+    local unreleased_content
+    unreleased_content=$(awk '/^## \[Unreleased\]/{flag=1; next} /^## \[/{flag=0} flag && /^-/{print}' "$changelog_file")
 
-### Added
--
+    # Build the changelog template with unreleased content or placeholder
+    local changelog_template
+    if [ -n "$unreleased_content" ]; then
+        changelog_template="## [$version] - $today
 
-### Changed
--
+$unreleased_content
 
-### Fixed
--
+"
+    else
+        changelog_template="## [$version] - $today
 
-### Removed
 -
 
 "
+    fi
 
     # Read the changelog and add the template
     {
-        # Copy everything up to the [Unreleased] section
+        # Copy everything up to the [Unreleased] section header
         sed -n '1,/## \[Unreleased\]/p' "$changelog_file"
 
-        # Add the new version template
+        # Add empty [Unreleased] section
         echo ""
+
+        # Add the new version template
         echo "$changelog_template"
 
-        # Copy the rest of the changelog (skip the old [Unreleased] section)
-        sed -n '/## \[Unreleased\]/,$p' "$changelog_file" | tail -n +2
+        # Copy the rest of the changelog starting from the first version section
+        awk '/^## \[[0-9]/{flag=1} flag{print}' "$changelog_file"
     } > "$temp_changelog"
 
     # Replace the original changelog
@@ -336,8 +341,8 @@ validate_changelog() {
             print_error "CHANGELOG.md has been updated with a template for version $NEW_VERSION"
             print_status "Please:"
             print_status "  1. Edit CHANGELOG.md and fill in the release notes"
-            print_status "  2. Remove empty sections (### Added, ### Changed, etc.) that you don't need"
-            print_status "  3. Add meaningful entries under the relevant sections"
+            print_status "  2. Add meaningful bullet points describing the changes"
+            print_status "  3. Replace the placeholder '-' with actual change descriptions"
             print_status "  4. Run the release script again: $0 $*"
             echo
             print_status "Template location: $changelog_file"

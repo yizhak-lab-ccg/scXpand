@@ -21,7 +21,7 @@ This guide explains how to publish new versions of scXpand to PyPI.
 ### `release.sh` (Dual Package Release Script)
 
 **Fully automated release pipeline** for both package variants with:
-- 📝 **Interactive changelog updates** with organized entry collection
+- 📝 **Smart changelog management** with automatic [Unreleased] content migration
 - 🚀 **Automatic GitHub release creation** with auto-generated release notes
 - 📦 **Dual package publishing** (CPU/MPS + CUDA variants)
 - 🔄 **Complete automation** from version bump to PyPI publishing
@@ -125,11 +125,8 @@ This guide explains how to publish new versions of scXpand to PyPI.
 3. **📝 Changelog Validation**:
    - **Checks for existing changelog entry** for the new version
    - If no entry exists or it's empty, **creates a template** and exits
-   - **Template includes organized sections**:
-     - **Added**: New features
-     - **Changed**: Changes in existing functionality
-     - **Fixed**: Bug fixes
-     - **Removed**: Removed features
+   - **Automatically moves content from [Unreleased] section** to the new version
+   - **Simple bullet-point format** for easy maintenance
    - You manually edit CHANGELOG.md with your preferred editor
    - **Re-run the script** after filling in the changelog
 
@@ -203,27 +200,18 @@ The script will:
 [ERROR] CHANGELOG.md has been updated with a template for version 0.3.5
 Please:
   1. Edit CHANGELOG.md and fill in the release notes
-  2. Remove empty sections (### Added, ### Changed, etc.) that you don't need
-  3. Add meaningful entries under the relevant sections
+  2. Add meaningful bullet points describing the changes
+  3. Replace the placeholder '-' with actual change descriptions
   4. Run the release script again: ./scripts/release.sh --patch
 ```
 
 #### 3. Edit the Changelog Template
-The script creates a template like this:
+
+The script automatically moves content from the `[Unreleased]` section to the new version. If there's no unreleased content, it creates a simple template like this:
+
 ```markdown
 ## [0.3.5] - 2025-01-15
 
-### Added
--
-
-### Changed
--
-
-### Fixed
--
-
-### Removed
--
 ```
 
 **Edit with your preferred editor:**
@@ -234,18 +222,13 @@ vim CHANGELOG.md         # Vim
 nano CHANGELOG.md        # Nano
 ```
 
-**Example filled template:**
+**Example of a well-filled changelog:**
 ```markdown
 ## [0.3.5] - 2025-01-15
 
-### Added
 - New hyperparameter optimization for MLP models
 - Support for custom loss functions
-
-### Changed
 - Improved memory efficiency in data loading
-
-### Fixed
 - Fixed CUDA memory leak in autoencoder training
 - Fixed validation metric calculation bug
 ```
@@ -265,7 +248,7 @@ The script will now:
 - **User-focused**: Describe impact on users, not internal changes
 - **One feature per line**: Each bullet should be one distinct change
 - **Use active voice**: "Added support for..." vs "Support was added for..."
-- **Remove empty sections**: Delete `### Added`, `### Changed`, etc. sections you don't use
+- **Use the [Unreleased] section**: Add changes as you work, they'll be automatically moved during release
 
 ## PyPI Token Requirements
 
