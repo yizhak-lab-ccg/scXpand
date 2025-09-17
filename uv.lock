@@ -3605,7 +3605,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.31.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.12.7" },
     { name = "scanpy", specifier = ">=1.11.1" },
-    { name = "scikit-learn", specifier = "==1.7.1" },
+    { name = "scikit-learn", specifier = ">=1.7.1" },
     { name = "scirpy", specifier = ">=0.9.3" },
     { name = "scrublet", specifier = ">=0.2.3" },
     { name = "seaborn", specifier = ">=0.13.2" },
