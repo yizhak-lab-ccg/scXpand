@@ -311,7 +311,7 @@ The script will now:
 - Verify the generated CUDA configuration in `temp/pyproject-cuda.toml`
 - Check that `[tool.uv.sources]` and `[[tool.uv.index]]` sections are present
 - Ensure CUDA index URL points to `https://download.pytorch.org/whl/cu128`
-- Test CUDA installation manually: `uv pip install scxpand-cuda==0.1.40` and check `torch.__version__` includes `+cu128`
+- Test CUDA installation manually: `uv pip install scxpand-cuda==<version>` and check `torch.__version__` includes `+cu128`
 
 **"Version detection issues"**:
 - The package uses a robust version detection system that tries `scxpand-cuda` first, then `scxpand`, then falls back to `"0.0.0"`

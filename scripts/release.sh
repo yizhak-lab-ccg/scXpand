@@ -169,8 +169,8 @@ check_prerequisites() {
         print_warning "GitHub CLI is not authenticated. GitHub release creation will be skipped."
         print_status "To enable GitHub releases, run: gh auth login"
         export SKIP_GITHUB_RELEASE=true
-        else
-            print_success "GitHub CLI is available and authenticated"
+    else
+        print_success "GitHub CLI is available and authenticated"
         export SKIP_GITHUB_RELEASE=false
     fi
 
@@ -186,7 +186,7 @@ check_prerequisites() {
     fi
 
     # Check if we're on main branch
-    current_branch=$(git branch --show-current)
+    local current_branch=$(git branch --show-current)
     if [ "$current_branch" != "main" ]; then
         print_error "Not on main branch (currently on: $current_branch)"
         print_status "Please checkout main branch first: git checkout main"
@@ -202,21 +202,22 @@ check_prerequisites() {
     fi
 
     # Check if we're up to date with remote
-    git fetch origin
-    local_commit=$(git rev-parse HEAD)
-    remote_commit=$(git rev-parse origin/main)
+    print_status "Fetching latest changes from remote..."
+    if ! git fetch origin; then
+        print_error "Failed to fetch from remote origin"
+        print_status "Please check your network connection and git credentials"
+        exit 1
+    fi
+    local local_commit=$(git rev-parse HEAD)
+    local remote_commit=$(git rev-parse origin/main)
     if [ "$local_commit" != "$remote_commit" ]; then
         print_error "Local branch is not up to date with remote origin/main"
         print_status "Please pull latest changes: git pull origin main, and push your changes: git push origin main"
         exit 1
     fi
 
-    # Check if there are any unpushed commits
-    if ! git diff --quiet origin/main..HEAD; then
-        print_error "There are unpushed commits"
-        print_status "Please push your changes first: git push origin main"
-        exit 1
-    fi
+    # Note: Unpushed commits check is redundant since we already verified
+    # local and remote commits are identical above
 
     # Check if pyproject file exists
     if [ ! -f "pyproject.toml" ]; then
@@ -363,31 +364,29 @@ preview_and_validate() {
     local current_version=$(uv version | cut -d' ' -f2)
     print_status "Current version: $current_version"
 
-    # Calculate what the new version would be
-    local new_version
-    if [ "$DRY_RUN" = false ]; then
-        # Backup and temporarily bump to get new version
-        backup_file "pyproject.toml" "original"
-        uv version --bump "$VERSION_TYPE" >/dev/null 2>&1
-        new_version=$(uv version | cut -d' ' -f2)
-        restore_file "pyproject.toml" "original" "false"
-    else
-        # For dry run, simulate version calculation
-        case "$VERSION_TYPE" in
-            "major")
-                new_version=$(echo "$current_version" | awk -F. '{print ($1+1)".0.0"}')
-                ;;
-            "minor")
-                new_version=$(echo "$current_version" | awk -F. '{print $1"."($2+1)".0"}')
-                ;;
-            "patch")
-                new_version=$(echo "$current_version" | awk -F. '{print $1"."$2"."($3+1)}')
-                ;;
-            *)
-                new_version="$current_version"
-                ;;
-        esac
+    # Validate version format (should be x.y.z)
+    if ! echo "$current_version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+        print_error "Invalid version format: $current_version (expected x.y.z)"
+        exit 1
     fi
+
+    # Calculate what the new version would be (without modifying files)
+    local new_version
+    case "$VERSION_TYPE" in
+        "major")
+            new_version=$(echo "$current_version" | awk -F. '{print ($1+1)".0.0"}')
+            ;;
+        "minor")
+            new_version=$(echo "$current_version" | awk -F. '{print $1"."($2+1)".0"}')
+            ;;
+        "patch")
+            new_version=$(echo "$current_version" | awk -F. '{print $1"."$2"."($3+1)}')
+            ;;
+        *)
+            print_error "Invalid version type: $VERSION_TYPE"
+            exit 1
+            ;;
+    esac
 
     print_status "Would bump to version: $new_version"
     export NEW_VERSION="$new_version"
@@ -592,6 +591,8 @@ build_package() {
     # Build package
     if ! uv build; then
         print_error "Failed to build $description"
+        print_status "Check for syntax errors in pyproject.toml or missing dependencies"
+        print_status "Run 'uv build' manually to see detailed error messages"
         [ "$package_type" = "cuda" ] && restore_file "pyproject.toml" "backup" "false"
         return 1
     fi
@@ -849,10 +850,11 @@ publish_to_pypi() {
     print_warning "About to publish BOTH packages (scxpand and scxpand-cuda) version $NEW_VERSION to PyPI"
     echo
     echo
-    read -p "Are you sure you want to continue? (y/N): " -r
+    local user_response
+    read -p "Are you sure you want to continue? (y/N): " -r user_response
     echo
 
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if [[ ! $user_response =~ ^[Yy]$ ]]; then
         print_status "Publishing cancelled"
         exit 0
     fi
@@ -1097,8 +1099,12 @@ main() {
 
 # Consolidated cleanup on exit
 cleanup_on_exit() {
+    # Try to restore files first (in case of script interruption)
     restore_file "pyproject.toml" "backup" "false" 2>/dev/null || true
     restore_file "pyproject.toml" "original" "false" 2>/dev/null || true
+
+    # Clean up all backup and temporary files
+    cleanup_backups
     rm -f temp/pyproject-cuda*.toml pyproject-cuda-temp*.toml 2>/dev/null || true
 }
 
