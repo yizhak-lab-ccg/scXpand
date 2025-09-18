@@ -171,6 +171,7 @@ ignore_names = [
     "deterministic",
     "benchmark",
     "run_inference",
+    "configure_logging",
     # InferenceResults methods
     "n_predictions",
     "has_metrics",
