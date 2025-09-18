@@ -1,4 +1,4 @@
-scxpand.util.logger
+﻿scxpand.util.logger
 ===================
 
 .. automodule:: scxpand.util.logger
@@ -8,5 +8,6 @@ scxpand.util.logger
 
    .. autosummary::
    
+      configure_logging
       get_logger
    
