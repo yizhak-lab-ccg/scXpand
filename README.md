@@ -19,6 +19,7 @@
   </p>
 
   <p style="margin: 0; text-align: center;">
+    <a href="https://www.biorxiv.org/content/10.1101/2025.09.14.676069v1" style="margin: 0 8px;">Preprint</a> •
     <a href="https://scxpand.readthedocs.io/en/latest/" style="margin: 0 8px;">Documentation</a> •
     <a href="#installation" style="margin: 0 8px;">Installation</a> •
     <a href="#quick-start" style="margin: 0 8px;">Quick Start</a> •

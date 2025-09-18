@@ -5,6 +5,8 @@ scXpand is a framework for predicting T-cell clonal expansion from single-cell R
 
 **GitHub Repository:** `https://github.com/yizhak-lab-ccg/scXpand <https://github.com/yizhak-lab-ccg/scXpand>`_
 
+**Preprint:** `https://www.biorxiv.org/content/10.1101/2025.09.14.676069v1 <https://www.biorxiv.org/content/10.1101/2025.09.14.676069v1>`_
+
 .. image:: _static/images/scXpand_datasets.jpeg
    :width: 100%
    :alt: scXpand Datasets Overview
