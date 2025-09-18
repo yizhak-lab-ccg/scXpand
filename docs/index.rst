@@ -108,4 +108,6 @@ Citation
 --------
 If you use scXpand in your research, please cite our paper:
 
-Under preparation.
+Shorer, O., Amit, R., and Yizhak, K. (2025). scXpand: Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing without paired single-cell TCR sequencing.
+Preprint at bioRxiv, https://doi.org/10.1101/2025.09.14.676069.
+
