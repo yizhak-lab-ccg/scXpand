@@ -164,13 +164,7 @@ This project is licensed under the MIT License – see the [LICENSE](LICENSE) fi
 If you use scXpand in your research, please cite:
 
 ```bibtex
-@article{scxpand2025,
-  title={scXpand: Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing without paired single-cell TCR sequencing},
-  author={[Your Name]},
-  journal={[Journal Name]},
-  year={2025},
-  doi={[DOI]}
-}
+Shorer, O., Amit, R., and Yizhak, K. (2025). scXpand: Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing without paired single-cell TCR sequencing. Preprint at bioRxiv, https://doi.org/10.1101/2025.09.14.676069.
 ```
 
 This project was created in favor of the scientific community worldwide, with a special dedication to the cancer research community.
