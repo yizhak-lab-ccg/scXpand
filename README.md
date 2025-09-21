@@ -179,9 +179,9 @@ If you use scXpand in your research, please cite:
   doi={https://doi.org/10.1101/2025.09.14.676069}
 }
 ```
-
 </details>
 
+---
 
 This project was created in favor of the scientific community worldwide, with a special dedication to the cancer research community.
 We hope you’ll find this repository helpful, and we warmly welcome any requests or suggestions - please don’t hesitate to reach out!
