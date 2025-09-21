@@ -1,14 +1,10 @@
-<div align="left">
+<div align="center">
   <p style="margin: 0 0 20px 0;">
     <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/v/scxpand" alt="PyPI version" /></a>
     <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/pyversions/scxpand" alt="Python versions" /></a>
     <a href="https://github.com/yizhak-lab-ccg/scXpand/blob/main/LICENSE"><img src="https://img.shields.io/github/license/yizhak-lab-ccg/scXpand" alt="License" /></a>
     <a href="#"><img src="https://visitor-badge.laobi.icu/badge?page_id=yizhak-lab-ccg.scXpand&left_text=scXpand%20Visitors" alt="Visitors" /></a>
   </p>
-
----
-
-<div align="center">
   <img src="https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_logo_gray.png" alt="scXpand Logo" width="280"/>
 
   <h1 style="margin: 10px 0 5px 0;">scXpand: Pan-cancer Detection of T-cell Clonal Expansion</h1>
@@ -38,6 +34,7 @@ A framework for predicting T-cell clonal expansion from single-cell RNA sequenci
 
 **[View full documentation](https://scxpand.readthedocs.io/en/latest/)** for comprehensive guides and API reference.
 
+---
 
 ## Features
 
@@ -48,6 +45,8 @@ A framework for predicting T-cell clonal expansion from single-cell RNA sequenci
   - **Linear Models**: Logistic regression and support vector machines
 - **Scalable Processing**: Handles millions of cells with memory-efficient data streaming from disk during training
 - **Automated Hyperparameter Optimization**: Built-in Optuna integration for model tuning
+
+---
 
 ## Installation
 
@@ -103,8 +102,6 @@ If you want to contribute or work with the latest source code, follow these step
 
 </details>
 
----
-
 > See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
 
 ---
@@ -132,8 +129,9 @@ if results.has_metrics:
     print(f"AUROC: {results.get_auroc():.3f}")
 ```
 
-
 See our **[Tutorial Notebook](docs/notebooks/scxpand_tutorial.ipynb)** for a complete example with data preprocessing, T-cell filtering, gene ID conversion, and model application using a real breast cancer dataset.
+
+---
 
 ## Documentation
 
@@ -156,9 +154,13 @@ See our **[Tutorial Notebook](docs/notebooks/scxpand_tutorial.ipynb)** for a com
 
 **[📖 Full Documentation](https://scxpand.readthedocs.io/en/latest/)** - Complete guides, API reference, and interactive tutorials
 
+---
+
 ## License
 
 This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
+
+---
 
 ## Citation
 
@@ -183,11 +185,11 @@ If you use scXpand in your research, please cite:
 
 ---
 
-This project was created in favor of the scientific community worldwide, with a special dedication to the cancer research community.
-We hope you’ll find this repository helpful, and we warmly welcome any requests or suggestions - please don’t hesitate to reach out!
+<div align="center">
+  <p><em>This project was created in favor of the scientific community worldwide, with a special dedication to the cancer research community.</em></p>
+  <p><em>We hope you'll find this repository helpful, and we warmly welcome any requests or suggestions - please don't hesitate to reach out!</em></p>
 
-<p align="center">
   <a href="https://mapmyvisitors.com/web/1bz9s">
-     <img src="https://mapmyvisitors.com/map.png?d=hwaNi7bepoJeL9CYnuB3WjMT-liNG4MvcmwecZk3aNA&cl=ffffff">
-   </a>
-</p>
+     <img src="https://mapmyvisitors.com/map.png?d=hwaNi7bepoJeL9CYnuB3WjMT-liNG4MvcmwecZk3aNA&cl=ffffff" alt="Visitor Map">
+  </a>
+</div>
