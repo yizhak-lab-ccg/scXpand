@@ -242,7 +242,7 @@ class TestSavePredictionsToCsv:
         wrong_predictions = np.array([0.8, 0.2])  # Only 2 predictions for 5 obs
 
         # Should raise ValueError due to length mismatch
-        with pytest.raises(ValueError, match="Predictions length.*doesn't match obs_df length"):
+        with pytest.raises(ValueError, match=r"Predictions length.*doesn't match obs_df length"):
             save_predictions_to_csv(
                 predictions=wrong_predictions, obs_df=mock_obs_df, model_type=ModelType.AUTOENCODER, save_path=save_path
             )

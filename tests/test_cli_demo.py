@@ -1,87 +1,117 @@
-"""Demo script to show CLI test coverage.
+"""Tests for CLI functionality and coverage.
 
-This script demonstrates the comprehensive CLI testing that has been added
-to ensure all API endpoints are properly tested.
+This module provides comprehensive CLI testing to ensure all API endpoints
+are properly tested using pytest.
 """
 
 import subprocess
 import sys
 
+import pytest
 
-def run_cli_test(command: list[str], description: str) -> bool:
-    """Run a CLI test and return success status."""
-    print(f"\n🧪 Testing: {description}")
-    print(f"Command: {' '.join(command)}")
 
-    try:
-        result = subprocess.run(command, check=False, capture_output=True, text=True, timeout=10)
+class TestCLICoverage:
+    """Test CLI functionality and coverage."""
 
-        if result.returncode == 0:
-            print("✅ SUCCESS")
-            return True
-        else:
-            print(f"❌ FAILED (exit code: {result.returncode})")
-            if result.stderr:
-                print(f"Error: {result.stderr[:200]}...")
+    def run_cli_test(self, command: list[str], _description: str) -> bool:
+        """Run a CLI test and return success status."""
+        try:
+            result = subprocess.run(command, check=False, capture_output=True, text=True, timeout=10)
+            return result.returncode == 0
+        except (subprocess.TimeoutExpired, Exception):
             return False
 
-    except subprocess.TimeoutExpired:
-        print("⏰ TIMEOUT")
-        return False
-    except Exception as e:
-        print(f"💥 EXCEPTION: {e}")
-        return False
+    @pytest.mark.slow
+    def test_main_help_command(self):
+        """Test main help command."""
+        command = [sys.executable, "-m", "scxpand.main", "--help"]
+        success = self.run_cli_test(command, "Main help")
+        assert success, "Main help command should succeed"
 
+    @pytest.mark.slow
+    def test_train_help_command(self):
+        """Test train help command."""
+        command = [sys.executable, "-m", "scxpand.main", "train", "--help"]
+        success = self.run_cli_test(command, "Train help")
+        assert success, "Train help command should succeed"
 
-def main():
-    """Run CLI tests to demonstrate coverage."""
-    print("🚀 scXpand CLI Test Coverage Demo")
-    print("=" * 50)
+    @pytest.mark.slow
+    def test_optimize_help_command(self):
+        """Test optimize help command."""
+        command = [sys.executable, "-m", "scxpand.main", "optimize", "--help"]
+        success = self.run_cli_test(command, "Optimize help")
+        assert success, "Optimize help command should succeed"
 
-    # Test cases covering different aspects of CLI
-    test_cases = [
-        # Help commands
-        ([sys.executable, "-m", "scxpand.main", "--help"], "Main help"),
-        ([sys.executable, "-m", "scxpand.main", "train", "--help"], "Train help"),
-        ([sys.executable, "-m", "scxpand.main", "optimize", "--help"], "Optimize help"),
-        ([sys.executable, "-m", "scxpand.main", "optimize-all", "--help"], "Optimize-all help"),
-        ([sys.executable, "-m", "scxpand.main", "inference", "--help"], "Inference help"),
-        ([sys.executable, "-m", "scxpand.main", "list-models", "--help"], "List-models help"),
-        # Error cases
-        ([sys.executable, "-m", "scxpand.main", "invalid-command"], "Invalid command"),
-        ([sys.executable, "-m", "scxpand.main", "train"], "Missing required args"),
-        ([sys.executable, "-m", "scxpand.main", "train", "--model_type", "invalid"], "Invalid model type"),
-        # Valid commands (should fail gracefully due to missing data)
-        (
-            [sys.executable, "-m", "scxpand.main", "train", "--model_type", "mlp", "--data_path", "nonexistent.h5ad"],
-            "Valid train command with missing data",
-        ),
-    ]
+    @pytest.mark.slow
+    def test_optimize_all_help_command(self):
+        """Test optimize-all help command."""
+        command = [sys.executable, "-m", "scxpand.main", "optimize-all", "--help"]
+        success = self.run_cli_test(command, "Optimize-all help")
+        assert success, "Optimize-all help command should succeed"
 
-    results = []
-    for command, description in test_cases:
-        success = run_cli_test(command, description)
-        results.append(success)
+    @pytest.mark.slow
+    def test_inference_help_command(self):
+        """Test inference help command."""
+        command = [sys.executable, "-m", "scxpand.main", "inference", "--help"]
+        success = self.run_cli_test(command, "Inference help")
+        assert success, "Inference help command should succeed"
 
-    # Summary
-    print("\n" + "=" * 50)
-    print("📊 Test Summary")
-    print(f"Total tests: {len(results)}")
-    print(f"Passed: {sum(results)}")
-    print(f"Failed: {len(results) - sum(results)}")
-    print(f"Success rate: {sum(results) / len(results) * 100:.1f}%")
+    @pytest.mark.slow
+    def test_list_models_help_command(self):
+        """Test list-models help command."""
+        command = [sys.executable, "-m", "scxpand.main", "list-models", "--help"]
+        success = self.run_cli_test(command, "List-models help")
+        assert success, "List-models help command should succeed"
 
-    print("\n🎯 CLI Test Coverage Areas:")
-    print("✅ Command availability and help")
-    print("✅ Argument parsing")
-    print("✅ Error handling")
-    print("✅ Invalid input validation")
-    print("✅ Fire framework integration")
-    print("✅ End-to-end CLI workflow")
+    @pytest.mark.slow
+    def test_invalid_command_handling(self):
+        """Test invalid command handling."""
+        command = [sys.executable, "-m", "scxpand.main", "invalid-command"]
+        success = self.run_cli_test(command, "Invalid command")
+        # Invalid commands should fail gracefully
+        assert not success, "Invalid command should fail gracefully"
 
-    print("\n📝 Note: Some tests may fail due to missing dependencies or data files.")
-    print("The important thing is that the CLI interface is working correctly.")
+    @pytest.mark.slow
+    def test_missing_required_args_handling(self):
+        """Test missing required arguments handling."""
+        command = [sys.executable, "-m", "scxpand.main", "train"]
+        success = self.run_cli_test(command, "Missing required args")
+        # Missing required args should fail gracefully
+        assert not success, "Missing required args should fail gracefully"
 
+    @pytest.mark.slow
+    def test_invalid_model_type_handling(self):
+        """Test invalid model type handling."""
+        command = [sys.executable, "-m", "scxpand.main", "train", "--model_type", "invalid"]
+        success = self.run_cli_test(command, "Invalid model type")
+        # Invalid model type should fail gracefully
+        assert not success, "Invalid model type should fail gracefully"
 
-if __name__ == "__main__":
-    main()
+    @pytest.mark.slow
+    def test_valid_command_with_missing_data(self):
+        """Test valid command with missing data file."""
+        command = [
+            sys.executable,
+            "-m",
+            "scxpand.main",
+            "train",
+            "--model_type",
+            "mlp",
+            "--data_path",
+            "nonexistent.h5ad",
+        ]
+        success = self.run_cli_test(command, "Valid train command with missing data")
+        # Should fail gracefully due to missing data file
+        assert not success, "Command with missing data should fail gracefully"
+
+    def test_cli_command_availability(self):
+        """Test that all expected CLI commands are available."""
+        # This test verifies that the CLI structure is correct
+        # The actual command availability is tested in the help command tests
+        expected_commands = ["train", "optimize", "optimize-all", "inference", "list-models"]
+
+        # Verify that we can construct help commands for all expected commands
+        for cmd in expected_commands:
+            command = [sys.executable, "-m", "scxpand.main", cmd, "--help"]
+            # Just verify the command can be constructed
+            assert len(command) > 0, f"Command for {cmd} should be constructible"

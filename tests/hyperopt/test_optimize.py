@@ -219,7 +219,7 @@ class TestStudyCreationAndResume:
             )
 
             # Test the _handle_existing_study method directly since create_study() fails at database level
-            with pytest.raises(ValueError, match="already exists.*with.*2 trial"):
+            with pytest.raises(ValueError, match=r"already exists.*with.*2 trial"):
                 optimizer2._handle_existing_study()
 
     def test_error_when_study_exists_and_not_resuming(self, dummy_adata):
