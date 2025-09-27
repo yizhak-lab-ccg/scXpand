@@ -56,6 +56,13 @@ To work with the latest version on GitHub (for development or contributions):
 
 scXpand follows the `scverse ecosystem <https://scverse.org/>`_ standards and uses modern Python packaging tools.
 
+**Prerequisites:**
+
+Before setting up the development environment, you need to install `uv`, a fast Python package installer and resolver:
+
+* **Install uv**: Follow the `uv installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_ for your platform
+* **Verify installation**: Run ``uv --version`` to confirm uv is installed
+
 **Install in development mode:**
 
 .. code-block:: bash

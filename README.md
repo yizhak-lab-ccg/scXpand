@@ -92,17 +92,24 @@ If you want to contribute or work with the latest source code, follow these step
    cd scXpand
    ```
 
-2. **Install in development mode:**
+2. **Install uv (if not already installed):**
+   ```bash
+   # Follow the installation guide: https://docs.astral.sh/uv/getting-started/installation/
+   # Verify installation:
+   uv --version
+   ```
+
+3. **Install in development mode:**
    ```bash
    uv pip install -e ".[dev]"
    ```
 
-3. **Install pre-commit hooks:**
+4. **Install pre-commit hooks:**
    ```bash
    pre-commit install
    ```
 
-4. **For PyTorch installation (optional):**
+5. **For PyTorch installation (optional):**
 
    **Using uv with automatic backend selection (Recommended):**
    ```bash
@@ -110,23 +117,6 @@ If you want to contribute or work with the latest source code, follow these step
    ```
    This automatically detects your system's optimal PyTorch backend (CUDA if available, otherwise CPU/MPS).
 
-   **Manual installation for specific CUDA versions:**
-   ```bash
-   # CUDA 12.8 (latest)
-   uv pip install torch torchvision torchaudio --torch-backend=cu128
-
-   # CUDA 12.6
-   uv pip install torch torchvision torchaudio --torch-backend=cu126
-
-   # CPU-only
-   uv pip install torch torchvision torchaudio --torch-backend=cpu
-   ```
-
-**Template Updates:** scXpand follows the scverse ecosystem standards. To update from the latest template:
-```bash
-pip install cruft
-cruft update
-```
 
 </details>
 

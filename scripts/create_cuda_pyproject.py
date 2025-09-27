@@ -11,6 +11,9 @@ import sys
 import tomllib
 from pathlib import Path
 
+# Add the project root to the path so we can import from scripts
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from scripts.constants import CUDA_VERSION as DEFAULT_CUDA_VERSION
 from scripts.constants import TORCH_VERSION
 
