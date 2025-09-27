@@ -388,6 +388,16 @@ create_dev_version() {
     # Extract the clean base version (remove .devX suffix if present)
     local clean_base_version=$(echo "$base_version" | sed 's/\.dev[0-9]*$//')
 
+    # For automation, if we already have a .dev0 version, increment the base version
+    if git tag -l "v${clean_base_version}.dev0" | grep -q "v${clean_base_version}.dev0"; then
+        # Increment the patch version for the next dev release
+        local major=$(echo "$clean_base_version" | cut -d. -f1)
+        local minor=$(echo "$clean_base_version" | cut -d. -f2)
+        local patch=$(echo "$clean_base_version" | cut -d. -f3)
+        patch=$((patch + 1))
+        clean_base_version="${major}.${minor}.${patch}"
+    fi
+
     # For VCS versioning, hatch-vcs only supports .dev0 for development versions
     echo "${clean_base_version}.dev0"
 }
@@ -907,12 +917,25 @@ commit_and_push() {
     fi
 }
 
-# Function to create and push tag
+# Function to create and push tag with conflict handling
 create_and_push_tag() {
+    local tag_name="v$NEW_VERSION"
+
+    # Check if tag already exists
+    if git tag -l "$tag_name" | grep -q "$tag_name"; then
+        print_warning "Tag $tag_name already exists. Deleting and recreating..."
+        if [ "$DRY_RUN" = false ]; then
+            git tag -d "$tag_name" 2>/dev/null || true
+            git push origin ":refs/tags/$tag_name" 2>/dev/null || true
+        else
+            print_status "DRY RUN: Would delete existing tag $tag_name"
+        fi
+    fi
+
     execute_git_command \
-        "git tag 'v$NEW_VERSION' && git push origin 'v$NEW_VERSION'" \
-        "Creating and pushing tag v$NEW_VERSION" \
-        "Would create and push tag v$NEW_VERSION"
+        "git tag '$tag_name' && git push origin '$tag_name'" \
+        "Creating and pushing tag $tag_name" \
+        "Would create and push tag $tag_name"
 }
 
 # Function to publish both packages to PyPI
