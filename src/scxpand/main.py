@@ -16,6 +16,7 @@ See individual function docstrings for detailed usage examples.
 # Set matplotlib backend to non-interactive to avoid GUI issues
 import contextlib
 from pathlib import Path
+from typing import Any
 
 import fire
 import matplotlib
@@ -51,7 +52,7 @@ def train(
     config_path: str | None = None,
     resume: bool = False,
     num_workers: int = 4,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Train a single model.
 
@@ -89,10 +90,12 @@ def train(
     )
 
     # Create save directory using registry default
-    save_dir = get_new_version_path(save_dir or model_spec.default_save_dir)
+    save_dir_str: str = str(
+        get_new_version_path(save_dir or model_spec.default_save_dir)
+    )
 
     # Load parameters and apply overrides
-    prm = load_and_override_params(
+    prm: Any = load_and_override_params(
         param_class=model_spec.param_class, config_path=config_path, **kwargs
     )
 
@@ -101,7 +104,7 @@ def train(
         model_type=model_type_enum,
         train_fn=model_spec.runner,
         data_path=data_path,
-        save_dir=save_dir,
+        save_dir=save_dir_str,
         prm=prm,
         resume=resume,
         num_workers=num_workers,
@@ -120,7 +123,7 @@ def optimize(
     num_workers: int = 4,
     config_path: str | None = None,
     fail_fast: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Run hyperparameter optimization for a specified model type.
 
@@ -186,7 +189,7 @@ def optimize_all(
     resume: bool = True,
     num_workers: int = 4,
     model_types: list[ModelType] | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Run hyperparameter optimization for all supported model types or a specified subset.
 
@@ -309,7 +312,7 @@ def inference(
     )
 
 
-def main():
+def main() -> None:
     """Main entry point for the scxpand CLI.
 
     Returns:

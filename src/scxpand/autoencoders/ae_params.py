@@ -93,7 +93,7 @@ class AutoEncoderParams(BaseParams):
         return DataAugmentParams(
             mask_rate=self.mask_rate,
             noise_std=self.noise_std,
-            soft_loss_beta=self.soft_loss_beta,
+            soft_loss_beta=self.soft_loss_beta or 1.0,  # type: ignore[arg-type]
         )
 
     def get_optimizer_params(self) -> OptimizerParams:
@@ -108,7 +108,7 @@ class AutoEncoderParams(BaseParams):
     def get_lr_scheduler_params(self) -> LRSchedulerParams:
         return LRSchedulerParams(
             lr_scheduler_type=self.lr_scheduler_type,
-            lr_scheduler_config=self.lr_scheduler_config,
+            lr_scheduler_config=self.lr_scheduler_config or {},  # type: ignore[arg-type]
         )
 
     def get_data_loader_params(self) -> DataLoaderParams:

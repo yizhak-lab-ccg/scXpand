@@ -81,7 +81,7 @@ class LinearClassifierParam(BaseParams):
         return DataAugmentParams(
             mask_rate=self.mask_rate,
             noise_std=self.noise_std,
-            soft_loss_beta=self.soft_loss_beta,
+            soft_loss_beta=self.soft_loss_beta or 1.0,  # type: ignore[arg-type]
         )
 
     def get_lr_scheduler_params(self) -> LRSchedulerParams:
@@ -101,6 +101,7 @@ class LinearClassifierParam(BaseParams):
             init_learning_rate=self.init_learning_rate,
         )
 
-    def get_model_type(self) -> str:
+    @classmethod
+    def get_model_type(cls) -> str:
         """Return the model type identifier for this parameter class."""
-        return self.model_type
+        return "linear"

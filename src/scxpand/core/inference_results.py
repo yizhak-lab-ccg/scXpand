@@ -57,7 +57,7 @@ class InferenceResults:
     metrics: dict[str, Any] | None = None
     model_info: ModelInfo | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the inference results after initialization."""
         if not isinstance(self.predictions, np.ndarray):
             raise TypeError("predictions must be a numpy array")
@@ -87,20 +87,20 @@ class InferenceResults:
         """Get the overall AUROC score if available."""
         if not self.has_metrics:
             return None
-        return self.metrics.get("AUROC")
+        return self.metrics.get("AUROC")  # type: ignore[union-attr]
 
     def get_harmonic_avg_auroc(self) -> float | None:
         """Get the harmonic average AUROC across strata if available."""
         if not self.has_metrics:
             return None
-        harmonic_avg = self.metrics.get("harmonic_avg")
+        harmonic_avg = self.metrics.get("harmonic_avg")  # type: ignore[union-attr]
         if harmonic_avg and isinstance(harmonic_avg, dict):
-            return harmonic_avg.get("AUROC")
+            return harmonic_avg.get("AUROC")  # type: ignore[no-any-return]
         return None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary format for backward compatibility."""
-        result = {"predictions": self.predictions}
+        result: dict[str, Any] = {"predictions": self.predictions}
 
         if self.metrics is not None:
             result["metrics"] = self.metrics

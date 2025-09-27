@@ -67,7 +67,7 @@ class ModelOutput:
     theta: torch.Tensor | None = None
     categorical_logits: dict[str, torch.Tensor] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Ensure categorical_logits is initialized as a dict."""
         # Ensure categorical_logits is a dictionary
         if self.categorical_logits is None:
