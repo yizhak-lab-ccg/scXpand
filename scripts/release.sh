@@ -500,6 +500,9 @@ bump_version() {
             print_status "DRY RUN: Would bump to version: $NEW_VERSION"
         fi
     fi
+
+    # Clean up any backup files created during version bump
+    cleanup_backups
 }
 
 # Function to clean build directories
@@ -555,7 +558,16 @@ restore_file() {
 }
 
 cleanup_backups() {
+    # Remove all backup files created during the release process
     rm -f pyproject.toml.original pyproject.toml.backup pyproject.toml.temp
+    rm -f pyproject.toml.bak
+    rm -f temp/pyproject-cuda*.toml
+    rm -f pyproject-cuda-temp*.toml
+
+    # Clean up any temporary build artifacts
+    rm -rf temp/test_cuda_env 2>/dev/null || true
+
+    print_status "Cleaned up backup and temporary files"
 }
 
 
@@ -1245,9 +1257,7 @@ main() {
     show_summary
 
     # Clean up backup files after successful completion
-    if [ "$DRY_RUN" = false ]; then
-        cleanup_backups
-    fi
+    cleanup_backups
 }
 
 # Consolidated cleanup on exit
