@@ -130,6 +130,8 @@ torchaudio = { index = "pytorch-cpu", extra = "cpu" }
 [tool.ruff]
 target-version = "py311"
 line-length = 88
+
+[tool.ruff.lint]
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
@@ -147,7 +149,7 @@ ignore = [
     "F841",  # local variable assigned but never used
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "*.ipynb" = ["E402"]  # notebooks often have imports after other code
 "tests/**" = ["F841"]  # test files often have unused variables
