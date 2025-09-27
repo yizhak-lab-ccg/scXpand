@@ -219,19 +219,24 @@ check_prerequisites() {
         exit 1
     fi
 
-    # Check if we're up to date with remote
+    # Check if we're up to date with remote (skip for dev releases from non-main branches)
     print_status "Fetching latest changes from remote..."
     if ! git fetch origin; then
         print_error "Failed to fetch from remote origin"
         print_status "Please check your network connection and git credentials"
         exit 1
     fi
-    local local_commit=$(git rev-parse HEAD)
-    local remote_commit=$(git rev-parse origin/main)
-    if [ "$local_commit" != "$remote_commit" ]; then
-        print_error "Local branch is not up to date with remote origin/main"
-        print_status "Please pull latest changes: git pull origin main, and push your changes: git push origin main"
-        exit 1
+
+    if [ "$DEV_RELEASE" = true ] && [ "$current_branch" != "main" ]; then
+        print_warning "Dev release from non-main branch: Skipping remote sync check"
+    else
+        local local_commit=$(git rev-parse HEAD)
+        local remote_commit=$(git rev-parse origin/main)
+        if [ "$local_commit" != "$remote_commit" ]; then
+            print_error "Local branch is not up to date with remote origin/main"
+            print_status "Please pull latest changes: git pull origin main, and push your changes: git push origin main"
+            exit 1
+        fi
     fi
 
     # Note: Unpushed commits check is redundant since we already verified
