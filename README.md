@@ -32,8 +32,6 @@ A framework for predicting T-cell clonal expansion from single-cell RNA sequenci
 
 **Manuscript in preparation** - detailed methodology and benchmarks coming soon.
 
-scXpand follows the `scverse ecosystem <https://scverse.org/>`_ standards for single-cell analysis tools.
-
 **[View full documentation](https://scxpand.readthedocs.io/en/latest/)** for comprehensive guides and API reference.
 
 ---
