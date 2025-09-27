@@ -385,16 +385,20 @@ create_dev_version() {
     local base_version="$1"
     local dev_counter=1
 
-    # Check if there are existing dev versions for this base version
-    if git tag -l "v${base_version}.dev*" | grep -q "v${base_version}.dev"; then
-        # Find the highest dev counter
-        local max_dev=$(git tag -l "v${base_version}.dev*" | sed "s/v${base_version}.dev//" | sort -n | tail -1)
-        if [ -n "$max_dev" ] && [ "$max_dev" -gt 0 ]; then
+    # For VCS versioning, we need to handle the case where base_version might already be a dev version
+    # Extract the clean base version (remove .devX suffix if present)
+    local clean_base_version=$(echo "$base_version" | sed 's/\.dev[0-9]*$//')
+
+    # Check if there are existing dev versions for this clean base version
+    if git tag -l "v${clean_base_version}.dev*" | grep -q "v${clean_base_version}.dev"; then
+        # Find the highest dev counter for the clean base version
+        local max_dev=$(git tag -l "v${clean_base_version}.dev*" | sed "s/v${clean_base_version}.dev//" | sort -n | tail -1)
+        if [ -n "$max_dev" ] && [ "$max_dev" -ge 0 ]; then
             dev_counter=$((max_dev + 1))
         fi
     fi
 
-    echo "${base_version}.dev${dev_counter}"
+    echo "${clean_base_version}.dev${dev_counter}"
 }
 
 # Function to preview version bump and validate changelog
