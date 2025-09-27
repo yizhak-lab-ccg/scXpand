@@ -286,9 +286,9 @@ class DataFormat(BaseModel):
         del common_adata
 
         # Verify that all genes are now present in the correct order
-        assert (
-            final_adata.var_names.tolist() == self.gene_names
-        ), "Final gene order does not match data_format.gene_names"
+        assert final_adata.var_names.tolist() == self.gene_names, (
+            "Final gene order does not match data_format.gene_names"
+        )
 
         # Log the net change in gene count
         net_change = final_adata.n_vars - len(curr_gene_names)

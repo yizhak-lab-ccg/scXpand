@@ -341,9 +341,9 @@ class TestFunctionSignatureCompatibility:
             assert "data_format" in params, f"{func_name} missing data_format parameter"
 
             # Check that eval_row_inds parameter exists
-            assert (
-                "eval_row_inds" in params
-            ), f"{func_name} missing eval_row_inds parameter"
+            assert "eval_row_inds" in params, (
+                f"{func_name} missing eval_row_inds parameter"
+            )
 
     def test_return_type_consistency(self):
         """Test that all inference functions return numpy arrays."""

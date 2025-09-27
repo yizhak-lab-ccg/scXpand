@@ -630,16 +630,16 @@ class TestEpsilonConsistency:
 
         # The difference should be small but measurable
         # Standard vs high precision might be very small, but large vs high should be measurable
-        assert (
-            max_diff_large > 1e-8
-        ), "Large epsilon difference should produce measurable results"
+        assert max_diff_large > 1e-8, (
+            "Large epsilon difference should produce measurable results"
+        )
         assert max_diff_large < 1e-1, "Difference should be reasonable (not too large)"
 
         # Standard deviations should be different
         std_diff_large = abs(expr_high_eps.std() - expr_large_eps.std())
-        assert (
-            std_diff_large > 1e-8
-        ), "Standard deviations should differ with large epsilon difference"
+        assert std_diff_large > 1e-8, (
+            "Standard deviations should differ with large epsilon difference"
+        )
 
     def test_epsilon_consistency_gene_subset(self, data_format_with_scaling_factors):
         """Test that load_and_preprocess_data_numpy produces consistent results for gene subsets."""

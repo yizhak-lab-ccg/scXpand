@@ -2,14 +2,19 @@ coverage:
   status:
     project:
       default:
-        target: auto
+        target: 80%
         threshold: 1%
     patch:
       default:
-        target: auto
+        target: 80%
         threshold: 1%
 
 comment:
   layout: "header,diff,files,footer"
   behavior: default
   require_changes: false
+  require_base: no
+  require_head: yes
+
+github_checks:
+  annotations: true

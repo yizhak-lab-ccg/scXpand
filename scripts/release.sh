@@ -405,32 +405,32 @@ preview_and_validate() {
         print_status "Previewing $VERSION_TYPE version bump..."
     fi
 
-    local current_version=$(uv version | cut -d' ' -f2)
-    print_status "Current version: $current_version"
+    # Get current version from VCS
+    local current_version=$(python -c "import tomllib; data=tomllib.load(open('pyproject.toml', 'rb')); print('0.0.0') if 'version' not in data['project'] else print(data['project']['version'])")
 
-    # Validate version format (should be x.y.z or x.y.z.devN)
-    if ! echo "$current_version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(\.[a-zA-Z0-9]+)*$'; then
-        print_error "Invalid version format: $current_version (expected x.y.z or x.y.z.devN)"
-        exit 1
-    fi
+    # For VCS versioning, we need to get the latest tag
+    local latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+    local base_version=$(echo "$latest_tag" | sed 's/^v//')
+
+    print_status "Latest tag: $latest_tag"
+    print_status "Base version: $base_version"
 
     # Calculate what the new version would be (without modifying files)
     local new_version
     if [ "$DEV_RELEASE" = true ]; then
-        # For dev releases, use the current version as base and add .devN
-        local base_version=$(echo "$current_version" | sed 's/\.dev[0-9]*$//')
+        # For dev releases, use the base version and add .devN
         new_version=$(create_dev_version "$base_version")
-        print_status "Dev release: $current_version → $new_version"
+        print_status "Dev release: $base_version → $new_version"
     else
         case "$VERSION_TYPE" in
             "major")
-                new_version=$(echo "$current_version" | awk -F. '{print ($1+1)".0.0"}')
+                new_version=$(echo "$base_version" | awk -F. '{print ($1+1)".0.0"}')
                 ;;
             "minor")
-                new_version=$(echo "$current_version" | awk -F. '{print $1"."($2+1)".0"}')
+                new_version=$(echo "$base_version" | awk -F. '{print $1"."($2+1)".0"}')
                 ;;
             "patch")
-                new_version=$(echo "$current_version" | awk -F. '{print $1"."$2"."($3+1)}')
+                new_version=$(echo "$base_version" | awk -F. '{print $1"."$2"."($3+1)}')
                 ;;
             *)
                 print_error "Invalid version type: $VERSION_TYPE"
@@ -459,50 +459,14 @@ bump_version() {
         print_status "Bumping $VERSION_TYPE version..."
     fi
 
-    # Get current version from main pyproject.toml
-    current_version=$(uv version | cut -d' ' -f2)
-    print_status "Current version: $current_version"
-
-    # Backup original pyproject.toml before version bump (for restoration on cancellation)
+    # For VCS versioning, we don't modify pyproject.toml
+    # Instead, we create a Git tag and let hatch-vcs handle the version
     if [ "$DRY_RUN" = false ]; then
-        backup_file "pyproject.toml" "original"
-    fi
-
-    # Handle dev releases differently
-    if [ "$DEV_RELEASE" = true ]; then
-        if [ "$DRY_RUN" = false ]; then
-            # For dev releases, manually set the version in pyproject.toml
-            # Extract the base version (remove any existing .dev suffix)
-            local base_version=$(echo "$current_version" | sed 's/\.dev[0-9]*$//')
-            local dev_version=$(create_dev_version "$base_version")
-
-            # Update version in pyproject.toml using sed
-            sed -i.bak "s/^version = \".*\"/version = \"$dev_version\"/" pyproject.toml
-            rm -f pyproject.toml.bak
-
-            print_success "Dev version set to: $dev_version"
-            export NEW_VERSION="$dev_version"
-        else
-            print_status "DRY RUN: Would set dev version to: $NEW_VERSION"
-        fi
+        print_status "VCS versioning: Version will be determined from Git tag v$NEW_VERSION"
+        print_success "Version will be: $NEW_VERSION (from Git tag)"
     else
-        # Regular version bump
-        if [ "$DRY_RUN" = false ]; then
-            uv version --bump "$VERSION_TYPE"
-        fi
-
-        # Get new version
-        if [ "$DRY_RUN" = false ]; then
-            new_version=$(uv version | cut -d' ' -f2)
-            print_success "Version bumped to: $new_version"
-            export NEW_VERSION="$new_version"
-        else
-            print_status "DRY RUN: Would bump to version: $NEW_VERSION"
-        fi
+        print_status "DRY RUN: Would create Git tag v$NEW_VERSION for VCS versioning"
     fi
-
-    # Clean up any backup files created during version bump
-    cleanup_backups
 }
 
 # Function to clean build directories
@@ -921,7 +885,7 @@ commit_and_push() {
     if [ "$DEV_RELEASE" = true ]; then
         commit_message="Dev release version $NEW_VERSION (dual package release)"
     else
-        commit_message="Bump version to $NEW_VERSION and update CHANGELOG.md (dual package release)"
+        commit_message="Release version $NEW_VERSION (dual package release)"
     fi
 
     if [ "$DEV_RELEASE" = true ] && [ "$current_branch" != "main" ]; then
@@ -1264,10 +1228,10 @@ main() {
     check_prerequisites
     preview_and_validate
     bump_version
-    build_and_test_packages
-    show_changes
     commit_and_push
     create_and_push_tag
+    build_and_test_packages
+    show_changes
     create_github_release
     publish_to_pypi
     trigger_readthedocs_build

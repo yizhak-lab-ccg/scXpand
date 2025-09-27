@@ -286,9 +286,9 @@ class TestLightGBMPreprocessingCompatibility:
         def validate_preprocess_params(X, data_format):
             # Validate parameter types
             assert isinstance(X, np.ndarray), f"X should be numpy array, got {type(X)}"
-            assert isinstance(
-                data_format, DataFormat
-            ), f"data_format should be DataFormat, got {type(data_format)}"
+            assert isinstance(data_format, DataFormat), (
+                f"data_format should be DataFormat, got {type(data_format)}"
+            )
 
             # Validate X properties
             assert X.ndim == 2, f"X should be 2D, got {X.ndim}D"
@@ -320,15 +320,15 @@ class TestRegressionPrevention:
         params = sig.parameters
 
         # The function MUST accept data_format parameter
-        assert (
-            "data_format" in params
-        ), "run_lightgbm_inference must accept data_format parameter"
+        assert "data_format" in params, (
+            "run_lightgbm_inference must accept data_format parameter"
+        )
 
         # data_format should be a required parameter (not optional with None default)
         data_format_param = params["data_format"]
-        assert (
-            data_format_param.default == inspect.Parameter.empty
-        ), "data_format should be required"
+        assert data_format_param.default == inspect.Parameter.empty, (
+            "data_format should be required"
+        )
 
     def test_preprocessing_function_calls(self, tmp_path):
         """Regression test: Ensure preprocessing functions are actually called."""
@@ -473,9 +473,9 @@ class TestRegressionPrevention:
         )
 
         assert isinstance(result, np.ndarray)
-        assert result.shape == (
-            n_cells,
-        ), f"Expected shape ({n_cells},), got {result.shape}"
+        assert result.shape == (n_cells,), (
+            f"Expected shape ({n_cells},), got {result.shape}"
+        )
 
         # Test file-based inference with gene mismatch
         file_path = tmp_path / "test_gene_mismatch.h5ad"
@@ -490,6 +490,6 @@ class TestRegressionPrevention:
         )
 
         assert isinstance(result, np.ndarray)
-        assert result.shape == (
-            n_cells,
-        ), f"Expected shape ({n_cells},), got {result.shape}"
+        assert result.shape == (n_cells,), (
+            f"Expected shape ({n_cells},), got {result.shape}"
+        )

@@ -142,13 +142,13 @@ class TestCellsDatasetDataFormatIntegration:
         assert "categorical_targets" in batch
 
         # Verify batch shapes - checking each dimension separately for better error messages
-        assert (
-            batch["x"].shape[0] == 3
-        ), f"Expected 3 samples, got {batch['x'].shape[0]}"
+        assert batch["x"].shape[0] == 3, (
+            f"Expected 3 samples, got {batch['x'].shape[0]}"
+        )
         # Feature dimension should be just the genes (2)
-        assert (
-            batch["x"].shape[1] == 2
-        ), f"Feature dimension {batch['x'].shape[1]} should be 2 (genes only)"
+        assert batch["x"].shape[1] == 2, (
+            f"Feature dimension {batch['x'].shape[1]} should be 2 (genes only)"
+        )
 
         assert batch["y"].shape == (3,)
         assert batch["y_soft"].shape == (3,)
@@ -221,13 +221,13 @@ class TestCellsDatasetDataFormatIntegration:
 
         # The data should be processed on-the-fly, so verify shape
         # Check only sample dimension (first dimension)
-        assert (
-            batch["x"].shape[0] == 3
-        ), f"Expected 3 samples, got {batch['x'].shape[0]}"
+        assert batch["x"].shape[0] == 3, (
+            f"Expected 3 samples, got {batch['x'].shape[0]}"
+        )
         # Feature dimension should be just the genes (2)
-        assert (
-            batch["x"].shape[1] == 2
-        ), f"Feature dimension {batch['x'].shape[1]} should be 2 (genes only)"
+        assert batch["x"].shape[1] == 2, (
+            f"Feature dimension {batch['x'].shape[1]} should be 2 (genes only)"
+        )
 
         # Verify that categorical targets are present
         assert "categorical_targets" in batch

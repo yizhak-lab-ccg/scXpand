@@ -125,3 +125,10 @@ If you prefer using uv for everything:
 
     # Install pre-commit hooks
     pre-commit install
+
+**Run tests to verify installation:**
+
+.. code-block:: bash
+
+    # Run tests with coverage and parallel execution
+    pytest --cov=src/scxpand --cov-report=term-missing -n auto

@@ -64,9 +64,9 @@ class TestMSELoss:
         loss_good = mse_loss_fn(x_genes_true=x_true, x_pred=x_pred_good)
         loss_bad = mse_loss_fn(x_genes_true=x_true, x_pred=x_pred_bad)
 
-        assert (
-            loss_good.item() < loss_bad.item()
-        ), "Better reconstruction should have lower MSE loss"
+        assert loss_good.item() < loss_bad.item(), (
+            "Better reconstruction should have lower MSE loss"
+        )
 
 
 class TestNBLoss:
@@ -135,9 +135,9 @@ class TestNBLoss:
         loss_good = nb_loss_fn(x_genes_true=x_true, mu=mu_good, theta=theta)
         loss_bad = nb_loss_fn(x_genes_true=x_true, mu=mu_bad, theta=theta)
 
-        assert (
-            loss_good.item() < loss_bad.item()
-        ), "Better reconstruction should have lower NB loss"
+        assert loss_good.item() < loss_bad.item(), (
+            "Better reconstruction should have lower NB loss"
+        )
 
     def test_nb_loss_against_scipy(self):
         """Test NB loss against scipy implementation if available."""
@@ -163,9 +163,9 @@ class TestNBLoss:
 
             # They should be close (within numerical precision)
             expected_nll = -scipy_logpmf
-            assert (
-                abs(our_nll - expected_nll) < 1e-4
-            ), f"Mismatch: {our_nll} vs {expected_nll}"
+            assert abs(our_nll - expected_nll) < 1e-4, (
+                f"Mismatch: {our_nll} vs {expected_nll}"
+            )
 
         except ImportError:
             pytest.skip("Scipy not available for comparison")
@@ -271,9 +271,9 @@ class TestZINBLoss:
         nb_loss = nb_loss_fn(x_genes_true=x_true, mu=x_pred, theta=theta)
 
         # They should be very close (accounting for numerical precision)
-        assert (
-            abs(zinb_loss.item() - nb_loss.item()) < 1e-3
-        ), "ZINB with pi=0 should equal NB loss"
+        assert abs(zinb_loss.item() - nb_loss.item()) < 1e-3, (
+            "ZINB with pi=0 should equal NB loss"
+        )
 
     def test_zinb_better_reconstruction_lower_loss(self):
         """Test that better reconstruction gives lower ZINB loss."""
@@ -297,9 +297,9 @@ class TestZINBLoss:
         )
         loss_bad = zinb_loss_fn(x_genes_true=x_true, mu=x_pred_bad, pi=pi, theta=theta)
 
-        assert (
-            loss_good.item() < loss_bad.item()
-        ), "Better reconstruction should have lower ZINB loss"
+        assert loss_good.item() < loss_bad.item(), (
+            "Better reconstruction should have lower ZINB loss"
+        )
 
     def test_zinb_better_zero_inflation_parameter_lower_loss(self):
         """Test that better zero-inflation parameter gives lower ZINB loss."""
@@ -323,9 +323,9 @@ class TestZINBLoss:
         )
         loss_bad = zinb_loss_fn(x_genes_true=x_true, mu=x_pred, pi=pi_bad, theta=theta)
 
-        assert (
-            loss_good.item() < loss_bad.item()
-        ), "Better zero-inflation parameter should have lower ZINB loss"
+        assert loss_good.item() < loss_bad.item(), (
+            "Better zero-inflation parameter should have lower ZINB loss"
+        )
 
 
 class TestLossComparisonEdgeCases:
@@ -450,9 +450,9 @@ class TestLossComparisonEdgeCases:
 
         # MSE should increase monotonically
         for i in range(len(mse_losses) - 1):
-            assert (
-                mse_losses[i] < mse_losses[i + 1]
-            ), f"MSE should increase monotonically: {mse_losses}"
+            assert mse_losses[i] < mse_losses[i + 1], (
+                f"MSE should increase monotonically: {mse_losses}"
+            )
 
         # Test NB - compare best vs worst
         nb_loss_fn = NB(use_masking=False, eps=1e-8)
@@ -463,9 +463,9 @@ class TestLossComparisonEdgeCases:
             x_genes_true=x_true, mu=predictions[-1], theta=theta
         ).item()
 
-        assert (
-            nb_loss_best < nb_loss_worst
-        ), f"NB: best ({nb_loss_best}) should be < worst ({nb_loss_worst})"
+        assert nb_loss_best < nb_loss_worst, (
+            f"NB: best ({nb_loss_best}) should be < worst ({nb_loss_worst})"
+        )
 
         # Test ZINB - compare best vs worst
         zinb_loss_fn = ZINBLoss(eps=1e-8)
@@ -476,6 +476,6 @@ class TestLossComparisonEdgeCases:
             x_genes_true=x_true, mu=predictions[-1], pi=pi, theta=theta
         ).item()
 
-        assert (
-            zinb_loss_best < zinb_loss_worst
-        ), f"ZINB: best ({zinb_loss_best}) should be < worst ({zinb_loss_worst})"
+        assert zinb_loss_best < zinb_loss_worst, (
+            f"ZINB: best ({zinb_loss_best}) should be < worst ({zinb_loss_worst})"
+        )

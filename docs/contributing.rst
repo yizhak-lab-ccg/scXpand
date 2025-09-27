@@ -16,7 +16,10 @@ Quick Start
 4. **Create a feature branch and make your changes**
 5. **Run tests and linting:**
    .. code-block:: bash
-      pytest
+      # Run tests with coverage (parallel execution for faster results)
+      pytest --cov=src/scxpand --cov-report=term-missing -n auto
+
+      # Run linting and formatting
       pre-commit run --all-files
 6. **Submit a pull request**
 
@@ -47,6 +50,45 @@ Development Setup
 -----------------
 
 For development setup instructions, see :doc:`installation`.
+
+Testing
+-------
+
+**Running Tests:**
+
+The project uses pytest with coverage reporting and parallel execution for efficient testing:
+
+.. code-block:: bash
+
+    # Run all tests with coverage and parallel execution (recommended)
+    pytest --cov=src/scxpand --cov-report=term-missing -n auto
+
+    # Run tests without parallel execution (if you encounter issues)
+    pytest --cov=src/scxpand --cov-report=term-missing
+
+    # Run specific test files or modules
+    pytest tests/data_util/test_data_format.py
+
+    # Run tests with verbose output
+    pytest --cov=src/scxpand --cov-report=term-missing -n auto -v
+
+    # Run tests and generate HTML coverage report
+    pytest --cov=src/scxpand --cov-report=html --cov-report=term-missing -n auto
+
+**Test Coverage:**
+
+The project maintains a minimum test coverage of 80%. Coverage reports are generated in multiple formats:
+- Terminal output with missing lines
+- HTML report in the `htmlcov/` directory
+- XML report for CI/CD integration
+
+**Parallel Execution:**
+
+The `-n auto` flag automatically detects the optimal number of parallel workers based on your CPU cores. This significantly speeds up test execution, especially for the comprehensive test suite with 900+ tests.
+
+**Pre-commit Integration:**
+
+Tests are also run automatically via pre-commit hooks to ensure code quality before commits.
 
 Release Process
 ===============

@@ -92,9 +92,9 @@ class TestGeneSpecificNormalization:
 
         # Check that the processed data has reasonable z-score values
         # (typically between -3 and 3 for most data)
-        assert np.all(
-            np.abs(X_processed) < 10
-        ), f"Z-score values too extreme: {X_processed}"
+        assert np.all(np.abs(X_processed) < 10), (
+            f"Z-score values too extreme: {X_processed}"
+        )
 
         # Verify that genes with different statistics (mu, sigma) get different normalization
         # GENE_A (mu=100, sigma=20) vs GENE_B (mu=10, sigma=100) should behave differently
@@ -676,9 +676,9 @@ class TestGeneSpecificNormalization:
                 if not np.isclose(mu, wrong_mu, rtol=0.1) or not np.isclose(
                     sigma, wrong_sigma, rtol=0.1
                 ):
-                    assert not np.isclose(
-                        actual_zscore, wrong_zscore, rtol=1e-3
-                    ), f"Gene {gene_name} z-score same with wrong parameters - test may be flawed"
+                    assert not np.isclose(actual_zscore, wrong_zscore, rtol=1e-3), (
+                        f"Gene {gene_name} z-score same with wrong parameters - test may be flawed"
+                    )
 
     def test_gene_reordering_mathematical_correctness(
         self, training_data_format_with_specific_stats: DataFormat

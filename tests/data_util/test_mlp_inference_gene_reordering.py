@@ -131,9 +131,9 @@ class TestMLPInferenceGeneReordering:
             X_direct_tensor = torch.from_numpy(X_direct).float()
 
             # Results should be identical
-            assert torch.allclose(
-                X_dataset, X_direct_tensor, rtol=1e-5, atol=1e-6
-            ), "Perfect match scenario should produce identical results"
+            assert torch.allclose(X_dataset, X_direct_tensor, rtol=1e-5, atol=1e-6), (
+                "Perfect match scenario should produce identical results"
+            )
 
             inference_adata.file.close()
 
@@ -194,10 +194,14 @@ class TestMLPInferenceGeneReordering:
             # All cells should have the same value for missing genes
             assert torch.allclose(
                 X_processed[:, 1], torch.tensor(expected_missing_gene_b), atol=1e-5
-            ), f"Missing GENE_B not handled correctly: {X_processed[:, 1]} != {expected_missing_gene_b}"
+            ), (
+                f"Missing GENE_B not handled correctly: {X_processed[:, 1]} != {expected_missing_gene_b}"
+            )
             assert torch.allclose(
                 X_processed[:, 3], torch.tensor(expected_missing_gene_d), atol=1e-5
-            ), f"Missing GENE_D not handled correctly: {X_processed[:, 3]} != {expected_missing_gene_d}"
+            ), (
+                f"Missing GENE_D not handled correctly: {X_processed[:, 3]} != {expected_missing_gene_d}"
+            )
 
     def test_inference_normalization_with_extra_genes(self, training_data_format):
         """Test that inference normalization correctly ignores extra genes."""
@@ -309,7 +313,9 @@ class TestMLPInferenceGeneReordering:
             # Results should be identical after reordering
             assert torch.allclose(
                 reference_batch["x"], reordered_batch["x"], atol=1e-5
-            ), "Reordered genes should produce identical results to correctly ordered genes"
+            ), (
+                "Reordered genes should produce identical results to correctly ordered genes"
+            )
 
     def test_inference_normalization_with_mixed_scenario(self, training_data_format):
         """Test complex scenario with missing, extra, and reordered genes."""
@@ -401,20 +407,20 @@ class TestMLPInferenceGeneReordering:
                     X_processed = batch["x"]
 
                     # Basic sanity checks
-                    assert (
-                        X_processed.shape[1] == training_data_format.n_genes
-                    ), f"Output shape wrong for {scenario}: {X_processed.shape[1]} != {training_data_format.n_genes}"
-                    assert not torch.any(
-                        torch.isnan(X_processed)
-                    ), f"NaN values in {scenario}"
-                    assert not torch.any(
-                        torch.isinf(X_processed)
-                    ), f"Inf values in {scenario}"
+                    assert X_processed.shape[1] == training_data_format.n_genes, (
+                        f"Output shape wrong for {scenario}: {X_processed.shape[1]} != {training_data_format.n_genes}"
+                    )
+                    assert not torch.any(torch.isnan(X_processed)), (
+                        f"NaN values in {scenario}"
+                    )
+                    assert not torch.any(torch.isinf(X_processed)), (
+                        f"Inf values in {scenario}"
+                    )
 
                     # Reasonable value range after z-score normalization
-                    assert (
-                        X_processed.abs().max() < 50
-                    ), f"Extreme values in {scenario}: {X_processed.abs().max()}"
+                    assert X_processed.abs().max() < 50, (
+                        f"Extreme values in {scenario}: {X_processed.abs().max()}"
+                    )
 
                     break  # Just test first batch
 

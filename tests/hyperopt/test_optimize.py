@@ -344,9 +344,9 @@ class TestTrialSpecificResumeLogic:
                 print(f"DEBUG: all call_args = {call_args}")
 
                 # Check if resume is in kwargs
-                assert (
-                    "resume" in kwargs
-                ), f"resume not found in kwargs: {list(kwargs.keys())}"
+                assert "resume" in kwargs, (
+                    f"resume not found in kwargs: {list(kwargs.keys())}"
+                )
                 assert kwargs["resume"] is False  # New trial should get resume=False
 
     def test_existing_trial_with_checkpoints_resumes_when_global_resume_true(

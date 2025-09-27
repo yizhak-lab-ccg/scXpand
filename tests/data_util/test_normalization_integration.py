@@ -685,9 +685,9 @@ class TestEpsilonIntegration:
                 if eps_val != 1e-10:
                     # This manual result should differ from the dataset result (which uses 1e-10)
                     max_diff = np.abs(expr_dataset - expr_manual).max()
-                    assert (
-                        max_diff > 1e-8
-                    ), f"Different epsilon {eps_val} should produce measurable differences from 1e-10"
+                    assert max_diff > 1e-8, (
+                        f"Different epsilon {eps_val} should produce measurable differences from 1e-10"
+                    )
 
     def test_shared_epsilon_constant_usage(self):
         """Test using a shared epsilon constant across the codebase."""
@@ -737,9 +737,9 @@ class TestEpsilonIntegration:
         )
 
         max_diff = np.abs(results[0] - result_different_eps).max()
-        assert (
-            max_diff > 1e-12
-        ), "Different epsilon should produce measurably different results"
+        assert max_diff > 1e-12, (
+            "Different epsilon should produce measurably different results"
+        )
 
 
 class TestPerformance:

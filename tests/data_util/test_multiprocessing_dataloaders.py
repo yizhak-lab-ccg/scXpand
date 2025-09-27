@@ -823,9 +823,9 @@ class TestErrorHandlingAndEdgeCases:
 
         # Reference count should be similar (allowing for some variation)
         final_refs = sys.getrefcount(sample_dataset)
-        assert (
-            abs(final_refs - initial_refs) <= 2
-        ), f"Memory leak detected: {initial_refs} -> {final_refs}"
+        assert abs(final_refs - initial_refs) <= 2, (
+            f"Memory leak detected: {initial_refs} -> {final_refs}"
+        )
 
     @pytest.mark.skipif(platform.system() == "Windows", reason="Unix-specific test")
     def test_unix_fork_behavior_simulation(self, sample_dataset):

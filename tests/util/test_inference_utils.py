@@ -638,27 +638,27 @@ class TestInferenceUtils:
         if os.path.exists(mlp_file):
             with open(mlp_file) as f:
                 content = f.read()
-                assert (
-                    "is_train=False" in content
-                ), "MLP inference should use is_train=False"
+                assert "is_train=False" in content, (
+                    "MLP inference should use is_train=False"
+                )
 
         # Check Linear inference
         linear_file = "scxpand/linear/sklearn_utils.py"
         if os.path.exists(linear_file):
             with open(linear_file) as f:
                 content = f.read()
-                assert (
-                    "is_train=False" in content
-                ), "Linear inference should use is_train=False"
+                assert "is_train=False" in content, (
+                    "Linear inference should use is_train=False"
+                )
 
         # Check Autoencoder inference
         ae_file = "scxpand/autoencoders/ae_trainer.py"
         if os.path.exists(ae_file):
             with open(ae_file) as f:
                 content = f.read()
-                assert (
-                    "is_train=False" in content
-                ), "Autoencoder inference should use is_train=False"
+                assert "is_train=False" in content, (
+                    "Autoencoder inference should use is_train=False"
+                )
 
     def test_inference_with_gene_mismatch(self, tmp_path, data_format):
         """Test inference with gene mismatches between model and data."""
@@ -1115,9 +1115,9 @@ class TestInferenceUtils:
 
         # Verify that all ModelSpecs have default_save_dir
         for model_type, spec in MODEL_TYPES.items():
-            assert hasattr(
-                spec, "default_save_dir"
-            ), f"ModelSpec for {model_type.value} missing default_save_dir"
-            assert (
-                spec.default_save_dir
-            ), f"ModelSpec for {model_type.value} has empty default_save_dir"
+            assert hasattr(spec, "default_save_dir"), (
+                f"ModelSpec for {model_type.value} missing default_save_dir"
+            )
+            assert spec.default_save_dir, (
+                f"ModelSpec for {model_type.value} has empty default_save_dir"
+            )

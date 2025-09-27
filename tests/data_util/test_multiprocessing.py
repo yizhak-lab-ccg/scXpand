@@ -83,24 +83,24 @@ class TestMultiprocessingLoading:
             for batch in dataloader:
                 batch_count += 1
                 # Verify batch structure
-                assert (
-                    "x" in batch
-                ), f"Batch should contain 'x' key for {num_workers} workers"
-                assert (
-                    batch["x"].shape[0] <= 32
-                ), f"Batch size should be <= 32 for {num_workers} workers"
-                assert (
-                    batch["x"].shape[1] == dummy_adata.n_vars
-                ), f"Batch should have correct number of genes for {num_workers} workers"
+                assert "x" in batch, (
+                    f"Batch should contain 'x' key for {num_workers} workers"
+                )
+                assert batch["x"].shape[0] <= 32, (
+                    f"Batch size should be <= 32 for {num_workers} workers"
+                )
+                assert batch["x"].shape[1] == dummy_adata.n_vars, (
+                    f"Batch should have correct number of genes for {num_workers} workers"
+                )
 
                 if batch_count >= max_batches:
                     break
 
             # Assert that we got the expected number of batches
             assert batch_count > 0, f"No batches were loaded with {num_workers} workers"
-            assert (
-                batch_count <= max_batches
-            ), f"Should not load more than {max_batches} batches"
+            assert batch_count <= max_batches, (
+                f"Should not load more than {max_batches} batches"
+            )
 
     @pytest.mark.slow
     def test_multiprocessing_with_real_data_format(self, dummy_adata, tmp_path):
@@ -150,15 +150,15 @@ class TestMultiprocessingLoading:
             batch = next(iter(dataloader))
 
             # Verify batch structure
-            assert (
-                "x" in batch
-            ), f"Batch should contain 'x' key for {num_workers} workers, batch_size={batch_size}"
-            assert (
-                batch["x"].shape[0] <= batch_size
-            ), f"Batch size should be <= {batch_size} for {num_workers} workers"
-            assert (
-                batch["x"].shape[1] == dummy_adata.n_vars
-            ), f"Batch should have correct number of genes for {num_workers} workers"
+            assert "x" in batch, (
+                f"Batch should contain 'x' key for {num_workers} workers, batch_size={batch_size}"
+            )
+            assert batch["x"].shape[0] <= batch_size, (
+                f"Batch size should be <= {batch_size} for {num_workers} workers"
+            )
+            assert batch["x"].shape[1] == dummy_adata.n_vars, (
+                f"Batch should have correct number of genes for {num_workers} workers"
+            )
 
     def test_multiprocessing_edge_cases(self, dummy_adata, tmp_path):
         """Test multiprocessing with edge cases like very small datasets."""
@@ -200,12 +200,12 @@ class TestMultiprocessingLoading:
 
             # Should get exactly one batch with all data
             batches = list(dataloader)
-            assert (
-                len(batches) == 1
-            ), f"Should get exactly one batch with large batch size for {num_workers} workers"
-            assert batches[0]["x"].shape[0] == len(
-                dataset
-            ), f"Batch should contain all data for {num_workers} workers"
+            assert len(batches) == 1, (
+                f"Should get exactly one batch with large batch size for {num_workers} workers"
+            )
+            assert batches[0]["x"].shape[0] == len(dataset), (
+                f"Batch should contain all data for {num_workers} workers"
+            )
 
     @pytest.mark.slow
     def test_multiprocessing_worker_consistency(self, dummy_adata, tmp_path):
@@ -255,9 +255,9 @@ class TestMultiprocessingLoading:
 
         # Verify consistency across different worker counts
         for num_workers in [2]:  # Reduced from [2, 4] to speed up test
-            assert torch.allclose(
-                results[0], results[num_workers], atol=1e-6
-            ), f"Results should be consistent between 0 and {num_workers} workers"
+            assert torch.allclose(results[0], results[num_workers], atol=1e-6), (
+                f"Results should be consistent between 0 and {num_workers} workers"
+            )
 
 
 # Keep the original script functionality for manual testing

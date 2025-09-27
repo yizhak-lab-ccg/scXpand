@@ -348,9 +348,9 @@ class TestCLIPerformance:
 
             # CLI should start up in less than 1 second
             startup_time = end_time - start_time
-            assert (
-                startup_time < 1.0
-            ), f"CLI startup took {startup_time:.3f}s, should be < 1.0s"
+            assert startup_time < 1.0, (
+                f"CLI startup took {startup_time:.3f}s, should be < 1.0s"
+            )
 
     def test_cli_memory_usage(self):
         """Test that CLI doesn't use excessive memory."""
@@ -366,9 +366,9 @@ class TestCLIPerformance:
             memory_increase = final_memory - initial_memory
 
             # CLI should not use more than 50MB additional memory
-            assert (
-                memory_increase < 50 * 1024 * 1024
-            ), f"CLI used {memory_increase / 1024 / 1024:.1f}MB, should be < 50MB"
+            assert memory_increase < 50 * 1024 * 1024, (
+                f"CLI used {memory_increase / 1024 / 1024:.1f}MB, should be < 50MB"
+            )
 
 
 class TestCLIConfiguration:

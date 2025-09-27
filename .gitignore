@@ -39,7 +39,12 @@ dist/
 # MyPy
 .mypy_cache/
 
-# PyTest
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
 .pytest_cache/
 
 # VSCode

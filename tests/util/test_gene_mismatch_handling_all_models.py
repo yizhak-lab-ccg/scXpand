@@ -160,12 +160,12 @@ class TestGeneMismatchHandlingAllModels:
             )
 
             # Verify the result
-            assert isinstance(
-                result, np.ndarray
-            ), f"Result should be numpy array for {model_type}"
-            assert result.shape == (
-                scenario["n_cells"],
-            ), f"Wrong result shape for {model_type}"
+            assert isinstance(result, np.ndarray), (
+                f"Result should be numpy array for {model_type}"
+            )
+            assert result.shape == (scenario["n_cells"],), (
+                f"Wrong result shape for {model_type}"
+            )
             np.testing.assert_array_equal(result, expected_result)
 
             # Verify the inference function was called
@@ -227,9 +227,9 @@ class TestGeneMismatchHandlingAllModels:
             for gene_idx in range(missing_values.shape[1]):
                 gene_values = missing_values[:, gene_idx]
                 # All samples should have the same value for this missing gene
-                assert torch.allclose(
-                    gene_values, gene_values[0], atol=1e-6
-                ), f"Missing gene {gene_idx} should have consistent values across samples"
+                assert torch.allclose(gene_values, gene_values[0], atol=1e-6), (
+                    f"Missing gene {gene_idx} should have consistent values across samples"
+                )
 
     def test_file_based_gene_mismatch_handling(self, tmp_path, training_data_format):
         """Test gene mismatch handling with file-based data loading."""
@@ -604,12 +604,12 @@ class TestGeneMismatchIntegration:
                     )
 
                     # Verify results
-                    assert isinstance(
-                        result, np.ndarray
-                    ), f"Failed for {model_type} with {data_source} data"
-                    assert result.shape == (
-                        n_cells,
-                    ), f"Wrong shape for {model_type} with {data_source} data"
+                    assert isinstance(result, np.ndarray), (
+                        f"Failed for {model_type} with {data_source} data"
+                    )
+                    assert result.shape == (n_cells,), (
+                        f"Wrong shape for {model_type} with {data_source} data"
+                    )
                     np.testing.assert_array_equal(result, expected_result)
 
                     # Verify the inference function was called correctly

@@ -45,9 +45,9 @@ class TestIntegration:
         # Validate AUROC and F1 values
         for metric in ["AUROC", "F1"]:
             value = results[metric]
-            assert isinstance(value, float | np.floating) or np.isnan(
-                value
-            ), f"{metric} invalid type for {test_name}"
+            assert isinstance(value, float | np.floating) or np.isnan(value), (
+                f"{metric} invalid type for {test_name}"
+            )
             if not np.isnan(value):
                 assert 0 <= value <= 1, f"{metric} out of range for {test_name}"
 
@@ -86,15 +86,15 @@ class TestIntegration:
 
                 # Check that model and results were saved
                 save_dir = Path(temp_dir) / "mlp_results"
-                assert (
-                    save_dir / "best_ckpt.pt"
-                ).exists(), "Best model checkpoint should be saved"
-                assert (
-                    save_dir / "parameters.json"
-                ).exists(), "Parameters should be saved"
-                assert (
-                    save_dir / BEST_MODEL_METRICS_FILE
-                ).exists(), "Results should be saved"
+                assert (save_dir / "best_ckpt.pt").exists(), (
+                    "Best model checkpoint should be saved"
+                )
+                assert (save_dir / "parameters.json").exists(), (
+                    "Parameters should be saved"
+                )
+                assert (save_dir / BEST_MODEL_METRICS_FILE).exists(), (
+                    "Results should be saved"
+                )
             finally:
                 # Ensure the test file is removed after the test
                 robust_remove(test_file_path)
@@ -130,12 +130,12 @@ class TestIntegration:
 
                 # Check that model and results were saved
                 save_dir = Path(temp_dir) / "linear_results"
-                assert (
-                    save_dir / SKLEARN_MODEL_FILE
-                ).exists(), "Model file should be saved"
-                assert (
-                    save_dir / "parameters.json"
-                ).exists(), "Parameters should be saved"
+                assert (save_dir / SKLEARN_MODEL_FILE).exists(), (
+                    "Model file should be saved"
+                )
+                assert (save_dir / "parameters.json").exists(), (
+                    "Parameters should be saved"
+                )
 
             finally:
                 # Ensure the test file is removed after the test
@@ -171,12 +171,12 @@ class TestIntegration:
 
                 # Check that model and results were saved
                 save_dir = Path(temp_dir) / "lgb_results"
-                assert (
-                    save_dir / SKLEARN_MODEL_FILE
-                ).exists(), "Model file should be saved"
-                assert (
-                    save_dir / "parameters.json"
-                ).exists(), "Parameters should be saved"
+                assert (save_dir / SKLEARN_MODEL_FILE).exists(), (
+                    "Model file should be saved"
+                )
+                assert (save_dir / "parameters.json").exists(), (
+                    "Parameters should be saved"
+                )
 
             finally:
                 # Ensure the test file is removed after the test
@@ -217,12 +217,12 @@ class TestIntegration:
 
                 # Check that model and results were saved
                 save_dir = Path(temp_dir) / "ae_results"
-                assert (
-                    save_dir / "best_ckpt.pt"
-                ).exists(), "Best model checkpoint should be saved"
-                assert (
-                    save_dir / "parameters.json"
-                ).exists(), "Parameters should be saved"
+                assert (save_dir / "best_ckpt.pt").exists(), (
+                    "Best model checkpoint should be saved"
+                )
+                assert (save_dir / "parameters.json").exists(), (
+                    "Parameters should be saved"
+                )
 
             finally:
                 # Ensure the test file is removed after the test
@@ -274,23 +274,23 @@ class TestIntegration:
                 # Validate that normalization parameters were captured
                 if captured_inference_data:
                     data_format = captured_inference_data["data_format"]
-                    assert hasattr(
-                        data_format, "genes_mu"
-                    ), "Should have gene means for normalization"
-                    assert hasattr(
-                        data_format, "genes_sigma"
-                    ), "Should have gene stds for normalization"
-                    assert (
-                        len(data_format.genes_mu) == dummy_adata.n_vars
-                    ), "Should have means for all genes"
-                    assert (
-                        len(data_format.genes_sigma) == dummy_adata.n_vars
-                    ), "Should have stds for all genes"
+                    assert hasattr(data_format, "genes_mu"), (
+                        "Should have gene means for normalization"
+                    )
+                    assert hasattr(data_format, "genes_sigma"), (
+                        "Should have gene stds for normalization"
+                    )
+                    assert len(data_format.genes_mu) == dummy_adata.n_vars, (
+                        "Should have means for all genes"
+                    )
+                    assert len(data_format.genes_sigma) == dummy_adata.n_vars, (
+                        "Should have stds for all genes"
+                    )
 
                     # Check that normalization parameters are reasonable
-                    assert np.all(
-                        data_format.genes_sigma > 0
-                    ), "Gene standard deviations should be positive"
+                    assert np.all(data_format.genes_sigma > 0), (
+                        "Gene standard deviations should be positive"
+                    )
 
                 # Validate results
                 self._validate_results(results, "normalization_test")
@@ -337,12 +337,12 @@ class TestIntegration:
                     data_format_info = json.load(f)
 
                 # Check that normalization metadata is present
-                assert (
-                    "use_log_transform" in data_format_info
-                ), "Should have log transform flag"
-                assert (
-                    data_format_info["use_log_transform"] is True
-                ), "Log transform should be enabled"
+                assert "use_log_transform" in data_format_info, (
+                    "Should have log transform flag"
+                )
+                assert data_format_info["use_log_transform"] is True, (
+                    "Log transform should be enabled"
+                )
 
                 # Load the actual normalization arrays from NPZ file
                 data_format_npz = save_dir / DATA_FORMAT_NPZ_FILE
@@ -350,37 +350,37 @@ class TestIntegration:
 
                 with np.load(data_format_npz) as npz_data:
                     assert "genes_mu" in npz_data, "Should have gene means in NPZ file"
-                    assert (
-                        "genes_sigma" in npz_data
-                    ), "Should have gene standard deviations in NPZ file"
+                    assert "genes_sigma" in npz_data, (
+                        "Should have gene standard deviations in NPZ file"
+                    )
 
                     genes_mu = npz_data["genes_mu"]
                     genes_sigma = npz_data["genes_sigma"]
 
                     # Validate normalization parameters
-                    assert (
-                        len(genes_mu) == dummy_adata.n_vars
-                    ), f"Should have means for all {dummy_adata.n_vars} genes"
-                    assert (
-                        len(genes_sigma) == dummy_adata.n_vars
-                    ), f"Should have stds for all {dummy_adata.n_vars} genes"
+                    assert len(genes_mu) == dummy_adata.n_vars, (
+                        f"Should have means for all {dummy_adata.n_vars} genes"
+                    )
+                    assert len(genes_sigma) == dummy_adata.n_vars, (
+                        f"Should have stds for all {dummy_adata.n_vars} genes"
+                    )
 
                     # Check that normalization parameters are reasonable
-                    assert np.all(
-                        genes_sigma > 0
-                    ), "Gene standard deviations should be positive"
+                    assert np.all(genes_sigma > 0), (
+                        "Gene standard deviations should be positive"
+                    )
                     assert np.all(np.isfinite(genes_mu)), "Gene means should be finite"
-                    assert np.all(
-                        np.isfinite(genes_sigma)
-                    ), "Gene standard deviations should be finite"
+                    assert np.all(np.isfinite(genes_sigma)), (
+                        "Gene standard deviations should be finite"
+                    )
 
                     # Check that means are in a reasonable range (log-transformed data)
-                    assert np.all(
-                        genes_mu >= 0
-                    ), "Log-transformed gene means should be non-negative"
-                    assert np.all(
-                        genes_mu <= 20
-                    ), "Log-transformed gene means should be reasonable"
+                    assert np.all(genes_mu >= 0), (
+                        "Log-transformed gene means should be non-negative"
+                    )
+                    assert np.all(genes_mu <= 20), (
+                        "Log-transformed gene means should be reasonable"
+                    )
 
                 # Validate results
                 self._validate_results(results, "normalization_values_test")
@@ -504,12 +504,12 @@ class TestIntegration:
 
                 # Validate that normalization parameters were captured and saved correctly
                 if captured_train_data:
-                    assert (
-                        "genes_mu" in captured_train_data
-                    ), "Should have captured gene means"
-                    assert (
-                        "genes_sigma" in captured_train_data
-                    ), "Should have captured gene sigmas"
+                    assert "genes_mu" in captured_train_data, (
+                        "Should have captured gene means"
+                    )
+                    assert "genes_sigma" in captured_train_data, (
+                        "Should have captured gene sigmas"
+                    )
 
                     # Check that captured parameters match saved parameters
                     np.testing.assert_array_almost_equal(
@@ -526,18 +526,18 @@ class TestIntegration:
                     )
 
                     # Validate that means and sigmas are reasonable for log-transformed data
-                    assert np.all(
-                        saved_genes_mu >= 0
-                    ), "Gene means should be non-negative for log-transformed data"
-                    assert np.all(
-                        saved_genes_mu <= 15
-                    ), "Gene means should be reasonable for log-transformed data"
-                    assert np.all(
-                        saved_genes_sigma > 0
-                    ), "Gene standard deviations should be positive"
-                    assert np.all(
-                        saved_genes_sigma <= 5
-                    ), "Gene standard deviations should be reasonable"
+                    assert np.all(saved_genes_mu >= 0), (
+                        "Gene means should be non-negative for log-transformed data"
+                    )
+                    assert np.all(saved_genes_mu <= 15), (
+                        "Gene means should be reasonable for log-transformed data"
+                    )
+                    assert np.all(saved_genes_sigma > 0), (
+                        "Gene standard deviations should be positive"
+                    )
+                    assert np.all(saved_genes_sigma <= 5), (
+                        "Gene standard deviations should be reasonable"
+                    )
 
                 # Now test that the normalization is applied correctly during inference
                 # by creating a dataset and using its transform_batch_data method
@@ -585,30 +585,30 @@ class TestIntegration:
 
                 # The means should be close to 0 (within reasonable tolerance for small batch)
                 # Note: For small batches, the means might not be exactly 0, so we use a more lenient tolerance
-                assert np.all(
-                    np.abs(batch_means) < 10
-                ), f"Normalized batch means should be reasonable, got {batch_means[:5]}"
+                assert np.all(np.abs(batch_means) < 10), (
+                    f"Normalized batch means should be reasonable, got {batch_means[:5]}"
+                )
 
                 # The standard deviations should be positive and reasonable
-                assert np.all(
-                    batch_stds > 0.01
-                ), f"Normalized batch stds should be positive, got {batch_stds[:5]}"
-                assert np.all(
-                    batch_stds < 10
-                ), f"Normalized batch stds should be reasonable, got {batch_stds[:5]}"
+                assert np.all(batch_stds > 0.01), (
+                    f"Normalized batch stds should be positive, got {batch_stds[:5]}"
+                )
+                assert np.all(batch_stds < 10), (
+                    f"Normalized batch stds should be reasonable, got {batch_stds[:5]}"
+                )
 
                 # Test that normalization parameters are computed from training data only
                 # by checking that the number of samples used for computing stats is reasonable
                 if captured_train_data and "n_train_samples" in captured_train_data:
                     n_train_samples = captured_train_data["n_train_samples"]
                     # Should be less than total samples (since we have dev split)
-                    assert (
-                        n_train_samples < n_cells
-                    ), f"Training samples ({n_train_samples}) should be less than total ({n_cells})"
+                    assert n_train_samples < n_cells, (
+                        f"Training samples ({n_train_samples}) should be less than total ({n_cells})"
+                    )
                     # Should be more than 50% of total samples (typical train split)
-                    assert (
-                        n_train_samples > n_cells * 0.5
-                    ), f"Training samples ({n_train_samples}) should be substantial portion of total ({n_cells})"
+                    assert n_train_samples > n_cells * 0.5, (
+                        f"Training samples ({n_train_samples}) should be substantial portion of total ({n_cells})"
+                    )
 
                 # Validate the overall results
                 self._validate_results(results, "normalization_logic_test")

@@ -250,39 +250,39 @@ class TestTrainingInferenceCompatibility:
         # Check MLP inference
         mlp_sig = inspect.signature(run_mlp_inference)
         mlp_params = set(mlp_sig.parameters.keys())
-        assert expected_params.issubset(
-            mlp_params
-        ), f"MLP missing params: {expected_params - mlp_params}"
-        assert batched_params.issubset(
-            mlp_params
-        ), f"MLP missing batch params: {batched_params - mlp_params}"
+        assert expected_params.issubset(mlp_params), (
+            f"MLP missing params: {expected_params - mlp_params}"
+        )
+        assert batched_params.issubset(mlp_params), (
+            f"MLP missing batch params: {batched_params - mlp_params}"
+        )
 
         # Check Autoencoder inference
         ae_sig = inspect.signature(run_ae_inference)
         ae_params = set(ae_sig.parameters.keys())
-        assert expected_params.issubset(
-            ae_params
-        ), f"AE missing params: {expected_params - ae_params}"
-        assert batched_params.issubset(
-            ae_params
-        ), f"AE missing batch params: {batched_params - ae_params}"
+        assert expected_params.issubset(ae_params), (
+            f"AE missing params: {expected_params - ae_params}"
+        )
+        assert batched_params.issubset(ae_params), (
+            f"AE missing batch params: {batched_params - ae_params}"
+        )
 
         # Check Linear inference
         linear_sig = inspect.signature(run_linear_inference)
         linear_params = set(linear_sig.parameters.keys())
-        assert expected_params.issubset(
-            linear_params
-        ), f"Linear missing params: {expected_params - linear_params}"
-        assert batched_params.issubset(
-            linear_params
-        ), f"Linear missing batch params: {batched_params - linear_params}"
+        assert expected_params.issubset(linear_params), (
+            f"Linear missing params: {expected_params - linear_params}"
+        )
+        assert batched_params.issubset(linear_params), (
+            f"Linear missing batch params: {batched_params - linear_params}"
+        )
 
         # Check LightGBM inference (updated signature)
         lgb_sig = inspect.signature(run_lightgbm_inference)
         lgb_params = set(lgb_sig.parameters.keys())
-        assert expected_params.issubset(
-            lgb_params
-        ), f"LightGBM missing params: {expected_params - lgb_params}"
+        assert expected_params.issubset(lgb_params), (
+            f"LightGBM missing params: {expected_params - lgb_params}"
+        )
         # Note: LightGBM doesn't use batching, so we don't check for batch_size/num_workers
 
     def test_data_format_consistency_across_models(self, mock_adata, mock_data_format):
@@ -501,9 +501,9 @@ class TestRegressionPrevention:
         """Regression test: LightGBM inference must accept data_format parameter."""
         # Verify the function signature includes data_format
         sig = inspect.signature(run_lightgbm_inference)
-        assert (
-            "data_format" in sig.parameters
-        ), "LightGBM inference must accept data_format parameter"
+        assert "data_format" in sig.parameters, (
+            "LightGBM inference must accept data_format parameter"
+        )
 
         # Verify data_format is not optional (has no default value of None)
         data_format_param = sig.parameters["data_format"]
@@ -516,12 +516,12 @@ class TestRegressionPrevention:
         """Regression test: batch_size must be passed to linear models."""
         # Verify the function signature includes batch_size and num_workers
         sig = inspect.signature(run_linear_inference)
-        assert (
-            "batch_size" in sig.parameters
-        ), "Linear inference must accept batch_size parameter"
-        assert (
-            "num_workers" in sig.parameters
-        ), "Linear inference must accept num_workers parameter"
+        assert "batch_size" in sig.parameters, (
+            "Linear inference must accept batch_size parameter"
+        )
+        assert "num_workers" in sig.parameters, (
+            "Linear inference must accept num_workers parameter"
+        )
 
     def test_preprocessing_consistency_regression(self):
         """Regression test: LightGBM inference must use same preprocessing as training."""

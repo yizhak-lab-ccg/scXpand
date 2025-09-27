@@ -144,13 +144,13 @@ class TestGeneMismatchNormalization:
 
                 # Verify gene transformation was detected correctly
                 if scenario == "perfect_match":
-                    assert (
-                        not dataset.needs_gene_transformation
-                    ), f"Should not need transformation for {scenario}"
+                    assert not dataset.needs_gene_transformation, (
+                        f"Should not need transformation for {scenario}"
+                    )
                 else:
-                    assert (
-                        dataset.needs_gene_transformation
-                    ), f"Should need transformation for {scenario}"
+                    assert dataset.needs_gene_transformation, (
+                        f"Should need transformation for {scenario}"
+                    )
 
                 # Test batch loading
                 def make_collate_fn(ds):
@@ -166,22 +166,22 @@ class TestGeneMismatchNormalization:
                 batch = next(iter(dataloader))
 
                 # Verify output shape is correct (should match training format)
-                assert (
-                    batch["x"].shape[1] == training_data_format.n_genes
-                ), f"Output genes {batch['x'].shape[1]} != training genes {training_data_format.n_genes} for {scenario}"
+                assert batch["x"].shape[1] == training_data_format.n_genes, (
+                    f"Output genes {batch['x'].shape[1]} != training genes {training_data_format.n_genes} for {scenario}"
+                )
 
                 # Verify no NaN/Inf values after normalization
-                assert not torch.any(
-                    torch.isnan(batch["x"])
-                ), f"NaN values found in {scenario}"
-                assert not torch.any(
-                    torch.isinf(batch["x"])
-                ), f"Inf values found in {scenario}"
+                assert not torch.any(torch.isnan(batch["x"])), (
+                    f"NaN values found in {scenario}"
+                )
+                assert not torch.any(torch.isinf(batch["x"])), (
+                    f"Inf values found in {scenario}"
+                )
 
                 # Verify the data is properly normalized (z-score should have reasonable range)
-                assert (
-                    batch["x"].abs().max() < 50
-                ), f"Z-score values too large in {scenario}: {batch['x'].abs().max()}"
+                assert batch["x"].abs().max() < 50, (
+                    f"Z-score values too large in {scenario}: {batch['x'].abs().max()}"
+                )
 
     def test_missing_genes_filled_with_zeros(self, training_data_format):
         """Test that missing genes are correctly filled with zeros before normalization."""
@@ -201,9 +201,9 @@ class TestGeneMismatchNormalization:
 
             # Check that gene indices mapping is correct
             expected_indices = [0, -1, 1, -1, 2]  # A, missing, C, missing, E
-            assert np.array_equal(
-                dataset.gene_indices, expected_indices
-            ), f"Gene indices wrong: {dataset.gene_indices} != {expected_indices}"
+            assert np.array_equal(dataset.gene_indices, expected_indices), (
+                f"Gene indices wrong: {dataset.gene_indices} != {expected_indices}"
+            )
 
             # Test that transformation creates zeros for missing genes
             raw_data = torch.rand(
@@ -227,10 +227,14 @@ class TestGeneMismatchNormalization:
             # All cells should have the same value for missing genes
             assert torch.allclose(
                 transformed[:, 1], torch.tensor(expected_missing_gene_b), atol=1e-5
-            ), f"Missing GENE_B not handled correctly: {transformed[:, 1]} != {expected_missing_gene_b}"
+            ), (
+                f"Missing GENE_B not handled correctly: {transformed[:, 1]} != {expected_missing_gene_b}"
+            )
             assert torch.allclose(
                 transformed[:, 3], torch.tensor(expected_missing_gene_d), atol=1e-5
-            ), f"Missing GENE_D not handled correctly: {transformed[:, 3]} != {expected_missing_gene_d}"
+            ), (
+                f"Missing GENE_D not handled correctly: {transformed[:, 3]} != {expected_missing_gene_d}"
+            )
 
     def test_extra_genes_ignored(self, training_data_format):
         """Test that extra genes in inference data are correctly ignored."""
@@ -256,9 +260,9 @@ class TestGeneMismatchNormalization:
                 3,
                 4,
             ]  # Perfect match for first 5 genes, ignore F and G
-            assert np.array_equal(
-                dataset.gene_indices, expected_indices
-            ), f"Gene indices wrong: {dataset.gene_indices} != {expected_indices}"
+            assert np.array_equal(dataset.gene_indices, expected_indices), (
+                f"Gene indices wrong: {dataset.gene_indices} != {expected_indices}"
+            )
 
             # Test batch processing
             def collate_fn(batch_indices):
@@ -376,9 +380,9 @@ class TestGeneMismatchNormalization:
             X_direct_tensor = torch.from_numpy(X_direct).float()
 
             # Should be identical (within floating point precision)
-            assert torch.allclose(
-                X_dataset, X_direct_tensor, rtol=1e-5, atol=1e-6
-            ), "Dataset and direct normalization should produce identical results"
+            assert torch.allclose(X_dataset, X_direct_tensor, rtol=1e-5, atol=1e-6), (
+                "Dataset and direct normalization should produce identical results"
+            )
 
     def test_normalization_with_edge_cases(self, training_data_format):
         """Test normalization handles edge cases correctly."""
@@ -432,12 +436,12 @@ class TestGeneMismatchNormalization:
             X_processed = batch["x"]
 
             # Verify no NaN or Inf values
-            assert not torch.any(
-                torch.isnan(X_processed)
-            ), "Edge cases should not produce NaN"
-            assert not torch.any(
-                torch.isinf(X_processed)
-            ), "Edge cases should not produce Inf"
+            assert not torch.any(torch.isnan(X_processed)), (
+                "Edge cases should not produce NaN"
+            )
+            assert not torch.any(torch.isinf(X_processed)), (
+                "Edge cases should not produce Inf"
+            )
 
             # Verify all-zero row is handled correctly
             # After row normalization, all-zero row stays zero
@@ -454,9 +458,9 @@ class TestGeneMismatchNormalization:
                 dtype=torch.float32,
             )
 
-            assert torch.allclose(
-                X_processed[0], expected_zero_row, atol=1e-5
-            ), f"All-zero row not handled correctly: {X_processed[0]} != {expected_zero_row}"
+            assert torch.allclose(X_processed[0], expected_zero_row, atol=1e-5), (
+                f"All-zero row not handled correctly: {X_processed[0]} != {expected_zero_row}"
+            )
 
 
 class TestGeneMismatchIntegrationWithModels:
@@ -492,9 +496,9 @@ class TestGeneMismatchIntegrationWithModels:
         )
 
         # Genes should now be in correct order
-        assert (
-            list(prepared_adata.var_names) == data_format.gene_names
-        ), f"Genes not reordered correctly: {list(prepared_adata.var_names)} != {data_format.gene_names}"
+        assert list(prepared_adata.var_names) == data_format.gene_names, (
+            f"Genes not reordered correctly: {list(prepared_adata.var_names)} != {data_format.gene_names}"
+        )
 
         # Test that prepare_adata_for_training with reorder_genes=False doesn't change order
         unchanged_adata = data_format.prepare_adata_for_training(
@@ -537,9 +541,9 @@ class TestNormalizationParameterConsistency:
         )
 
         # Should be identical
-        assert np.allclose(
-            X_numpy_processed, X_torch_processed.numpy(), rtol=1e-6
-        ), "Numpy and torch preprocessing should use identical parameters"
+        assert np.allclose(X_numpy_processed, X_torch_processed.numpy(), rtol=1e-6), (
+            "Numpy and torch preprocessing should use identical parameters"
+        )
 
         # Test that custom parameters are actually used
         # After row normalization, sum should be target_sum (5000, not default 10000)
@@ -551,9 +555,9 @@ class TestNormalizationParameterConsistency:
             X=X_test, target_sum=data_format.target_sum
         )
 
-        assert np.allclose(
-            X_row_norm.sum(axis=1), data_format.target_sum
-        ), f"Row normalization should use custom target_sum: {X_row_norm.sum()} != {data_format.target_sum}"
+        assert np.allclose(X_row_norm.sum(axis=1), data_format.target_sum), (
+            f"Row normalization should use custom target_sum: {X_row_norm.sum()} != {data_format.target_sum}"
+        )
 
         # Test that log transform is correctly disabled
         X_after_row_norm = X_row_norm.copy()
@@ -573,6 +577,6 @@ class TestNormalizationParameterConsistency:
             expected_raw, -DEFAULT_SIGMA_CLIP_FACTOR, DEFAULT_SIGMA_CLIP_FACTOR
         )
 
-        assert np.allclose(
-            X_full, expected, rtol=1e-6
-        ), "Log transform should be disabled when use_log_transform=False"
+        assert np.allclose(X_full, expected, rtol=1e-6), (
+            "Log transform should be disabled when use_log_transform=False"
+        )
