@@ -890,10 +890,19 @@ commit_and_push() {
 
     if [ "$DEV_RELEASE" = true ] && [ "$current_branch" != "main" ]; then
         # For dev releases from non-main branches, just push to current branch
-        execute_git_command \
-            "git add -A && git commit -m '$commit_message' && git push origin $current_branch" \
-            "Committing and pushing dev release changes to $current_branch" \
-            "Would commit and push dev release changes to $current_branch"
+        # Check if there are any changes to commit first
+        if git diff --quiet && git diff --cached --quiet; then
+            print_status "No changes to commit for VCS versioning dev release"
+            execute_git_command \
+                "git push origin $current_branch" \
+                "Pushing dev release to $current_branch" \
+                "Would push dev release to $current_branch"
+        else
+            execute_git_command \
+                "git add -A && git commit -m '$commit_message' && git push origin $current_branch" \
+                "Committing and pushing dev release changes to $current_branch" \
+                "Would commit and push dev release changes to $current_branch"
+        fi
     else
         # Regular release or dev release from main branch
         execute_git_command \
