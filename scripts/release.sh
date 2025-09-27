@@ -200,12 +200,15 @@ check_prerequisites() {
         exit 1
     fi
 
-    # Check if we're on main branch
+    # Check if we're on main branch (skip for dev releases)
     local current_branch=$(git branch --show-current)
-    if [ "$current_branch" != "main" ]; then
+    if [ "$current_branch" != "main" ] && [ "$DEV_RELEASE" = false ]; then
         print_error "Not on main branch (currently on: $current_branch)"
         print_status "Please checkout main branch first: git checkout main"
         exit 1
+    elif [ "$current_branch" != "main" ] && [ "$DEV_RELEASE" = true ]; then
+        print_warning "Dev release from branch: $current_branch (not main)"
+        print_status "This is allowed for dev releases"
     fi
 
     # Check if working directory is clean
@@ -896,16 +899,27 @@ execute_git_command() {
 # Function to commit and push changes
 commit_and_push() {
     local commit_message
+    local current_branch=$(git branch --show-current)
+
     if [ "$DEV_RELEASE" = true ]; then
         commit_message="Dev release version $NEW_VERSION (dual package release)"
     else
         commit_message="Bump version to $NEW_VERSION and update CHANGELOG.md (dual package release)"
     fi
 
-    execute_git_command \
-        "git add -A && git commit -m '$commit_message' && git push origin main" \
-        "Committing and pushing changes" \
-        "Would commit and push changes"
+    if [ "$DEV_RELEASE" = true ] && [ "$current_branch" != "main" ]; then
+        # For dev releases from non-main branches, just push to current branch
+        execute_git_command \
+            "git add -A && git commit -m '$commit_message' && git push origin $current_branch" \
+            "Committing and pushing dev release changes to $current_branch" \
+            "Would commit and push dev release changes to $current_branch"
+    else
+        # Regular release or dev release from main branch
+        execute_git_command \
+            "git add -A && git commit -m '$commit_message' && git push origin main" \
+            "Committing and pushing changes" \
+            "Would commit and push changes"
+    fi
 }
 
 # Function to create and push tag

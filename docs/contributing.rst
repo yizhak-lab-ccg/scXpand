@@ -56,6 +56,25 @@ Release Process
 We use an automated release script that handles the entire publishing process to PyPI.
 For detailed instructions, see :doc:`../scripts/PUBLISHING`.
 
+Dev Releases
+------------
+
+For testing releases before official announcement, use dev releases:
+
+.. code-block:: bash
+
+    # Create a dev release (no GitHub announcement)
+    ./scripts/release.sh --dev
+
+    # Dry run for dev release
+    ./scripts/release.sh --dev --dry-run
+
+Dev releases:
+- Publish packages to PyPI with dev version suffix (e.g., 0.3.6.dev1)
+- Skip GitHub release creation and announcement
+- Skip ReadTheDocs documentation build
+- Useful for testing releases on other machines before official release
+
 Version Management
 ------------------
 
