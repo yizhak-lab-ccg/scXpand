@@ -1,7 +1,7 @@
 Contributing to scXpand
 =======================
 
-We welcome contributions to scXpand! For detailed contributing guidelines, please see our `CONTRIBUTING.md <https://github.com/yizhak-lab-ccg/scXpand/blob/main/CONTRIBUTING.md>`_ file.
+We welcome contributions to scXpand! This document provides guidelines for contributing to the project.
 
 Quick Start
 -----------
@@ -23,28 +23,37 @@ Quick Start
       pre-commit run --all-files
 6. **Submit a pull request**
 
-Template Updates
+Coding Standards
 ----------------
 
-scXpand follows the `scverse cookiecutter template <https://github.com/scverse/cookiecutter-scverse>`_ for consistent ecosystem standards.
+We use several tools to maintain code quality:
 
-**To update from the latest scverse template:**
+- **Ruff** for code formatting and linting
+- **Pre-commit hooks** for automated checks
+- **Type hints** for better code documentation
+- **Comprehensive testing** with pytest
 
-.. code-block:: bash
+All tools are configured in `pyproject.toml` and run automatically via pre-commit hooks.
 
-    pip install cruft
-    cruft update
+Pull Request Process
+--------------------
 
-This will:
+1. **Ensure all tests pass**
+2. **Update documentation** if needed
+3. **Add tests** for new functionality
+4. **Update CHANGELOG.md** with your changes
+5. **Request review** from maintainers
 
-* Pull the latest improvements from the scverse template
-* Update CI/CD workflows, documentation structure, and tool configurations
-* Preserve your custom CUDA PyTorch installation solution
-* Keep your project-specific files intact
+Reporting Issues
+----------------
 
-**Note:** The CUDA PyTorch installation solution is protected from template updates and will continue working as before.
+When reporting issues, please include:
 
-For complete instructions, coding standards, and workflow details, please refer to the `CONTRIBUTING.md <https://github.com/yizhak-lab-ccg/scXpand/blob/main/CONTRIBUTING.md>`_ file.
+- Python version
+- scXpand version
+- Operating system
+- Minimal reproducible example
+- Expected vs actual behavior
 
 Development Setup
 -----------------
