@@ -7,6 +7,7 @@ from scxpand.util.classes import (
     DataLoaderParams,
     LRSchedulerParams,
     LRSchedulerType,
+    ModelType,
     OptimizerParams,
     OptimizerType,
     SamplerType,
@@ -127,6 +128,6 @@ class AutoEncoderParams(BaseParams):
         return self.loss_type.lower() in ["nb", "zinb"]
 
     @classmethod
-    def get_model_type(cls) -> str:
+    def get_model_type(cls) -> ModelType:
         """Return the model type identifier for this parameter class."""
-        return "autoencoder"
+        return ModelType.AUTOENCODER

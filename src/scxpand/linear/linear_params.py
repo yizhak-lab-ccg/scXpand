@@ -7,6 +7,7 @@ from scxpand.util.classes import (
     DataAugmentParams,
     LRSchedulerParams,
     LRSchedulerType,
+    ModelType,
     OptimizerParams,
     OptimizerType,
     SamplerType,
@@ -19,7 +20,7 @@ class LinearClassifierParam(BaseParams):
 
     use_log_transform: bool = True
     # Model type: 'logistic' for logistic regression, 'svm' for support vector machine
-    model_type: str = "logistic"
+    model_type: ModelType = ModelType.LOGISTIC
     # Regularization parameter (alpha is inverse of C) - scikit-learn default: 0.0001
     alpha: float = 0.0001
     # Regularization type - scikit-learn default: 'l2'
@@ -102,6 +103,6 @@ class LinearClassifierParam(BaseParams):
         )
 
     @classmethod
-    def get_model_type(cls) -> str:
+    def get_model_type(cls) -> ModelType:
         """Return the model type identifier for this parameter class."""
-        return "linear"
+        return cls().model_type

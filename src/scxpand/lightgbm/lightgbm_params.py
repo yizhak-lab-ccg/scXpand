@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from scxpand.util.classes import BaseParams
+from scxpand.util.classes import BaseParams, ModelType
 
 
 class BoostingType(str, Enum):
@@ -86,6 +86,6 @@ class LightGBMParams(BaseParams):
     verbose: int = -1
 
     @classmethod
-    def get_model_type(cls) -> str:
+    def get_model_type(cls) -> ModelType:
         """Return the model type identifier for this parameter class."""
-        return "lightgbm"
+        return ModelType.LIGHTGBM

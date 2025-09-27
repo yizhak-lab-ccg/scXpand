@@ -3,6 +3,16 @@ from dataclasses import dataclass
 from enum import Enum
 
 
+class ModelType(str, Enum):
+    """Enumeration of supported model types."""
+
+    AUTOENCODER = "autoencoder"
+    MLP = "mlp"
+    LIGHTGBM = "lightgbm"
+    LOGISTIC = "logistic"
+    SVM = "svm"
+
+
 class BaseParams(ABC):
     """Abstract base class for all parameter classes.
 
@@ -12,22 +22,12 @@ class BaseParams(ABC):
 
     @classmethod
     @abstractmethod
-    def get_model_type(cls) -> str:
+    def get_model_type(cls) -> ModelType:
         """Return the model type identifier for this parameter class.
 
         Returns:
-            String identifier for the model type (e.g., 'mlp', 'autoencoder', 'logistic', 'svm', etc.)
+            ModelType enum value for the model type
         """
-
-
-class ModelType(str, Enum):
-    """Enumeration of supported model types."""
-
-    AUTOENCODER = "autoencoder"
-    MLP = "mlp"
-    LIGHTGBM = "lightgbm"
-    LOGISTIC = "logistic"
-    SVM = "svm"
 
 
 class LRSchedulerType(str, Enum):
