@@ -383,22 +383,13 @@ validate_changelog() {
 # Function to create dev version number
 create_dev_version() {
     local base_version="$1"
-    local dev_counter=1
 
-    # For VCS versioning, we need to handle the case where base_version might already be a dev version
+    # For VCS versioning with hatch-vcs, we can only use .dev0
     # Extract the clean base version (remove .devX suffix if present)
     local clean_base_version=$(echo "$base_version" | sed 's/\.dev[0-9]*$//')
 
-    # Check if there are existing dev versions for this clean base version
-    if git tag -l "v${clean_base_version}.dev*" | grep -q "v${clean_base_version}.dev"; then
-        # Find the highest dev counter for the clean base version
-        local max_dev=$(git tag -l "v${clean_base_version}.dev*" | sed "s/v${clean_base_version}.dev//" | sort -n | tail -1)
-        if [ -n "$max_dev" ] && [ "$max_dev" -ge 0 ]; then
-            dev_counter=$((max_dev + 1))
-        fi
-    fi
-
-    echo "${clean_base_version}.dev${dev_counter}"
+    # For VCS versioning, hatch-vcs only supports .dev0 for development versions
+    echo "${clean_base_version}.dev0"
 }
 
 # Function to preview version bump and validate changelog
