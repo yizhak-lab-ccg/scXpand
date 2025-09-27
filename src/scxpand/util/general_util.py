@@ -87,7 +87,7 @@ def save_params(params: BaseParams, save_dir: Path | str):
     # Get model type from parameter object
     try:
         model_type = params.get_model_type()
-        save_model_type(str(model_type), save_dir)
+        save_model_type(model_type.value, save_dir)
     except AttributeError:
         logger.warning(
             f"Parameter object {type(params)} does not have get_model_type method"

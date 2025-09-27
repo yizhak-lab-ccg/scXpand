@@ -94,7 +94,7 @@ If you want to contribute or work with the latest source code, follow these step
 
 2. **Install in development mode:**
    ```bash
-   pip install -e ".[dev]"
+   uv pip install -e ".[dev]"
    ```
 
 3. **Install pre-commit hooks:**
@@ -102,9 +102,24 @@ If you want to contribute or work with the latest source code, follow these step
    pre-commit install
    ```
 
-4. **For CUDA development setup (optional):**
+4. **For PyTorch installation (optional):**
+
+   **Using uv with automatic backend selection (Recommended):**
    ```bash
-   python scripts/install_torch_for_dev.py
+   uv pip install torch torchvision torchaudio --torch-backend=auto
+   ```
+   This automatically detects your system's optimal PyTorch backend (CUDA if available, otherwise CPU/MPS).
+
+   **Manual installation for specific CUDA versions:**
+   ```bash
+   # CUDA 12.8 (latest)
+   uv pip install torch torchvision torchaudio --torch-backend=cu128
+
+   # CUDA 12.6
+   uv pip install torch torchvision torchaudio --torch-backend=cu126
+
+   # CPU-only
+   uv pip install torch torchvision torchaudio --torch-backend=cpu
    ```
 
 **Template Updates:** scXpand follows the scverse ecosystem standards. To update from the latest template:

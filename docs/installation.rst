@@ -60,7 +60,7 @@ scXpand follows the `scverse ecosystem <https://scverse.org/>`_ standards and us
 
 .. code-block:: bash
 
-    pip install -e ".[dev]"
+    uv pip install -e ".[dev]"
 
 This will:
 
@@ -74,24 +74,47 @@ This will:
 
     pre-commit install
 
-**For CUDA development setup:**
+**For PyTorch installation with uv (Recommended):**
 
-If you need specific CUDA PyTorch installation for development:
+uv provides excellent PyTorch integration with automatic backend selection:
 
 .. code-block:: bash
 
-    python scripts/install_torch_for_dev.py
+    # Install PyTorch with automatic backend detection
+    uv pip install torch torchvision torchaudio --torch-backend=auto
 
-This script will:
-
-* Detect your system's optimal PyTorch backend
+This will:
+* Automatically detect your system's optimal PyTorch backend
 * Install CUDA PyTorch if NVIDIA GPU is available
 * Fall back to CPU/MPS PyTorch if CUDA is not available
-* Update the environment with the correct PyTorch version
+* Use the most compatible PyTorch index for your system
 
-**Alternative: Using uv (if you have it installed):**
+**Alternative: Manual PyTorch installation with uv:**
+
+For specific CUDA versions:
 
 .. code-block:: bash
 
+    # CUDA 12.8 (latest)
+    uv pip install torch torchvision torchaudio --torch-backend=cu128
+
+    # CUDA 12.6
+    uv pip install torch torchvision torchaudio --torch-backend=cu126
+
+    # CPU-only
+    uv pip install torch torchvision torchaudio --torch-backend=cpu
+
+**Using uv for the entire development setup:**
+
+If you prefer using uv for everything:
+
+.. code-block:: bash
+
+    # Install scXpand in development mode with uv
     uv pip install -e ".[dev]"
+
+    # Then install PyTorch with optimal backend
+    uv pip install torch torchvision torchaudio --torch-backend=auto
+
+    # Install pre-commit hooks
     pre-commit install
