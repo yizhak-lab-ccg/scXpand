@@ -63,16 +63,6 @@ dependencies = [
   "torchvision>=0.20",
   "tqdm>=4.66",
 ]
-optional-dependencies.cpu = [
-  "torch>=2.5",
-  "torchaudio>=2.5",
-  "torchvision>=0.20",
-]
-optional-dependencies.cuda = [
-  "torch>=2.5",
-  "torchaudio>=2.5",
-  "torchvision>=0.20",
-]
 optional-dependencies.dev = [
   "ipykernel>=6.29.5",
   "ipywidgets>=8.1.5",
@@ -84,7 +74,6 @@ optional-dependencies.dev = [
   "pytest-cov>=6",
   "pytest-xdist>=3.6",
   "ruff>=0.12.7",
-  "vulture>=2.14",
 ]
 optional-dependencies.docs = [
   "colorama>=0.4.6",
@@ -204,50 +193,3 @@ explicit = true
 torch = { index = "pytorch-cpu", extra = "cpu" }
 torchvision = { index = "pytorch-cpu", extra = "cpu" }
 torchaudio = { index = "pytorch-cpu", extra = "cpu" }
-
-[tool.vulture]
-# Configuration for vulture: https://github.com/jendrikseipp/vulture
-# Ignore specific functions and variables that are used but not detected by static analysis
-ignore_names = [
-  # Functions that are used but not detected by vulture
-  "encode_categorical_value",
-  "encode_categorical_features_batch",
-  "metrics_dict_to_dataframes",
-  "plot_roc_curves_per_strata",
-  "load_model",
-  "model_config",
-  "deterministic",
-  "benchmark",
-  "run_inference",
-  "configure_logging",
-  # InferenceResults methods
-  "n_predictions",
-  "has_metrics",
-  "has_model_info",
-  "get_auroc",
-  "get_harmonic_avg_auroc",
-  "to_dict",
-  # Standard class method parameters
-  "cls",
-  # LightGBM enum values - part of complete API definition
-  "DART",
-  "GOSS",
-  "RF",
-  "MULTICLASS",
-  "REGRESSION",
-  "LAMBDARANK",
-  "MULTICLASS_LOGLOSS",
-  "RMSE",
-  "MAE",
-  "AUC",
-  "NDCG",
-  "download_model",
-  "load_model",
-  "load_sklearn_model",
-  "load_nn_model",
-  "load_ae_model",
-  "load_and_validate_model",
-  "load_model_state_dict",
-]
-paths = [ "src/scxpand" ]
-min_confidence = 60
