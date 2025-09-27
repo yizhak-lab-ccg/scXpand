@@ -1200,8 +1200,6 @@ show_summary() {
             echo "  CUDA version (GPU):"
             echo "    pip install scxpand-cuda==$NEW_VERSION --extra-index-url https://download.pytorch.org/whl/cu128"
             echo
-            print_status "Test the installation:"
-            echo "  python -c \"import scxpand; print(f'scXpand {scxpand.__version__} installed successfully!')\""
         else
             print_success "Dual package $VERSION_TYPE release completed successfully!"
             echo
