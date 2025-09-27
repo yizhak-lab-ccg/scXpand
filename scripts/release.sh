@@ -1192,6 +1192,16 @@ show_summary() {
             echo "  - Documentation build: SKIPPED (dev release)"
             echo
             print_success "Dev release published to PyPI without GitHub announcement"
+            echo
+            print_status "Installation Instructions:"
+            echo "  Standard version (CPU/MPS):"
+            echo "    pip install scxpand==$NEW_VERSION"
+            echo
+            echo "  CUDA version (GPU):"
+            echo "    pip install scxpand-cuda==$NEW_VERSION --extra-index-url https://download.pytorch.org/whl/cu128"
+            echo
+            print_status "Test the installation:"
+            echo "  python -c \"import scxpand; print(f'scXpand {scxpand.__version__} installed successfully!')\""
         else
             print_success "Dual package $VERSION_TYPE release completed successfully!"
             echo
@@ -1208,6 +1218,16 @@ show_summary() {
             if [ "$SKIP_GITHUB_RELEASE" != true ]; then
                 print_success "GitHub release automatically created at: $REPO_URL/releases/tag/v$NEW_VERSION"
             fi
+            echo
+            print_status "Installation Instructions:"
+            echo "  Standard version (CPU/MPS):"
+            echo "    pip install scxpand==$NEW_VERSION"
+            echo
+            echo "  CUDA version (GPU):"
+            echo "    pip install scxpand-cuda==$NEW_VERSION --extra-index-url https://download.pytorch.org/whl/cu128"
+            echo
+            print_status "Test the installation:"
+            echo "  python -c \"import scxpand; print(f'scXpand {scxpand.__version__} installed successfully!')\""
         fi
     fi
     echo
