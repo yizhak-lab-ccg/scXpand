@@ -188,8 +188,3 @@ conflicts = [
 name = "pytorch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
 explicit = true
-
-[tool.uv.sources]
-torch = { index = "pytorch-cpu", extra = "cpu" }
-torchvision = { index = "pytorch-cpu", extra = "cpu" }
-torchaudio = { index = "pytorch-cpu", extra = "cpu" }

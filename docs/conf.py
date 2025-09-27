@@ -12,14 +12,20 @@ sys.path.insert(0, str(HERE.parent / "src"))
 # -- Project information -----------------------------------------------------
 
 try:
-    info = metadata("scXpand")
+    info = metadata("scxpand")
     project_name = info["Name"]
     author = info.get("Author") or "The scXpand Team"
     release = info["Version"]
 except PackageNotFoundError:
     project_name = "scXpand"
     author = "The scXpand Team"
-    release = "0.1.0"
+    # Get version from package
+    try:
+        from scxpand import __version__
+
+        release = __version__
+    except ImportError:
+        release = "0.1.0"
 
 project = project_name
 version = release

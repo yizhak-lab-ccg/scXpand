@@ -174,6 +174,55 @@ python scripts/create_cuda_pyproject.py -c cu124  # example for CUDA 12.4
 - Ensure Git tags follow `vX.Y.Z` or `vX.Y.Z.dev0` format
 - Delete problematic tags: `git tag -d vTAG_NAME && git push origin :refs/tags/vTAG_NAME`
 
+## Installing Dev Versions
+
+### From PyPI (Recommended)
+
+**Install latest dev version (CPU/MPS):**
+```bash
+pip install --pre scxpand
+```
+
+**Install latest dev version (CUDA):**
+```bash
+pip install --pre scxpand-cuda
+```
+
+**Install specific dev version:**
+```bash
+pip install --pre scxpand==0.3.8.dev0
+pip install --pre scxpand-cuda==0.3.8.dev0
+```
+
+### From Source (Development)
+
+**Install in editable mode with dev dependencies:**
+```bash
+git clone https://github.com/your-org/scXpand.git
+cd scXpand
+pip install -e ".[dev]"
+```
+
+**For CUDA development:**
+```bash
+# Install CUDA PyTorch first
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+# Then install scXpand
+pip install -e ".[dev]"
+```
+
+### Version Verification
+
+**Check installed version:**
+```bash
+python -c "import scxpand; print(scxpand.__version__)"
+```
+
+**Verify CUDA support:**
+```bash
+python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
+```
+
 ## Key Points
 
 - **Dual Package Publishing**: Always publishes both `scxpand` and `scxpand-cuda`
