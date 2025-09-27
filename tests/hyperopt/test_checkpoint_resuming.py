@@ -12,14 +12,12 @@ Tests verify that:
 import shutil
 import tempfile
 import time
-
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 import torch
-
 from torch.optim import Adam
 from torch.optim.lr_scheduler import StepLR
 
@@ -106,7 +104,9 @@ class TestCheckpointResuming:
             new_lr_scheduler = StepLR(new_optimizer, step_size=5, gamma=0.5)
 
             # Verify they start with different states
-            assert not torch.equal(next(iter(model.parameters())), next(iter(new_model.parameters())))
+            assert not torch.equal(
+                next(iter(model.parameters())), next(iter(new_model.parameters()))
+            )
 
             # Resume from checkpoint
             new_logger = TrainLogger(save_path=save_path)
@@ -124,7 +124,9 @@ class TestCheckpointResuming:
             assert resumed_epoch == 4  # Should resume from epoch 4 (3 + 1)
 
             # Verify model state was restored
-            for orig_param, new_param in zip(model.parameters(), new_model.parameters()):
+            for orig_param, new_param in zip(
+                model.parameters(), new_model.parameters(), strict=False
+            ):
                 assert torch.allclose(orig_param, new_param, atol=1e-6)
 
             # Verify optimizer state was restored (check that state keys exist)
@@ -133,7 +135,10 @@ class TestCheckpointResuming:
             assert len(orig_state["state"]) == len(new_state["state"])
 
             # Verify lr_scheduler state was restored
-            assert new_lr_scheduler.state_dict()["last_epoch"] == lr_scheduler.state_dict()["last_epoch"]
+            assert (
+                new_lr_scheduler.state_dict()["last_epoch"]
+                == lr_scheduler.state_dict()["last_epoch"]
+            )
 
             # Verify best model tracking
             # The checkpoint should contain the best score from the time it was saved
@@ -149,7 +154,9 @@ class TestCheckpointResuming:
             # Since this was the first checkpoint with a None best score,
             # the current logger should have 0.85 but the checkpoint/resumed should have None
             assert logger.best_model_score == 0.85  # Current logger was updated
-            assert new_logger.best_model_score is None  # Resumed from checkpoint with old value
+            assert (
+                new_logger.best_model_score is None
+            )  # Resumed from checkpoint with old value
 
     def test_checkpoint_resume_without_optimizer(self):
         """Test that model can be resumed even if optimizer is None."""
@@ -190,7 +197,9 @@ class TestCheckpointResuming:
             assert resumed_epoch == 3
 
             # Model state should be restored
-            for orig_param, new_param in zip(model.parameters(), new_model.parameters()):
+            for orig_param, new_param in zip(
+                model.parameters(), new_model.parameters(), strict=False
+            ):
                 assert torch.allclose(orig_param, new_param, atol=1e-6)
         finally:
             # Robust cleanup with retry mechanism
@@ -210,7 +219,9 @@ class TestCheckpointResuming:
             logger = TrainLogger(save_path=save_path)
 
             with pytest.raises(FileNotFoundError, match="No checkpoint file found"):
-                logger.resume_from_checkpoint(resume_exp_path=save_path, model=model, device_name="cpu")
+                logger.resume_from_checkpoint(
+                    resume_exp_path=save_path, model=model, device_name="cpu"
+                )
 
     def test_duplicate_epoch_prevention_during_resume(self):
         """Test that duplicate epoch reporting is prevented during resume."""
@@ -231,9 +242,15 @@ class TestCheckpointResuming:
             mock_trial.set_user_attr = mock_set_user_attr
 
             # Simulate initial epoch reports
-            report_to_optuna_and_handle_pruning(trial=mock_trial, current_score=0.7, epoch=0)
-            report_to_optuna_and_handle_pruning(trial=mock_trial, current_score=0.75, epoch=1)
-            report_to_optuna_and_handle_pruning(trial=mock_trial, current_score=0.8, epoch=2)
+            report_to_optuna_and_handle_pruning(
+                trial=mock_trial, current_score=0.7, epoch=0
+            )
+            report_to_optuna_and_handle_pruning(
+                trial=mock_trial, current_score=0.75, epoch=1
+            )
+            report_to_optuna_and_handle_pruning(
+                trial=mock_trial, current_score=0.8, epoch=2
+            )
 
             # Verify epochs were recorded
             reported_epochs = set(mock_trial.user_attrs.get("reported_epochs", []))
@@ -244,9 +261,15 @@ class TestCheckpointResuming:
             mock_trial.report.reset_mock()
 
             # Try to report the same epochs again (simulating resume)
-            report_to_optuna_and_handle_pruning(trial=mock_trial, current_score=0.7, epoch=0)  # Duplicate
-            report_to_optuna_and_handle_pruning(trial=mock_trial, current_score=0.75, epoch=1)  # Duplicate
-            report_to_optuna_and_handle_pruning(trial=mock_trial, current_score=0.85, epoch=3)  # New
+            report_to_optuna_and_handle_pruning(
+                trial=mock_trial, current_score=0.7, epoch=0
+            )  # Duplicate
+            report_to_optuna_and_handle_pruning(
+                trial=mock_trial, current_score=0.75, epoch=1
+            )  # Duplicate
+            report_to_optuna_and_handle_pruning(
+                trial=mock_trial, current_score=0.85, epoch=3
+            )  # New
 
             # Should only report the new epoch
             assert mock_trial.report.call_count == 1
@@ -354,7 +377,9 @@ class TestCheckpointResuming:
 
             # Reset mock for second run
             mock_report.reset_mock()
-            mock_trial.user_attrs = {"reported_epochs": [0, 1]}  # Simulate epochs already reported
+            mock_trial.user_attrs = {
+                "reported_epochs": [0, 1]
+            }  # Simulate epochs already reported
 
             # Second training run (resume)
             with patch("scxpand.mlp.mlp_trainer.logger") as mock_logger:
@@ -373,16 +398,24 @@ class TestCheckpointResuming:
 
             # Verify resuming behavior
             # Should have logged resuming from the correct epoch
-            resume_log_calls = [call for call in mock_logger.info.call_args_list if "Resumed from epoch" in str(call)]
+            resume_log_calls = [
+                call
+                for call in mock_logger.info.call_args_list
+                if "Resumed from epoch" in str(call)
+            ]
             assert len(resume_log_calls) == 1
             assert f"Resumed from epoch {first_run_epoch}" in str(resume_log_calls[0])
 
             # Should have started training from the next epoch
             training_log_calls = [
-                call for call in mock_logger.info.call_args_list if "Training model from epoch" in str(call)
+                call
+                for call in mock_logger.info.call_args_list
+                if "Training model from epoch" in str(call)
             ]
             assert len(training_log_calls) == 1
-            assert f"Training model from epoch {first_run_epoch + 1}" in str(training_log_calls[0])
+            assert f"Training model from epoch {first_run_epoch + 1}" in str(
+                training_log_calls[0]
+            )
 
             # Verify no duplicate epoch reports
             reported_epochs = []
@@ -390,7 +423,9 @@ class TestCheckpointResuming:
                 if "epoch" in call.kwargs:
                     reported_epochs.append(call.kwargs["epoch"])
                 elif len(call.args) >= 3:
-                    reported_epochs.append(call.args[2])  # epoch is third positional arg
+                    reported_epochs.append(
+                        call.args[2]
+                    )  # epoch is third positional arg
 
             # Should only report epochs 2, 3, 4 (since 0, 1 were already reported)
             expected_new_epochs = list(range(first_run_epoch + 1, mlp_params.n_epochs))
@@ -416,10 +451,17 @@ class TestCheckpointResuming:
             import anndata as ad  # noqa: PLC0415
             import pandas as pd  # noqa: PLC0415
 
-            obs_df = pd.DataFrame({"cell_id": [f"cell_{idx}" for idx in range(n_samples)], "is_expanded": y})
+            obs_df = pd.DataFrame(
+                {
+                    "cell_id": [f"cell_{idx}" for idx in range(n_samples)],
+                    "is_expanded": y,
+                }
+            )
             obs_df.index = obs_df["cell_id"]
 
-            var_df = pd.DataFrame({"gene_id": [f"gene_{idx}" for idx in range(n_features)]})
+            var_df = pd.DataFrame(
+                {"gene_id": [f"gene_{idx}" for idx in range(n_features)]}
+            )
             var_df.index = var_df["gene_id"]
 
             adata = ad.AnnData(X=X, obs=obs_df, var=var_df)
@@ -441,7 +483,9 @@ class TestCheckpointResuming:
             )
 
             # Run first optimization (partial)
-            with patch("scxpand.hyperopt.hyperopt_utils.cleanup_incomplete_trials") as mock_cleanup:
+            with patch(
+                "scxpand.hyperopt.hyperopt_utils.cleanup_incomplete_trials"
+            ) as mock_cleanup:
                 study = optimizer.run_optimization(n_trials=1, resume=False)
 
             # Verify trial completed
@@ -464,7 +508,9 @@ class TestCheckpointResuming:
                 print(f"  Model score: {checkpoint.get('model_score', 'N/A')}")
 
             # Test resume functionality
-            with patch("scxpand.hyperopt.hyperopt_utils.cleanup_incomplete_trials") as mock_cleanup:
+            with patch(
+                "scxpand.hyperopt.hyperopt_utils.cleanup_incomplete_trials"
+            ) as mock_cleanup:
                 # This should call cleanup_incomplete_trials since resume=True
                 study_resumed = optimizer.run_optimization(n_trials=0, resume=True)  # noqa: F841
                 mock_cleanup.assert_called_once()
@@ -489,10 +535,17 @@ class TestCheckpointResuming:
             import anndata as ad  # noqa: PLC0415
             import pandas as pd  # noqa: PLC0415
 
-            obs_df = pd.DataFrame({"cell_id": [f"cell_{idx}" for idx in range(n_samples)], "is_expanded": y})
+            obs_df = pd.DataFrame(
+                {
+                    "cell_id": [f"cell_{idx}" for idx in range(n_samples)],
+                    "is_expanded": y,
+                }
+            )
             obs_df.index = obs_df["cell_id"]
 
-            var_df = pd.DataFrame({"gene_id": [f"gene_{idx}" for idx in range(n_features)]})
+            var_df = pd.DataFrame(
+                {"gene_id": [f"gene_{idx}" for idx in range(n_features)]}
+            )
             var_df.index = var_df["gene_id"]
 
             adata = ad.AnnData(X=X, obs=obs_df, var=var_df)
@@ -539,7 +592,11 @@ class TestCheckpointResuming:
 
         # Create test parameters
         params = LinearClassifierParam(
-            model_type="logistic", learning_rate="constant", eta0=0.01, max_iter=1, random_seed=42
+            model_type="logistic",
+            learning_rate="constant",
+            eta0=0.01,
+            max_iter=1,
+            random_seed=42,
         )
 
         # Create test data
@@ -561,7 +618,15 @@ class TestCheckpointResuming:
         )
 
         # Verify state contains expected fields
-        expected_fields = ["coef_", "intercept_", "classes_", "n_features_in_", "t_", "epoch", "score"]
+        expected_fields = [
+            "coef_",
+            "intercept_",
+            "classes_",
+            "n_features_in_",
+            "t_",
+            "epoch",
+            "score",
+        ]
         for field in expected_fields:
             assert field in saved_state, f"Missing field: {field}"
 
@@ -577,7 +642,10 @@ class TestCheckpointResuming:
         # Load the saved state
         with tempfile.TemporaryDirectory() as temp_dir:
             ModelManager.load_model_state(
-                model=new_model, best_model_state=saved_state, base_save_dir=Path(temp_dir), score_metric="accuracy"
+                model=new_model,
+                best_model_state=saved_state,
+                base_save_dir=Path(temp_dir),
+                score_metric="accuracy",
             )
 
         # States should now be identical

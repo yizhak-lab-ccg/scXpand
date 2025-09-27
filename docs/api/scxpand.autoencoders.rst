@@ -3,7 +3,7 @@ scxpand.autoencoders
 
 .. automodule:: scxpand.autoencoders
 
-   
+
 .. rubric:: Modules
 
 .. autosummary::

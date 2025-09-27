@@ -36,7 +36,9 @@ class TestZScoreNormalizationDense:
 
         # Convert to tensor and invert
         z_tensor = torch.from_numpy(X_dense)
-        inv = apply_inverse_zscore_normalization(X=z_tensor, genes_mu=mu, genes_sigma=sigma)
+        inv = apply_inverse_zscore_normalization(
+            X=z_tensor, genes_mu=mu, genes_sigma=sigma
+        )
         np.testing.assert_allclose(inv.numpy(), X_original, rtol=1e-5, atol=1e-5)
 
 
@@ -58,4 +60,6 @@ class TestRowNormalization:
             out_np = out
 
         row_sums = out_np.sum(axis=1)
-        np.testing.assert_allclose(row_sums, np.full_like(row_sums, target_sum), atol=1e-6)
+        np.testing.assert_allclose(
+            row_sums, np.full_like(row_sums, target_sum), atol=1e-6
+        )

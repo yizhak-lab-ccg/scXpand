@@ -3,7 +3,7 @@ scxpand.mlp
 
 .. automodule:: scxpand.mlp
 
-   
+
 .. rubric:: Modules
 
 .. autosummary::

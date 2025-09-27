@@ -23,7 +23,9 @@ def sample_data():
     n_cells, n_genes = 100, 10
 
     # Create realistic expression data
-    X_dense = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(np.float32)
+    X_dense = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(
+        np.float32
+    )
 
     # Create sparse version
     sparse_mask = np.random.random((n_cells, n_genes)) > 0.3
@@ -33,7 +35,13 @@ def sample_data():
     # Create tensor version
     X_tensor = torch.from_numpy(X_dense).float()
 
-    return {"dense": X_dense, "sparse": X_sparse, "tensor": X_tensor, "n_cells": n_cells, "n_genes": n_genes}
+    return {
+        "dense": X_dense,
+        "sparse": X_sparse,
+        "tensor": X_tensor,
+        "n_cells": n_cells,
+        "n_genes": n_genes,
+    }
 
 
 @pytest.fixture
@@ -57,7 +65,9 @@ def data_format_with_log(sample_data):
     return DataFormat(
         n_genes=n_genes,
         gene_names=[f"GENE_{i:03d}" for i in range(n_genes)],
-        genes_mu=np.random.normal(5, 2, n_genes).astype(np.float32),  # Higher mean for log data
+        genes_mu=np.random.normal(5, 2, n_genes).astype(
+            np.float32
+        ),  # Higher mean for log data
         genes_sigma=np.random.uniform(1.0, 3.0, n_genes).astype(np.float32),
         target_sum=10000.0,
         use_log_transform=True,
@@ -135,7 +145,9 @@ class TestPreprocessExpressionDataBasic:
             genes_mu=np.random.normal(0, 1, data_format_with_log.n_genes).astype(
                 np.float32
             ),  # Appropriate for non-log data
-            genes_sigma=np.random.uniform(0.5, 2.0, data_format_with_log.n_genes).astype(np.float32),
+            genes_sigma=np.random.uniform(
+                0.5, 2.0, data_format_with_log.n_genes
+            ).astype(np.float32),
             target_sum=data_format_with_log.target_sum,
             use_log_transform=False,  # Different setting
         )
@@ -181,7 +193,9 @@ class TestPrecomputedScalingFactors:
         assert result.shape == X_tensor.shape
         assert torch.isfinite(result).all()
 
-    def test_scaling_factors_vs_dynamic_normalization(self, sample_data, data_format_basic):
+    def test_scaling_factors_vs_dynamic_normalization(
+        self, sample_data, data_format_basic
+    ):
         """Test that dynamic normalization produces consistent results."""
         X = sample_data["dense"].copy()
 
@@ -192,7 +206,9 @@ class TestPrecomputedScalingFactors:
         result_dynamic2 = preprocess_expression_data(X.copy(), data_format_basic)
 
         # Results should be identical since both use dynamic normalization
-        np.testing.assert_allclose(result_dynamic, result_dynamic2, rtol=1e-10, atol=1e-12)
+        np.testing.assert_allclose(
+            result_dynamic, result_dynamic2, rtol=1e-10, atol=1e-12
+        )
 
         # Verify that the results are reasonable
         assert isinstance(result_dynamic, np.ndarray)
@@ -269,7 +285,9 @@ class TestEdgeCases:
         zero_cell_values = result[zero_cells, :]
         # All zero cells should have identical values after normalization
         for i in range(1, len(zero_cells)):
-            np.testing.assert_allclose(zero_cell_values[i], zero_cell_values[0], rtol=1e-10)
+            np.testing.assert_allclose(
+                zero_cell_values[i], zero_cell_values[0], rtol=1e-10
+            )
 
     def test_single_gene_expression_cells(self, data_format_basic):
         """Test cells that express only one gene."""
@@ -315,8 +333,12 @@ class TestEdgeCases:
 
         # Test with different eps values
         result_default = preprocess_expression_data(X.copy(), data_format_basic)
-        result_large_eps = preprocess_expression_data(X.copy(), data_format_basic, eps=1e-2)
-        result_small_eps = preprocess_expression_data(X.copy(), data_format_basic, eps=1e-12)
+        result_large_eps = preprocess_expression_data(
+            X.copy(), data_format_basic, eps=1e-2
+        )
+        result_small_eps = preprocess_expression_data(
+            X.copy(), data_format_basic, eps=1e-12
+        )
 
         # Results should be slightly different due to different eps
         assert not np.allclose(result_default, result_large_eps, rtol=1e-6)
@@ -394,7 +416,9 @@ class TestRegressionPrevention:
         # to raw data would create negative values before log transform
         # (This is just documentation - we don't actually run this problematic case)
 
-    def test_scaling_factor_consistency_bug_prevention(self, sample_data, data_format_basic):
+    def test_scaling_factor_consistency_bug_prevention(
+        self, sample_data, data_format_basic
+    ):
         """Regression test for the specific bug where gene subset normalization.
 
         gave different results than full matrix normalization.
@@ -436,7 +460,9 @@ def test_integration_with_scaling_factor_helpers():
     # Create test data
     np.random.seed(12345)
     n_cells, n_genes = 50, 5
-    X_dense = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(np.float32)
+    X_dense = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(
+        np.float32
+    )
     X_sparse = sp.csr_matrix(X_dense)
     X_tensor = torch.from_numpy(X_dense).float()
 
@@ -454,7 +480,11 @@ def test_integration_with_scaling_factor_helpers():
 
     # Convert results to same type for comparison
     result_sparse_dense = result_sparse.toarray()
-    result_tensor_numpy = result_tensor.numpy() if isinstance(result_tensor, torch.Tensor) else result_tensor
+    result_tensor_numpy = (
+        result_tensor.numpy()
+        if isinstance(result_tensor, torch.Tensor)
+        else result_tensor
+    )
 
     # All should give the same result
     np.testing.assert_allclose(result_dense, result_sparse_dense, rtol=1e-6)

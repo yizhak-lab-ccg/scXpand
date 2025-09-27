@@ -1,138 +1,52 @@
 Contributing to scXpand
 =======================
 
-We welcome contributions to scXpand! This guide will help you contribute effectively to the project.
+We welcome contributions to scXpand! For detailed contributing guidelines, please see our `CONTRIBUTING.md <https://github.com/yizhak-lab-ccg/scXpand/blob/main/CONTRIBUTING.md>`_ file.
+
+Quick Start
+-----------
+
+1. **Fork and clone the repository**
+2. **Install in development mode:**
+   .. code-block:: bash
+      pip install -e ".[dev]"
+3. **Install pre-commit hooks:**
+   .. code-block:: bash
+      pre-commit install
+4. **Create a feature branch and make your changes**
+5. **Run tests and linting:**
+   .. code-block:: bash
+      pytest
+      pre-commit run --all-files
+6. **Submit a pull request**
+
+Template Updates
+----------------
+
+scXpand follows the `scverse cookiecutter template <https://github.com/scverse/cookiecutter-scverse>`_ for consistent ecosystem standards.
+
+**To update from the latest scverse template:**
+
+.. code-block:: bash
+
+    pip install cruft
+    cruft update
+
+This will:
+
+* Pull the latest improvements from the scverse template
+* Update CI/CD workflows, documentation structure, and tool configurations
+* Preserve your custom CUDA PyTorch installation solution
+* Keep your project-specific files intact
+
+**Note:** The CUDA PyTorch installation solution is protected from template updates and will continue working as before.
+
+For complete instructions, coding standards, and workflow details, please refer to the `CONTRIBUTING.md <https://github.com/yizhak-lab-ccg/scXpand/blob/main/CONTRIBUTING.md>`_ file.
 
 Development Setup
 -----------------
 
 For development setup instructions, see :doc:`installation`.
-
-
-Contributing Workflow
----------------------
-
-External Contributor Workflow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-**1. Fork the Repository**
-
-Fork the scXpand repository on GitHub by clicking the "Fork" button on the main repository page.
-
-**2. Clone Your Fork**
-
-.. code-block:: bash
-
-   git clone https://github.com/YOUR_USERNAME/scXpand.git
-   cd scXpand
-
-**3. Add Upstream Remote**
-
-This allows you to sync your fork with the main repository. Replace ORIGINAL_OWNER with the main scXpand repo owner (e.g., scXpandTeam):
-
-.. code-block:: bash
-
-   git remote add upstream https://github.com/ORIGINAL_OWNER/scXpand.git
-
-**4. Create Branch**
-
-.. code-block:: bash
-
-   git checkout -b your-feature-name
-
-**5. Make Changes**
-
-Implement your changes with appropriate tests and documentation updates.
-
-**6. Test Your Changes**
-
-.. code-block:: bash
-
-   # Run all tests
-   uv run pytest -n auto
-
-   # Run specific tests for your changes
-   uv run pytest tests/your_test_file.py
-
-**7. Commit Guidelines**
-
-Write clear, descriptive commit messages.
-Keep commits focused on a single change when possible.
-
-**8. Push to Your Fork**
-
-.. code-block:: bash
-
-   git push origin your-feature-name
-
-**9. Create Pull Request**
-
-On GitHub, create a pull request from your fork's branch to the main repository's main branch.
-
-Keeping Your Fork Up to Date
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For external contributors, regularly sync your fork with the upstream repository to avoid merge conflicts:
-
-.. code-block:: bash
-
-   # Fetch latest changes from upstream
-   git fetch upstream
-
-   # Switch to main branch
-   git checkout main
-
-   # Merge upstream changes
-   git merge upstream/main
-
-   # Push updated main to your fork
-   git push origin main
-
-Maintainer Workflow
-~~~~~~~~~~~~~~~~~~~
-
-**1. Create Branch**
-
-.. code-block:: bash
-
-   git checkout -b your-feature-name
-
-**2. Make Changes**
-
-Implement your changes with appropriate tests and documentation updates.
-
-**3. Test Your Changes**
-
-.. code-block:: bash
-
-   # Run all tests
-   uv run pytest -n auto
-
-   # Run specific tests for your changes
-   uv run pytest tests/your_test_file.py
-
-**4. Commit Guidelines**
-
-Write clear, descriptive commit messages.
-Keep commits focused on a single change when possible.
-
-**5. Push Branch**
-
-.. code-block:: bash
-
-   git push origin your-feature-name
-
-**6. Create Pull Request**
-
-On GitHub, create a pull request targeting the main branch.
-
-**Pull Request Checklist**
-
-- [ ] Tests added for new functionality
-- [ ] All tests pass locally
-- [ ] Documentation updated if needed
-- [ ] PR description clearly explains changes
-- [ ] Branch is up-to-date with main
 
 Release Process
 ===============

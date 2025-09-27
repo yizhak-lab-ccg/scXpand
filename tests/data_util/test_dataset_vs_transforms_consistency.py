@@ -6,7 +6,6 @@ dynamically while load_and_preprocess_data_numpy uses precomputed factors.
 """
 
 import tempfile
-
 from pathlib import Path
 
 import anndata as ad
@@ -83,7 +82,10 @@ class TestDatasetVsTransformsConsistency:
         # Test on a subset of training data (where scaling factors were computed)
         test_indices = train_indices[:100]  # First 100 training cells
 
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             temp_path = Path(temp_dir) / "test_data.h5ad"
             adata.write_h5ad(temp_path)
             ctx.register_file(temp_path)
@@ -176,12 +178,18 @@ class TestDatasetVsTransformsConsistency:
                 )
                 print("✅ Single gene consistency test PASSED")
             except AssertionError as e:
-                print("❌ Single gene consistency test FAILED (expected - demonstrates the bug)")
-                print(f"CellsDataset stats: mean={expr_from_dataset.mean():.6f}, std={expr_from_dataset.std():.6f}")
+                print(
+                    "❌ Single gene consistency test FAILED (expected - demonstrates the bug)"
+                )
+                print(
+                    f"CellsDataset stats: mean={expr_from_dataset.mean():.6f}, std={expr_from_dataset.std():.6f}"
+                )
                 print(
                     f"Transforms stats:  mean={expr_from_transforms.mean():.6f}, std={expr_from_transforms.std():.6f}"
                 )
-                print(f"Difference: mean_diff={abs(expr_from_dataset.mean() - expr_from_transforms.mean()):.6f}")
+                print(
+                    f"Difference: mean_diff={abs(expr_from_dataset.mean() - expr_from_transforms.mean()):.6f}"
+                )
                 raise e
 
     def test_sparse_gene_scenario(self, test_data_with_scaling_factors):
@@ -199,7 +207,9 @@ class TestDatasetVsTransformsConsistency:
 
         # Only a few cells express this gene
         expressing_cells = np.random.choice(train_indices, size=10, replace=False)
-        X_modified[expressing_cells, sparse_gene_idx] = np.random.choice([1, 2, 3], size=10)
+        X_modified[expressing_cells, sparse_gene_idx] = np.random.choice(
+            [1, 2, 3], size=10
+        )
 
         adata_copy.X = sp.csr_matrix(X_modified)
 
@@ -286,7 +296,9 @@ class TestDatasetVsTransformsConsistency:
             scaling_factors = compute_scaling_factors(row_sums, data_format.target_sum)
 
             print("\nOn-the-fly scaling factors:")
-            print(f"Computed factors: mean={scaling_factors.mean():.6f}, std={scaling_factors.std():.6f}")
+            print(
+                f"Computed factors: mean={scaling_factors.mean():.6f}, std={scaling_factors.std():.6f}"
+            )
 
             # This assertion confirms that scaling factors are positive and finite.
             assert np.all(np.isfinite(scaling_factors))
@@ -341,7 +353,9 @@ def test_demonstrate_notebook_bug():
         sparse_gene = f"GENE_{sparse_gene_idx:04d}"
 
         print(f"\nTesting sparse gene: {sparse_gene}")
-        print(f"Cells expressing this gene: {np.count_nonzero(X[eval_indices, sparse_gene_idx])}/{len(eval_indices)}")
+        print(
+            f"Cells expressing this gene: {np.count_nonzero(X[eval_indices, sparse_gene_idx])}/{len(eval_indices)}"
+        )
 
         # Method 1: CellsDataset (notebook's first approach)
         dataset = CellsDataset(
@@ -467,7 +481,9 @@ def test_demonstrate_eval_set_bug():
             row_indices=eval_indices,  # These indices are outside the scaling factors range!
             gene_subset=[sparse_gene],
         ).flatten()
-        print(f"load_and_preprocess worked: mean={expr2.mean():.6f}, std={expr2.std():.6f}")
+        print(
+            f"load_and_preprocess worked: mean={expr2.mean():.6f}, std={expr2.std():.6f}"
+        )
 
         # Both methods now work, and they should give the same results.
         print("\nResults comparison:")

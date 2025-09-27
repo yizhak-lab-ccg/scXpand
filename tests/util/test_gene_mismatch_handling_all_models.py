@@ -40,27 +40,37 @@ class TestGeneMismatchHandlingAllModels:
         return {
             "partial_overlap": {
                 "description": "50% overlap with training genes",
-                "genes": [f"GENE_{i:03d}" for i in range(50, 150)],  # 50 overlap, 50 new, 50 missing
+                "genes": [
+                    f"GENE_{i:03d}" for i in range(50, 150)
+                ],  # 50 overlap, 50 new, 50 missing
                 "n_cells": 20,
             },
             "no_overlap": {
                 "description": "No overlap with training genes",
-                "genes": [f"NEWGENE_{i:03d}" for i in range(100)],  # Completely different genes
+                "genes": [
+                    f"NEWGENE_{i:03d}" for i in range(100)
+                ],  # Completely different genes
                 "n_cells": 15,
             },
             "superset": {
                 "description": "Contains all training genes plus extras",
-                "genes": [f"GENE_{i:03d}" for i in range(150)],  # All training genes + 50 extra
+                "genes": [
+                    f"GENE_{i:03d}" for i in range(150)
+                ],  # All training genes + 50 extra
                 "n_cells": 25,
             },
             "subset": {
                 "description": "Contains only some training genes",
-                "genes": [f"GENE_{i:03d}" for i in range(0, 100, 2)],  # Every other training gene (50 genes)
+                "genes": [
+                    f"GENE_{i:03d}" for i in range(0, 100, 2)
+                ],  # Every other training gene (50 genes)
                 "n_cells": 30,
             },
             "reordered": {
                 "description": "Same genes but in different order",
-                "genes": [f"GENE_{i:03d}" for i in reversed(range(100))],  # Reverse order
+                "genes": [
+                    f"GENE_{i:03d}" for i in reversed(range(100))
+                ],  # Reverse order
                 "n_cells": 18,
             },
         }
@@ -78,18 +88,29 @@ class TestGeneMismatchHandlingAllModels:
 
         obs_df = pd.DataFrame(
             {
-                "expansion": np.random.choice(["expanded", "non-expanded"], size=n_cells),
+                "expansion": np.random.choice(
+                    ["expanded", "non-expanded"], size=n_cells
+                ),
                 "tissue_type": np.random.choice(["A", "B", "C"], size=n_cells),
-                "patient_id": np.random.choice([f"P{i}" for i in range(5)], size=n_cells),
+                "patient_id": np.random.choice(
+                    [f"P{i}" for i in range(5)], size=n_cells
+                ),
             }
         )
         var_df = pd.DataFrame(index=genes)
 
         return ad.AnnData(X=X, obs=obs_df, var=var_df)
 
-    @pytest.mark.parametrize("model_type", ["mlp", "autoencoder", "logistic", "svm", "lightgbm"])
-    @pytest.mark.parametrize("scenario_name", ["partial_overlap", "no_overlap", "superset", "subset", "reordered"])
-    def test_gene_mismatch_scenarios_all_models(self, model_type, scenario_name, training_data_format, test_scenarios):
+    @pytest.mark.parametrize(
+        "model_type", ["mlp", "autoencoder", "logistic", "svm", "lightgbm"]
+    )
+    @pytest.mark.parametrize(
+        "scenario_name",
+        ["partial_overlap", "no_overlap", "superset", "subset", "reordered"],
+    )
+    def test_gene_mismatch_scenarios_all_models(
+        self, model_type, scenario_name, training_data_format, test_scenarios
+    ):
         """Test that all model types handle various gene mismatch scenarios correctly."""
         scenario = test_scenarios[scenario_name]
 
@@ -104,9 +125,13 @@ class TestGeneMismatchHandlingAllModels:
             mock_model.to.return_value = None
         # Sklearn-based models
         elif model_type == "lightgbm":
-            mock_model.predict_proba.return_value = np.random.rand(scenario["n_cells"], 2)
+            mock_model.predict_proba.return_value = np.random.rand(
+                scenario["n_cells"], 2
+            )
         else:  # logistic, svm
-            mock_model.predict_proba.return_value = np.random.rand(scenario["n_cells"], 2)
+            mock_model.predict_proba.return_value = np.random.rand(
+                scenario["n_cells"], 2
+            )
 
         # Mock the model-specific inference functions
         patch_targets = {
@@ -135,8 +160,12 @@ class TestGeneMismatchHandlingAllModels:
             )
 
             # Verify the result
-            assert isinstance(result, np.ndarray), f"Result should be numpy array for {model_type}"
-            assert result.shape == (scenario["n_cells"],), f"Wrong result shape for {model_type}"
+            assert isinstance(
+                result, np.ndarray
+            ), f"Result should be numpy array for {model_type}"
+            assert result.shape == (
+                scenario["n_cells"],
+            ), f"Wrong result shape for {model_type}"
             np.testing.assert_array_equal(result, expected_result)
 
             # Verify the inference function was called
@@ -150,7 +179,9 @@ class TestGeneMismatchHandlingAllModels:
     def test_gene_transformation_correctness_dataset(self, training_data_format):
         """Test that CellsDataset correctly transforms genes for neural network models."""
         # Create test data with partial gene overlap
-        test_genes = [f"GENE_{i:03d}" for i in range(50, 150)]  # 50 overlap, 50 new, 50 missing
+        test_genes = [
+            f"GENE_{i:03d}" for i in range(50, 150)
+        ]  # 50 overlap, 50 new, 50 missing
         n_cells = 10
         test_adata = self.create_test_adata(test_genes, n_cells)
 
@@ -183,7 +214,9 @@ class TestGeneMismatchHandlingAllModels:
 
         # Verify missing genes are handled consistently
         # Missing genes should be filled with zeros before preprocessing, then processed consistently
-        missing_gene_mask = np.array([gene not in test_genes for gene in training_data_format.gene_names])
+        missing_gene_mask = np.array(
+            [gene not in test_genes for gene in training_data_format.gene_names]
+        )
         missing_positions = np.where(missing_gene_mask)[0]
 
         if len(missing_positions) > 0:
@@ -194,14 +227,16 @@ class TestGeneMismatchHandlingAllModels:
             for gene_idx in range(missing_values.shape[1]):
                 gene_values = missing_values[:, gene_idx]
                 # All samples should have the same value for this missing gene
-                assert torch.allclose(gene_values, gene_values[0], atol=1e-6), (
-                    f"Missing gene {gene_idx} should have consistent values across samples"
-                )
+                assert torch.allclose(
+                    gene_values, gene_values[0], atol=1e-6
+                ), f"Missing gene {gene_idx} should have consistent values across samples"
 
     def test_file_based_gene_mismatch_handling(self, tmp_path, training_data_format):
         """Test gene mismatch handling with file-based data loading."""
         # Create test data file
-        test_genes = [f"GENE_{i:03d}" for i in range(25, 125)]  # 75 overlap, 25 new, 25 missing
+        test_genes = [
+            f"GENE_{i:03d}" for i in range(25, 125)
+        ]  # 75 overlap, 25 new, 25 missing
         n_cells = 12
         test_adata = self.create_test_adata(test_genes, n_cells)
 
@@ -265,7 +300,9 @@ class TestGeneMismatchHandlingAllModels:
             assert len(result) == 5
 
         # Test case 2: Single gene overlap
-        single_gene_adata = self.create_test_adata([training_data_format.gene_names[0]], 3)
+        single_gene_adata = self.create_test_adata(
+            [training_data_format.gene_names[0]], 3
+        )
 
         with patch("scxpand.util.inference_utils.run_mlp_inference") as mock_inference:
             mock_inference.return_value = np.random.rand(3)
@@ -283,7 +320,9 @@ class TestGeneMismatchHandlingAllModels:
     def test_gene_name_case_sensitivity(self, training_data_format):
         """Test that gene name matching is case-sensitive (as it should be)."""
         # Create test data with different case
-        lowercase_genes = [gene.lower() for gene in training_data_format.gene_names[:50]]
+        lowercase_genes = [
+            gene.lower() for gene in training_data_format.gene_names[:50]
+        ]
         test_adata = self.create_test_adata(lowercase_genes, 8)
 
         mock_model = MagicMock()
@@ -352,13 +391,19 @@ class TestGeneMismatchHandlingAllModels:
             shuffled_values = batch_shuffled["x"][:, overlapping_positions]
 
             # Allow for small numerical differences due to floating point operations
-            torch.testing.assert_close(original_values, shuffled_values, atol=1e-5, rtol=1e-5)
+            torch.testing.assert_close(
+                original_values, shuffled_values, atol=1e-5, rtol=1e-5
+            )
 
-    @pytest.mark.parametrize("model_type", ["mlp", "autoencoder", "logistic", "svm", "lightgbm"])
+    @pytest.mark.parametrize(
+        "model_type", ["mlp", "autoencoder", "logistic", "svm", "lightgbm"]
+    )
     def test_eval_row_inds_with_gene_mismatch(self, model_type, training_data_format):
         """Test that eval_row_inds works correctly with gene mismatches."""
         # Create test data
-        test_genes = [f"GENE_{i:03d}" for i in range(30, 130)]  # 70 overlap, 30 new, 30 missing
+        test_genes = [
+            f"GENE_{i:03d}" for i in range(30, 130)
+        ]  # 70 overlap, 30 new, 30 missing
         n_cells = 20
         test_adata = self.create_test_adata(test_genes, n_cells)
 
@@ -412,7 +457,11 @@ class TestGeneMismatchErrorHandling:
         # Create test data with problematic gene names
         problematic_cases = [
             ["", "GENE_1", "GENE_2"],  # Empty string
-            ["GENE_0", None, "GENE_2"],  # None value (this would fail at AnnData creation)
+            [
+                "GENE_0",
+                None,
+                "GENE_2",
+            ],  # None value (this would fail at AnnData creation)
             ["GENE_0", "GENE_1", "GENE_1"],  # Duplicate names
         ]
 
@@ -494,13 +543,19 @@ class TestGeneMismatchIntegration:
         )
 
         # Create test data with gene mismatches
-        test_genes = [f"GENE_{i:03d}" for i in range(25, 75)]  # 25 overlap, 25 new, 25 missing
+        test_genes = [
+            f"GENE_{i:03d}" for i in range(25, 75)
+        ]  # 25 overlap, 25 new, 25 missing
         n_cells = 15
 
-        X = np.random.exponential(scale=2.0, size=(n_cells, len(test_genes))).astype(np.float32)
+        X = np.random.exponential(scale=2.0, size=(n_cells, len(test_genes))).astype(
+            np.float32
+        )
         obs_df = pd.DataFrame(
             {
-                "expansion": np.random.choice(["expanded", "non-expanded"], size=n_cells),
+                "expansion": np.random.choice(
+                    ["expanded", "non-expanded"], size=n_cells
+                ),
                 "tissue_type": np.random.choice(["A", "B"], size=n_cells),
             }
         )
@@ -549,8 +604,12 @@ class TestGeneMismatchIntegration:
                     )
 
                     # Verify results
-                    assert isinstance(result, np.ndarray), f"Failed for {model_type} with {data_source} data"
-                    assert result.shape == (n_cells,), f"Wrong shape for {model_type} with {data_source} data"
+                    assert isinstance(
+                        result, np.ndarray
+                    ), f"Failed for {model_type} with {data_source} data"
+                    assert result.shape == (
+                        n_cells,
+                    ), f"Wrong shape for {model_type} with {data_source} data"
                     np.testing.assert_array_equal(result, expected_result)
 
                     # Verify the inference function was called correctly

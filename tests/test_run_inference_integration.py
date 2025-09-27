@@ -90,7 +90,12 @@ class TestRunInferenceIntegration:
             )
 
             # Run inference
-            results = run_inference(adata=sample_adata, model_path=str(mock_model_path), batch_size=32, num_workers=2)
+            results = run_inference(
+                adata=sample_adata,
+                model_path=str(mock_model_path),
+                batch_size=32,
+                num_workers=2,
+            )
 
             # Verify results
             assert isinstance(results, InferenceResults)
@@ -105,7 +110,9 @@ class TestRunInferenceIntegration:
             assert call_kwargs["batch_size"] == 32
             assert call_kwargs["num_workers"] == 2
 
-    def test_run_inference_with_data_path(self, sample_adata, mock_model_path, tmp_path):
+    def test_run_inference_with_data_path(
+        self, sample_adata, mock_model_path, tmp_path
+    ):
         """Test run_inference with data_path instead of adata."""
         # Save adata to file
         data_path = tmp_path / "test_data.h5ad"
@@ -113,10 +120,14 @@ class TestRunInferenceIntegration:
 
         with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
             mock_predictions = np.random.random(len(sample_adata))
-            mock_pipeline.return_value = InferenceResults(predictions=mock_predictions, metrics={"AUROC": 0.85})
+            mock_pipeline.return_value = InferenceResults(
+                predictions=mock_predictions, metrics={"AUROC": 0.85}
+            )
 
             # Run inference with data_path
-            results = run_inference(data_path=str(data_path), model_path=str(mock_model_path), batch_size=64)
+            results = run_inference(
+                data_path=str(data_path), model_path=str(mock_model_path), batch_size=64
+            )
 
             # Verify results
             assert isinstance(results, InferenceResults)
@@ -131,7 +142,9 @@ class TestRunInferenceIntegration:
 
     def test_run_inference_registry_model(self, sample_adata):
         """Test run_inference with registry model."""
-        with patch("scxpand.core.inference.fetch_model_and_run_inference") as mock_pretrained:
+        with patch(
+            "scxpand.core.inference.fetch_model_and_run_inference"
+        ) as mock_pretrained:
             mock_predictions = np.random.random(len(sample_adata))
             mock_metrics = {"AUROC": 0.90}
 
@@ -141,7 +154,9 @@ class TestRunInferenceIntegration:
             )
 
             # Run inference with registry model
-            results = run_inference(adata=sample_adata, model_name=DEFAULT_MODEL_NAME, batch_size=128)
+            results = run_inference(
+                adata=sample_adata, model_name=DEFAULT_MODEL_NAME, batch_size=128
+            )
 
             # Verify results
             assert isinstance(results, InferenceResults)
@@ -157,7 +172,9 @@ class TestRunInferenceIntegration:
 
     def test_run_inference_url_model(self, sample_adata):
         """Test run_inference with URL model."""
-        with patch("scxpand.core.inference.fetch_model_and_run_inference") as mock_pretrained:
+        with patch(
+            "scxpand.core.inference.fetch_model_and_run_inference"
+        ) as mock_pretrained:
             mock_predictions = np.random.random(len(sample_adata))
             mock_metrics = {"AUROC": 0.88}
 
@@ -167,7 +184,11 @@ class TestRunInferenceIntegration:
             )
 
             # Run inference with URL model
-            results = run_inference(adata=sample_adata, model_url="https://example.com/model.zip", batch_size=256)
+            results = run_inference(
+                adata=sample_adata,
+                model_url="https://example.com/model.zip",
+                batch_size=256,
+            )
 
             # Verify results
             assert isinstance(results, InferenceResults)
@@ -181,16 +202,24 @@ class TestRunInferenceIntegration:
             assert call_kwargs["adata"] is sample_adata
             assert call_kwargs["batch_size"] == 256
 
-    def test_run_inference_with_save_path(self, sample_adata, mock_model_path, tmp_path):
+    def test_run_inference_with_save_path(
+        self, sample_adata, mock_model_path, tmp_path
+    ):
         """Test run_inference with save_path specified."""
         save_path = tmp_path / "results"
 
         with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
             mock_predictions = np.random.random(len(sample_adata))
-            mock_pipeline.return_value = InferenceResults(predictions=mock_predictions, metrics={"AUROC": 0.85})
+            mock_pipeline.return_value = InferenceResults(
+                predictions=mock_predictions, metrics={"AUROC": 0.85}
+            )
 
             # Run inference with save_path
-            results = run_inference(adata=sample_adata, model_path=str(mock_model_path), save_path=str(save_path))
+            results = run_inference(
+                adata=sample_adata,
+                model_path=str(mock_model_path),
+                save_path=str(save_path),
+            )
 
             # Verify results
             assert isinstance(results, InferenceResults)
@@ -206,10 +235,16 @@ class TestRunInferenceIntegration:
 
         with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
             mock_predictions = np.random.random(len(eval_row_inds))
-            mock_pipeline.return_value = InferenceResults(predictions=mock_predictions, metrics={"AUROC": 0.85})
+            mock_pipeline.return_value = InferenceResults(
+                predictions=mock_predictions, metrics={"AUROC": 0.85}
+            )
 
             # Run inference with eval_row_inds
-            results = run_inference(adata=sample_adata, model_path=str(mock_model_path), eval_row_inds=eval_row_inds)
+            results = run_inference(
+                adata=sample_adata,
+                model_path=str(mock_model_path),
+                eval_row_inds=eval_row_inds,
+            )
 
             # Verify results
             assert isinstance(results, InferenceResults)
@@ -224,12 +259,16 @@ class TestRunInferenceIntegration:
     def test_run_inference_parameter_validation(self, sample_adata):
         """Test run_inference parameter validation."""
         # Test no data input
-        with pytest.raises(ValueError, match="Either adata or data_path must be provided"):
+        with pytest.raises(
+            ValueError, match="Either adata or data_path must be provided"
+        ):
             run_inference(model_path="fake_path")
 
         # Test no model source (should use default registry model)
         # Mock the model fetch to avoid network calls
-        with patch("scxpand.core.inference.fetch_model_and_run_inference") as mock_fetch:
+        with patch(
+            "scxpand.core.inference.fetch_model_and_run_inference"
+        ) as mock_fetch:
             mock_fetch.side_effect = Exception("Mocked network error")
 
             with pytest.raises(Exception, match="Mocked network error"):
@@ -237,7 +276,9 @@ class TestRunInferenceIntegration:
 
         # Test multiple model sources
         with pytest.raises(ValueError, match="Cannot specify multiple model sources"):
-            run_inference(adata=sample_adata, model_path="fake_path", model_name="fake_model")
+            run_inference(
+                adata=sample_adata, model_path="fake_path", model_name="fake_model"
+            )
 
         # Test all three model sources
         with pytest.raises(ValueError, match="Cannot specify multiple model sources"):
@@ -252,7 +293,9 @@ class TestRunInferenceIntegration:
         """Test run_inference with default parameters."""
         with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
             mock_predictions = np.random.random(len(sample_adata))
-            mock_pipeline.return_value = InferenceResults(predictions=mock_predictions, metrics={"AUROC": 0.85})
+            mock_pipeline.return_value = InferenceResults(
+                predictions=mock_predictions, metrics={"AUROC": 0.85}
+            )
 
             # Run inference with minimal parameters
             results = run_inference(adata=sample_adata, model_path=str(mock_model_path))
@@ -267,7 +310,9 @@ class TestRunInferenceIntegration:
             assert call_kwargs["num_workers"] == 4  # Default num_workers
             assert call_kwargs["eval_row_inds"] is None  # Default eval_row_inds
 
-    def test_run_inference_with_missing_expansion_column(self, sample_adata, mock_model_path):
+    def test_run_inference_with_missing_expansion_column(
+        self, sample_adata, mock_model_path
+    ):
         """Test run_inference with missing expansion column."""
         # Remove expansion column
         adata_no_expansion = sample_adata.copy()
@@ -276,10 +321,14 @@ class TestRunInferenceIntegration:
         with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
             mock_predictions = np.random.random(len(adata_no_expansion))
             # Empty metrics due to missing expansion column
-            mock_pipeline.return_value = InferenceResults(predictions=mock_predictions, metrics={})
+            mock_pipeline.return_value = InferenceResults(
+                predictions=mock_predictions, metrics={}
+            )
 
             # Run inference
-            results = run_inference(adata=adata_no_expansion, model_path=str(mock_model_path))
+            results = run_inference(
+                adata=adata_no_expansion, model_path=str(mock_model_path)
+            )
 
             # Verify results
             assert isinstance(results, InferenceResults)
@@ -301,7 +350,9 @@ class TestRunInferenceIntegration:
                 "B_cell__tumor": {"AUROC": 0.87},
             }
 
-            mock_pipeline.return_value = InferenceResults(predictions=mock_predictions, metrics=mock_metrics)
+            mock_pipeline.return_value = InferenceResults(
+                predictions=mock_predictions, metrics=mock_metrics
+            )
 
             # Run inference
             results = run_inference(adata=sample_adata, model_path=str(mock_model_path))
@@ -319,10 +370,14 @@ class TestRunInferenceIntegration:
         """Test run_inference with automatic device detection."""
         with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
             mock_predictions = np.random.random(len(sample_adata))
-            mock_pipeline.return_value = InferenceResults(predictions=mock_predictions, metrics={"AUROC": 0.85})
+            mock_pipeline.return_value = InferenceResults(
+                predictions=mock_predictions, metrics={"AUROC": 0.85}
+            )
 
             # Run inference without device parameter (auto-detection)
-            _results = run_inference(adata=sample_adata, model_path=str(mock_model_path))
+            _results = run_inference(
+                adata=sample_adata, model_path=str(mock_model_path)
+            )
 
             # Verify device parameter was not passed (auto-detection happens internally)
             mock_pipeline.assert_called_once()
@@ -334,12 +389,20 @@ class TestRunInferenceIntegration:
         test_batch_sizes = [1, 16, 64, 256, 1024, 2048]
 
         for batch_size in test_batch_sizes:
-            with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
+            with patch(
+                "scxpand.core.inference.run_prediction_pipeline"
+            ) as mock_pipeline:
                 mock_predictions = np.random.random(len(sample_adata))
-                mock_pipeline.return_value = InferenceResults(predictions=mock_predictions, metrics={"AUROC": 0.85})
+                mock_pipeline.return_value = InferenceResults(
+                    predictions=mock_predictions, metrics={"AUROC": 0.85}
+                )
 
                 # Run inference with specific batch size
-                _results = run_inference(adata=sample_adata, model_path=str(mock_model_path), batch_size=batch_size)
+                _results = run_inference(
+                    adata=sample_adata,
+                    model_path=str(mock_model_path),
+                    batch_size=batch_size,
+                )
 
                 # Verify batch size parameter was passed
                 mock_pipeline.assert_called_once()
@@ -351,12 +414,20 @@ class TestRunInferenceIntegration:
         test_num_workers = [0, 1, 2, 4, 8]
 
         for num_workers in test_num_workers:
-            with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
+            with patch(
+                "scxpand.core.inference.run_prediction_pipeline"
+            ) as mock_pipeline:
                 mock_predictions = np.random.random(len(sample_adata))
-                mock_pipeline.return_value = InferenceResults(predictions=mock_predictions, metrics={"AUROC": 0.85})
+                mock_pipeline.return_value = InferenceResults(
+                    predictions=mock_predictions, metrics={"AUROC": 0.85}
+                )
 
                 # Run inference with specific num_workers
-                _results = run_inference(adata=sample_adata, model_path=str(mock_model_path), num_workers=num_workers)
+                _results = run_inference(
+                    adata=sample_adata,
+                    model_path=str(mock_model_path),
+                    num_workers=num_workers,
+                )
 
                 # Verify num_workers parameter was passed
                 mock_pipeline.assert_called_once()

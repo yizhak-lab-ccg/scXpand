@@ -1,13 +1,11 @@
 """Tests for linear model manager."""
 
 import tempfile
-
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-
 from sklearn.linear_model import SGDClassifier
 
 from scxpand.linear.linear_params import LinearClassifierParam
@@ -115,8 +113,12 @@ class TestModelManager:
 
             # Check that model attributes were updated
             np.testing.assert_array_equal(mock_model.coef_, best_model_state["coef_"])
-            np.testing.assert_array_equal(mock_model.intercept_, best_model_state["intercept_"])
-            np.testing.assert_array_equal(mock_model.classes_, best_model_state["classes_"])
+            np.testing.assert_array_equal(
+                mock_model.intercept_, best_model_state["intercept_"]
+            )
+            np.testing.assert_array_equal(
+                mock_model.classes_, best_model_state["classes_"]
+            )
             assert mock_model.n_features_in_ == best_model_state["n_features_in_"]
             assert mock_model.t_ == best_model_state["t_"]
 

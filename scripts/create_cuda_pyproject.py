@@ -9,10 +9,10 @@ import argparse
 import re
 import sys
 import tomllib
-
 from pathlib import Path
 
-from scripts.constants import CUDA_VERSION as DEFAULT_CUDA_VERSION, TORCH_VERSION
+from scripts.constants import CUDA_VERSION as DEFAULT_CUDA_VERSION
+from scripts.constants import TORCH_VERSION
 
 
 def load_toml_lines(file_path: Path) -> list[str]:
@@ -86,15 +86,21 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
         # Change package name
         if re.match(r'^\s*name\s*=\s*"scxpand"', line):
             original_line = line.strip()
-            modified_line = re.sub(r'name\s*=\s*"scxpand"', 'name = "scxpand-cuda"', line)
+            modified_line = re.sub(
+                r'name\s*=\s*"scxpand"', 'name = "scxpand-cuda"', line
+            )
             modified_lines.append(modified_line)
-            print(f"  ✓ Changed package name: {original_line} → {modified_line.strip()}")
+            print(
+                f"  ✓ Changed package name: {original_line} → {modified_line.strip()}"
+            )
             continue
 
         # Update description
         if re.match(r"^\s*description\s*=", line) and "CUDA-enabled" not in line:
             original_line = line.strip()
-            modified_line = re.sub(r'(description\s*=\s*"[^"]*)"', r'\1 (CUDA-enabled)"', line)
+            modified_line = re.sub(
+                r'(description\s*=\s*"[^"]*)"', r'\1 (CUDA-enabled)"', line
+            )
             modified_lines.append(modified_line)
             print("  ✓ Updated description: Added '(CUDA-enabled)' suffix")
             continue
@@ -104,7 +110,11 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
             original_line = line.strip()
             # Add cuda and gpu keywords if not present
             if "cuda" not in line.lower():
-                modified_line = re.sub(r'(keywords\s*=\s*\[[^\]]*)"([^"]*)"(\s*\])', r'\1"\2", "cuda", "gpu"\3', line)
+                modified_line = re.sub(
+                    r'(keywords\s*=\s*\[[^\]]*)"([^"]*)"(\s*\])',
+                    r'\1"\2", "cuda", "gpu"\3',
+                    line,
+                )
                 modified_lines.append(modified_line)
                 print("  ✓ Added CUDA keywords: cuda, gpu")
                 continue
@@ -118,11 +128,15 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
         if re.match(r"^\s*\[tool\.uv\.sources\]", line):
             sources_section_found = True
             sources_section_start = i
-            print(f"  ✓ Found [tool.uv.sources] section at line {i + 1} - will replace with CUDA config")
+            print(
+                f"  ✓ Found [tool.uv.sources] section at line {i + 1} - will replace with CUDA config"
+            )
 
             # Find end of this section
             for j in range(i + 1, len(lines)):
-                if re.match(r"^\s*\[", lines[j]) and not lines[j].strip().startswith("#"):
+                if re.match(r"^\s*\[", lines[j]) and not lines[j].strip().startswith(
+                    "#"
+                ):
                     sources_section_end = j
                     break
             else:
@@ -130,7 +144,9 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
 
             # Replace with CUDA-specific configuration
             modified_lines.append("[tool.uv.sources]\n")
-            modified_lines.append(f'torch = {{ index = "{pytorch_cuda_index_name}" }}\n')
+            modified_lines.append(
+                f'torch = {{ index = "{pytorch_cuda_index_name}" }}\n'
+            )
             modified_lines.append("\n")
             modified_lines.append("[[tool.uv.index]]\n")
             modified_lines.append(f'name = "{pytorch_cuda_index_name}"\n')
@@ -230,7 +246,9 @@ def main():
         default=Path("temp/pyproject-cuda.toml"),
         help="Output CUDA variant file (default: temp/pyproject-cuda.toml)",
     )
-    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Enable verbose output"
+    )
     parser.add_argument(
         "--cuda-version",
         "-c",

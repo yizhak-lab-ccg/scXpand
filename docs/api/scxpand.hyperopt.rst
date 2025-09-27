@@ -3,7 +3,7 @@ scxpand.hyperopt
 
 .. automodule:: scxpand.hyperopt
 
-   
+
 .. rubric:: Modules
 
 .. autosummary::

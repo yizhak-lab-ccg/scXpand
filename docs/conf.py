@@ -2,14 +2,12 @@
 
 import os
 import sys
-
 from datetime import datetime
 from importlib.metadata import PackageNotFoundError, metadata
 from pathlib import Path
 
-
 HERE = Path(__file__).parent
-sys.path.insert(0, str(HERE.parent / "extensions"))
+sys.path.insert(0, str(HERE.parent / "src"))
 
 # -- Project information -----------------------------------------------------
 
@@ -138,6 +136,15 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy", None),
     "seaborn": ("https://seaborn.pydata.org", None),
     "sklearn": ("https://scikit-learn.org/stable", None),
+    "torch": ("https://pytorch.org/docs/stable", None),
+    "lightgbm": ("https://lightgbm.readthedocs.io/en/latest", None),
+    "optuna": ("https://optuna.readthedocs.io/en/stable", None),
+    "pydantic": ("https://docs.pydantic.dev/latest", None),
+    "structlog": ("https://www.structlog.org/en/stable", None),
+    "shap": ("https://shap.readthedocs.io/en/latest", None),
+    "bbknn": ("https://bbknn.readthedocs.io/en/latest", None),
+    "scrublet": ("https://scrublet.readthedocs.io/en/stable", None),
+    "scirpy": ("https://scirpy.readthedocs.io/en/stable", None),
 }
 
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]

@@ -5,7 +5,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from scxpand.util.classes import ModelType
-from scxpand.util.training_utils import call_training_function, validate_and_setup_common
+from scxpand.util.training_utils import (
+    call_training_function,
+    validate_and_setup_common,
+)
 
 
 class TestValidateAndSetupCommon:
@@ -38,7 +41,9 @@ class TestValidateAndSetupCommon:
                 mock_path.return_value.exists.return_value = True
                 mock_path.return_value.is_file.return_value = True
 
-                model_type, spec = validate_and_setup_common(ModelType.MLP, "data/test.h5ad")
+                model_type, spec = validate_and_setup_common(
+                    ModelType.MLP, "data/test.h5ad"
+                )
 
                 assert model_type == ModelType.MLP
                 assert spec == mock_spec

@@ -1,6 +1,5 @@
 import pytest
 import torch
-
 from scipy.stats import nbinom
 
 from scxpand.autoencoders.ae_losses import NB, MSELoss, ZINBLoss
@@ -65,7 +64,9 @@ class TestMSELoss:
         loss_good = mse_loss_fn(x_genes_true=x_true, x_pred=x_pred_good)
         loss_bad = mse_loss_fn(x_genes_true=x_true, x_pred=x_pred_bad)
 
-        assert loss_good.item() < loss_bad.item(), "Better reconstruction should have lower MSE loss"
+        assert (
+            loss_good.item() < loss_bad.item()
+        ), "Better reconstruction should have lower MSE loss"
 
 
 class TestNBLoss:
@@ -78,7 +79,9 @@ class TestNBLoss:
         batch_size, n_genes = 10, 5
         x_true = torch.randint(0, 100, (batch_size, n_genes)).float()
         x_pred = torch.rand(batch_size, n_genes) * 50 + 1  # means between 1-51
-        theta = torch.rand(batch_size, n_genes) * 10 + 0.1  # dispersion between 0.1-10.1
+        theta = (
+            torch.rand(batch_size, n_genes) * 10 + 0.1
+        )  # dispersion between 0.1-10.1
         return x_true, x_pred, theta
 
     def test_nb_loss_basic(self, mock_data):
@@ -132,7 +135,9 @@ class TestNBLoss:
         loss_good = nb_loss_fn(x_genes_true=x_true, mu=mu_good, theta=theta)
         loss_bad = nb_loss_fn(x_genes_true=x_true, mu=mu_bad, theta=theta)
 
-        assert loss_good.item() < loss_bad.item(), "Better reconstruction should have lower NB loss"
+        assert (
+            loss_good.item() < loss_bad.item()
+        ), "Better reconstruction should have lower NB loss"
 
     def test_nb_loss_against_scipy(self):
         """Test NB loss against scipy implementation if available."""
@@ -158,7 +163,9 @@ class TestNBLoss:
 
             # They should be close (within numerical precision)
             expected_nll = -scipy_logpmf
-            assert abs(our_nll - expected_nll) < 1e-4, f"Mismatch: {our_nll} vs {expected_nll}"
+            assert (
+                abs(our_nll - expected_nll) < 1e-4
+            ), f"Mismatch: {our_nll} vs {expected_nll}"
 
         except ImportError:
             pytest.skip("Scipy not available for comparison")
@@ -177,7 +184,9 @@ class TestZINBLoss:
         x_true[x_true < 20] = 0
 
         x_pred = torch.rand(batch_size, n_genes) * 50 + 1  # means between 1-51
-        theta = torch.rand(batch_size, n_genes) * 10 + 0.1  # dispersion between 0.1-10.1
+        theta = (
+            torch.rand(batch_size, n_genes) * 10 + 0.1
+        )  # dispersion between 0.1-10.1
         pi = torch.rand(batch_size, n_genes) * 0.5  # zero-inflation probability 0-0.5
         return x_true, x_pred, theta, pi
 
@@ -228,7 +237,9 @@ class TestZINBLoss:
         mu_small = torch.tensor([[1.0, 2.0]])
 
         zinb_loss_fn = ZINBLoss(eps=1e-8)
-        loss = zinb_loss_fn(x_genes_true=x_true_small, mu=mu_small, pi=pi_extreme, theta=theta_extreme)
+        loss = zinb_loss_fn(
+            x_genes_true=x_true_small, mu=mu_small, pi=pi_extreme, theta=theta_extreme
+        )
 
         assert torch.isfinite(loss), "ZINB loss should handle extreme parameter values"
 
@@ -251,14 +262,18 @@ class TestZINBLoss:
 
         # ZINB loss with pi=0
         zinb_loss_fn = ZINBLoss(eps=1e-8)
-        zinb_loss = zinb_loss_fn(x_genes_true=x_true, mu=x_pred, pi=pi_zero, theta=theta)
+        zinb_loss = zinb_loss_fn(
+            x_genes_true=x_true, mu=x_pred, pi=pi_zero, theta=theta
+        )
 
         # Regular NB loss
         nb_loss_fn = NB(use_masking=False, eps=1e-8)
         nb_loss = nb_loss_fn(x_genes_true=x_true, mu=x_pred, theta=theta)
 
         # They should be very close (accounting for numerical precision)
-        assert abs(zinb_loss.item() - nb_loss.item()) < 1e-3, "ZINB with pi=0 should equal NB loss"
+        assert (
+            abs(zinb_loss.item() - nb_loss.item()) < 1e-3
+        ), "ZINB with pi=0 should equal NB loss"
 
     def test_zinb_better_reconstruction_lower_loss(self):
         """Test that better reconstruction gives lower ZINB loss."""
@@ -277,10 +292,14 @@ class TestZINBLoss:
         pi = torch.ones_like(x_true) * 0.1  # Low zero-inflation
 
         zinb_loss_fn = ZINBLoss(eps=1e-8)
-        loss_good = zinb_loss_fn(x_genes_true=x_true, mu=x_pred_good, pi=pi, theta=theta)
+        loss_good = zinb_loss_fn(
+            x_genes_true=x_true, mu=x_pred_good, pi=pi, theta=theta
+        )
         loss_bad = zinb_loss_fn(x_genes_true=x_true, mu=x_pred_bad, pi=pi, theta=theta)
 
-        assert loss_good.item() < loss_bad.item(), "Better reconstruction should have lower ZINB loss"
+        assert (
+            loss_good.item() < loss_bad.item()
+        ), "Better reconstruction should have lower ZINB loss"
 
     def test_zinb_better_zero_inflation_parameter_lower_loss(self):
         """Test that better zero-inflation parameter gives lower ZINB loss."""
@@ -299,10 +318,14 @@ class TestZINBLoss:
         pi_bad = torch.tensor([[0.1, 0.1, 0.8], [0.1, 0.8, 0.1]])
 
         zinb_loss_fn = ZINBLoss(eps=1e-8)
-        loss_good = zinb_loss_fn(x_genes_true=x_true, mu=x_pred, pi=pi_good, theta=theta)
+        loss_good = zinb_loss_fn(
+            x_genes_true=x_true, mu=x_pred, pi=pi_good, theta=theta
+        )
         loss_bad = zinb_loss_fn(x_genes_true=x_true, mu=x_pred, pi=pi_bad, theta=theta)
 
-        assert loss_good.item() < loss_bad.item(), "Better zero-inflation parameter should have lower ZINB loss"
+        assert (
+            loss_good.item() < loss_bad.item()
+        ), "Better zero-inflation parameter should have lower ZINB loss"
 
 
 class TestLossComparisonEdgeCases:
@@ -328,7 +351,9 @@ class TestLossComparisonEdgeCases:
 
         # ZINB should handle zero predictions (with small epsilon)
         zinb_loss_fn = ZINBLoss(eps=1e-8)
-        zinb_loss = zinb_loss_fn(x_genes_true=x_true, mu=x_pred_small, pi=pi, theta=theta)
+        zinb_loss = zinb_loss_fn(
+            x_genes_true=x_true, mu=x_pred_small, pi=pi, theta=theta
+        )
         assert torch.isfinite(zinb_loss)
 
     def test_loss_functions_numerical_stability(self):
@@ -367,7 +392,9 @@ class TestLossComparisonEdgeCases:
         # Test NB gradients - create fresh tensors
         torch.manual_seed(42)  # Reset seed for reproducibility
         x_pred_nb = torch.rand(5, 3, requires_grad=True)
-        theta_nb = torch.rand(5, 3) * 2.0 + 0.5  # Range 0.5-2.5, safely within clamp bounds
+        theta_nb = (
+            torch.rand(5, 3) * 2.0 + 0.5
+        )  # Range 0.5-2.5, safely within clamp bounds
         theta_nb.requires_grad_(True)  # Make it a leaf tensor
         nb_loss_fn = NB(use_masking=False, eps=1e-8)
         nb_loss = nb_loss_fn(x_genes_true=x_true, mu=x_pred_nb, theta=theta_nb)
@@ -378,12 +405,16 @@ class TestLossComparisonEdgeCases:
         # Test ZINB gradients - create fresh tensors
         torch.manual_seed(42)  # Reset seed for reproducibility
         x_pred_zinb = torch.rand(5, 3, requires_grad=True)
-        theta_zinb = torch.rand(5, 3) * 2.0 + 0.5  # Range 0.5-2.5, safely within clamp bounds
+        theta_zinb = (
+            torch.rand(5, 3) * 2.0 + 0.5
+        )  # Range 0.5-2.5, safely within clamp bounds
         theta_zinb.requires_grad_(True)  # Make it a leaf tensor
         pi_zinb = torch.rand(5, 3) * 0.5
         pi_zinb.requires_grad_(True)  # Make it a leaf tensor
         zinb_loss_fn = ZINBLoss(eps=1e-8)
-        zinb_loss = zinb_loss_fn(x_genes_true=x_true, mu=x_pred_zinb, pi=pi_zinb, theta=theta_zinb)
+        zinb_loss = zinb_loss_fn(
+            x_genes_true=x_true, mu=x_pred_zinb, pi=pi_zinb, theta=theta_zinb
+        )
         zinb_loss.backward()
         assert x_pred_zinb.grad is not None, "ZINB should compute gradients for x_pred"
         assert theta_zinb.grad is not None, "ZINB should compute gradients for theta"
@@ -413,22 +444,38 @@ class TestLossComparisonEdgeCases:
 
         # Test MSE - should be perfectly monotonic since MSE is just squared distance
         mse_loss_fn = MSELoss(eps=1e-8)
-        mse_losses = [mse_loss_fn(x_genes_true=x_true, x_pred=pred).item() for pred in predictions]
+        mse_losses = [
+            mse_loss_fn(x_genes_true=x_true, x_pred=pred).item() for pred in predictions
+        ]
 
         # MSE should increase monotonically
         for i in range(len(mse_losses) - 1):
-            assert mse_losses[i] < mse_losses[i + 1], f"MSE should increase monotonically: {mse_losses}"
+            assert (
+                mse_losses[i] < mse_losses[i + 1]
+            ), f"MSE should increase monotonically: {mse_losses}"
 
         # Test NB - compare best vs worst
         nb_loss_fn = NB(use_masking=False, eps=1e-8)
-        nb_loss_best = nb_loss_fn(x_genes_true=x_true, mu=predictions[0], theta=theta).item()
-        nb_loss_worst = nb_loss_fn(x_genes_true=x_true, mu=predictions[-1], theta=theta).item()
+        nb_loss_best = nb_loss_fn(
+            x_genes_true=x_true, mu=predictions[0], theta=theta
+        ).item()
+        nb_loss_worst = nb_loss_fn(
+            x_genes_true=x_true, mu=predictions[-1], theta=theta
+        ).item()
 
-        assert nb_loss_best < nb_loss_worst, f"NB: best ({nb_loss_best}) should be < worst ({nb_loss_worst})"
+        assert (
+            nb_loss_best < nb_loss_worst
+        ), f"NB: best ({nb_loss_best}) should be < worst ({nb_loss_worst})"
 
         # Test ZINB - compare best vs worst
         zinb_loss_fn = ZINBLoss(eps=1e-8)
-        zinb_loss_best = zinb_loss_fn(x_genes_true=x_true, mu=predictions[0], pi=pi, theta=theta).item()
-        zinb_loss_worst = zinb_loss_fn(x_genes_true=x_true, mu=predictions[-1], pi=pi, theta=theta).item()
+        zinb_loss_best = zinb_loss_fn(
+            x_genes_true=x_true, mu=predictions[0], pi=pi, theta=theta
+        ).item()
+        zinb_loss_worst = zinb_loss_fn(
+            x_genes_true=x_true, mu=predictions[-1], pi=pi, theta=theta
+        ).item()
 
-        assert zinb_loss_best < zinb_loss_worst, f"ZINB: best ({zinb_loss_best}) should be < worst ({zinb_loss_worst})"
+        assert (
+            zinb_loss_best < zinb_loss_worst
+        ), f"ZINB: best ({zinb_loss_best}) should be < worst ({zinb_loss_worst})"

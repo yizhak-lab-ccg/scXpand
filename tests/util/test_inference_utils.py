@@ -4,7 +4,6 @@ import importlib
 import inspect
 import json
 import os
-
 from unittest.mock import MagicMock, patch
 
 import anndata as ad
@@ -16,7 +15,11 @@ from scxpand.core.model_types import MODEL_TYPES
 from scxpand.data_util.data_format import DataFormat
 from scxpand.data_util.dataset import CellsDataset, cells_collate_fn
 from scxpand.util.inference_utils import load_model, run_model_inference
-from scxpand.util.model_constants import BEST_CHECKPOINT_FILE, DATA_FORMAT_NPZ_FILE, SKLEARN_MODEL_FILE
+from scxpand.util.model_constants import (
+    BEST_CHECKPOINT_FILE,
+    DATA_FORMAT_NPZ_FILE,
+    SKLEARN_MODEL_FILE,
+)
 
 
 class TestInferenceUtils:
@@ -97,7 +100,11 @@ class TestInferenceUtils:
         # Create a valid data_format.npz file
         genes_mu = np.zeros(10, dtype=np.float32)
         genes_sigma = np.ones(10, dtype=np.float32)
-        np.savez(results_path / DATA_FORMAT_NPZ_FILE, genes_mu=genes_mu, genes_sigma=genes_sigma)
+        np.savez(
+            results_path / DATA_FORMAT_NPZ_FILE,
+            genes_mu=genes_mu,
+            genes_sigma=genes_sigma,
+        )
 
         # Mock the MLP model loading at the module level where it's imported
         with patch("scxpand.util.inference_utils.load_nn_model") as mock_load:
@@ -147,7 +154,11 @@ class TestInferenceUtils:
         # Create a valid data_format.npz file
         genes_mu = np.zeros(10, dtype=np.float32)
         genes_sigma = np.ones(10, dtype=np.float32)
-        np.savez(results_path / DATA_FORMAT_NPZ_FILE, genes_mu=genes_mu, genes_sigma=genes_sigma)
+        np.savez(
+            results_path / DATA_FORMAT_NPZ_FILE,
+            genes_mu=genes_mu,
+            genes_sigma=genes_sigma,
+        )
 
         # Mock the autoencoder model loading at the module level where it's imported
         with patch("scxpand.util.inference_utils.load_ae_model") as mock_load:
@@ -185,7 +196,11 @@ class TestInferenceUtils:
         # Create a valid data_format.npz file
         genes_mu = np.zeros(10, dtype=np.float32)
         genes_sigma = np.ones(10, dtype=np.float32)
-        np.savez(results_path / DATA_FORMAT_NPZ_FILE, genes_mu=genes_mu, genes_sigma=genes_sigma)
+        np.savez(
+            results_path / DATA_FORMAT_NPZ_FILE,
+            genes_mu=genes_mu,
+            genes_sigma=genes_sigma,
+        )
 
         with patch("scxpand.util.inference_utils.load_nn_model") as mock_load:
             mock_load.return_value = None
@@ -217,7 +232,9 @@ class TestInferenceUtils:
         """Test running linear inference (svm/logistic) (with adata only)."""
         file_path, adata = mock_adata_with_metadata
         # Mock the linear inference function at the module level where it's imported
-        with patch("scxpand.util.inference_utils.run_linear_inference") as mock_inference:
+        with patch(
+            "scxpand.util.inference_utils.run_linear_inference"
+        ) as mock_inference:
             mock_inference.return_value = np.random.rand(10)
             mock_model = MagicMock()
             for model_type in ["svm", "logistic"]:
@@ -262,7 +279,9 @@ class TestInferenceUtils:
         """Test running LightGBM inference (with adata only)."""
         file_path, adata = mock_adata_with_metadata
         # Mock the LightGBM inference function at the module level where it's imported
-        with patch("scxpand.util.inference_utils.run_lightgbm_inference") as mock_inference:
+        with patch(
+            "scxpand.util.inference_utils.run_lightgbm_inference"
+        ) as mock_inference:
             mock_inference.return_value = np.random.rand(10)
             mock_model = MagicMock()
             result = run_model_inference(
@@ -280,7 +299,9 @@ class TestInferenceUtils:
             assert len(result) == 10
             mock_inference.assert_called_once()
 
-    def test_run_inference_unsupported_type_with_adata(self, mock_adata_with_metadata, data_format):
+    def test_run_inference_unsupported_type_with_adata(
+        self, mock_adata_with_metadata, data_format
+    ):
         """Test running inference with unsupported model type (with adata only)."""
         file_path, adata = mock_adata_with_metadata
         mock_model = MagicMock()
@@ -297,13 +318,17 @@ class TestInferenceUtils:
                 num_workers=0,
             )
 
-    def test_run_inference_unsupported_type_with_data_path(self, mock_adata_with_metadata, data_format):
+    def test_run_inference_unsupported_type_with_data_path(
+        self, mock_adata_with_metadata, data_format
+    ):
         """Test running inference with unsupported model type (with data_path only)."""
         file_path, adata = mock_adata_with_metadata
         mock_model = MagicMock()
         with patch("scxpand.util.inference_utils.ad.read_h5ad") as mock_read_h5ad:
             mock_read_h5ad.return_value = adata
-            with pytest.raises(ValueError, match="Unsupported model_type for inference"):
+            with pytest.raises(
+                ValueError, match="Unsupported model_type for inference"
+            ):
                 run_model_inference(
                     model_type="unsupported",
                     model=mock_model,
@@ -316,7 +341,9 @@ class TestInferenceUtils:
                     num_workers=0,
                 )
 
-    def test_run_inference_with_data_format_conversion(self, mock_adata_with_metadata, data_format):
+    def test_run_inference_with_data_format_conversion(
+        self, mock_adata_with_metadata, data_format
+    ):
         """Test that run_inference properly passes adata to individual inference functions."""
         file_path, adata = mock_adata_with_metadata
         # Mock the MLP inference function at the module level where it's imported
@@ -345,7 +372,9 @@ class TestInferenceUtils:
         file_path, adata = mock_adata_with_metadata
 
         # Mock the LightGBM inference function at the module level where it's imported
-        with patch("scxpand.util.inference_utils.run_lightgbm_inference") as mock_inference:
+        with patch(
+            "scxpand.util.inference_utils.run_lightgbm_inference"
+        ) as mock_inference:
             mock_inference.return_value = np.random.rand(10)
 
             mock_model = MagicMock()
@@ -371,7 +400,9 @@ class TestInferenceUtils:
         with pytest.raises(TypeError):
             run_model_inference()  # Missing required parameters
 
-    def test_run_inference_adata_and_data_path(self, mock_adata_with_metadata, data_format):
+    def test_run_inference_adata_and_data_path(
+        self, mock_adata_with_metadata, data_format
+    ):
         """Test that run_inference handles both adata and data_path (allowing both, requiring at least one)."""
         file_path, adata = mock_adata_with_metadata
         mock_model = MagicMock()
@@ -397,7 +428,9 @@ class TestInferenceUtils:
             assert call_kwargs["data_path"] == file_path
 
         # Neither provided
-        with pytest.raises(ValueError, match="Either adata or data_path must be provided"):
+        with pytest.raises(
+            ValueError, match="Either adata or data_path must be provided"
+        ):
             run_model_inference(
                 model_type="mlp",
                 model=mock_model,
@@ -431,7 +464,9 @@ class TestInferenceUtils:
             assert len(result) == 10
             mock_inference.assert_called_once()
 
-    def test_run_inference_with_only_data_path(self, mock_adata_with_metadata, data_format):
+    def test_run_inference_with_only_data_path(
+        self, mock_adata_with_metadata, data_format
+    ):
         """Test run_inference works with only data_path (adata=None)."""
         file_path, adata = mock_adata_with_metadata
         mock_model = MagicMock()
@@ -458,14 +493,18 @@ class TestInferenceUtils:
             assert call_args.kwargs["data_path"] == file_path
             assert call_args.kwargs["adata"] is None
 
-    def test_inference_functions_use_is_train_false(self, mock_adata_with_metadata, data_format):
+    def test_inference_functions_use_is_train_false(
+        self, mock_adata_with_metadata, data_format
+    ):
         """Test that all inference functions create datasets with is_train=False."""
         file_path, adata = mock_adata_with_metadata
 
         # Test MLP inference - verify source code uses is_train=False
         with patch("scxpand.util.inference_utils.ad.read_h5ad") as mock_read_h5ad:
             mock_read_h5ad.return_value = adata
-            with patch("scxpand.util.inference_utils.run_mlp_inference") as mock_inference:
+            with patch(
+                "scxpand.util.inference_utils.run_mlp_inference"
+            ) as mock_inference:
                 mock_inference.return_value = np.random.rand(5)
 
                 mock_model = MagicMock()
@@ -489,7 +528,9 @@ class TestInferenceUtils:
         # Test Linear inference - verify source code uses is_train=False
         with patch("scxpand.util.inference_utils.ad.read_h5ad") as mock_read_h5ad:
             mock_read_h5ad.return_value = adata
-            with patch("scxpand.util.inference_utils.run_linear_inference") as mock_inference:
+            with patch(
+                "scxpand.util.inference_utils.run_linear_inference"
+            ) as mock_inference:
                 mock_inference.return_value = np.random.rand(5)
 
                 mock_model = MagicMock()
@@ -513,7 +554,9 @@ class TestInferenceUtils:
         # Test Autoencoder inference - verify source code uses is_train=False
         with patch("scxpand.util.inference_utils.ad.read_h5ad") as mock_read_h5ad:
             mock_read_h5ad.return_value = adata
-            with patch("scxpand.util.inference_utils.run_ae_inference") as mock_inference:
+            with patch(
+                "scxpand.util.inference_utils.run_ae_inference"
+            ) as mock_inference:
                 mock_inference.return_value = np.random.rand(5)
 
                 mock_model = MagicMock()
@@ -541,7 +584,9 @@ class TestInferenceUtils:
         # Test MLP inference with missing columns
         with patch("scxpand.util.inference_utils.ad.read_h5ad") as mock_read_h5ad:
             mock_read_h5ad.return_value = adata_minimal
-            with patch("scxpand.util.inference_utils.run_mlp_inference") as mock_inference:
+            with patch(
+                "scxpand.util.inference_utils.run_mlp_inference"
+            ) as mock_inference:
                 mock_inference.return_value = np.random.rand(5)
 
                 mock_model = MagicMock()
@@ -593,21 +638,27 @@ class TestInferenceUtils:
         if os.path.exists(mlp_file):
             with open(mlp_file) as f:
                 content = f.read()
-                assert "is_train=False" in content, "MLP inference should use is_train=False"
+                assert (
+                    "is_train=False" in content
+                ), "MLP inference should use is_train=False"
 
         # Check Linear inference
         linear_file = "scxpand/linear/sklearn_utils.py"
         if os.path.exists(linear_file):
             with open(linear_file) as f:
                 content = f.read()
-                assert "is_train=False" in content, "Linear inference should use is_train=False"
+                assert (
+                    "is_train=False" in content
+                ), "Linear inference should use is_train=False"
 
         # Check Autoencoder inference
         ae_file = "scxpand/autoencoders/ae_trainer.py"
         if os.path.exists(ae_file):
             with open(ae_file) as f:
                 content = f.read()
-                assert "is_train=False" in content, "Autoencoder inference should use is_train=False"
+                assert (
+                    "is_train=False" in content
+                ), "Autoencoder inference should use is_train=False"
 
     def test_inference_with_gene_mismatch(self, tmp_path, data_format):
         """Test inference with gene mismatches between model and data."""
@@ -615,7 +666,9 @@ class TestInferenceUtils:
         n_cells, n_genes_original = 10, 15
         X = np.random.randn(n_cells, n_genes_original).astype(np.float32)
         # Create gene names that partially overlap with target format
-        original_gene_names = [f"gene_{i}" for i in range(5)] + [f"extra_gene_{i}" for i in range(10)]
+        original_gene_names = [f"gene_{i}" for i in range(5)] + [
+            f"extra_gene_{i}" for i in range(10)
+        ]
         obs_df = pd.DataFrame(
             {
                 "expansion": ["expanded"] * 5 + ["non-expanded"] * 5,
@@ -649,7 +702,9 @@ class TestInferenceUtils:
                 assert len(result) == n_cells
                 mock_inference.assert_called_once()
             except Exception as e:
-                pytest.fail(f"Inference with gene mismatch should not fail, but got: {e}")
+                pytest.fail(
+                    f"Inference with gene mismatch should not fail, but got: {e}"
+                )
 
     def test_inference_with_completely_different_genes(self, tmp_path):
         """Test inference when genes are completely different."""
@@ -699,7 +754,9 @@ class TestInferenceUtils:
                 assert len(result) == n_cells
                 mock_inference.assert_called_once()
             except Exception as e:
-                pytest.fail(f"Inference with completely different genes should not fail, but got: {e}")
+                pytest.fail(
+                    f"Inference with completely different genes should not fail, but got: {e}"
+                )
 
     def test_data_format_conversion_with_gene_mismatch(self):
         """Test the actual data format conversion with gene mismatches."""
@@ -708,7 +765,9 @@ class TestInferenceUtils:
         X = np.random.randn(n_cells, n_genes_original).astype(np.float32)
 
         # Create gene names that partially overlap with target format
-        original_gene_names = [f"gene_{i}" for i in range(5)] + [f"extra_gene_{i}" for i in range(10)]
+        original_gene_names = [f"gene_{i}" for i in range(5)] + [
+            f"extra_gene_{i}" for i in range(10)
+        ]
         target_gene_names = [f"gene_{i}" for i in range(10)]  # 5 overlap, 5 missing
 
         obs_df = pd.DataFrame(
@@ -744,21 +803,35 @@ class TestInferenceUtils:
 
             # Verify the conversion worked - by default it doesn't change the shape
             assert converted_adata.shape[0] == n_cells  # Same number of cells
-            assert converted_adata.shape[1] == n_genes_original  # Same number of genes (no reordering by default)
-            assert converted_adata.var_names.tolist() == original_gene_names  # Same gene order
+            assert (
+                converted_adata.shape[1] == n_genes_original
+            )  # Same number of genes (no reordering by default)
+            assert (
+                converted_adata.var_names.tolist() == original_gene_names
+            )  # Same gene order
 
             # Now test with explicit gene reordering
-            converted_adata_reordered = data_format.prepare_adata_for_training(adata, reorder_genes=True)
+            converted_adata_reordered = data_format.prepare_adata_for_training(
+                adata, reorder_genes=True
+            )
             print(f"Reordered adata shape: {converted_adata_reordered.shape}")
-            print(f"Reordered gene names: {converted_adata_reordered.var_names.tolist()}")
+            print(
+                f"Reordered gene names: {converted_adata_reordered.var_names.tolist()}"
+            )
 
             # Verify the reordering worked
             assert converted_adata_reordered.shape[0] == n_cells  # Same number of cells
-            assert converted_adata_reordered.shape[1] == len(target_gene_names)  # Target number of genes
-            assert converted_adata_reordered.var_names.tolist() == target_gene_names  # Correct gene order
+            assert converted_adata_reordered.shape[1] == len(
+                target_gene_names
+            )  # Target number of genes
+            assert (
+                converted_adata_reordered.var_names.tolist() == target_gene_names
+            )  # Correct gene order
 
         except Exception as e:
-            pytest.fail(f"Data format conversion with gene mismatch should not fail, but got: {e}")
+            pytest.fail(
+                f"Data format conversion with gene mismatch should not fail, but got: {e}"
+            )
 
     def test_dataset_creation_with_gene_mismatch(self, tmp_path):
         """Test that dataset creation works with gene mismatches."""
@@ -767,7 +840,9 @@ class TestInferenceUtils:
         X = np.random.randn(n_cells, n_genes_original).astype(np.float32)
 
         # Create gene names that partially overlap with target format
-        original_gene_names = [f"gene_{i}" for i in range(5)] + [f"extra_gene_{i}" for i in range(10)]
+        original_gene_names = [f"gene_{i}" for i in range(5)] + [
+            f"extra_gene_{i}" for i in range(10)
+        ]
         target_gene_names = [f"gene_{i}" for i in range(10)]  # 5 overlap, 5 missing
 
         obs_df = pd.DataFrame(
@@ -818,7 +893,9 @@ class TestInferenceUtils:
             print(f"Successfully got batch with x shape: {batch['x'].shape}")
 
         except Exception as e:
-            pytest.fail(f"Dataset creation with gene mismatch should not fail, but got: {e}")
+            pytest.fail(
+                f"Dataset creation with gene mismatch should not fail, but got: {e}"
+            )
 
     def test_tensor_dimension_mismatch_fix(self, tmp_path):
         """Test that the specific RuntimeError with tensor dimension mismatch is fixed."""
@@ -832,7 +909,9 @@ class TestInferenceUtils:
 
         # Create gene names - some overlap, many extra
         original_gene_names = [f"gene_{i}" for i in range(n_genes_original)]
-        target_gene_names = [f"gene_{i}" for i in range(n_genes_target)]  # Subset of original
+        target_gene_names = [
+            f"gene_{i}" for i in range(n_genes_target)
+        ]  # Subset of original
 
         obs_df = pd.DataFrame(
             {
@@ -850,8 +929,11 @@ class TestInferenceUtils:
         data_format = DataFormat(
             n_genes=n_genes_target,
             gene_names=target_gene_names,
-            genes_mu=np.random.randn(n_genes_target).astype(np.float32),  # Target dimensions
-            genes_sigma=np.random.rand(n_genes_target).astype(np.float32) + 0.1,  # Target dimensions
+            genes_mu=np.random.randn(n_genes_target).astype(
+                np.float32
+            ),  # Target dimensions
+            genes_sigma=np.random.rand(n_genes_target).astype(np.float32)
+            + 0.1,  # Target dimensions
             use_log_transform=False,
             target_sum=1e4,
         )
@@ -886,11 +968,16 @@ class TestInferenceUtils:
             print("✅ No RuntimeError - tensor dimensions match!")
 
             # Verify the batch has correct dimensions
-            assert batch["x"].shape == (2, n_genes_target)  # [batch_size, n_genes_target]
+            assert batch["x"].shape == (
+                2,
+                n_genes_target,
+            )  # [batch_size, n_genes_target]
 
         except RuntimeError as e:
             if "must match the size" in str(e):
-                pytest.fail(f"RuntimeError with tensor dimension mismatch still occurs: {e}")
+                pytest.fail(
+                    f"RuntimeError with tensor dimension mismatch still occurs: {e}"
+                )
             else:
                 raise  # Re-raise if it's a different RuntimeError
         except Exception as e:
@@ -901,12 +988,16 @@ class TestInferenceUtils:
         assert callable(load_model)
         assert callable(run_model_inference)
 
-    def test_run_inference_mlp_with_data_path(self, mock_adata_with_metadata, data_format):
+    def test_run_inference_mlp_with_data_path(
+        self, mock_adata_with_metadata, data_format
+    ):
         """Test running MLP inference (with data_path only)."""
         file_path, adata = mock_adata_with_metadata
         with patch("scxpand.util.inference_utils.ad.read_h5ad") as mock_read_h5ad:
             mock_read_h5ad.return_value = adata
-            with patch("scxpand.util.inference_utils.run_mlp_inference") as mock_inference:
+            with patch(
+                "scxpand.util.inference_utils.run_mlp_inference"
+            ) as mock_inference:
                 mock_inference.return_value = np.random.rand(10)
                 mock_model = MagicMock()
                 result = run_model_inference(
@@ -924,12 +1015,16 @@ class TestInferenceUtils:
                 assert len(result) == 10
                 mock_inference.assert_called_once()
 
-    def test_run_inference_linear_with_data_path(self, mock_adata_with_metadata, data_format):
+    def test_run_inference_linear_with_data_path(
+        self, mock_adata_with_metadata, data_format
+    ):
         """Test running linear inference (svm/logistic) (with data_path only)."""
         file_path, adata = mock_adata_with_metadata
         with patch("scxpand.util.inference_utils.ad.read_h5ad") as mock_read_h5ad:
             mock_read_h5ad.return_value = adata
-            with patch("scxpand.util.inference_utils.run_linear_inference") as mock_inference:
+            with patch(
+                "scxpand.util.inference_utils.run_linear_inference"
+            ) as mock_inference:
                 mock_inference.return_value = np.random.rand(10)
                 mock_model = MagicMock()
                 for model_type in ["svm", "logistic"]:
@@ -948,12 +1043,16 @@ class TestInferenceUtils:
                     assert len(result) == 10
                     mock_inference.assert_called()
 
-    def test_run_inference_autoencoder_with_data_path(self, mock_adata_with_metadata, data_format):
+    def test_run_inference_autoencoder_with_data_path(
+        self, mock_adata_with_metadata, data_format
+    ):
         """Test running autoencoder inference (with data_path only)."""
         file_path, adata = mock_adata_with_metadata
         with patch("scxpand.util.inference_utils.ad.read_h5ad") as mock_read_h5ad:
             mock_read_h5ad.return_value = adata
-            with patch("scxpand.util.inference_utils.run_ae_inference") as mock_inference:
+            with patch(
+                "scxpand.util.inference_utils.run_ae_inference"
+            ) as mock_inference:
                 mock_inference.return_value = np.random.rand(10)
                 mock_model = MagicMock()
                 result = run_model_inference(
@@ -976,7 +1075,9 @@ class TestInferenceUtils:
         file_path, adata = mock_adata_with_metadata
         with patch("scxpand.util.inference_utils.ad.read_h5ad") as mock_read_h5ad:
             mock_read_h5ad.return_value = adata
-            with patch("scxpand.util.inference_utils.run_lightgbm_inference") as mock_inference:
+            with patch(
+                "scxpand.util.inference_utils.run_lightgbm_inference"
+            ) as mock_inference:
                 mock_inference.return_value = np.random.rand(10)
                 mock_model = MagicMock()
                 result = run_model_inference(
@@ -1014,5 +1115,9 @@ class TestInferenceUtils:
 
         # Verify that all ModelSpecs have default_save_dir
         for model_type, spec in MODEL_TYPES.items():
-            assert hasattr(spec, "default_save_dir"), f"ModelSpec for {model_type.value} missing default_save_dir"
-            assert spec.default_save_dir, f"ModelSpec for {model_type.value} has empty default_save_dir"
+            assert hasattr(
+                spec, "default_save_dir"
+            ), f"ModelSpec for {model_type.value} missing default_save_dir"
+            assert (
+                spec.default_save_dir
+            ), f"ModelSpec for {model_type.value} has empty default_save_dir"

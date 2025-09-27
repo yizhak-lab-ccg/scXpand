@@ -2,7 +2,6 @@
 
 import numpy as np
 import pandas as pd
-
 from anndata import AnnData
 
 from scxpand.data_util.data_format import DataFormat
@@ -132,7 +131,9 @@ class TestDatasetGeneComparison:
         # Create test data
         n_cells, n_genes = 100, 50
         gene_names = [f"gene_{i}" for i in range(n_genes)]
-        extended_gene_names = gene_names + [f"extra_gene_{i}" for i in range(10)]  # Extra genes
+        extended_gene_names = gene_names + [
+            f"extra_gene_{i}" for i in range(10)
+        ]  # Extra genes
 
         X = np.random.rand(n_cells, len(extended_gene_names))
         obs = pd.DataFrame(

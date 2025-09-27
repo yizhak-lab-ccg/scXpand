@@ -118,7 +118,9 @@ class TestDataAccess:
 
         # Verify data integrity
         expected = (
-            sample_adata.X[indices, :].toarray() if hasattr(sample_adata.X, "toarray") else sample_adata.X[indices, :]
+            sample_adata.X[indices, :].toarray()
+            if hasattr(sample_adata.X, "toarray")
+            else sample_adata.X[indices, :]
         )
         np.testing.assert_array_equal(result, expected)
 
@@ -126,7 +128,9 @@ class TestDataAccess:
         """Test context manager with in-memory AnnData object."""
         indices = np.array([1, 2, 3])
 
-        with open_adata_multiprocessing_safe(None, adata=sample_adata, indices=indices) as (adata, returned_indices):
+        with open_adata_multiprocessing_safe(
+            None, adata=sample_adata, indices=indices
+        ) as (adata, returned_indices):
             assert adata is sample_adata
             assert np.array_equal(returned_indices, indices)
 
@@ -141,7 +145,10 @@ class TestDataAccess:
 
             indices = np.array([1, 2])
 
-            with open_adata_multiprocessing_safe(tmp_path, indices=indices) as (adata, returned_indices):
+            with open_adata_multiprocessing_safe(tmp_path, indices=indices) as (
+                adata,
+                returned_indices,
+            ):
                 assert adata is not None
                 assert adata.n_obs == sample_adata.n_obs
                 assert adata.n_vars == sample_adata.n_vars
@@ -154,7 +161,9 @@ class TestDataAccess:
 
     def test_open_adata_invalid_arguments(self):
         """Test error handling for invalid arguments."""
-        with pytest.raises(ValueError, match="Either data_path or adata must be provided"):
+        with pytest.raises(
+            ValueError, match="Either data_path or adata must be provided"
+        ):
             with open_adata_multiprocessing_safe(None, adata=None):
                 pass
 

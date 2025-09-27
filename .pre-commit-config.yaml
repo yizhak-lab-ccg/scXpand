@@ -1,62 +1,25 @@
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.1
-    hooks:
-      - id: ruff-check
-        args: [--fix, --config=ruff.toml]
-      - id: ruff-format
-        args: [--config=ruff.toml]
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+    rev: v4.6.0
     hooks:
-      - id: check-added-large-files
-        args: ['--maxkb=5000']
       - id: trailing-whitespace
       - id: end-of-file-fixer
-        exclude: '^docs/api/'
-      - id: check-toml
       - id: check-yaml
-      - id: check-json
-      - id: check-xml
-      - id: check-ast
-      - id: check-builtin-literals
-      - id: check-docstring-first
-      - id: check-executables-have-shebangs
+      - id: check-added-large-files
       - id: check-merge-conflict
-      - id: check-symlinks
-      - id: check-vcs-permalinks
       - id: debug-statements
-      - id: check-case-conflict
-      - id: detect-private-key
-      - id: mixed-line-ending
-        args: [--fix=auto]
-      - id: check-illegal-windows-names
-      - id: check-shebang-scripts-are-executable
-      - id: pretty-format-json
-        args: [--autofix, --indent=2]
-        exclude: '\.ipynb$'
+      - id: check-docstring-first
 
-  - repo: local
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.7.4
     hooks:
-      - id: pytest-all
-        name: pytest all tests
-        entry: uv run pytest
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]
-        verbose: true
-        require_serial: true
-        fail_fast: false
-        args: [-n, auto]
-      - id: vulture-dead-code-check
-        name: vulture dead code detection (warnings only)
-        entry: bash -c 'echo "Checking for unused code..." && uv run vulture scxpand/'
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]
-        verbose: true
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
 
-exclude: '^docs/api/'
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.13.0
+  #   hooks:
+  #     - id: mypy
+  #       additional_dependencies: [types-requests, types-PyYAML]
+  #       args: [--ignore-missing-imports]

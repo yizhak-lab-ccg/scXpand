@@ -39,7 +39,9 @@ class TestRunInferenceErrorHandling:
 
     def test_run_inference_no_data_input(self):
         """Test run_inference with no data input."""
-        with pytest.raises(ValueError, match="Either adata or data_path must be provided"):
+        with pytest.raises(
+            ValueError, match="Either adata or data_path must be provided"
+        ):
             run_inference(model_path="fake_path")
 
     @patch("scxpand.core.inference.fetch_model_and_run_inference")
@@ -63,17 +65,27 @@ class TestRunInferenceErrorHandling:
     def test_run_inference_multiple_model_sources_path_and_name(self, sample_adata):
         """Test run_inference with both model_path and model_name."""
         with pytest.raises(ValueError, match="Cannot specify multiple model sources"):
-            run_inference(adata=sample_adata, model_path="fake_path", model_name="fake_model")
+            run_inference(
+                adata=sample_adata, model_path="fake_path", model_name="fake_model"
+            )
 
     def test_run_inference_multiple_model_sources_path_and_url(self, sample_adata):
         """Test run_inference with both model_path and model_url."""
         with pytest.raises(ValueError, match="Cannot specify multiple model sources"):
-            run_inference(adata=sample_adata, model_path="fake_path", model_url="https://fake.com/model.zip")
+            run_inference(
+                adata=sample_adata,
+                model_path="fake_path",
+                model_url="https://fake.com/model.zip",
+            )
 
     def test_run_inference_multiple_model_sources_name_and_url(self, sample_adata):
         """Test run_inference with both model_name and model_url."""
         with pytest.raises(ValueError, match="Cannot specify multiple model sources"):
-            run_inference(adata=sample_adata, model_name="fake_model", model_url="https://fake.com/model.zip")
+            run_inference(
+                adata=sample_adata,
+                model_name="fake_model",
+                model_url="https://fake.com/model.zip",
+            )
 
     def test_run_inference_all_three_model_sources(self, sample_adata):
         """Test run_inference with all three model sources specified."""
@@ -130,7 +142,11 @@ class TestRunInferenceErrorHandling:
 
             # Test eval_row_inds with negative indices - should pass through to pipeline
             invalid_indices = np.array([-1, 0, 1])
-            run_inference(adata=sample_adata, model_path="fake_path", eval_row_inds=invalid_indices)
+            run_inference(
+                adata=sample_adata,
+                model_path="fake_path",
+                eval_row_inds=invalid_indices,
+            )
 
             mock_pipeline.assert_called_once()
             call_kwargs = mock_pipeline.call_args[1]
@@ -139,12 +155,20 @@ class TestRunInferenceErrorHandling:
             mock_pipeline.reset_mock()
 
             # Test eval_row_inds with indices out of range - should pass through to pipeline
-            out_of_range_indices = np.array([0, 1, 100])  # 100 is out of range for 50 cells
-            run_inference(adata=sample_adata, model_path="fake_path", eval_row_inds=out_of_range_indices)
+            out_of_range_indices = np.array(
+                [0, 1, 100]
+            )  # 100 is out of range for 50 cells
+            run_inference(
+                adata=sample_adata,
+                model_path="fake_path",
+                eval_row_inds=out_of_range_indices,
+            )
 
             mock_pipeline.assert_called_once()
             call_kwargs = mock_pipeline.call_args[1]
-            np.testing.assert_array_equal(call_kwargs["eval_row_inds"], out_of_range_indices)
+            np.testing.assert_array_equal(
+                call_kwargs["eval_row_inds"], out_of_range_indices
+            )
 
     def test_run_inference_empty_adata(self):
         """Test run_inference with empty AnnData object."""
@@ -179,7 +203,12 @@ class TestRunInferenceErrorHandling:
             mock_pipeline.return_value = None
 
             # Test with None parameters (should use defaults)
-            run_inference(adata=sample_adata, model_path="fake_path", save_path=None, eval_row_inds=None)
+            run_inference(
+                adata=sample_adata,
+                model_path="fake_path",
+                save_path=None,
+                eval_row_inds=None,
+            )
 
             mock_pipeline.assert_called_once()
             call_kwargs = mock_pipeline.call_args[1]
@@ -199,7 +228,9 @@ class TestRunInferenceErrorHandling:
 
     def test_run_inference_pretrained_exception(self, sample_adata):
         """Test run_inference when pretrained inference raises exception."""
-        with patch("scxpand.core.inference.fetch_model_and_run_inference") as mock_pretrained:
+        with patch(
+            "scxpand.core.inference.fetch_model_and_run_inference"
+        ) as mock_pretrained:
             # Mock pretrained function to raise exception
             mock_pretrained.side_effect = RuntimeError("Download failed")
 
@@ -216,7 +247,9 @@ class TestRunInferenceErrorHandling:
             large_batch_size = len(sample_adata) * 2
 
             # Should handle large batch size gracefully
-            run_inference(adata=sample_adata, model_path="fake_path", batch_size=large_batch_size)
+            run_inference(
+                adata=sample_adata, model_path="fake_path", batch_size=large_batch_size
+            )
 
             mock_pipeline.assert_called_once()
             call_kwargs = mock_pipeline.call_args[1]
@@ -243,7 +276,9 @@ class TestRunInferenceErrorHandling:
         # Create dataset with many cells (but still manageable for testing)
         n_cells, n_genes = 10000, 100
         X = np.random.rand(n_cells, n_genes).astype(np.float32)
-        obs_df = pd.DataFrame({"expansion": np.random.choice(["expanded", "non-expanded"], n_cells)})
+        obs_df = pd.DataFrame(
+            {"expansion": np.random.choice(["expanded", "non-expanded"], n_cells)}
+        )
         var_df = pd.DataFrame(index=[f"gene_{i}" for i in range(n_genes)])
         large_adata = ad.AnnData(X=X, obs=obs_df, var=var_df)
 
@@ -271,7 +306,9 @@ class TestRunInferenceErrorHandling:
         ]
 
         for config in configurations:
-            with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
+            with patch(
+                "scxpand.core.inference.run_prediction_pipeline"
+            ) as mock_pipeline:
                 mock_pipeline.return_value = None
 
                 # Should handle different memory configurations
@@ -293,7 +330,9 @@ class TestRunInferenceErrorHandling:
         ]
 
         for case in edge_cases:
-            with patch("scxpand.core.inference.run_prediction_pipeline") as mock_pipeline:
+            with patch(
+                "scxpand.core.inference.run_prediction_pipeline"
+            ) as mock_pipeline:
                 mock_pipeline.return_value = None
 
                 # Should handle edge cases gracefully

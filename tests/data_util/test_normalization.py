@@ -1,14 +1,12 @@
 """Tests for the normalization module functions."""
 
 import tempfile
-
 from pathlib import Path
 
 import anndata as ad
 import numpy as np
 import pytest
 import torch
-
 from scipy.sparse import csr_matrix
 
 from scxpand.data_util.data_format import DataFormat
@@ -47,7 +45,9 @@ class TestRowNormalization:
 
         assert result is X_copy  # Always returns same object (in-place)
         assert np.allclose(result.sum(axis=1), target_sum)
-        assert not np.allclose(X.sum(axis=1), target_sum)  # Original should be unchanged
+        assert not np.allclose(
+            X.sum(axis=1), target_sum
+        )  # Original should be unchanged
 
     def test_torch_row_normalization_basic(self):
         """Test basic torch row normalization."""
@@ -72,7 +72,9 @@ class TestRowNormalization:
 
         assert result is X_copy  # Always returns same object (in-place)
         assert torch.allclose(result.sum(dim=1), torch.tensor(target_sum))
-        assert not torch.allclose(X.sum(dim=1), torch.tensor(target_sum))  # Original should be unchanged
+        assert not torch.allclose(
+            X.sum(dim=1), torch.tensor(target_sum)
+        )  # Original should be unchanged
 
     def test_zero_row_handling(self):
         """Test handling of rows with zero sum."""
@@ -180,7 +182,9 @@ class TestZScoreNormalization:
 
         # Should not raise error due to eps
         result_np = apply_zscore_normalization(X_np, genes_mu, genes_sigma, eps=eps)
-        result_torch = apply_zscore_normalization(X_torch, genes_mu_torch, genes_sigma_torch, eps=eps)
+        result_torch = apply_zscore_normalization(
+            X_torch, genes_mu_torch, genes_sigma_torch, eps=eps
+        )
 
         assert not np.any(np.isnan(result_np))
         assert not torch.any(torch.isnan(result_torch))
@@ -221,7 +225,9 @@ class TestNumpyTorchConsistency:
         eps = 1e-6
 
         result_np = apply_zscore_normalization(X_np, genes_mu, genes_sigma, eps=eps)
-        result_torch = apply_zscore_normalization(X_torch, genes_mu_torch, genes_sigma_torch, eps=eps)
+        result_torch = apply_zscore_normalization(
+            X_torch, genes_mu_torch, genes_sigma_torch, eps=eps
+        )
 
         assert np.allclose(result_np, result_torch.numpy(), rtol=1e-6)
 
@@ -278,8 +284,12 @@ class TestCompletePreprocessingPipeline:
         X_np = np.random.rand(10, 5).astype(np.float32) * 100
         X_torch = torch.from_numpy(X_np.copy())
 
-        result_np = preprocess_expression_data(X=X_np.copy(), data_format=mock_data_format)
-        result_torch = preprocess_expression_data(X=X_torch.clone(), data_format=mock_data_format)
+        result_np = preprocess_expression_data(
+            X=X_np.copy(), data_format=mock_data_format
+        )
+        result_torch = preprocess_expression_data(
+            X=X_torch.clone(), data_format=mock_data_format
+        )
 
         assert np.allclose(result_np, result_torch.numpy(), rtol=1e-5)
 

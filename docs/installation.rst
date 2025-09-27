@@ -54,35 +54,44 @@ To work with the latest version on GitHub (for development or contributions):
     git clone https://github.com/yizhak-lab-ccg/scXpand.git
     cd scXpand
 
-scXpand uses `uv <https://docs.astral.sh/uv/>`_ for fast, reliable dependency management. Use the provided install scripts:
+scXpand follows the `scverse ecosystem <https://scverse.org/>`_ standards and uses modern Python packaging tools.
 
-**macOS/Linux:**
-
-.. code-block:: bash
-
-    ./install.sh
-
-**Windows PowerShell:**
+**Install in development mode:**
 
 .. code-block:: bash
 
-    .\install.bat
+    pip install -e ".[dev]"
 
-These scripts will:
+This will:
 
-* Install Python 3.13 via uv
-* Create a virtual environment in ``.venv/``
-* Install all dependencies from the lock file
-* Set up PyTorch with appropriate GPU support
-* Register Jupyter kernel
-* Set up pre-commit hooks
+* Install scXpand in editable mode
+* Install all development dependencies (testing, linting, documentation)
+* Set up PyTorch with automatic backend detection (CUDA if available, otherwise CPU/MPS)
 
-Then activate the environment:
+**Install pre-commit hooks:**
 
 .. code-block:: bash
 
-    # macOS/Linux
-    source .venv/bin/activate
+    pre-commit install
 
-    # Windows PowerShell
-    .\.venv\Scripts\activate
+**For CUDA development setup:**
+
+If you need specific CUDA PyTorch installation for development:
+
+.. code-block:: bash
+
+    python scripts/install_torch_for_dev.py
+
+This script will:
+
+* Detect your system's optimal PyTorch backend
+* Install CUDA PyTorch if NVIDIA GPU is available
+* Fall back to CPU/MPS PyTorch if CUDA is not available
+* Update the environment with the correct PyTorch version
+
+**Alternative: Using uv (if you have it installed):**
+
+.. code-block:: bash
+
+    uv pip install -e ".[dev]"
+    pre-commit install

@@ -7,9 +7,7 @@ and SVM models, including learning rate scheduler configurations.
 import numpy as np
 import optuna
 
-from scxpand.hyperopt.param_grids import (
-    create_optimized_lr_scheduler_config,
-)
+from scxpand.hyperopt.param_grids import create_optimized_lr_scheduler_config
 from scxpand.linear.linear_params import LinearClassifierParam
 from scxpand.linear.model_manager import ModelManager
 
@@ -24,14 +22,18 @@ class TestLinearHyperopt:
         trial = study.ask()
 
         # Test logistic regression LR scheduler
-        config = create_optimized_lr_scheduler_config(trial, "ReduceLROnPlateau", n_epochs, "logistic_")
+        config = create_optimized_lr_scheduler_config(
+            trial, "ReduceLROnPlateau", n_epochs, "logistic_"
+        )
         assert config["type"] == "ReduceLROnPlateau"
         assert "factor" in config
         assert "patience" in config
         assert "min_lr" in config
 
         # Test SVM LR scheduler
-        config = create_optimized_lr_scheduler_config(trial, "CosineAnnealingLR", n_epochs, "svm_")
+        config = create_optimized_lr_scheduler_config(
+            trial, "CosineAnnealingLR", n_epochs, "svm_"
+        )
         assert config["type"] == "CosineAnnealingLR"
         assert "T_max" in config
         assert "eta_min" in config
@@ -86,7 +88,9 @@ class TestLinearHyperopt:
         assert model.average is False
         assert model.n_iter_no_change == 5
         assert model.validation_fraction == 0.1
-        assert model.early_stopping is False  # Should always be False when using partial_fit()
+        assert (
+            model.early_stopping is False
+        )  # Should always be False when using partial_fit()
         assert model.fit_intercept is True
         assert model.shuffle is True
 

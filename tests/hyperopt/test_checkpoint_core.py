@@ -5,14 +5,12 @@ without getting into complex integration scenarios.
 """
 
 import tempfile
-
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 import torch
-
 from torch.optim import Adam
 from torch.optim.lr_scheduler import StepLR
 
@@ -118,9 +116,15 @@ class TestCheckpointCore:
         mock_trial.set_user_attr = mock_set_user_attr
 
         # Report some epochs
-        report_to_optuna_and_handle_pruning(trial=mock_trial, current_score=0.7, epoch=0)
-        report_to_optuna_and_handle_pruning(trial=mock_trial, current_score=0.75, epoch=1)
-        report_to_optuna_and_handle_pruning(trial=mock_trial, current_score=0.8, epoch=2)
+        report_to_optuna_and_handle_pruning(
+            trial=mock_trial, current_score=0.7, epoch=0
+        )
+        report_to_optuna_and_handle_pruning(
+            trial=mock_trial, current_score=0.75, epoch=1
+        )
+        report_to_optuna_and_handle_pruning(
+            trial=mock_trial, current_score=0.8, epoch=2
+        )
 
         # Verify epochs were recorded
         reported_epochs = set(mock_trial.user_attrs.get("reported_epochs", []))
@@ -131,9 +135,15 @@ class TestCheckpointCore:
         mock_trial.report.reset_mock()
 
         # Try to report duplicates and one new epoch
-        report_to_optuna_and_handle_pruning(trial=mock_trial, current_score=0.7, epoch=0)  # Duplicate
-        report_to_optuna_and_handle_pruning(trial=mock_trial, current_score=0.75, epoch=1)  # Duplicate
-        report_to_optuna_and_handle_pruning(trial=mock_trial, current_score=0.85, epoch=3)  # New
+        report_to_optuna_and_handle_pruning(
+            trial=mock_trial, current_score=0.7, epoch=0
+        )  # Duplicate
+        report_to_optuna_and_handle_pruning(
+            trial=mock_trial, current_score=0.75, epoch=1
+        )  # Duplicate
+        report_to_optuna_and_handle_pruning(
+            trial=mock_trial, current_score=0.85, epoch=3
+        )  # New
 
         # Should only report the new epoch
         assert mock_trial.report.call_count == 1
@@ -149,7 +159,11 @@ class TestCheckpointCore:
         """Test that linear models (SGD-based) preserve their state correctly."""
         # Create test parameters and data
         params = LinearClassifierParam(
-            model_type="logistic", learning_rate="constant", eta0=0.01, max_iter=1, random_seed=42
+            model_type="logistic",
+            learning_rate="constant",
+            eta0=0.01,
+            max_iter=1,
+            random_seed=42,
         )
 
         n_samples, n_features = 100, 20
@@ -167,7 +181,15 @@ class TestCheckpointCore:
         )
 
         # Verify state contains expected fields
-        expected_fields = ["coef_", "intercept_", "classes_", "n_features_in_", "t_", "epoch", "score"]
+        expected_fields = [
+            "coef_",
+            "intercept_",
+            "classes_",
+            "n_features_in_",
+            "t_",
+            "epoch",
+            "score",
+        ]
         for field in expected_fields:
             assert field in saved_state, f"Missing field: {field}"
 
@@ -179,7 +201,10 @@ class TestCheckpointCore:
         # Load the saved state
         with tempfile.TemporaryDirectory() as temp_dir:
             ModelManager.load_model_state(
-                model=new_model, best_model_state=saved_state, base_save_dir=Path(temp_dir), score_metric="accuracy"
+                model=new_model,
+                best_model_state=saved_state,
+                base_save_dir=Path(temp_dir),
+                score_metric="accuracy",
             )
 
         # Verify states are now identical
@@ -206,7 +231,9 @@ class TestCheckpointCore:
             logger = TrainLogger(save_path=nonexistent_path)
 
             with pytest.raises(FileNotFoundError, match="No checkpoint file found"):
-                logger.resume_from_checkpoint(resume_exp_path=nonexistent_path, model=model, device_name="cpu")
+                logger.resume_from_checkpoint(
+                    resume_exp_path=nonexistent_path, model=model, device_name="cpu"
+                )
 
             print("✓ Checkpoint file operations work correctly")
 
@@ -238,7 +265,10 @@ class TestCheckpointCore:
             new_logger = TrainLogger(save_path=save_path)
 
             resumed_epoch = new_logger.resume_from_checkpoint(
-                resume_exp_path=save_path, model=new_model, optimizer=new_optimizer, device_name="cpu"
+                resume_exp_path=save_path,
+                model=new_model,
+                optimizer=new_optimizer,
+                device_name="cpu",
             )
 
             assert resumed_epoch == 6  # Should be saved_epoch + 1

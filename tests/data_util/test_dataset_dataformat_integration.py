@@ -25,7 +25,11 @@ class TestCellsDatasetDataFormatIntegration:
         # Third cell (index 2): not expanded (0)
         obs = pd.DataFrame(
             {
-                "expansion": ["not_expanded", "expanded", "not_expanded"],  # String values that will be converted
+                "expansion": [
+                    "not_expanded",
+                    "expanded",
+                    "not_expanded",
+                ],  # String values that will be converted
                 "clone_id_size": [10, 20, 30],
                 "median_clone_size": [10, 10, 10],
                 "tissue_type": ["A", "B", "A"],
@@ -66,7 +70,9 @@ class TestCellsDatasetDataFormatIntegration:
 
         return DummyParam()
 
-    def test_cellsdataset_and_dataformat_integration(self, minimal_adata, data_format, dataset_params, tmp_path):
+    def test_cellsdataset_and_dataformat_integration(
+        self, minimal_adata, data_format, dataset_params, tmp_path
+    ):
         # Save the data to a temporary file
         temp_file = tmp_path / "temp_adata.h5ad"
         minimal_adata.write_h5ad(temp_file)
@@ -106,7 +112,9 @@ class TestCellsDatasetDataFormatIntegration:
         ]:
             assert col in dataset.obs_df.columns
 
-    def test_batch_collation(self, minimal_adata, data_format, dataset_params, tmp_path):
+    def test_batch_collation(
+        self, minimal_adata, data_format, dataset_params, tmp_path
+    ):
         """Test that batch collation works correctly with cells_collate_fn."""
         # Save the data to a temporary file
         temp_file = tmp_path / "temp_adata.h5ad"
@@ -134,13 +142,20 @@ class TestCellsDatasetDataFormatIntegration:
         assert "categorical_targets" in batch
 
         # Verify batch shapes - checking each dimension separately for better error messages
-        assert batch["x"].shape[0] == 3, f"Expected 3 samples, got {batch['x'].shape[0]}"
+        assert (
+            batch["x"].shape[0] == 3
+        ), f"Expected 3 samples, got {batch['x'].shape[0]}"
         # Feature dimension should be just the genes (2)
-        assert batch["x"].shape[1] == 2, f"Feature dimension {batch['x'].shape[1]} should be 2 (genes only)"
+        assert (
+            batch["x"].shape[1] == 2
+        ), f"Feature dimension {batch['x'].shape[1]} should be 2 (genes only)"
 
         assert batch["y"].shape == (3,)
         assert batch["y_soft"].shape == (3,)
-        assert batch["x_row_normalized_gene_counts"].shape == (3, 2)  # 3 samples, 2 genes
+        assert batch["x_row_normalized_gene_counts"].shape == (
+            3,
+            2,
+        )  # 3 samples, 2 genes
 
         # Check categorical targets are now a dictionary
         assert isinstance(batch["categorical_targets"], dict)
@@ -156,8 +171,12 @@ class TestCellsDatasetDataFormatIntegration:
         # Sample 2: A,X -> tissue_type=0, imputed_labels=0
         expected_tissue_type = torch.tensor([0, 1, 0])
         expected_imputed_labels = torch.tensor([0, 1, 0])
-        assert torch.all(batch["categorical_targets"]["tissue_type"] == expected_tissue_type)
-        assert torch.all(batch["categorical_targets"]["imputed_labels"] == expected_imputed_labels)
+        assert torch.all(
+            batch["categorical_targets"]["tissue_type"] == expected_tissue_type
+        )
+        assert torch.all(
+            batch["categorical_targets"]["imputed_labels"] == expected_imputed_labels
+        )
 
     def test_batch_loading_mode(self, minimal_adata, dataset_params, tmp_path):
         """Test dataset with batch loading (default behavior)."""
@@ -202,19 +221,27 @@ class TestCellsDatasetDataFormatIntegration:
 
         # The data should be processed on-the-fly, so verify shape
         # Check only sample dimension (first dimension)
-        assert batch["x"].shape[0] == 3, f"Expected 3 samples, got {batch['x'].shape[0]}"
+        assert (
+            batch["x"].shape[0] == 3
+        ), f"Expected 3 samples, got {batch['x'].shape[0]}"
         # Feature dimension should be just the genes (2)
-        assert batch["x"].shape[1] == 2, f"Feature dimension {batch['x'].shape[1]} should be 2 (genes only)"
+        assert (
+            batch["x"].shape[1] == 2
+        ), f"Feature dimension {batch['x'].shape[1]} should be 2 (genes only)"
 
         # Verify that categorical targets are present
         assert "categorical_targets" in batch
         assert "tissue_type" in batch["categorical_targets"]
         assert "imputed_labels" in batch["categorical_targets"]
 
-    def test_specific_row_indices(self, minimal_adata, data_format, dataset_params, tmp_path):
+    def test_specific_row_indices(
+        self, minimal_adata, data_format, dataset_params, tmp_path
+    ):
         """Test dataset with specific row indices."""
         # Print the original expansion values to understand what we're working with
-        print("\nOriginal data expansion values:", minimal_adata.obs["expansion"].values)
+        print(
+            "\nOriginal data expansion values:", minimal_adata.obs["expansion"].values
+        )
 
         # Use only first two rows
         row_inds = np.array([0, 1])
@@ -311,7 +338,9 @@ class TestCellsDatasetDataFormatIntegration:
         # No augmentation batch should be different from augmented batch
         assert not torch.allclose(batch1["x"], no_aug_batch["x"])
 
-    def test_categorical_targets_extraction(self, minimal_adata, data_format, dataset_params, tmp_path):
+    def test_categorical_targets_extraction(
+        self, minimal_adata, data_format, dataset_params, tmp_path
+    ):
         """Test that categorical targets are correctly extracted."""
         # Save the data to a temporary file
         temp_file = tmp_path / "temp_adata.h5ad"
@@ -364,8 +393,14 @@ class TestCellsDatasetDataFormatIntegration:
         )
 
         # For unknown values, the index should remain 0
-        expected_tissue_type_unknown = torch.tensor([0, 0, 0])  # A, Unknown (defaults to 0), A
-        expected_imputed_labels_unknown = torch.tensor([0, 1, 0])  # X, Y, Unknown (defaults to 0)
+        expected_tissue_type_unknown = torch.tensor(
+            [0, 0, 0]
+        )  # A, Unknown (defaults to 0), A
+        expected_imputed_labels_unknown = torch.tensor(
+            [0, 1, 0]
+        )  # X, Y, Unknown (defaults to 0)
 
         assert torch.all(targets_unknown["tissue_type"] == expected_tissue_type_unknown)
-        assert torch.all(targets_unknown["imputed_labels"] == expected_imputed_labels_unknown)
+        assert torch.all(
+            targets_unknown["imputed_labels"] == expected_imputed_labels_unknown
+        )

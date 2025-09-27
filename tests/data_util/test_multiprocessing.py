@@ -4,12 +4,10 @@ This demonstrates the fix for the OSError: Can't synchronously read data issue.
 """
 
 import sys
-
 from pathlib import Path
 
 import pytest
 import torch
-
 from torch.utils.data import DataLoader
 
 from scxpand.data_util.data_format import DataFormat, load_data_format
@@ -71,7 +69,11 @@ class TestMultiprocessingLoading:
             # Test with multiple workers
             collate_fn = PicklableCollateFn(dataset)
             dataloader = DataLoader(
-                dataset, batch_size=32, num_workers=num_workers, shuffle=False, collate_fn=collate_fn
+                dataset,
+                batch_size=32,
+                num_workers=num_workers,
+                shuffle=False,
+                collate_fn=collate_fn,
             )
 
             # Load a few batches to test
@@ -81,18 +83,24 @@ class TestMultiprocessingLoading:
             for batch in dataloader:
                 batch_count += 1
                 # Verify batch structure
-                assert "x" in batch, f"Batch should contain 'x' key for {num_workers} workers"
-                assert batch["x"].shape[0] <= 32, f"Batch size should be <= 32 for {num_workers} workers"
-                assert batch["x"].shape[1] == dummy_adata.n_vars, (
-                    f"Batch should have correct number of genes for {num_workers} workers"
-                )
+                assert (
+                    "x" in batch
+                ), f"Batch should contain 'x' key for {num_workers} workers"
+                assert (
+                    batch["x"].shape[0] <= 32
+                ), f"Batch size should be <= 32 for {num_workers} workers"
+                assert (
+                    batch["x"].shape[1] == dummy_adata.n_vars
+                ), f"Batch should have correct number of genes for {num_workers} workers"
 
                 if batch_count >= max_batches:
                     break
 
             # Assert that we got the expected number of batches
             assert batch_count > 0, f"No batches were loaded with {num_workers} workers"
-            assert batch_count <= max_batches, f"Should not load more than {max_batches} batches"
+            assert (
+                batch_count <= max_batches
+            ), f"Should not load more than {max_batches} batches"
 
     @pytest.mark.slow
     def test_multiprocessing_with_real_data_format(self, dummy_adata, tmp_path):
@@ -131,18 +139,26 @@ class TestMultiprocessingLoading:
         for num_workers, batch_size in test_configs:
             collate_fn = PicklableCollateFn(dataset)
             dataloader = DataLoader(
-                dataset, batch_size=batch_size, num_workers=num_workers, shuffle=False, collate_fn=collate_fn
+                dataset,
+                batch_size=batch_size,
+                num_workers=num_workers,
+                shuffle=False,
+                collate_fn=collate_fn,
             )
 
             # Load one batch to verify it works
             batch = next(iter(dataloader))
 
             # Verify batch structure
-            assert "x" in batch, f"Batch should contain 'x' key for {num_workers} workers, batch_size={batch_size}"
-            assert batch["x"].shape[0] <= batch_size, f"Batch size should be <= {batch_size} for {num_workers} workers"
-            assert batch["x"].shape[1] == dummy_adata.n_vars, (
-                f"Batch should have correct number of genes for {num_workers} workers"
-            )
+            assert (
+                "x" in batch
+            ), f"Batch should contain 'x' key for {num_workers} workers, batch_size={batch_size}"
+            assert (
+                batch["x"].shape[0] <= batch_size
+            ), f"Batch size should be <= {batch_size} for {num_workers} workers"
+            assert (
+                batch["x"].shape[1] == dummy_adata.n_vars
+            ), f"Batch should have correct number of genes for {num_workers} workers"
 
     def test_multiprocessing_edge_cases(self, dummy_adata, tmp_path):
         """Test multiprocessing with edge cases like very small datasets."""
@@ -175,13 +191,21 @@ class TestMultiprocessingLoading:
         for num_workers in [0, 2]:
             collate_fn = PicklableCollateFn(dataset)
             dataloader = DataLoader(
-                dataset, batch_size=large_batch_size, num_workers=num_workers, shuffle=False, collate_fn=collate_fn
+                dataset,
+                batch_size=large_batch_size,
+                num_workers=num_workers,
+                shuffle=False,
+                collate_fn=collate_fn,
             )
 
             # Should get exactly one batch with all data
             batches = list(dataloader)
-            assert len(batches) == 1, f"Should get exactly one batch with large batch size for {num_workers} workers"
-            assert batches[0]["x"].shape[0] == len(dataset), f"Batch should contain all data for {num_workers} workers"
+            assert (
+                len(batches) == 1
+            ), f"Should get exactly one batch with large batch size for {num_workers} workers"
+            assert batches[0]["x"].shape[0] == len(
+                dataset
+            ), f"Batch should contain all data for {num_workers} workers"
 
     @pytest.mark.slow
     def test_multiprocessing_worker_consistency(self, dummy_adata, tmp_path):
@@ -231,9 +255,9 @@ class TestMultiprocessingLoading:
 
         # Verify consistency across different worker counts
         for num_workers in [2]:  # Reduced from [2, 4] to speed up test
-            assert torch.allclose(results[0], results[num_workers], atol=1e-6), (
-                f"Results should be consistent between 0 and {num_workers} workers"
-            )
+            assert torch.allclose(
+                results[0], results[num_workers], atol=1e-6
+            ), f"Results should be consistent between 0 and {num_workers} workers"
 
 
 # Keep the original script functionality for manual testing
@@ -272,10 +296,14 @@ if __name__ == "__main__":
         try:
             # Try to load a data format (this might not exist, but that's ok for this test)
             try:
-                data_format = load_data_format(Path("results/autoencoder/data_format.json"))
+                data_format = load_data_format(
+                    Path("results/autoencoder/data_format.json")
+                )
                 print("✅ Successfully loaded data format")
             except (FileNotFoundError, KeyError, ValueError) as e:
-                print("Could not load existing data format, this test needs preprocessed data")
+                print(
+                    "Could not load existing data format, this test needs preprocessed data"
+                )
                 print("Run a training first to generate data_format.json")
                 print(f"Error: {e}")
                 continue
@@ -285,7 +313,9 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"❌ Error with {num_workers} workers: {e}")
             if num_workers > 0:
-                print("If you see errors above, there might be an issue with the multiprocessing fix")
+                print(
+                    "If you see errors above, there might be an issue with the multiprocessing fix"
+                )
                 break
 
     print(f"\n{'=' * 50}")

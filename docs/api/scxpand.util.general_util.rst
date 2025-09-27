@@ -3,11 +3,11 @@ scxpand.util.general\_util
 
 .. automodule:: scxpand.util.general_util
 
-   
+
    .. rubric:: Functions
 
    .. autosummary::
-   
+
       compute_error_rate
       compute_false_negative_rate
       compute_false_positive_rate
@@ -43,4 +43,3 @@ scxpand.util.general\_util
       time_seconds_to_str
       time_to_str
       to_np
-   

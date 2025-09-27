@@ -3,17 +3,17 @@ scxpand.util.classes
 
 .. automodule:: scxpand.util.classes
 
-   
+
    .. rubric:: Functions
 
    .. autosummary::
-   
+
       ensure_model_type
-   
+
    .. rubric:: Classes
 
    .. autosummary::
-   
+
       BaseParams
       DataAugmentParams
       DataLoaderParams
@@ -23,4 +23,3 @@ scxpand.util.classes
       OptimizerParams
       OptimizerType
       SamplerType
-   

@@ -6,7 +6,6 @@ and reordered genes.
 """
 
 import tempfile
-
 from pathlib import Path
 
 import anndata as ad
@@ -14,7 +13,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import torch
-
 from scipy.sparse import csr_matrix
 from torch.utils.data import DataLoader
 
@@ -53,7 +51,15 @@ class TestMLPInferenceGeneReordering:
             n_genes = 3
         elif scenario == "extra_genes":
             # Has all training genes plus extra ones
-            gene_names = ["GENE_A", "GENE_B", "GENE_C", "GENE_D", "GENE_E", "GENE_F", "GENE_G"]
+            gene_names = [
+                "GENE_A",
+                "GENE_B",
+                "GENE_C",
+                "GENE_D",
+                "GENE_E",
+                "GENE_F",
+                "GENE_G",
+            ]
             n_genes = 7
         elif scenario == "reordered_genes":
             # Same genes but different order
@@ -71,7 +77,9 @@ class TestMLPInferenceGeneReordering:
 
         obs = pd.DataFrame(
             {
-                "expansion": np.random.choice(["expanded", "not_expanded"], size=n_cells),
+                "expansion": np.random.choice(
+                    ["expanded", "not_expanded"], size=n_cells
+                ),
                 "tissue_type": np.random.choice(["tissue1", "tissue2"], size=n_cells),
             }
         )
@@ -107,21 +115,25 @@ class TestMLPInferenceGeneReordering:
                 dataset,
                 batch_size=5,
                 shuffle=False,
-                collate_fn=lambda batch_indices: cells_collate_fn(batch_indices, dataset),
+                collate_fn=lambda batch_indices: cells_collate_fn(
+                    batch_indices, dataset
+                ),
             )
             batch = next(iter(dataloader))
             X_dataset = batch["x"]
 
             # Method 2: Using direct normalization approach
             X_direct = load_and_preprocess_data_numpy(
-                data_path=inference_file, row_indices=np.arange(5), data_format=training_data_format
+                data_path=inference_file,
+                row_indices=np.arange(5),
+                data_format=training_data_format,
             )
             X_direct_tensor = torch.from_numpy(X_direct).float()
 
             # Results should be identical
-            assert torch.allclose(X_dataset, X_direct_tensor, rtol=1e-5, atol=1e-6), (
-                "Perfect match scenario should produce identical results"
-            )
+            assert torch.allclose(
+                X_dataset, X_direct_tensor, rtol=1e-5, atol=1e-6
+            ), "Perfect match scenario should produce identical results"
 
             inference_adata.file.close()
 
@@ -158,7 +170,9 @@ class TestMLPInferenceGeneReordering:
                 dataset,
                 batch_size=5,
                 shuffle=False,
-                collate_fn=lambda batch_indices: cells_collate_fn(batch_indices, dataset),
+                collate_fn=lambda batch_indices: cells_collate_fn(
+                    batch_indices, dataset
+                ),
             )
             batch = next(iter(dataloader))
             X_processed = batch["x"]
@@ -169,19 +183,21 @@ class TestMLPInferenceGeneReordering:
             # Missing genes should have specific z-score values (since they start as 0)
             # After preprocessing: 0 -> 0 (row norm) -> 0 (log) -> -mu/sigma (z-score)
             expected_missing_gene_b = -training_data_format.genes_mu[1] / (
-                training_data_format.genes_sigma[1] + 1e-9  # Ultra high precision for MLP inference testing
+                training_data_format.genes_sigma[1]
+                + 1e-9  # Ultra high precision for MLP inference testing
             )
             expected_missing_gene_d = -training_data_format.genes_mu[3] / (
-                training_data_format.genes_sigma[3] + 1e-9  # Ultra high precision for MLP inference testing
+                training_data_format.genes_sigma[3]
+                + 1e-9  # Ultra high precision for MLP inference testing
             )
 
             # All cells should have the same value for missing genes
-            assert torch.allclose(X_processed[:, 1], torch.tensor(expected_missing_gene_b), atol=1e-5), (
-                f"Missing GENE_B not handled correctly: {X_processed[:, 1]} != {expected_missing_gene_b}"
-            )
-            assert torch.allclose(X_processed[:, 3], torch.tensor(expected_missing_gene_d), atol=1e-5), (
-                f"Missing GENE_D not handled correctly: {X_processed[:, 3]} != {expected_missing_gene_d}"
-            )
+            assert torch.allclose(
+                X_processed[:, 1], torch.tensor(expected_missing_gene_b), atol=1e-5
+            ), f"Missing GENE_B not handled correctly: {X_processed[:, 1]} != {expected_missing_gene_b}"
+            assert torch.allclose(
+                X_processed[:, 3], torch.tensor(expected_missing_gene_d), atol=1e-5
+            ), f"Missing GENE_D not handled correctly: {X_processed[:, 3]} != {expected_missing_gene_d}"
 
     def test_inference_normalization_with_extra_genes(self, training_data_format):
         """Test that inference normalization correctly ignores extra genes."""
@@ -216,7 +232,9 @@ class TestMLPInferenceGeneReordering:
                 dataset,
                 batch_size=5,
                 shuffle=False,
-                collate_fn=lambda batch_indices: cells_collate_fn(batch_indices, dataset),
+                collate_fn=lambda batch_indices: cells_collate_fn(
+                    batch_indices, dataset
+                ),
             )
             batch = next(iter(dataloader))
             X_processed = batch["x"]
@@ -246,7 +264,9 @@ class TestMLPInferenceGeneReordering:
 
             # Set the same data in both AnnData objects but in different gene orders
             # Create a new AnnData object to avoid SparseEfficiencyWarning
-            reference_adata_new = ad.AnnData(X=csr_matrix(raw_data), obs=reference_adata.obs, var=reference_adata.var)
+            reference_adata_new = ad.AnnData(
+                X=csr_matrix(raw_data), obs=reference_adata.obs, var=reference_adata.var
+            )
 
             # For reordered: genes are E, C, A, D, B, so data should be reordered
             # raw_data columns: A, B, C, D, E (indices 0, 1, 2, 3, 4)
@@ -254,7 +274,9 @@ class TestMLPInferenceGeneReordering:
             reordered_data = raw_data[:, [4, 2, 0, 3, 1]]
             # Create a new AnnData object to avoid SparseEfficiencyWarning
             reordered_adata_new = ad.AnnData(
-                X=csr_matrix(reordered_data), obs=reordered_adata.obs, var=reordered_adata.var
+                X=csr_matrix(reordered_data),
+                obs=reordered_adata.obs,
+                var=reordered_adata.var,
             )
 
             # Save data
@@ -285,9 +307,9 @@ class TestMLPInferenceGeneReordering:
             reordered_batch = cells_collate_fn(batch_indices, reordered_dataset)
 
             # Results should be identical after reordering
-            assert torch.allclose(reference_batch["x"], reordered_batch["x"], atol=1e-5), (
-                "Reordered genes should produce identical results to correctly ordered genes"
-            )
+            assert torch.allclose(
+                reference_batch["x"], reordered_batch["x"], atol=1e-5
+            ), "Reordered genes should produce identical results to correctly ordered genes"
 
     def test_inference_normalization_with_mixed_scenario(self, training_data_format):
         """Test complex scenario with missing, extra, and reordered genes."""
@@ -322,7 +344,9 @@ class TestMLPInferenceGeneReordering:
                 dataset,
                 batch_size=5,
                 shuffle=False,
-                collate_fn=lambda batch_indices: cells_collate_fn(batch_indices, dataset),
+                collate_fn=lambda batch_indices: cells_collate_fn(
+                    batch_indices, dataset
+                ),
             )
             batch = next(iter(dataloader))
             X_processed = batch["x"]
@@ -337,9 +361,11 @@ class TestMLPInferenceGeneReordering:
                     training_data_format.genes_sigma[missing_idx]
                     + 1e-9  # Ultra high precision for MLP inference consistency
                 )
-                assert torch.allclose(X_processed[:, missing_idx], torch.tensor(expected_missing_value), atol=1e-5), (
-                    f"Missing gene at index {missing_idx} not handled correctly"
-                )
+                assert torch.allclose(
+                    X_processed[:, missing_idx],
+                    torch.tensor(expected_missing_value),
+                    atol=1e-5,
+                ), f"Missing gene at index {missing_idx} not handled correctly"
 
     def test_inference_pipeline_consistency(self, training_data_format):
         """Test that MLP inference pipeline produces consistent results regardless of gene order."""
@@ -375,14 +401,20 @@ class TestMLPInferenceGeneReordering:
                     X_processed = batch["x"]
 
                     # Basic sanity checks
-                    assert X_processed.shape[1] == training_data_format.n_genes, (
-                        f"Output shape wrong for {scenario}: {X_processed.shape[1]} != {training_data_format.n_genes}"
-                    )
-                    assert not torch.any(torch.isnan(X_processed)), f"NaN values in {scenario}"
-                    assert not torch.any(torch.isinf(X_processed)), f"Inf values in {scenario}"
+                    assert (
+                        X_processed.shape[1] == training_data_format.n_genes
+                    ), f"Output shape wrong for {scenario}: {X_processed.shape[1]} != {training_data_format.n_genes}"
+                    assert not torch.any(
+                        torch.isnan(X_processed)
+                    ), f"NaN values in {scenario}"
+                    assert not torch.any(
+                        torch.isinf(X_processed)
+                    ), f"Inf values in {scenario}"
 
                     # Reasonable value range after z-score normalization
-                    assert X_processed.abs().max() < 50, f"Extreme values in {scenario}: {X_processed.abs().max()}"
+                    assert (
+                        X_processed.abs().max() < 50
+                    ), f"Extreme values in {scenario}: {X_processed.abs().max()}"
 
                     break  # Just test first batch
 
@@ -407,11 +439,16 @@ class TestMLPInferenceGeneReordering:
 
             # This is what the user wants to do for SHAP analysis
             X_train = load_and_preprocess_data_numpy(
-                data_path=training_file, row_indices=row_inds_train, data_format=data_format_from_training
+                data_path=training_file,
+                row_indices=row_inds_train,
+                data_format=data_format_from_training,
             )
 
             # Verify this works correctly
-            assert X_train.shape == (len(row_inds_train), data_format_from_training.n_genes)
+            assert X_train.shape == (
+                len(row_inds_train),
+                data_format_from_training.n_genes,
+            )
             assert X_train.dtype == np.float32
             assert not np.any(np.isnan(X_train))
             assert not np.any(np.isinf(X_train))

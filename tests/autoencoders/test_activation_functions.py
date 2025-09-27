@@ -1,9 +1,6 @@
 import torch
 
-from scxpand.autoencoders.ae_modules import (
-    dropout_activation,
-    theta_activation,
-)
+from scxpand.autoencoders.ae_modules import dropout_activation, theta_activation
 
 
 class TestActivationFunctions:
@@ -21,9 +18,15 @@ class TestActivationFunctions:
 
         for x in inputs:
             result = theta_activation(x)
-            assert torch.all(result > 0), "theta_activation should always output positive values"
-            assert torch.all(result >= 1e-4), "theta_activation should respect minimum bound"
-            assert torch.all(result <= 1e4), "theta_activation should respect maximum bound"
+            assert torch.all(
+                result > 0
+            ), "theta_activation should always output positive values"
+            assert torch.all(
+                result >= 1e-4
+            ), "theta_activation should respect minimum bound"
+            assert torch.all(
+                result <= 1e4
+            ), "theta_activation should respect maximum bound"
 
     def test_theta_activation_softplus_behavior(self):
         """Test that theta_activation behaves like clamped softplus."""
@@ -32,26 +35,34 @@ class TestActivationFunctions:
 
         # Should be monotonically increasing
         diffs = torch.diff(result)
-        assert torch.all(diffs >= 0), "theta_activation should be monotonically increasing"
+        assert torch.all(
+            diffs >= 0
+        ), "theta_activation should be monotonically increasing"
 
         # For large positive inputs, should approach x (softplus behavior)
         large_x = torch.tensor([5.0, 10.0])
         large_result = theta_activation(large_x)
         # softplus(x) ≈ x for large x
-        assert torch.allclose(large_result, large_x, atol=0.1), "Should approximate input for large positive values"
+        assert torch.allclose(
+            large_result, large_x, atol=0.1
+        ), "Should approximate input for large positive values"
 
     def test_theta_activation_numerical_stability(self):
         """Test theta_activation with extreme values."""
         # Test with very large values (should be clamped)
         extreme_pos = torch.ones(5, 10) * 100
         result_pos = theta_activation(extreme_pos)
-        assert torch.all(torch.isfinite(result_pos)), "Should handle extreme positive values"
+        assert torch.all(
+            torch.isfinite(result_pos)
+        ), "Should handle extreme positive values"
         assert torch.all(result_pos <= 1e4), "Should clamp large values"
 
         # Test with very negative values
         extreme_neg = torch.ones(5, 10) * -100
         result_neg = theta_activation(extreme_neg)
-        assert torch.all(torch.isfinite(result_neg)), "Should handle extreme negative values"
+        assert torch.all(
+            torch.isfinite(result_neg)
+        ), "Should handle extreme negative values"
         assert torch.all(result_neg >= 1e-4), "Should respect minimum bound"
 
     def test_dropout_activation_probability_output(self):
@@ -66,8 +77,12 @@ class TestActivationFunctions:
 
         for x in inputs:
             result = dropout_activation(x)
-            assert torch.all(result >= 0), "dropout_activation should output values >= 0"
-            assert torch.all(result <= 1), "dropout_activation should output values <= 1"
+            assert torch.all(
+                result >= 0
+            ), "dropout_activation should output values >= 0"
+            assert torch.all(
+                result <= 1
+            ), "dropout_activation should output values <= 1"
 
     def test_dropout_activation_sigmoid_behavior(self):
         """Test that dropout_activation behaves like sigmoid."""
@@ -76,30 +91,40 @@ class TestActivationFunctions:
 
         # Should be monotonically increasing
         diffs = torch.diff(result)
-        assert torch.all(diffs >= 0), "dropout_activation should be monotonically increasing"
+        assert torch.all(
+            diffs >= 0
+        ), "dropout_activation should be monotonically increasing"
 
         # Should approach 0 for large negative inputs
         neg_x = torch.tensor([-10.0, -5.0])
         neg_result = dropout_activation(neg_x)
-        assert torch.all(neg_result < 0.1), "Should approach 0 for large negative inputs"
+        assert torch.all(
+            neg_result < 0.1
+        ), "Should approach 0 for large negative inputs"
 
         # Should approach 1 for large positive inputs
         pos_x = torch.tensor([5.0, 10.0])
         pos_result = dropout_activation(pos_x)
-        assert torch.all(pos_result > 0.9), "Should approach 1 for large positive inputs"
+        assert torch.all(
+            pos_result > 0.9
+        ), "Should approach 1 for large positive inputs"
 
     def test_dropout_activation_numerical_stability(self):
         """Test dropout_activation with extreme values."""
         # Test with very large positive values
         extreme_pos = torch.ones(5, 10) * 100
         result_pos = dropout_activation(extreme_pos)
-        assert torch.all(torch.isfinite(result_pos)), "Should handle extreme positive values"
+        assert torch.all(
+            torch.isfinite(result_pos)
+        ), "Should handle extreme positive values"
         assert torch.all(result_pos <= 1), "Should not exceed 1"
 
         # Test with very large negative values
         extreme_neg = torch.ones(5, 10) * -100
         result_neg = dropout_activation(extreme_neg)
-        assert torch.all(torch.isfinite(result_neg)), "Should handle extreme negative values"
+        assert torch.all(
+            torch.isfinite(result_neg)
+        ), "Should handle extreme negative values"
         assert torch.all(result_neg >= 0), "Should not go below 0"
 
     def test_activation_functions_gradient_flow(self):
@@ -148,4 +173,6 @@ class TestActivationFunctions:
             dropout_out = dropout_activation(x)
 
             assert theta_out.dtype == dtype, f"theta_activation should preserve {dtype}"
-            assert dropout_out.dtype == dtype, f"dropout_activation should preserve {dtype}"
+            assert (
+                dropout_out.dtype == dtype
+            ), f"dropout_activation should preserve {dtype}"

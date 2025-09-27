@@ -14,7 +14,6 @@ import socketserver
 import subprocess
 import sys
 import webbrowser
-
 from pathlib import Path
 
 
@@ -27,7 +26,9 @@ def check_dependencies():
         subprocess.run(["pandoc", "--version"], capture_output=True, check=True)
         print("✅ Pandoc found in PATH")
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print("❌ Pandoc not found. Please install it from: https://pandoc.org/installing.html")
+        print(
+            "❌ Pandoc not found. Please install it from: https://pandoc.org/installing.html"
+        )
         sys.exit(1)
 
 
@@ -98,7 +99,9 @@ def build_docs():
         # Show only important warnings if any
         if result.stderr:
             stderr_lines = result.stderr.split("\n")
-            important_warnings = [line for line in stderr_lines if "ERROR" in line or "CRITICAL" in line]
+            important_warnings = [
+                line for line in stderr_lines if "ERROR" in line or "CRITICAL" in line
+            ]
             if important_warnings:
                 print("⚠️  Important warnings:")
                 for warning in important_warnings[:5]:  # Show max 5
@@ -107,8 +110,12 @@ def build_docs():
         return True
     except subprocess.CalledProcessError as e:
         print(f"❌ Error building documentation: {e}")
-        print("STDOUT:", e.stdout[-1000:] if e.stdout else "No stdout")  # Last 1000 chars only
-        print("STDERR:", e.stderr[-1000:] if e.stderr else "No stderr")  # Last 1000 chars only
+        print(
+            "STDOUT:", e.stdout[-1000:] if e.stdout else "No stdout"
+        )  # Last 1000 chars only
+        print(
+            "STDERR:", e.stderr[-1000:] if e.stderr else "No stderr"
+        )  # Last 1000 chars only
         return False
 
 
@@ -120,7 +127,9 @@ def find_available_port(start_port: int, max_attempts: int = 10) -> int:
                 return port
         except OSError:
             continue
-    raise OSError(f"Could not find an available port in range {start_port}-{start_port + max_attempts - 1}")
+    raise OSError(
+        f"Could not find an available port in range {start_port}-{start_port + max_attempts - 1}"
+    )
 
 
 def serve_docs(port: int = 8000):
@@ -160,10 +169,18 @@ def serve_docs(port: int = 8000):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Build and serve scXpand documentation")
-    parser.add_argument("--serve", action="store_true", help="Serve documentation after building")
-    parser.add_argument("--port", type=int, default=8000, help="Port for serving (default: 8000)")
-    parser.add_argument("--no-build", action="store_true", help="Skip building, just serve")
+    parser = argparse.ArgumentParser(
+        description="Build and serve scXpand documentation"
+    )
+    parser.add_argument(
+        "--serve", action="store_true", help="Serve documentation after building"
+    )
+    parser.add_argument(
+        "--port", type=int, default=8000, help="Port for serving (default: 8000)"
+    )
+    parser.add_argument(
+        "--no-build", action="store_true", help="Skip building, just serve"
+    )
 
     args = parser.parse_args()
 

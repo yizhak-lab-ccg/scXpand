@@ -32,6 +32,8 @@ A framework for predicting T-cell clonal expansion from single-cell RNA sequenci
 
 **Manuscript in preparation** - detailed methodology and benchmarks coming soon.
 
+scXpand follows the `scverse ecosystem <https://scverse.org/>`_ standards for single-cell analysis tools.
+
 **[View full documentation](https://scxpand.readthedocs.io/en/latest/)** for comprehensive guides and API reference.
 
 ---
@@ -90,15 +92,26 @@ If you want to contribute or work with the latest source code, follow these step
    cd scXpand
    ```
 
-2. **Run the install script:**
-   - **Windows PowerShell:**
-     ```bash
-     .\install.bat
-     ```
-   - **macOS/Linux:**
-     ```bash
-     ./install.sh
-     ```
+2. **Install in development mode:**
+   ```bash
+   pip install -e ".[dev]"
+   ```
+
+3. **Install pre-commit hooks:**
+   ```bash
+   pre-commit install
+   ```
+
+4. **For CUDA development setup (optional):**
+   ```bash
+   python scripts/install_torch_for_dev.py
+   ```
+
+**Template Updates:** scXpand follows the scverse ecosystem standards. To update from the latest template:
+```bash
+pip install cruft
+cruft update
+```
 
 </details>
 

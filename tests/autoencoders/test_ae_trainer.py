@@ -25,12 +25,20 @@ class TestAutoEncoderTrainer:
 
         # Test default values
         assert params.latent_dim > 0, "latent_dim should be positive"
-        assert isinstance(params.encoder_hidden_dims, tuple), "encoder_hidden_dims should be tuple"
-        assert isinstance(params.decoder_hidden_dims, tuple), "decoder_hidden_dims should be tuple"
-        assert isinstance(params.classifier_hidden_dims, tuple), "classifier_hidden_dims should be tuple"
+        assert isinstance(
+            params.encoder_hidden_dims, tuple
+        ), "encoder_hidden_dims should be tuple"
+        assert isinstance(
+            params.decoder_hidden_dims, tuple
+        ), "decoder_hidden_dims should be tuple"
+        assert isinstance(
+            params.classifier_hidden_dims, tuple
+        ), "classifier_hidden_dims should be tuple"
         assert 0 <= params.dropout_rate <= 1, "dropout_rate should be between 0 and 1"
         assert params.n_epochs > 0, "n_epochs should be positive"
-        assert params.early_stopping_patience > 0, "early_stopping_patience should be positive"
+        assert (
+            params.early_stopping_patience > 0
+        ), "early_stopping_patience should be positive"
 
     def test_autoencoder_params_custom_values(self):
         """Test custom values for AutoEncoderParams."""

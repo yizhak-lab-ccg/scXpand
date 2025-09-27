@@ -8,7 +8,6 @@ import contextlib
 import os
 import sys
 import time
-
 from io import StringIO
 from unittest.mock import patch
 
@@ -60,7 +59,9 @@ class TestCLIUnit:
         assert hasattr(fire, "Fire")
         assert callable(fire.Fire)
 
-    @pytest.mark.parametrize("command", ["train", "optimize", "optimize-all", "inference", "list-models"])
+    @pytest.mark.parametrize(
+        "command", ["train", "optimize", "optimize-all", "inference", "list-models"]
+    )
     def test_cli_command_availability(self, command):
         """Test that each CLI command is available through Fire."""
         with patch("scxpand.main.fire.Fire") as mock_fire:
@@ -151,7 +152,9 @@ class TestCLIFunctionIntegration:
     @patch("scxpand.main.get_new_version_path")
     @patch("scxpand.main.load_and_override_params")
     @patch("scxpand.main.call_training_function")
-    def test_train_function_integration(self, mock_call_training, mock_load_params, mock_get_path, mock_validate):
+    def test_train_function_integration(
+        self, mock_call_training, mock_load_params, mock_get_path, mock_validate
+    ):
         """Test train function integration with CLI."""
         # Mock all dependencies
 
@@ -204,7 +207,9 @@ class TestCLIFunctionIntegration:
 
     @patch("scxpand.main.run_inference")
     @patch("scxpand.main.load_eval_indices")
-    def test_inference_function_integration(self, mock_load_indices, mock_run_inference):
+    def test_inference_function_integration(
+        self, mock_load_indices, mock_run_inference
+    ):
         """Test inference function integration with CLI."""
         # Mock dependencies
         mock_load_indices.return_value = None
@@ -343,7 +348,9 @@ class TestCLIPerformance:
 
             # CLI should start up in less than 1 second
             startup_time = end_time - start_time
-            assert startup_time < 1.0, f"CLI startup took {startup_time:.3f}s, should be < 1.0s"
+            assert (
+                startup_time < 1.0
+            ), f"CLI startup took {startup_time:.3f}s, should be < 1.0s"
 
     def test_cli_memory_usage(self):
         """Test that CLI doesn't use excessive memory."""
@@ -359,9 +366,9 @@ class TestCLIPerformance:
             memory_increase = final_memory - initial_memory
 
             # CLI should not use more than 50MB additional memory
-            assert memory_increase < 50 * 1024 * 1024, (
-                f"CLI used {memory_increase / 1024 / 1024:.1f}MB, should be < 50MB"
-            )
+            assert (
+                memory_increase < 50 * 1024 * 1024
+            ), f"CLI used {memory_increase / 1024 / 1024:.1f}MB, should be < 50MB"
 
 
 class TestCLIConfiguration:

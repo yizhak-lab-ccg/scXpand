@@ -1,14 +1,9 @@
 import numpy as np
 import pandas as pd
 import pytest
-
 from anndata import AnnData
 
-from scxpand.util.metrics import (
-    calculate_metrics,
-    compute_basic_metrics,
-    safe_hmean,
-)
+from scxpand.util.metrics import calculate_metrics, compute_basic_metrics, safe_hmean
 
 
 class TestMetrics:
@@ -81,7 +76,9 @@ class TestMetrics:
         # Use AnnData slicing to get a view of the obs dataframe instead of using iloc
         # This avoids the ImplicitModificationWarning
         subset_adata = adata[row_inds_dev]
-        metrics = calculate_metrics(y_true=y_true, y_pred_prob=y_pred_prob, obs_df=subset_adata.obs)
+        metrics = calculate_metrics(
+            y_true=y_true, y_pred_prob=y_pred_prob, obs_df=subset_adata.obs
+        )
 
         # Check that the metrics dictionary has the expected structure
         # The metrics should include overall metrics like AUROC and F1

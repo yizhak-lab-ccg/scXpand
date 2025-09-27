@@ -16,7 +16,9 @@ class TestCLICoverage:
     def run_cli_test(self, command: list[str], _description: str) -> bool:
         """Run a CLI test and return success status."""
         try:
-            result = subprocess.run(command, check=False, capture_output=True, text=True, timeout=10)
+            result = subprocess.run(
+                command, check=False, capture_output=True, text=True, timeout=10
+            )
             return result.returncode == 0
         except (subprocess.TimeoutExpired, Exception):
             return False
@@ -85,7 +87,14 @@ class TestCLICoverage:
     @pytest.mark.slow
     def test_invalid_model_type_handling(self):
         """Test invalid model type handling."""
-        command = [sys.executable, "-m", "scxpand.main", "train", "--model_type", "invalid"]
+        command = [
+            sys.executable,
+            "-m",
+            "scxpand.main",
+            "train",
+            "--model_type",
+            "invalid",
+        ]
         success = self.run_cli_test(command, "Invalid model type")
         # Invalid model type should fail gracefully
         assert not success, "Invalid model type should fail gracefully"
@@ -111,7 +120,13 @@ class TestCLICoverage:
         """Test that all expected CLI commands are available."""
         # This test verifies that the CLI structure is correct
         # The actual command availability is tested in the help command tests
-        expected_commands = ["train", "optimize", "optimize-all", "inference", "list-models"]
+        expected_commands = [
+            "train",
+            "optimize",
+            "optimize-all",
+            "inference",
+            "list-models",
+        ]
 
         # Verify that we can construct help commands for all expected commands
         for cmd in expected_commands:

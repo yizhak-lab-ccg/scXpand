@@ -2,7 +2,6 @@
 
 import json
 import tempfile
-
 from dataclasses import asdict
 from pathlib import Path
 
@@ -31,7 +30,9 @@ class TestLightGBMEnumValues:
         y = np.random.randint(0, 2, 50)
 
         for boosting_type in BoostingType:
-            print(f"Testing boosting_type: {boosting_type} (value: '{boosting_type.value}')")
+            print(
+                f"Testing boosting_type: {boosting_type} (value: '{boosting_type.value}')"
+            )
 
             try:
                 # RF boosting type requires additional parameters
@@ -79,16 +80,24 @@ class TestLightGBMEnumValues:
         }
 
         for objective_type, y_data in objective_data_map.items():
-            print(f"Testing objective: {objective_type} (value: '{objective_type.value}')")
+            print(
+                f"Testing objective: {objective_type} (value: '{objective_type.value}')"
+            )
 
             try:
                 if objective_type == ObjectiveType.REGRESSION:
                     model = lgb.LGBMRegressor(
-                        objective=objective_type.value, n_estimators=1, verbose=-1, random_state=42
+                        objective=objective_type.value,
+                        n_estimators=1,
+                        verbose=-1,
+                        random_state=42,
                     )
                 else:
                     model = lgb.LGBMClassifier(
-                        objective=objective_type.value, n_estimators=1, verbose=-1, random_state=42
+                        objective=objective_type.value,
+                        n_estimators=1,
+                        verbose=-1,
+                        random_state=42,
                     )
 
                 model.fit(X, y_data)
@@ -110,7 +119,11 @@ class TestLightGBMEnumValues:
         # Map metrics to appropriate data and model types
         metric_config_map = {
             MetricType.BINARY_LOGLOSS: (y_binary, lgb.LGBMClassifier, "binary"),
-            MetricType.MULTICLASS_LOGLOSS: (y_multiclass, lgb.LGBMClassifier, "multiclass"),
+            MetricType.MULTICLASS_LOGLOSS: (
+                y_multiclass,
+                lgb.LGBMClassifier,
+                "multiclass",
+            ),
             MetricType.RMSE: (y_regression, lgb.LGBMRegressor, "regression"),
             MetricType.MAE: (y_regression, lgb.LGBMRegressor, "regression"),
             MetricType.AUC: (y_binary, lgb.LGBMClassifier, "binary"),
@@ -122,14 +135,20 @@ class TestLightGBMEnumValues:
 
             try:
                 model = model_class(
-                    objective=objective, metric=metric_type.value, n_estimators=1, verbose=-1, random_state=42
+                    objective=objective,
+                    metric=metric_type.value,
+                    n_estimators=1,
+                    verbose=-1,
+                    random_state=42,
                 )
 
                 model.fit(X, y_data)
                 print(f"✅ {metric_type} works correctly")
 
             except Exception as e:
-                pytest.fail(f"MetricType.{metric_type.name} ('{metric_type.value}') is not supported by LightGBM: {e}")
+                pytest.fail(
+                    f"MetricType.{metric_type.name} ('{metric_type.value}') is not supported by LightGBM: {e}"
+                )
 
 
 class TestLightGBMParamsIntegration:
@@ -271,11 +290,21 @@ class TestEnumStringBehavior:
 
         # This should work without calling .value on strings
         model = lgb.LGBMClassifier(
-            boosting_type=params.boosting_type.value
-            if hasattr(params.boosting_type, "value")
-            else params.boosting_type,
-            objective=params.objective.value if hasattr(params.objective, "value") else params.objective,
-            metric=params.metric.value if hasattr(params.metric, "value") else params.metric,
+            boosting_type=(
+                params.boosting_type.value
+                if hasattr(params.boosting_type, "value")
+                else params.boosting_type
+            ),
+            objective=(
+                params.objective.value
+                if hasattr(params.objective, "value")
+                else params.objective
+            ),
+            metric=(
+                params.metric.value
+                if hasattr(params.metric, "value")
+                else params.metric
+            ),
             n_estimators=params.n_estimators,
             learning_rate=params.learning_rate,
             verbose=params.verbose,
@@ -316,10 +345,16 @@ class TestEnumStringBehavior:
 
         # Test enum parameters
         model1 = lgb.LGBMClassifier(
-            boosting_type=enum_params.boosting_type.value
-            if hasattr(enum_params.boosting_type, "value")
-            else enum_params.boosting_type,
-            objective=enum_params.objective.value if hasattr(enum_params.objective, "value") else enum_params.objective,
+            boosting_type=(
+                enum_params.boosting_type.value
+                if hasattr(enum_params.boosting_type, "value")
+                else enum_params.boosting_type
+            ),
+            objective=(
+                enum_params.objective.value
+                if hasattr(enum_params.objective, "value")
+                else enum_params.objective
+            ),
             n_estimators=1,
             verbose=-1,
             random_state=42,
@@ -328,12 +363,16 @@ class TestEnumStringBehavior:
 
         # Test string parameters
         model2 = lgb.LGBMClassifier(
-            boosting_type=string_params.boosting_type.value
-            if hasattr(string_params.boosting_type, "value")
-            else string_params.boosting_type,
-            objective=string_params.objective.value
-            if hasattr(string_params.objective, "value")
-            else string_params.objective,
+            boosting_type=(
+                string_params.boosting_type.value
+                if hasattr(string_params.boosting_type, "value")
+                else string_params.boosting_type
+            ),
+            objective=(
+                string_params.objective.value
+                if hasattr(string_params.objective, "value")
+                else string_params.objective
+            ),
             n_estimators=1,
             verbose=-1,
             random_state=42,
@@ -385,13 +424,20 @@ class TestEnumStringBehavior:
             obs = pd.DataFrame(
                 {
                     "is_expanded": np.random.randint(0, 2, n_cells),
-                    "expansion": np.random.choice(["expanded", "not_expanded"], n_cells),  # Required for evaluation
+                    "expansion": np.random.choice(
+                        ["expanded", "not_expanded"], n_cells
+                    ),  # Required for evaluation
                     "tissue_type": np.random.choice(["T_cell", "B_cell"], n_cells),
                     "imputed_labels": np.random.choice(["CD4", "CD8"], n_cells),
                     "study": ["study_1"] * n_cells,  # Required for data splitting
-                    "patient": [f"patient_{i}" for i in range(n_cells)],  # Required for data splitting
-                    "sample": [f"sample_{i}" for i in range(n_cells)],  # Required for data splitting
-                    "cancer_type": ["cancer_A"] * n_cells,  # Required for data splitting
+                    "patient": [
+                        f"patient_{i}" for i in range(n_cells)
+                    ],  # Required for data splitting
+                    "sample": [
+                        f"sample_{i}" for i in range(n_cells)
+                    ],  # Required for data splitting
+                    "cancer_type": ["cancer_A"]
+                    * n_cells,  # Required for data splitting
                 }
             )
 

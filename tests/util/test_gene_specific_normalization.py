@@ -40,8 +40,12 @@ class TestGeneSpecificNormalization:
         # GENE_C: medium mean, medium std
         # GENE_D: very low mean, very high std (will be close to -1 after z-score for missing genes)
         # GENE_E: high mean, high std
-        genes_mu: np.ndarray = np.array([100.0, 10.0, 50.0, 5.0, 200.0], dtype=np.float32)
-        genes_sigma: np.ndarray = np.array([20.0, 100.0, 30.0, 200.0, 50.0], dtype=np.float32)
+        genes_mu: np.ndarray = np.array(
+            [100.0, 10.0, 50.0, 5.0, 200.0], dtype=np.float32
+        )
+        genes_sigma: np.ndarray = np.array(
+            [20.0, 100.0, 30.0, 200.0, 50.0], dtype=np.float32
+        )
 
         return DataFormat(
             n_genes=len(gene_names),
@@ -53,7 +57,9 @@ class TestGeneSpecificNormalization:
             target_sum=1e4,
         )
 
-    def test_gene_specific_normalization_manual(self, training_data_format_with_specific_stats: DataFormat) -> None:
+    def test_gene_specific_normalization_manual(
+        self, training_data_format_with_specific_stats: DataFormat
+    ) -> None:
         """Test gene-specific normalization manually to verify the math."""
         data_format = training_data_format_with_specific_stats
 
@@ -86,7 +92,9 @@ class TestGeneSpecificNormalization:
 
         # Check that the processed data has reasonable z-score values
         # (typically between -3 and 3 for most data)
-        assert np.all(np.abs(X_processed) < 10), f"Z-score values too extreme: {X_processed}"
+        assert np.all(
+            np.abs(X_processed) < 10
+        ), f"Z-score values too extreme: {X_processed}"
 
         # Verify that genes with different statistics (mu, sigma) get different normalization
         # GENE_A (mu=100, sigma=20) vs GENE_B (mu=10, sigma=100) should behave differently
@@ -108,7 +116,13 @@ class TestGeneSpecificNormalization:
         data_format = training_data_format_with_specific_stats
 
         # Create test data with genes in different order
-        test_genes = ["GENE_C", "GENE_A", "GENE_E", "GENE_B", "GENE_D"]  # Different order
+        test_genes = [
+            "GENE_C",
+            "GENE_A",
+            "GENE_E",
+            "GENE_B",
+            "GENE_D",
+        ]  # Different order
         X_raw = np.array(
             [
                 [50.0, 100.0, 200.0, 10.0, 5.0],  # Same values, different order
@@ -122,13 +136,17 @@ class TestGeneSpecificNormalization:
         test_adata = ad.AnnData(X=X_raw, obs=obs_df, var=var_df)
 
         # Reorder genes to match training format
-        adata_reordered = data_format.prepare_adata_for_training(test_adata, reorder_genes=True)
+        adata_reordered = data_format.prepare_adata_for_training(
+            test_adata, reorder_genes=True
+        )
 
         # Verify genes are now in correct order
         assert list(adata_reordered.var_names) == data_format.gene_names
 
         # Apply preprocessing
-        X_processed = preprocess_expression_data(X=adata_reordered.X, data_format=data_format)
+        X_processed = preprocess_expression_data(
+            X=adata_reordered.X, data_format=data_format
+        )
 
         # Verify that preprocessing was applied correctly
         assert X_processed.shape == (1, 5)  # 1 row, 5 genes
@@ -163,14 +181,18 @@ class TestGeneSpecificNormalization:
         test_adata = ad.AnnData(X=X_raw, obs=obs_df, var=var_df)
 
         # Reorder genes to match training format (will add missing genes as zeros)
-        adata_reordered = data_format.prepare_adata_for_training(test_adata, reorder_genes=True)
+        adata_reordered = data_format.prepare_adata_for_training(
+            test_adata, reorder_genes=True
+        )
 
         # Verify genes are now in correct order with missing genes added
         assert list(adata_reordered.var_names) == data_format.gene_names
         assert adata_reordered.n_vars == 5
 
         # Apply preprocessing
-        X_processed = preprocess_expression_data(X=adata_reordered.X, data_format=data_format)
+        X_processed = preprocess_expression_data(
+            X=adata_reordered.X, data_format=data_format
+        )
 
         # Verify that preprocessing was applied correctly
         assert X_processed.shape == (1, 5)  # 1 row, 5 genes
@@ -184,15 +206,33 @@ class TestGeneSpecificNormalization:
         # Verify that the data structure is preserved and preprocessing worked
         assert X_processed.shape == adata_reordered.X.shape
 
-    def test_extra_genes_are_removed_correctly(self, training_data_format_with_specific_stats: DataFormat) -> None:
+    def test_extra_genes_are_removed_correctly(
+        self, training_data_format_with_specific_stats: DataFormat
+    ) -> None:
         """Test that extra genes are removed and remaining genes get correct normalization."""
         data_format = training_data_format_with_specific_stats
 
         # Create test data with extra genes
-        test_genes = ["GENE_A", "GENE_B", "GENE_C", "GENE_D", "GENE_E", "EXTRA_1", "EXTRA_2"]
+        test_genes = [
+            "GENE_A",
+            "GENE_B",
+            "GENE_C",
+            "GENE_D",
+            "GENE_E",
+            "EXTRA_1",
+            "EXTRA_2",
+        ]
         X_raw = np.array(
             [
-                [100.0, 10.0, 50.0, 5.0, 200.0, 999.0, 888.0],  # Extra genes have high values
+                [
+                    100.0,
+                    10.0,
+                    50.0,
+                    5.0,
+                    200.0,
+                    999.0,
+                    888.0,
+                ],  # Extra genes have high values
             ],
             dtype=np.float32,
         )
@@ -203,14 +243,18 @@ class TestGeneSpecificNormalization:
         test_adata = ad.AnnData(X=X_raw, obs=obs_df, var=var_df)
 
         # Reorder genes to match training format (will remove extra genes)
-        adata_reordered = data_format.prepare_adata_for_training(test_adata, reorder_genes=True)
+        adata_reordered = data_format.prepare_adata_for_training(
+            test_adata, reorder_genes=True
+        )
 
         # Verify extra genes are removed
         assert list(adata_reordered.var_names) == data_format.gene_names
         assert adata_reordered.n_vars == 5
 
         # Apply preprocessing
-        X_processed = preprocess_expression_data(X=adata_reordered.X, data_format=data_format)
+        X_processed = preprocess_expression_data(
+            X=adata_reordered.X, data_format=data_format
+        )
 
         # Verify that preprocessing was applied correctly
         assert X_processed.shape == (1, 5)  # 1 row, 5 genes
@@ -284,14 +328,22 @@ class TestGeneSpecificNormalization:
         data_format = training_data_format_with_specific_stats
 
         # Create test data with gene mismatches
-        test_genes: list[str] = ["GENE_C", "GENE_A", "GENE_E"]  # Missing B and D, different order
+        test_genes: list[str] = [
+            "GENE_C",
+            "GENE_A",
+            "GENE_E",
+        ]  # Missing B and D, different order
         n_cells: int = 5
-        X_raw: np.ndarray = np.random.exponential(scale=2.0, size=(n_cells, len(test_genes))).astype(np.float32)
+        X_raw: np.ndarray = np.random.exponential(
+            scale=2.0, size=(n_cells, len(test_genes))
+        ).astype(np.float32)
 
         # Create AnnData with gene mismatches
         obs_df = pd.DataFrame(
             {
-                "expansion": np.random.choice(["expanded", "non-expanded"], size=n_cells),
+                "expansion": np.random.choice(
+                    ["expanded", "non-expanded"], size=n_cells
+                ),
                 "tissue_type": np.random.choice(["A", "B"], size=n_cells),
             }
         )
@@ -359,12 +411,16 @@ class TestGeneSpecificNormalization:
         # Create test data with gene mismatches
         test_genes = ["GENE_C", "GENE_A", "GENE_E"]  # Missing B and D, different order
         n_cells = 3
-        X_raw = np.random.exponential(scale=2.0, size=(n_cells, len(test_genes))).astype(np.float32)
+        X_raw = np.random.exponential(
+            scale=2.0, size=(n_cells, len(test_genes))
+        ).astype(np.float32)
 
         # Create AnnData with gene mismatches
         obs_df = pd.DataFrame(
             {
-                "expansion": np.random.choice(["expanded", "non-expanded"], size=n_cells),
+                "expansion": np.random.choice(
+                    ["expanded", "non-expanded"], size=n_cells
+                ),
                 "tissue_type": np.random.choice(["A", "B"], size=n_cells),
             }
         )
@@ -418,7 +474,9 @@ class TestGeneSpecificNormalization:
                 assert result.shape == (n_cells,)
                 mock_inference.assert_called_once()
 
-    def test_edge_cases_gene_normalization(self, training_data_format_with_specific_stats: DataFormat) -> None:
+    def test_edge_cases_gene_normalization(
+        self, training_data_format_with_specific_stats: DataFormat
+    ) -> None:
         """Test edge cases in gene-specific normalization."""
         data_format = training_data_format_with_specific_stats
 
@@ -431,14 +489,18 @@ class TestGeneSpecificNormalization:
         test_adata = ad.AnnData(X=X_raw, obs=obs_df, var=var_df)
 
         # Reorder genes to match training format
-        adata_reordered = data_format.prepare_adata_for_training(test_adata, reorder_genes=True)
+        adata_reordered = data_format.prepare_adata_for_training(
+            test_adata, reorder_genes=True
+        )
 
         # Verify genes are now in correct order with missing genes added
         assert list(adata_reordered.var_names) == data_format.gene_names
         assert adata_reordered.n_vars == 5
 
         # Apply preprocessing
-        X_processed = preprocess_expression_data(X=adata_reordered.X, data_format=data_format)
+        X_processed = preprocess_expression_data(
+            X=adata_reordered.X, data_format=data_format
+        )
 
         # Verify that preprocessing was applied correctly
         assert X_processed.shape == (1, 5)  # 1 row, 5 genes
@@ -472,7 +534,9 @@ class TestGeneSpecificNormalization:
         # Apply the complete preprocessing pipeline step by step to verify each stage
 
         # Step 1: Row normalization (target_sum=1e4)
-        X_normalized = apply_row_normalization(X_raw.copy(), target_sum=data_format.target_sum)
+        X_normalized = apply_row_normalization(
+            X_raw.copy(), target_sum=data_format.target_sum
+        )
 
         # Verify row normalization worked correctly
         row_sums = np.sum(X_normalized, axis=1)
@@ -505,7 +569,9 @@ class TestGeneSpecificNormalization:
             expected_zscore[:, gene_idx] = (X_logged[:, gene_idx] - mu) / (sigma + eps)
 
         # Apply clipping using the default sigma clip factor
-        expected_zscore = np.clip(expected_zscore, -DEFAULT_SIGMA_CLIP_FACTOR, DEFAULT_SIGMA_CLIP_FACTOR)
+        expected_zscore = np.clip(
+            expected_zscore, -DEFAULT_SIGMA_CLIP_FACTOR, DEFAULT_SIGMA_CLIP_FACTOR
+        )
 
         # Verify that our manual calculation matches the implementation
         np.testing.assert_allclose(X_zscore, expected_zscore, rtol=1e-6, atol=1e-8)
@@ -527,7 +593,11 @@ class TestGeneSpecificNormalization:
 
             # Manually compute what the z-score should be for this gene
             expected_gene_zscore = (original_logged_values - mu) / (sigma + 1e-8)
-            expected_gene_zscore = np.clip(expected_gene_zscore, -DEFAULT_SIGMA_CLIP_FACTOR, DEFAULT_SIGMA_CLIP_FACTOR)
+            expected_gene_zscore = np.clip(
+                expected_gene_zscore,
+                -DEFAULT_SIGMA_CLIP_FACTOR,
+                DEFAULT_SIGMA_CLIP_FACTOR,
+            )
 
             np.testing.assert_allclose(
                 zscore_values,
@@ -553,7 +623,9 @@ class TestGeneSpecificNormalization:
         )
 
         # Apply preprocessing
-        X_processed = preprocess_expression_data(X=X_raw.copy(), data_format=data_format)
+        X_processed = preprocess_expression_data(
+            X=X_raw.copy(), data_format=data_format
+        )
 
         # Manually verify each gene's normalization
         # First, compute what the intermediate values should be
@@ -574,7 +646,9 @@ class TestGeneSpecificNormalization:
             # Compute expected z-score for this specific gene
             logged_value = X_logged[gene_idx]
             expected_zscore = (logged_value - mu) / (sigma + 1e-8)
-            expected_zscore = np.clip(expected_zscore, -DEFAULT_SIGMA_CLIP_FACTOR, DEFAULT_SIGMA_CLIP_FACTOR)
+            expected_zscore = np.clip(
+                expected_zscore, -DEFAULT_SIGMA_CLIP_FACTOR, DEFAULT_SIGMA_CLIP_FACTOR
+            )
 
             # Verify the actual result matches our expectation
             actual_zscore = X_processed[0, gene_idx]
@@ -593,14 +667,18 @@ class TestGeneSpecificNormalization:
                 wrong_mu = data_format.genes_mu[0]  # Use first gene's parameters
                 wrong_sigma = data_format.genes_sigma[0]
                 wrong_zscore = (logged_value - wrong_mu) / (wrong_sigma + 1e-8)
-                wrong_zscore = np.clip(wrong_zscore, -DEFAULT_SIGMA_CLIP_FACTOR, DEFAULT_SIGMA_CLIP_FACTOR)
+                wrong_zscore = np.clip(
+                    wrong_zscore, -DEFAULT_SIGMA_CLIP_FACTOR, DEFAULT_SIGMA_CLIP_FACTOR
+                )
 
                 # The z-score should be different when using wrong parameters
                 # (unless by coincidence the parameters are very similar)
-                if not np.isclose(mu, wrong_mu, rtol=0.1) or not np.isclose(sigma, wrong_sigma, rtol=0.1):
-                    assert not np.isclose(actual_zscore, wrong_zscore, rtol=1e-3), (
-                        f"Gene {gene_name} z-score same with wrong parameters - test may be flawed"
-                    )
+                if not np.isclose(mu, wrong_mu, rtol=0.1) or not np.isclose(
+                    sigma, wrong_sigma, rtol=0.1
+                ):
+                    assert not np.isclose(
+                        actual_zscore, wrong_zscore, rtol=1e-3
+                    ), f"Gene {gene_name} z-score same with wrong parameters - test may be flawed"
 
     def test_gene_reordering_mathematical_correctness(
         self, training_data_format_with_specific_stats: DataFormat
@@ -609,7 +687,13 @@ class TestGeneSpecificNormalization:
         data_format = training_data_format_with_specific_stats
 
         # Create test data with genes in different order than training
-        test_genes = ["GENE_C", "GENE_A", "GENE_E", "GENE_B", "GENE_D"]  # Different order
+        test_genes = [
+            "GENE_C",
+            "GENE_A",
+            "GENE_E",
+            "GENE_B",
+            "GENE_D",
+        ]  # Different order
 
         # Use specific values that we can track through the reordering
         X_raw_reordered = np.array(
@@ -625,7 +709,9 @@ class TestGeneSpecificNormalization:
         test_adata = ad.AnnData(X=X_raw_reordered, obs=obs_df, var=var_df)
 
         # Reorder genes to match training format
-        adata_reordered = data_format.prepare_adata_for_training(test_adata, reorder_genes=True)
+        adata_reordered = data_format.prepare_adata_for_training(
+            test_adata, reorder_genes=True
+        )
 
         # Verify genes are now in correct order
         assert list(adata_reordered.var_names) == data_format.gene_names
@@ -633,11 +719,17 @@ class TestGeneSpecificNormalization:
         # The reordered data should now have values in training gene order: A,B,C,D,E
         # Original: C=3000, A=1000, E=5000, B=2000, D=4000
         # Reordered: A=1000, B=2000, C=3000, D=4000, E=5000
-        expected_reordered_values = np.array([[1000.0, 2000.0, 3000.0, 4000.0, 5000.0]], dtype=np.float32)
-        np.testing.assert_allclose(adata_reordered.X, expected_reordered_values, rtol=1e-6)
+        expected_reordered_values = np.array(
+            [[1000.0, 2000.0, 3000.0, 4000.0, 5000.0]], dtype=np.float32
+        )
+        np.testing.assert_allclose(
+            adata_reordered.X, expected_reordered_values, rtol=1e-6
+        )
 
         # Apply preprocessing and verify mathematical correctness
-        X_processed = preprocess_expression_data(X=adata_reordered.X, data_format=data_format)
+        X_processed = preprocess_expression_data(
+            X=adata_reordered.X, data_format=data_format
+        )
 
         # Manually compute expected results for the reordered data
         # Step 1: Row normalization
@@ -657,10 +749,14 @@ class TestGeneSpecificNormalization:
             expected_zscore[gene_idx] = (X_logged[gene_idx] - mu) / (sigma + 1e-8)
 
         # Apply clipping
-        expected_zscore = np.clip(expected_zscore, -DEFAULT_SIGMA_CLIP_FACTOR, DEFAULT_SIGMA_CLIP_FACTOR)
+        expected_zscore = np.clip(
+            expected_zscore, -DEFAULT_SIGMA_CLIP_FACTOR, DEFAULT_SIGMA_CLIP_FACTOR
+        )
 
         # Verify the processed result matches our manual calculation
-        np.testing.assert_allclose(X_processed[0], expected_zscore, rtol=1e-6, atol=1e-8)
+        np.testing.assert_allclose(
+            X_processed[0], expected_zscore, rtol=1e-6, atol=1e-8
+        )
 
         # Verify that each gene in the final result used its correct parameters
         for gene_idx, gene_name in enumerate(data_format.gene_names):
@@ -670,7 +766,11 @@ class TestGeneSpecificNormalization:
             # Verify this specific gene's z-score calculation
             logged_value = X_logged[gene_idx]
             expected_gene_zscore = (logged_value - mu) / (sigma + 1e-8)
-            expected_gene_zscore = np.clip(expected_gene_zscore, -DEFAULT_SIGMA_CLIP_FACTOR, DEFAULT_SIGMA_CLIP_FACTOR)
+            expected_gene_zscore = np.clip(
+                expected_gene_zscore,
+                -DEFAULT_SIGMA_CLIP_FACTOR,
+                DEFAULT_SIGMA_CLIP_FACTOR,
+            )
 
             actual_gene_zscore = X_processed[0, gene_idx]
 
@@ -690,8 +790,12 @@ class TestGeneSpecificNormalization:
         large_gene_names: list[str] = [f"GENE_{i:04d}" for i in range(large_gene_count)]
 
         # Create diverse statistics for testing
-        large_genes_mu: np.ndarray = np.random.randn(large_gene_count).astype(np.float32) * 100
-        large_genes_sigma: np.ndarray = np.random.rand(large_gene_count).astype(np.float32) * 50 + 10
+        large_genes_mu: np.ndarray = (
+            np.random.randn(large_gene_count).astype(np.float32) * 100
+        )
+        large_genes_sigma: np.ndarray = (
+            np.random.rand(large_gene_count).astype(np.float32) * 50 + 10
+        )
 
         large_data_format = DataFormat(
             n_genes=large_gene_count,
@@ -706,15 +810,21 @@ class TestGeneSpecificNormalization:
         # Create test data with partial overlap
         # Use genes from the middle range for overlap, and add some extra genes
         overlap_genes: list[str] = large_gene_names[500:750]  # 250 overlapping genes
-        extra_genes: list[str] = [f"EXTRA_{i:04d}" for i in range(250)]  # 250 extra genes
+        extra_genes: list[str] = [
+            f"EXTRA_{i:04d}" for i in range(250)
+        ]  # 250 extra genes
         test_genes: list[str] = overlap_genes + extra_genes  # 500 total test genes
 
         n_cells: int = 10
-        X_raw: np.ndarray = np.random.exponential(scale=2.0, size=(n_cells, len(test_genes))).astype(np.float32)
+        X_raw: np.ndarray = np.random.exponential(
+            scale=2.0, size=(n_cells, len(test_genes))
+        ).astype(np.float32)
 
         obs_df = pd.DataFrame(
             {
-                "expansion": np.random.choice(["expanded", "non-expanded"], size=n_cells),
+                "expansion": np.random.choice(
+                    ["expanded", "non-expanded"], size=n_cells
+                ),
                 "tissue_type": np.random.choice(["A", "B"], size=n_cells),
             }
         )

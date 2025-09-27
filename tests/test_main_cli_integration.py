@@ -19,7 +19,9 @@ class TestCLIIntegration:
     def setup_method(self):
         """Skip tests in parallel execution due to global state conflicts."""
         if os.environ.get("PYTEST_XDIST_WORKER") is not None:
-            pytest.skip("CLI integration tests skipped in parallel execution due to global state conflicts")
+            pytest.skip(
+                "CLI integration tests skipped in parallel execution due to global state conflicts"
+            )
 
     @pytest.mark.slow
     def test_cli_help_command_integration(self):
@@ -40,7 +42,10 @@ class TestCLIIntegration:
         assert len(output) > 0
         # Check for key commands in help
         help_text = output.lower()
-        assert any(cmd in help_text for cmd in ["train", "optimize", "inference", "list-models"])
+        assert any(
+            cmd in help_text
+            for cmd in ["train", "optimize", "inference", "list-models"]
+        )
 
     @pytest.mark.slow
     def test_cli_train_help_integration(self):
@@ -114,7 +119,14 @@ class TestCLIIntegration:
     def test_cli_invalid_model_type_integration(self):
         """Test invalid model type via subprocess."""
         result = subprocess.run(
-            [sys.executable, "-m", "scxpand.main", "train", "--model_type", "invalid_model"],
+            [
+                sys.executable,
+                "-m",
+                "scxpand.main",
+                "train",
+                "--model_type",
+                "invalid_model",
+            ],
             check=False,
             capture_output=True,
             text=True,
@@ -128,7 +140,16 @@ class TestCLIIntegration:
     def test_cli_nonexistent_data_file_integration(self):
         """Test nonexistent data file via subprocess."""
         result = subprocess.run(
-            [sys.executable, "-m", "scxpand.main", "train", "--model_type", "mlp", "--data_path", "nonexistent.h5ad"],
+            [
+                sys.executable,
+                "-m",
+                "scxpand.main",
+                "train",
+                "--model_type",
+                "mlp",
+                "--data_path",
+                "nonexistent.h5ad",
+            ],
             check=False,
             capture_output=True,
             text=True,
@@ -161,7 +182,9 @@ class TestCLIEndToEnd:
     def setup_method(self):
         """Skip tests in parallel execution due to global state conflicts."""
         if os.environ.get("PYTEST_XDIST_WORKER") is not None:
-            pytest.skip("CLI integration tests skipped in parallel execution due to global state conflicts")
+            pytest.skip(
+                "CLI integration tests skipped in parallel execution due to global state conflicts"
+            )
 
     @pytest.mark.slow
     @pytest.mark.integration
@@ -240,7 +263,9 @@ class TestCLIEnvironment:
     def setup_method(self):
         """Skip tests in parallel execution due to global state conflicts."""
         if os.environ.get("PYTEST_XDIST_WORKER") is not None:
-            pytest.skip("CLI integration tests skipped in parallel execution due to global state conflicts")
+            pytest.skip(
+                "CLI integration tests skipped in parallel execution due to global state conflicts"
+            )
 
     @pytest.mark.slow
     def test_cli_with_different_python_versions(self):

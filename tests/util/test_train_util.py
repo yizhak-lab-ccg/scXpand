@@ -1,7 +1,6 @@
 import optuna
 import pytest
 import torch
-
 from torch.utils.data import DataLoader, TensorDataset
 
 from scxpand.hyperopt.param_grids import create_optimized_lr_scheduler_config
@@ -52,7 +51,9 @@ class TestTrainUtil:
 
     def test_get_optimizer(self, mock_model, mock_param):
         """Test get_optimizer function."""
-        optimizer = get_optimizer(model=mock_model, optimizer_params=mock_param.get_optimizer_params())
+        optimizer = get_optimizer(
+            model=mock_model, optimizer_params=mock_param.get_optimizer_params()
+        )
 
         assert isinstance(optimizer, torch.optim.AdamW)
         assert optimizer.param_groups[0]["lr"] == mock_param.init_learning_rate
@@ -89,7 +90,9 @@ class TestTrainUtil:
             train_log_interval=10,
         )
 
-        optimizer = get_optimizer(model=mock_model, optimizer_params=param.get_optimizer_params())
+        optimizer = get_optimizer(
+            model=mock_model, optimizer_params=param.get_optimizer_params()
+        )
 
         lr_scheduler = get_lr_scheduler(
             optimizer=optimizer,
@@ -132,7 +135,9 @@ class TestTrainUtil:
             train_log_interval=10,
         )
 
-        optimizer = get_optimizer(model=mock_model, optimizer_params=param.get_optimizer_params())
+        optimizer = get_optimizer(
+            model=mock_model, optimizer_params=param.get_optimizer_params()
+        )
 
         lr_scheduler = get_lr_scheduler(
             optimizer=optimizer,
@@ -174,7 +179,9 @@ class TestTrainUtil:
             train_log_interval=10,
         )
 
-        optimizer = get_optimizer(model=mock_model, optimizer_params=param.get_optimizer_params())
+        optimizer = get_optimizer(
+            model=mock_model, optimizer_params=param.get_optimizer_params()
+        )
 
         lr_scheduler = get_lr_scheduler(
             optimizer=optimizer,
@@ -214,7 +221,9 @@ class TestTrainUtil:
             train_log_interval=10,
         )
 
-        optimizer = get_optimizer(model=mock_model, optimizer_params=param.get_optimizer_params())
+        optimizer = get_optimizer(
+            model=mock_model, optimizer_params=param.get_optimizer_params()
+        )
 
         lr_scheduler = get_lr_scheduler(
             optimizer=optimizer,
@@ -254,7 +263,9 @@ class TestTrainUtil:
             train_log_interval=10,
         )
 
-        optimizer = get_optimizer(model=mock_model, optimizer_params=param.get_optimizer_params())
+        optimizer = get_optimizer(
+            model=mock_model, optimizer_params=param.get_optimizer_params()
+        )
 
         lr_scheduler = get_lr_scheduler(
             optimizer=optimizer,
@@ -293,7 +304,9 @@ class TestTrainUtil:
             train_log_interval=10,
         )
 
-        optimizer = get_optimizer(model=mock_model, optimizer_params=param.get_optimizer_params())
+        optimizer = get_optimizer(
+            model=mock_model, optimizer_params=param.get_optimizer_params()
+        )
 
         lr_scheduler = get_lr_scheduler(
             optimizer=optimizer,
@@ -304,7 +317,9 @@ class TestTrainUtil:
         )
 
         assert isinstance(lr_scheduler, torch.optim.lr_scheduler.OneCycleLR)
-        assert lr_scheduler.optimizer.param_groups[0]["max_lr"] == param.init_learning_rate
+        assert (
+            lr_scheduler.optimizer.param_groups[0]["max_lr"] == param.init_learning_rate
+        )
 
     def test_create_optimized_lr_scheduler_config_all_types(self):
         """Test create_optimized_lr_scheduler_config function with all scheduler types."""
@@ -315,7 +330,9 @@ class TestTrainUtil:
         prefix = "test_"
 
         # Test ReduceLROnPlateau
-        config = create_optimized_lr_scheduler_config(trial, "ReduceLROnPlateau", n_epochs, prefix)
+        config = create_optimized_lr_scheduler_config(
+            trial, "ReduceLROnPlateau", n_epochs, prefix
+        )
         assert config["type"] == "ReduceLROnPlateau"
         assert "factor" in config
         assert "patience" in config
@@ -325,7 +342,9 @@ class TestTrainUtil:
         assert 1e-7 <= config["min_lr"] <= 1e-5
 
         # Test OneCycleLR
-        config = create_optimized_lr_scheduler_config(trial, "OneCycleLR", n_epochs, prefix)
+        config = create_optimized_lr_scheduler_config(
+            trial, "OneCycleLR", n_epochs, prefix
+        )
         assert config["type"] == "OneCycleLR"
         assert "warmup_ratio" in config
         assert 0.05 <= config["warmup_ratio"] <= 0.3
@@ -339,7 +358,9 @@ class TestTrainUtil:
         assert 0.1 <= config["gamma"] <= 0.7
 
         # Test CosineAnnealingLR
-        config = create_optimized_lr_scheduler_config(trial, "CosineAnnealingLR", n_epochs, prefix)
+        config = create_optimized_lr_scheduler_config(
+            trial, "CosineAnnealingLR", n_epochs, prefix
+        )
         assert config["type"] == "CosineAnnealingLR"
         assert "T_max" in config
         assert "eta_min" in config
@@ -347,12 +368,16 @@ class TestTrainUtil:
         assert 1e-7 <= config["eta_min"] <= 1e-5
 
         # Test ConstantLR
-        config = create_optimized_lr_scheduler_config(trial, "ConstantLR", n_epochs, prefix)
+        config = create_optimized_lr_scheduler_config(
+            trial, "ConstantLR", n_epochs, prefix
+        )
         assert config["type"] == "ConstantLR"
         assert len(config) == 1  # Only type, no additional params
 
         # Test NoScheduler
-        config = create_optimized_lr_scheduler_config(trial, "NoScheduler", n_epochs, prefix)
+        config = create_optimized_lr_scheduler_config(
+            trial, "NoScheduler", n_epochs, prefix
+        )
         assert config["type"] == "NoScheduler"
         assert len(config) == 1  # Only type, no additional params
 
@@ -382,9 +407,13 @@ class TestTrainUtil:
             train_log_interval=10,
         )
 
-        optimizer = get_optimizer(model=mock_model, optimizer_params=param.get_optimizer_params())
+        optimizer = get_optimizer(
+            model=mock_model, optimizer_params=param.get_optimizer_params()
+        )
 
-        with pytest.raises(ValueError, match="Unknown learning rate scheduler: InvalidScheduler"):
+        with pytest.raises(
+            ValueError, match="Unknown learning rate scheduler: InvalidScheduler"
+        ):
             get_lr_scheduler(
                 optimizer=optimizer,
                 lr_scheduler_params=param.get_lr_scheduler_params(),

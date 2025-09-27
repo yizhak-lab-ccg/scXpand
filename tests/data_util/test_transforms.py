@@ -9,7 +9,6 @@ This module tests all transformation functions with various input types:
 
 import tempfile
 import warnings
-
 from pathlib import Path
 
 import anndata as ad
@@ -41,7 +40,9 @@ def sample_data():
     n_cells, n_genes = 100, 50
 
     # Dense data
-    dense_data = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(np.float32)
+    dense_data = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(
+        np.float32
+    )
 
     # Sparse data (about 30% sparsity)
     sparse_mask = np.random.random((n_cells, n_genes)) > 0.3
@@ -49,7 +50,9 @@ def sample_data():
     sparse_csr = sp.csr_matrix(sparse_data)
 
     # Small test data for exact verification
-    small_dense = np.array([[1.0, 2.0, 0.0], [4.0, 0.0, 3.0], [0.0, 5.0, 6.0]], dtype=np.float32)
+    small_dense = np.array(
+        [[1.0, 2.0, 0.0], [4.0, 0.0, 3.0], [0.0, 5.0, 6.0]], dtype=np.float32
+    )
     small_sparse = sp.csr_matrix(small_dense)
 
     return {
@@ -330,7 +333,9 @@ class TestZScoreNormalization:
         genes_sigma = sample_data["small_genes_sigma"]
         eps = DEFAULT_EPS
 
-        result = apply_zscore_normalization(X_tensor, genes_mu, genes_sigma, eps=eps, in_place=False)
+        result = apply_zscore_normalization(
+            X_tensor, genes_mu, genes_sigma, eps=eps, in_place=False
+        )
 
         # Check transformation correctness
         expected_np = (sample_data["small_dense"] - genes_mu) / (genes_sigma + eps)
@@ -344,7 +349,9 @@ class TestZScoreNormalization:
         genes_sigma_torch = torch.from_numpy(sample_data["small_genes_sigma"])
         eps = DEFAULT_EPS
 
-        result = apply_zscore_normalization(X, genes_mu_torch, genes_sigma_torch, eps=eps)
+        result = apply_zscore_normalization(
+            X, genes_mu_torch, genes_sigma_torch, eps=eps
+        )
 
         # Check transformation correctness
         expected = (sample_data["small_dense"] - sample_data["small_genes_mu"]) / (
@@ -365,10 +372,14 @@ class TestInverseFunctions:
         eps = DEFAULT_EPS
 
         # Forward transform
-        X_normalized = apply_zscore_normalization(X_original.clone(), genes_mu, genes_sigma, eps=eps)
+        X_normalized = apply_zscore_normalization(
+            X_original.clone(), genes_mu, genes_sigma, eps=eps
+        )
 
         # Inverse transform
-        X_recovered = apply_inverse_zscore_normalization(X_normalized, genes_mu, genes_sigma, eps=eps)
+        X_recovered = apply_inverse_zscore_normalization(
+            X_normalized, genes_mu, genes_sigma, eps=eps
+        )
 
         # Check recovery
         torch.testing.assert_close(X_recovered, X_original, rtol=1e-5, atol=1e-5)
@@ -492,8 +503,8 @@ class TestMemoryEfficiency:
         np.testing.assert_allclose(row_sums, expected_sums, rtol=1e-5)
 
         # Check that non-zero locations are preserved (may be reordered due to matrix multiplication)
-        original_nonzero = set(zip(*X_sparse.nonzero()))
-        result_nonzero = set(zip(*result.nonzero()))
+        original_nonzero = set(zip(*X_sparse.nonzero(), strict=False))
+        result_nonzero = set(zip(*result.nonzero(), strict=False))
         assert original_nonzero == result_nonzero
 
     def test_sparse_log_preserves_sparsity(self):
@@ -523,7 +534,9 @@ class TestMemoryEfficiency:
         # Create large sparse matrix
         n_rows, n_cols = 10000, 5000
         density = 0.01
-        X_large_sparse = sp.random(n_rows, n_cols, density=density, format="csr", dtype=np.float32)
+        X_large_sparse = sp.random(
+            n_rows, n_cols, density=density, format="csr", dtype=np.float32
+        )
 
         # Track memory usage indirectly by checking operations don't fail
         # and preserve sparsity where expected
@@ -560,7 +573,9 @@ class TestEdgeCases:
             apply_log_transform(unsupported_data)
 
         with pytest.raises(TypeError, match="Unsupported type"):
-            apply_zscore_normalization(unsupported_data, np.array([1.0]), np.array([1.0]))
+            apply_zscore_normalization(
+                unsupported_data, np.array([1.0]), np.array([1.0])
+            )
 
     def test_dimension_mismatch(self):
         """Test handling of dimension mismatches."""
@@ -596,7 +611,9 @@ class TestExtractIsExpanded:
 
     def test_dataframe_input(self):
         """Test with DataFrame input."""
-        expansion_data = pd.DataFrame({"expansion": ["expanded", "not_expanded", "expanded", "other"]})
+        expansion_data = pd.DataFrame(
+            {"expansion": ["expanded", "not_expanded", "expanded", "other"]}
+        )
 
         result = extract_is_expanded(expansion_data)
         expected = np.array([1, 0, 1, 0])
@@ -712,8 +729,12 @@ class TestGeneSubsetDataFormat:
         original_mu = comprehensive_data_format.genes_mu
         original_sigma = comprehensive_data_format.genes_sigma
 
-        np.testing.assert_array_equal(subset_data_format.genes_mu, original_mu[expected_indices])
-        np.testing.assert_array_equal(subset_data_format.genes_sigma, original_sigma[expected_indices])
+        np.testing.assert_array_equal(
+            subset_data_format.genes_mu, original_mu[expected_indices]
+        )
+        np.testing.assert_array_equal(
+            subset_data_format.genes_sigma, original_sigma[expected_indices]
+        )
 
     def test_subset_by_gene_indices(self, sample_anndata, comprehensive_data_format):
         """Test subsetting by gene indices."""
@@ -734,8 +755,12 @@ class TestGeneSubsetDataFormat:
         original_mu = comprehensive_data_format.genes_mu
         original_sigma = comprehensive_data_format.genes_sigma
 
-        np.testing.assert_array_equal(subset_data_format.genes_mu, original_mu[gene_indices])
-        np.testing.assert_array_equal(subset_data_format.genes_sigma, original_sigma[gene_indices])
+        np.testing.assert_array_equal(
+            subset_data_format.genes_mu, original_mu[gene_indices]
+        )
+        np.testing.assert_array_equal(
+            subset_data_format.genes_sigma, original_sigma[gene_indices]
+        )
 
     def test_subset_with_numpy_array(self, sample_anndata, comprehensive_data_format):
         """Test subsetting with numpy array input."""
@@ -753,14 +778,18 @@ class TestGeneSubsetDataFormat:
         gene_subset = ["ENSG00000000000", "NONEXISTENT_GENE"]
 
         with pytest.raises(ValueError, match="not found in AnnData"):
-            _create_gene_subset_data_format(sample_anndata, comprehensive_data_format, gene_subset)
+            _create_gene_subset_data_format(
+                sample_anndata, comprehensive_data_format, gene_subset
+            )
 
     def test_invalid_gene_index_error(self, sample_anndata, comprehensive_data_format):
         """Test error when gene index is out of range."""
         gene_indices = [0, 100]  # 100 is out of range
 
         with pytest.raises(ValueError, match="Invalid gene indices"):
-            _create_gene_subset_data_format(sample_anndata, comprehensive_data_format, gene_indices)
+            _create_gene_subset_data_format(
+                sample_anndata, comprehensive_data_format, gene_indices
+            )
 
     def test_gene_not_in_data_format_error(self):
         """Test error when gene in AnnData is not in data_format."""
@@ -788,7 +817,9 @@ class TestGeneSubsetDataFormat:
         gene_subset = ["ENSG00000000000"]
 
         with pytest.raises(ValueError, match="not found in data_format"):
-            _create_gene_subset_data_format(adata_custom, mismatched_data_format, gene_subset)
+            _create_gene_subset_data_format(
+                adata_custom, mismatched_data_format, gene_subset
+            )
 
 
 class TestLoadAndPreprocessDataNumpyGeneSubset:
@@ -800,7 +831,9 @@ class TestLoadAndPreprocessDataNumpyGeneSubset:
         with tempfile.TemporaryDirectory() as temp_dir:
             data_path = Path(temp_dir) / "test.h5ad"
             sample_anndata.write_h5ad(data_path)
-            result = load_and_preprocess_data_numpy(data_path, comprehensive_data_format, gene_subset=[gene_name])
+            result = load_and_preprocess_data_numpy(
+                data_path, comprehensive_data_format, gene_subset=[gene_name]
+            )
 
         # Check output shape
         expected_shape = (sample_anndata.n_obs, 1)
@@ -818,7 +851,9 @@ class TestLoadAndPreprocessDataNumpyGeneSubset:
         with tempfile.TemporaryDirectory() as temp_dir:
             data_path = Path(temp_dir) / "test.h5ad"
             sample_anndata.write_h5ad(data_path)
-            result = load_and_preprocess_data_numpy(data_path, comprehensive_data_format, gene_subset=[gene_index])
+            result = load_and_preprocess_data_numpy(
+                data_path, comprehensive_data_format, gene_subset=[gene_index]
+            )
 
         # Check output shape
         expected_shape = (sample_anndata.n_obs, 1)
@@ -833,7 +868,9 @@ class TestLoadAndPreprocessDataNumpyGeneSubset:
         with tempfile.TemporaryDirectory() as temp_dir:
             data_path = Path(temp_dir) / "test.h5ad"
             sample_anndata.write_h5ad(data_path)
-            result = load_and_preprocess_data_numpy(data_path, comprehensive_data_format, gene_subset=gene_names)
+            result = load_and_preprocess_data_numpy(
+                data_path, comprehensive_data_format, gene_subset=gene_names
+            )
 
         # Check output shape
         expected_shape = (sample_anndata.n_obs, 3)
@@ -848,7 +885,9 @@ class TestLoadAndPreprocessDataNumpyGeneSubset:
         with tempfile.TemporaryDirectory() as temp_dir:
             data_path = Path(temp_dir) / "test.h5ad"
             sample_anndata.write_h5ad(data_path)
-            result = load_and_preprocess_data_numpy(data_path, comprehensive_data_format, gene_subset=gene_indices)
+            result = load_and_preprocess_data_numpy(
+                data_path, comprehensive_data_format, gene_subset=gene_indices
+            )
 
         # Check output shape
         expected_shape = (sample_anndata.n_obs, 4)
@@ -857,7 +896,9 @@ class TestLoadAndPreprocessDataNumpyGeneSubset:
         # Check that result is finite
         assert np.isfinite(result).all()
 
-    def test_gene_subset_with_row_indices(self, sample_anndata, comprehensive_data_format):
+    def test_gene_subset_with_row_indices(
+        self, sample_anndata, comprehensive_data_format
+    ):
         """Test gene subset with row indices (cell subset)."""
         gene_names = ["ENSG00000000002", "ENSG00000000006"]
         row_indices = np.array([5, 10, 15, 20])
@@ -865,7 +906,10 @@ class TestLoadAndPreprocessDataNumpyGeneSubset:
             data_path = Path(temp_dir) / "test.h5ad"
             sample_anndata.write_h5ad(data_path)
             result = load_and_preprocess_data_numpy(
-                data_path, comprehensive_data_format, row_indices=row_indices, gene_subset=gene_names
+                data_path,
+                comprehensive_data_format,
+                row_indices=row_indices,
+                gene_subset=gene_names,
             )
 
         # Check output shape
@@ -875,7 +919,9 @@ class TestLoadAndPreprocessDataNumpyGeneSubset:
         # Check that result is finite
         assert np.isfinite(result).all()
 
-    def test_gene_subset_consistency_name_vs_index(self, sample_anndata, comprehensive_data_format):
+    def test_gene_subset_consistency_name_vs_index(
+        self, sample_anndata, comprehensive_data_format
+    ):
         """Test that using gene names vs indices gives same results."""
         gene_name = "ENSG00000000004"
         gene_index = list(sample_anndata.var_names).index(gene_name)
@@ -893,13 +939,17 @@ class TestLoadAndPreprocessDataNumpyGeneSubset:
         # Results should be identical
         np.testing.assert_allclose(result_by_name, result_by_index, rtol=1e-10)
 
-    def test_no_gene_subset_vs_full_data(self, sample_anndata, comprehensive_data_format):
+    def test_no_gene_subset_vs_full_data(
+        self, sample_anndata, comprehensive_data_format
+    ):
         """Test that no gene_subset gives same result as full data preprocessing."""
         # Load all genes using gene_subset=None
         with tempfile.TemporaryDirectory() as temp_dir:
             data_path = Path(temp_dir) / "test.h5ad"
             sample_anndata.write_h5ad(data_path)
-            result_no_subset = load_and_preprocess_data_numpy(data_path, comprehensive_data_format, gene_subset=None)
+            result_no_subset = load_and_preprocess_data_numpy(
+                data_path, comprehensive_data_format, gene_subset=None
+            )
 
             # Load all genes using gene_subset with all gene names
             all_gene_names = list(sample_anndata.var_names)
@@ -910,7 +960,9 @@ class TestLoadAndPreprocessDataNumpyGeneSubset:
         # Results should be identical
         np.testing.assert_allclose(result_no_subset, result_all_genes, rtol=1e-10)
 
-    def test_dimension_validation_still_works(self, sample_anndata, comprehensive_data_format):
+    def test_dimension_validation_still_works(
+        self, sample_anndata, comprehensive_data_format
+    ):
         """Test that dimension validation still works for incompatible AnnData."""
         # Create AnnData subset (old problematic way)
         subset_adata = sample_anndata[:, [0]]  # Single gene subset
@@ -918,7 +970,9 @@ class TestLoadAndPreprocessDataNumpyGeneSubset:
             data_path = Path(temp_dir) / "test.h5ad"
             subset_adata.write_h5ad(data_path)
             # This should still raise an error because we're not using gene_subset parameter
-            with pytest.raises(ValueError, match="Number of genes in expression matrix"):
+            with pytest.raises(
+                ValueError, match="Number of genes in expression matrix"
+            ):
                 load_and_preprocess_data_numpy(data_path, comprehensive_data_format)
 
     def test_empty_gene_subset_error(self, sample_anndata, comprehensive_data_format):
@@ -927,9 +981,13 @@ class TestLoadAndPreprocessDataNumpyGeneSubset:
             data_path = Path(temp_dir) / "test.h5ad"
             sample_anndata.write_h5ad(data_path)
             with pytest.raises((ValueError, IndexError)):
-                load_and_preprocess_data_numpy(data_path, comprehensive_data_format, gene_subset=[])
+                load_and_preprocess_data_numpy(
+                    data_path, comprehensive_data_format, gene_subset=[]
+                )
 
-    def test_mixed_type_gene_subset_error(self, sample_anndata, comprehensive_data_format):
+    def test_mixed_type_gene_subset_error(
+        self, sample_anndata, comprehensive_data_format
+    ):
         """Test error handling for mixed type gene subset."""
         # Mix of string and int should fail
         mixed_subset = ["ENSG00000000001", 2]
@@ -938,7 +996,9 @@ class TestLoadAndPreprocessDataNumpyGeneSubset:
             sample_anndata.write_h5ad(data_path)
             # This should either work (if implementation handles it) or raise a clear error
             try:
-                result = load_and_preprocess_data_numpy(data_path, comprehensive_data_format, gene_subset=mixed_subset)
+                result = load_and_preprocess_data_numpy(
+                    data_path, comprehensive_data_format, gene_subset=mixed_subset
+                )
                 # If it works, check basic properties
                 assert result.shape == (sample_anndata.n_obs, 2)
             except (ValueError, TypeError):
@@ -949,7 +1009,9 @@ class TestLoadAndPreprocessDataNumpyGeneSubset:
 class TestGeneSubsetIntegration:
     """Integration tests for gene subset functionality."""
 
-    def test_realistic_single_gene_analysis(self, sample_anndata, comprehensive_data_format):
+    def test_realistic_single_gene_analysis(
+        self, sample_anndata, comprehensive_data_format
+    ):
         """Test realistic single gene analysis workflow with pre-computed scaling factors."""
         target_gene = "ENSG00000000005"
 
@@ -986,7 +1048,9 @@ class TestGeneSubsetIntegration:
             assert np.isfinite(expr_with_scaling).all()
 
             # With pre-computed scaling factors, single genes should have variation
-            print(f"Single gene std with pre-computed scaling: {expr_with_scaling.std():.4f}")
+            print(
+                f"Single gene std with pre-computed scaling: {expr_with_scaling.std():.4f}"
+            )
             assert np.abs(expr_with_scaling.mean()) < 10  # Not too extreme
             assert expr_with_scaling.std() > 0.01  # Should have variation now
 
@@ -1003,7 +1067,12 @@ class TestGeneSubsetIntegration:
 
     def test_gene_panel_analysis(self, sample_anndata, comprehensive_data_format):
         """Test analysis of a panel of genes with pre-computed scaling factors."""
-        gene_panel = ["ENSG00000000001", "ENSG00000000003", "ENSG00000000007", "ENSG00000000009"]
+        gene_panel = [
+            "ENSG00000000001",
+            "ENSG00000000003",
+            "ENSG00000000007",
+            "ENSG00000000009",
+        ]
 
         # Create DataFormat with pre-computed scaling factors for consistent analysis
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1027,7 +1096,9 @@ class TestGeneSubsetIntegration:
             )
 
             # Load and preprocess gene panel with pre-computed scaling
-            expr_panel = load_and_preprocess_data_numpy(temp_path, data_format_with_scaling, gene_subset=gene_panel)
+            expr_panel = load_and_preprocess_data_numpy(
+                temp_path, data_format_with_scaling, gene_subset=gene_panel
+            )
 
             # Check shape
             assert expr_panel.shape == (sample_anndata.n_obs, len(gene_panel))
@@ -1040,7 +1111,9 @@ class TestGeneSubsetIntegration:
                 # With pre-computed scaling, each gene should have meaningful variation
                 assert gene_expr.std() > 0.01
 
-    def test_subset_preserves_cell_order(self, sample_anndata, comprehensive_data_format):
+    def test_subset_preserves_cell_order(
+        self, sample_anndata, comprehensive_data_format
+    ):
         """Test that gene subsetting preserves cell order."""
         # Test with a specific subset of cells
         cell_indices = np.array([5, 15, 25, 35, 45])
@@ -1051,11 +1124,16 @@ class TestGeneSubsetIntegration:
             data_path = Path(temp_dir) / "test.h5ad"
             sample_anndata.write_h5ad(data_path)
             expr_subset = load_and_preprocess_data_numpy(
-                data_path, comprehensive_data_format, row_indices=cell_indices, gene_subset=target_genes
+                data_path,
+                comprehensive_data_format,
+                row_indices=cell_indices,
+                gene_subset=target_genes,
             )
 
             # Load full data with same genes
-            expr_full = load_and_preprocess_data_numpy(data_path, comprehensive_data_format, gene_subset=target_genes)
+            expr_full = load_and_preprocess_data_numpy(
+                data_path, comprehensive_data_format, gene_subset=target_genes
+            )
 
         # Subset should match the corresponding rows in full data
         np.testing.assert_allclose(expr_subset, expr_full[cell_indices, :], rtol=1e-10)
@@ -1066,7 +1144,9 @@ class TestGeneSubsetIntegration:
         n_cells, n_genes = 200, 100
         np.random.seed(42)
 
-        X_large = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(np.float32)
+        X_large = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(
+            np.float32
+        )
         gene_names_large = [f"ENSG{i:010d}" for i in range(n_genes)]
 
         adata_large = ad.AnnData(X=sp.csr_matrix(X_large))
@@ -1088,7 +1168,9 @@ class TestGeneSubsetIntegration:
         with tempfile.TemporaryDirectory() as temp_dir:
             data_path = Path(temp_dir) / "test.h5ad"
             adata_large.write_h5ad(data_path)
-            result = load_and_preprocess_data_numpy(data_path, data_format_large, gene_subset=gene_subset)
+            result = load_and_preprocess_data_numpy(
+                data_path, data_format_large, gene_subset=gene_subset
+            )
 
         # Check results
         assert result.shape == (n_cells, subset_size)

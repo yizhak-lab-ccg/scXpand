@@ -8,7 +8,11 @@ import pandas as pd
 import pytest
 
 from scxpand.util.classes import ModelType
-from scxpand.util.inference_utils import load_model, run_model_inference, setup_inference_environment
+from scxpand.util.inference_utils import (
+    load_model,
+    run_model_inference,
+    setup_inference_environment,
+)
 
 
 class TestSetupInferenceEnvironment:
@@ -44,7 +48,9 @@ class TestSetupInferenceEnvironment:
             mock_load_format.assert_called_once_with(data_format_path)
             mock_get_device.assert_called_once()
             mock_load_model.assert_called_once_with(
-                model_type=ModelType.AUTOENCODER, model_path=model_path, device=mock_device
+                model_type=ModelType.AUTOENCODER,
+                model_path=model_path,
+                device=mock_device,
             )
 
             # Verify results
@@ -59,7 +65,9 @@ class TestSetupInferenceEnvironment:
         # No data_format.json file created
 
         with pytest.raises(FileNotFoundError, match="Data format file not found"):
-            setup_inference_environment(model_type=ModelType.MLP, model_path=str(model_path))
+            setup_inference_environment(
+                model_type=ModelType.MLP, model_path=str(model_path)
+            )
 
     def test_setup_inference_environment_with_string_model_type(self, tmp_path):
         """Test setup with string model type."""
@@ -115,7 +123,9 @@ class TestSetupInferenceEnvironment:
             patch("scxpand.util.inference_utils.get_device", return_value="cpu"),
             patch("scxpand.util.inference_utils.load_model"),
         ):
-            setup_inference_environment(model_type=ModelType.LOGISTIC, model_path=str(model_path))
+            setup_inference_environment(
+                model_type=ModelType.LOGISTIC, model_path=str(model_path)
+            )
 
             # Verify correct path was used
             mock_load.assert_called_once_with(data_format_path)
@@ -134,7 +144,9 @@ class TestLoadModelEnhanced:
             mock_load_ae.return_value = mock_model
 
             # Test with enum
-            result = load_model(model_type=ModelType.AUTOENCODER, model_path=results_path, device="cpu")
+            result = load_model(
+                model_type=ModelType.AUTOENCODER, model_path=results_path, device="cpu"
+            )
 
             mock_load_ae.assert_called_once_with(model_path=results_path, device="cpu")
             assert result == mock_model
@@ -145,7 +157,9 @@ class TestLoadModelEnhanced:
         results_path.mkdir()
 
         with pytest.raises(ValueError, match="Unsupported model_type for loading"):
-            load_model(model_type="unsupported_model", model_path=results_path, device="cpu")
+            load_model(
+                model_type="unsupported_model", model_path=results_path, device="cpu"
+            )
 
     def test_load_model_all_supported_types(self, tmp_path):
         """Test loading all supported model types."""
@@ -165,7 +179,9 @@ class TestLoadModelEnhanced:
                 mock_model = Mock()
                 mock_loader.return_value = mock_model
 
-                result = load_model(model_type=model_type, model_path=results_path, device="cuda")
+                result = load_model(
+                    model_type=model_type, model_path=results_path, device="cuda"
+                )
 
                 mock_loader.assert_called_once()
                 assert result == mock_model
@@ -179,7 +195,9 @@ class TestLoadModelEnhanced:
             mock_model = Mock()
             mock_load.return_value = mock_model
 
-            result = load_model(model_type=ModelType.LIGHTGBM, model_path=results_path, device="cpu")
+            result = load_model(
+                model_type=ModelType.LIGHTGBM, model_path=results_path, device="cpu"
+            )
 
             mock_load.assert_called_once_with(results_path=results_path)
             assert result is mock_model
@@ -192,7 +210,10 @@ class TestRunInferenceEnhanced:
     def mock_adata(self):
         """Create mock AnnData object."""
         obs_data = pd.DataFrame(
-            {"cell_id": ["cell_1", "cell_2", "cell_3"], "expansion": ["expanded", "non-expanded", "expanded"]}
+            {
+                "cell_id": ["cell_1", "cell_2", "cell_3"],
+                "expansion": ["expanded", "non-expanded", "expanded"],
+            }
         )
         X = np.random.randn(3, 10)
         return ad.AnnData(X=X, obs=obs_data)
@@ -207,9 +228,13 @@ class TestRunInferenceEnhanced:
         """Create mock data format."""
         return Mock()
 
-    def test_run_inference_with_both_data_sources(self, mock_model, mock_data_format, mock_adata):
+    def test_run_inference_with_both_data_sources(
+        self, mock_model, mock_data_format, mock_adata
+    ):
         """Test that both adata and data_path can be provided and are passed through."""
-        with patch("scxpand.util.inference_utils.run_ae_inference") as mock_ae_inference:
+        with patch(
+            "scxpand.util.inference_utils.run_ae_inference"
+        ) as mock_ae_inference:
             mock_ae_inference.return_value = np.array([0.8, 0.2, 0.9])
 
             result = run_model_inference(
@@ -230,9 +255,13 @@ class TestRunInferenceEnhanced:
             # Verify the result is returned correctly
             np.testing.assert_array_equal(result, np.array([0.8, 0.2, 0.9]))
 
-    def test_run_inference_validation_neither_data_source(self, mock_model, mock_data_format):
+    def test_run_inference_validation_neither_data_source(
+        self, mock_model, mock_data_format
+    ):
         """Test validation error when neither adata nor data_path is provided."""
-        with pytest.raises(ValueError, match="Either adata or data_path must be provided"):
+        with pytest.raises(
+            ValueError, match="Either adata or data_path must be provided"
+        ):
             run_model_inference(
                 model_type=ModelType.MLP,
                 model=mock_model,
@@ -242,9 +271,13 @@ class TestRunInferenceEnhanced:
                 device="cpu",
             )
 
-    def test_run_inference_model_type_conversion(self, mock_model, mock_data_format, mock_adata):
+    def test_run_inference_model_type_conversion(
+        self, mock_model, mock_data_format, mock_adata
+    ):
         """Test that model_type enum is converted to string."""
-        with patch("scxpand.util.inference_utils.run_mlp_inference") as mock_mlp_inference:
+        with patch(
+            "scxpand.util.inference_utils.run_mlp_inference"
+        ) as mock_mlp_inference:
             mock_mlp_inference.return_value = np.array([0.7, 0.3, 0.8])
 
             run_model_inference(
@@ -258,7 +291,9 @@ class TestRunInferenceEnhanced:
             # Should route to MLP inference
             mock_mlp_inference.assert_called_once()
 
-    def test_run_inference_all_model_types(self, mock_model, mock_data_format, mock_adata):
+    def test_run_inference_all_model_types(
+        self, mock_model, mock_data_format, mock_adata
+    ):
         """Test inference routing for all model types."""
         test_cases = [
             (ModelType.AUTOENCODER, "run_ae_inference"),
@@ -269,7 +304,9 @@ class TestRunInferenceEnhanced:
         ]
 
         for model_type, inference_func in test_cases:
-            with patch(f"scxpand.util.inference_utils.{inference_func}") as mock_inference:
+            with patch(
+                f"scxpand.util.inference_utils.{inference_func}"
+            ) as mock_inference:
                 mock_inference.return_value = np.array([0.5, 0.6, 0.7])
 
                 result = run_model_inference(
@@ -297,18 +334,28 @@ class TestRunInferenceEnhanced:
 
                 np.testing.assert_array_equal(result, np.array([0.5, 0.6, 0.7]))
 
-    def test_run_inference_unsupported_model_type(self, mock_model, mock_data_format, mock_adata):
+    def test_run_inference_unsupported_model_type(
+        self, mock_model, mock_data_format, mock_adata
+    ):
         """Test error for unsupported model type."""
         with pytest.raises(ValueError, match="Unsupported model_type for inference"):
             run_model_inference(
-                model_type="unsupported", model=mock_model, data_format=mock_data_format, adata=mock_adata, device="cpu"
+                model_type="unsupported",
+                model=mock_model,
+                data_format=mock_data_format,
+                adata=mock_adata,
+                device="cpu",
             )
 
-    def test_run_inference_with_eval_indices(self, mock_model, mock_data_format, mock_adata):
+    def test_run_inference_with_eval_indices(
+        self, mock_model, mock_data_format, mock_adata
+    ):
         """Test inference with evaluation indices."""
         eval_indices = np.array([0, 2])
 
-        with patch("scxpand.util.inference_utils.run_lightgbm_inference") as mock_lgb_inference:
+        with patch(
+            "scxpand.util.inference_utils.run_lightgbm_inference"
+        ) as mock_lgb_inference:
             mock_lgb_inference.return_value = np.array([0.8, 0.9])
 
             _result = run_model_inference(
@@ -326,20 +373,30 @@ class TestRunInferenceEnhanced:
 
     def test_run_inference_svm_routing(self, mock_model, mock_data_format, mock_adata):
         """Test that SVM inference is routed correctly."""
-        with patch("scxpand.util.inference_utils.run_linear_inference") as mock_linear_inference:
+        with patch(
+            "scxpand.util.inference_utils.run_linear_inference"
+        ) as mock_linear_inference:
             mock_predictions = np.array([0.4, 0.6, 0.8])
             mock_linear_inference.return_value = mock_predictions
 
             result = run_model_inference(
-                model_type=ModelType.SVM, model=mock_model, data_format=mock_data_format, adata=mock_adata, device="cpu"
+                model_type=ModelType.SVM,
+                model=mock_model,
+                data_format=mock_data_format,
+                adata=mock_adata,
+                device="cpu",
             )
 
             mock_linear_inference.assert_called_once()
             np.testing.assert_array_equal(result, mock_predictions)
 
-    def test_run_inference_parameter_forwarding(self, mock_model, mock_data_format, mock_adata):
+    def test_run_inference_parameter_forwarding(
+        self, mock_model, mock_data_format, mock_adata
+    ):
         """Test that all parameters are properly forwarded to inference functions."""
-        with patch("scxpand.util.inference_utils.run_ae_inference") as mock_ae_inference:
+        with patch(
+            "scxpand.util.inference_utils.run_ae_inference"
+        ) as mock_ae_inference:
             mock_ae_inference.return_value = np.array([0.1, 0.2, 0.3])
 
             run_model_inference(
@@ -364,4 +421,6 @@ class TestRunInferenceEnhanced:
             assert call_kwargs["device"] == "cuda:1"
             assert call_kwargs["batch_size"] == 2048
             assert call_kwargs["num_workers"] == 8
-            np.testing.assert_array_equal(call_kwargs["eval_row_inds"], np.array([1, 2]))
+            np.testing.assert_array_equal(
+                call_kwargs["eval_row_inds"], np.array([1, 2])
+            )

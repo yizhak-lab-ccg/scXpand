@@ -11,7 +11,6 @@ histograms due to incorrect row normalization scaling factors.
 """
 
 import tempfile
-
 from pathlib import Path
 
 import anndata as ad
@@ -19,7 +18,6 @@ import numpy as np
 import pytest
 import scipy.sparse as sp
 import torch
-
 from torch.utils.data import DataLoader
 
 from scxpand.data_util.data_format import DataFormat, load_data_format
@@ -187,7 +185,9 @@ class TestPrecomputedScalingFactors:
 class TestNormalizationConsistency:
     """Test consistency between different normalization approaches."""
 
-    def test_full_vs_subset_normalization_consistency(self, data_format_with_scaling_factors):
+    def test_full_vs_subset_normalization_consistency(
+        self, data_format_with_scaling_factors
+    ):
         """Test that full matrix and gene subset normalization give identical results."""
         data_format, train_indices = data_format_with_scaling_factors
 
@@ -201,7 +201,9 @@ class TestNormalizationConsistency:
             n_genes = len(data_format.gene_names)
 
             # Create test data
-            X_test = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(np.float32)
+            X_test = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(
+                np.float32
+            )
             # Add sparsity
             sparse_mask = np.random.random((n_cells, n_genes)) > 0.6
             X_test[~sparse_mask] = 0
@@ -248,7 +250,9 @@ class TestNormalizationConsistency:
         np.random.seed(123)
         n_cells = 800
         n_genes = len(data_format.gene_names)
-        X_test = np.random.exponential(scale=1.5, size=(n_cells, n_genes)).astype(np.float32)
+        X_test = np.random.exponential(scale=1.5, size=(n_cells, n_genes)).astype(
+            np.float32
+        )
 
         test_adata = ad.AnnData(X=sp.csr_matrix(X_test))
         test_adata.var_names = data_format.gene_names
@@ -261,7 +265,9 @@ class TestNormalizationConsistency:
         with tempfile.TemporaryDirectory() as temp_dir:
             data_path = Path(temp_dir) / "test.h5ad"
             test_adata.write_h5ad(data_path)
-            expr_full = load_and_preprocess_data_numpy(data_path=data_path, data_format=data_format, gene_subset=None)
+            expr_full = load_and_preprocess_data_numpy(
+                data_path=data_path, data_format=data_format, gene_subset=None
+            )
             gene_indices = [data_format.gene_names.index(g) for g in target_genes]
             expr_from_full = expr_full[:, gene_indices]
 
@@ -287,7 +293,9 @@ class TestNormalizationConsistency:
         np.random.seed(456)
         n_cells = 800
         n_genes = len(data_format.gene_names)
-        X_test = np.random.exponential(scale=1.0, size=(n_cells, n_genes)).astype(np.float32)
+        X_test = np.random.exponential(scale=1.0, size=(n_cells, n_genes)).astype(
+            np.float32
+        )
 
         test_adata = ad.AnnData(X=sp.csr_matrix(X_test))
         test_adata.var_names = data_format.gene_names
@@ -302,19 +310,29 @@ class TestNormalizationConsistency:
             data_path = Path(temp_dir) / "test.h5ad"
             test_adata.write_h5ad(data_path)
             expr_full = load_and_preprocess_data_numpy(
-                data_path=data_path, data_format=data_format, row_indices=row_subset, gene_subset=None
+                data_path=data_path,
+                data_format=data_format,
+                row_indices=row_subset,
+                gene_subset=None,
             )
             gene_index = data_format.gene_names.index(target_gene)
             expr_from_full = expr_full[:, gene_index]
 
             # Method 2: Gene subset with row subset
             expr_from_subset = load_and_preprocess_data_numpy(
-                data_path=data_path, data_format=data_format, row_indices=row_subset, gene_subset=[target_gene]
+                data_path=data_path,
+                data_format=data_format,
+                row_indices=row_subset,
+                gene_subset=[target_gene],
             ).flatten()
 
         # Results should be identical
         np.testing.assert_allclose(
-            expr_from_full, expr_from_subset, rtol=1e-6, atol=1e-8, err_msg="Row and gene subset should be consistent"
+            expr_from_full,
+            expr_from_subset,
+            rtol=1e-6,
+            atol=1e-8,
+            err_msg="Row and gene subset should be consistent",
         )
 
     def test_legacy_data_format_fallback(self, synthetic_scrnaseq_data):
@@ -359,7 +377,9 @@ class TestNormalizationConsistency:
         np.random.seed(789)
         n_cells = 800
         n_genes = len(data_format.gene_names)
-        X_test = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(np.float32)
+        X_test = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(
+            np.float32
+        )
 
         # Make one gene very sparse (like ENSG00000153563 in the bug)
         sparse_gene_idx = 10
@@ -378,12 +398,14 @@ class TestNormalizationConsistency:
         with tempfile.TemporaryDirectory() as temp_dir:
             data_path = Path(temp_dir) / "test.h5ad"
             test_adata.write_h5ad(data_path)
-            expr_full = load_and_preprocess_data_numpy(data_path=data_path, data_format=data_format, gene_subset=None)[
-                :, sparse_gene_idx
-            ]
+            expr_full = load_and_preprocess_data_numpy(
+                data_path=data_path, data_format=data_format, gene_subset=None
+            )[:, sparse_gene_idx]
 
             expr_subset = load_and_preprocess_data_numpy(
-                data_path=data_path, data_format=data_format, gene_subset=[sparse_gene_name]
+                data_path=data_path,
+                data_format=data_format,
+                gene_subset=[sparse_gene_name],
             ).flatten()
 
         # Should be identical
@@ -445,7 +467,9 @@ class TestDataFormatIntegration:
         # Verify that the data format can be used for processing
         # The actual scaling factor computation will be tested in other tests
 
-    def test_data_format_save_load_with_scaling_factors(self, data_format_with_scaling_factors):
+    def test_data_format_save_load_with_scaling_factors(
+        self, data_format_with_scaling_factors
+    ):
         """Test saving and loading DataFormat with scaling factors."""
         data_format, train_indices = data_format_with_scaling_factors
 
@@ -464,8 +488,12 @@ class TestDataFormatIntegration:
             assert loaded_data_format.gene_names == data_format.gene_names
             assert loaded_data_format.target_sum == data_format.target_sum
 
-            np.testing.assert_allclose(loaded_data_format.genes_mu, data_format.genes_mu)
-            np.testing.assert_allclose(loaded_data_format.genes_sigma, data_format.genes_sigma)
+            np.testing.assert_allclose(
+                loaded_data_format.genes_mu, data_format.genes_mu
+            )
+            np.testing.assert_allclose(
+                loaded_data_format.genes_sigma, data_format.genes_sigma
+            )
 
             # In the new design, scaling factors are computed on-the-fly, not stored
             # So we just verify that the basic data format properties are preserved
@@ -474,7 +502,9 @@ class TestDataFormatIntegration:
 class TestEpsilonConsistency:
     """Test epsilon consistency between different processing approaches."""
 
-    def test_shared_epsilon_batch_vs_full_processing(self, data_format_with_scaling_factors):
+    def test_shared_epsilon_batch_vs_full_processing(
+        self, data_format_with_scaling_factors
+    ):
         """Test that CellsDataset and load_and_preprocess_data_numpy produce identical results with shared epsilon."""
         data_format, train_indices = data_format_with_scaling_factors
 
@@ -482,7 +512,9 @@ class TestEpsilonConsistency:
         np.random.seed(999)
         n_cells = 200
         n_genes = len(data_format.gene_names)
-        X_test = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(np.float32)
+        X_test = np.random.exponential(scale=2.0, size=(n_cells, n_genes)).astype(
+            np.float32
+        )
 
         # Make one gene sparse for testing (similar to notebook scenario)
         sparse_gene_idx = 10
@@ -506,7 +538,9 @@ class TestEpsilonConsistency:
             dataset = CellsDataset(
                 data_format=data_format,
                 row_inds=test_indices,
-                dataset_params=DataAugmentParams(soft_loss_beta=1.0, mask_rate=0.0, noise_std=0.0),
+                dataset_params=DataAugmentParams(
+                    soft_loss_beta=1.0, mask_rate=0.0, noise_std=0.0
+                ),
                 is_train=False,
                 data_path=temp_path,
             )
@@ -515,7 +549,9 @@ class TestEpsilonConsistency:
                 dataset,
                 batch_size=50,
                 shuffle=False,
-                collate_fn=lambda batch_indices: cells_collate_fn(batch_indices, dataset),
+                collate_fn=lambda batch_indices: cells_collate_fn(
+                    batch_indices, dataset
+                ),
             )
 
             batch = next(iter(dataloader))
@@ -557,7 +593,9 @@ class TestEpsilonConsistency:
             assert abs(sparse_gene_batch.mean() - sparse_gene_manual.mean()) < 1e-12
             assert abs(sparse_gene_batch.std() - sparse_gene_manual.std()) < 1e-12
 
-    def test_different_epsilon_values_produce_different_results(self, data_format_with_scaling_factors):
+    def test_different_epsilon_values_produce_different_results(
+        self, data_format_with_scaling_factors
+    ):
         """Test that different epsilon values produce measurably different results."""
         data_format, _ = data_format_with_scaling_factors
 
@@ -565,7 +603,9 @@ class TestEpsilonConsistency:
         np.random.seed(777)
         n_cells = 100
         n_genes = len(data_format.gene_names)
-        X_test = np.random.exponential(scale=1.0, size=(n_cells, n_genes)).astype(np.float32)
+        X_test = np.random.exponential(scale=1.0, size=(n_cells, n_genes)).astype(
+            np.float32
+        )
 
         test_adata = ad.AnnData(X=sp.csr_matrix(X_test))
         test_adata.var_names = data_format.gene_names
@@ -578,20 +618,28 @@ class TestEpsilonConsistency:
         # Apply preprocessing with different epsilon values
         X_raw = test_adata.X.toarray()
 
-        expr_high_eps = preprocess_expression_data(X=X_raw.copy(), data_format=data_format, eps=eps_high_precision)
-        expr_large_eps = preprocess_expression_data(X=X_raw.copy(), data_format=data_format, eps=eps_large)
+        expr_high_eps = preprocess_expression_data(
+            X=X_raw.copy(), data_format=data_format, eps=eps_high_precision
+        )
+        expr_large_eps = preprocess_expression_data(
+            X=X_raw.copy(), data_format=data_format, eps=eps_large
+        )
 
         # Results should be different (though possibly only slightly)
         max_diff_large = np.abs(expr_high_eps - expr_large_eps).max()
 
         # The difference should be small but measurable
         # Standard vs high precision might be very small, but large vs high should be measurable
-        assert max_diff_large > 1e-8, "Large epsilon difference should produce measurable results"
+        assert (
+            max_diff_large > 1e-8
+        ), "Large epsilon difference should produce measurable results"
         assert max_diff_large < 1e-1, "Difference should be reasonable (not too large)"
 
         # Standard deviations should be different
         std_diff_large = abs(expr_high_eps.std() - expr_large_eps.std())
-        assert std_diff_large > 1e-8, "Standard deviations should differ with large epsilon difference"
+        assert (
+            std_diff_large > 1e-8
+        ), "Standard deviations should differ with large epsilon difference"
 
     def test_epsilon_consistency_gene_subset(self, data_format_with_scaling_factors):
         """Test that load_and_preprocess_data_numpy produces consistent results for gene subsets."""
@@ -601,7 +649,9 @@ class TestEpsilonConsistency:
         np.random.seed(555)
         n_cells = 150
         n_genes = len(data_format.gene_names)
-        X_test = np.random.exponential(scale=1.5, size=(n_cells, n_genes)).astype(np.float32)
+        X_test = np.random.exponential(scale=1.5, size=(n_cells, n_genes)).astype(
+            np.float32
+        )
 
         test_adata = ad.AnnData(X=sp.csr_matrix(X_test))
         test_adata.var_names = data_format.gene_names
@@ -655,7 +705,9 @@ class TestEdgeCases:
         # Create data with some zero-expression cells
         n_cells = 100
         n_genes = len(data_format.gene_names)
-        X_test = np.random.exponential(scale=1.0, size=(n_cells, n_genes)).astype(np.float32)
+        X_test = np.random.exponential(scale=1.0, size=(n_cells, n_genes)).astype(
+            np.float32
+        )
 
         # Make some cells have zero expression
         zero_cells = np.array([10, 20, 30, 40, 50])
@@ -709,9 +761,9 @@ class TestEdgeCases:
         with tempfile.TemporaryDirectory() as temp_dir:
             data_path = Path(temp_dir) / "test.h5ad"
             test_adata.write_h5ad(data_path)
-            expr_full = load_and_preprocess_data_numpy(data_path=data_path, data_format=data_format, gene_subset=None)[
-                :, special_gene
-            ]
+            expr_full = load_and_preprocess_data_numpy(
+                data_path=data_path, data_format=data_format, gene_subset=None
+            )[:, special_gene]
 
             expr_subset = load_and_preprocess_data_numpy(
                 data_path=data_path, data_format=data_format, gene_subset=[target_gene]

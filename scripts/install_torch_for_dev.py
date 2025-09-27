@@ -2,14 +2,12 @@ import os
 import subprocess
 import sys
 
-
 # Add the project root to Python path to allow importing from scripts module
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from scripts.constants import CUDA_VERSION
-
 
 PYTORCH_CUDA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
 
@@ -34,7 +32,16 @@ def install_torch_with_optimal_backend():
         env["UV_TORCH_BACKEND"] = "auto"
 
         subprocess.check_call(
-            ["uv", "pip", "install", "torch", "--torch-backend=auto", "--reinstall-package", "torch"], env=env
+            [
+                "uv",
+                "pip",
+                "install",
+                "torch",
+                "--torch-backend=auto",
+                "--reinstall-package",
+                "torch",
+            ],
+            env=env,
         )
         print("✓ PyTorch installation completed with auto backend selection.")
     except subprocess.CalledProcessError as e:
@@ -42,7 +49,9 @@ def install_torch_with_optimal_backend():
         print("Trying CPU-only installation as fallback...")
         try:
             # Fallback to CPU-only torch
-            subprocess.check_call(["uv", "pip", "install", "torch", "--reinstall-package", "torch"])
+            subprocess.check_call(
+                ["uv", "pip", "install", "torch", "--reinstall-package", "torch"]
+            )
             print("✓ PyTorch installed with CPU backend (fallback).")
         except subprocess.CalledProcessError as e2:
             print(f"❌ Failed to install PyTorch with fallback method: {e2}")
@@ -90,7 +99,9 @@ def print_torch_backend():
     try:
         import torch  # type: ignore # noqa: PLC0415
     except ImportError:
-        print("Error: torch is not installed. Please run 'uv sync' to install dependencies.")
+        print(
+            "Error: torch is not installed. Please run 'uv sync' to install dependencies."
+        )
         return
 
     print(f"PyTorch version: {torch.__version__}")
@@ -110,7 +121,9 @@ def print_torch_backend():
 
         # Check for CUDA 12.x support
         if cuda_version and "12." in cuda_version:
-            print(f"✓ CUDA 12.x detected - compatible with latest PyTorch features (targeting {CUDA_VERSION})")
+            print(
+                f"✓ CUDA 12.x detected - compatible with latest PyTorch features (targeting {CUDA_VERSION})"
+            )
         else:
             print(
                 f"⚠ Older CUDA version detected - consider upgrading for optimal performance (targeting {CUDA_VERSION})"
@@ -124,7 +137,9 @@ def print_torch_backend():
         print("Torch is using CPU backend")
 
     python_version = sys.version_info
-    print(f"Python version: {python_version.major}.{python_version.minor}.{python_version.micro}")
+    print(
+        f"Python version: {python_version.major}.{python_version.minor}.{python_version.micro}"
+    )
 
 
 if __name__ == "__main__":
@@ -135,6 +150,8 @@ if __name__ == "__main__":
             # Print detailed backend info
             print_torch_backend()
         else:
-            print("❌ Torch installation failed. Please check the error messages above.")
+            print(
+                "❌ Torch installation failed. Please check the error messages above."
+            )
     else:
         print("❌ Failed to install torch. Please check the error messages above.")

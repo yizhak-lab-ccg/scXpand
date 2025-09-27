@@ -1,7 +1,6 @@
 """Tests for hyperopt system consistency and parameter validation."""
 
 import inspect
-
 from unittest.mock import MagicMock
 
 import optuna
@@ -35,20 +34,28 @@ class TestHyperoptParameterConsistency:
 
         for param_class in param_classes:
             # Check that the class has random_seed field
-            assert hasattr(param_class, "__dataclass_fields__"), f"{param_class.__name__} is not a dataclass"
+            assert hasattr(
+                param_class, "__dataclass_fields__"
+            ), f"{param_class.__name__} is not a dataclass"
             fields = param_class.__dataclass_fields__
-            assert "random_seed" in fields, f"{param_class.__name__} missing 'random_seed' field"
+            assert (
+                "random_seed" in fields
+            ), f"{param_class.__name__} missing 'random_seed' field"
 
             # Check that random_seed has correct type annotation
             field_info = fields["random_seed"]
-            assert field_info.type is int, (
-                f"{param_class.__name__}.random_seed should be type 'int', got {field_info.type}"
-            )
+            assert (
+                field_info.type is int
+            ), f"{param_class.__name__}.random_seed should be type 'int', got {field_info.type}"
 
             # Check that default value is reasonable
             instance = param_class()
-            assert isinstance(instance.random_seed, int), f"{param_class.__name__}.random_seed default is not int"
-            assert instance.random_seed >= 0, f"{param_class.__name__}.random_seed should be non-negative"
+            assert isinstance(
+                instance.random_seed, int
+            ), f"{param_class.__name__}.random_seed default is not int"
+            assert (
+                instance.random_seed >= 0
+            ), f"{param_class.__name__}.random_seed should be non-negative"
 
     def test_parameter_classes_do_not_use_random_state(self):
         """Test that parameter classes use random_seed, not random_state (consistency with hyperopt)."""
@@ -89,7 +96,11 @@ class TestHyperoptParameterConsistency:
                 return "random"  # Valid SamplerType value
             elif "lr_scheduler_type" in name:
                 return "ReduceLROnPlateau"  # Valid LRSchedulerType value
-            elif "use_log_transform" in name or "use_soft_loss" in name or "use_zscore_norm" in name:
+            elif (
+                "use_log_transform" in name
+                or "use_soft_loss" in name
+                or "use_zscore_norm" in name
+            ):
                 return True  # Boolean values
             elif "train_batch_size" in name or "batch_size" in name:
                 return 2048  # Batch size values
@@ -99,7 +110,12 @@ class TestHyperoptParameterConsistency:
                 return "balanced"  # Class weight values
             elif "learning_rate" in name:
                 return "optimal"  # Learning rate values
-            elif "warm_start" in name or "average" in name or "fit_intercept" in name or "shuffle" in name:
+            elif (
+                "warm_start" in name
+                or "average" in name
+                or "fit_intercept" in name
+                or "shuffle" in name
+            ):
                 return True  # Boolean values
             elif "boosting_type" in name:
                 return "gbdt"  # Boosting type values
@@ -137,34 +153,46 @@ class TestHyperoptParameterConsistency:
 
         # Parameter grids should NOT include random_seed - that's set by the optimizer
         # This is the correct behavior since hyperopt_optimizer.py line 112 sets: param_dict["random_seed"] = trial_seed
-        assert "random_seed" not in params, (
-            f"{config_func.__name__} should not return 'random_seed' - this is set by the hyperopt optimizer"
-        )
+        assert (
+            "random_seed" not in params
+        ), f"{config_func.__name__} should not return 'random_seed' - this is set by the hyperopt optimizer"
 
     def test_model_registry_consistency(self):
         """Test that MODEL_REGISTRY contains all expected models and their components are consistent."""
         expected_models = {"mlp", "logistic", "svm", "lightgbm", "autoencoder"}
 
-        assert set(MODEL_TYPES.keys()) == expected_models, (
-            f"MODEL_REGISTRY should contain {expected_models}, got {set(MODEL_TYPES.keys())}"
-        )
+        assert (
+            set(MODEL_TYPES.keys()) == expected_models
+        ), f"MODEL_REGISTRY should contain {expected_models}, got {set(MODEL_TYPES.keys())}"
 
         for model_name, spec in MODEL_TYPES.items():
             # Check that each spec has required components
-            assert hasattr(spec, "config_func"), f"{model_name} spec missing config_func"
-            assert hasattr(spec, "param_class"), f"{model_name} spec missing param_class"
+            assert hasattr(
+                spec, "config_func"
+            ), f"{model_name} spec missing config_func"
+            assert hasattr(
+                spec, "param_class"
+            ), f"{model_name} spec missing param_class"
             assert hasattr(spec, "runner"), f"{model_name} spec missing runner"
 
             # Check that config_func is callable
-            assert callable(spec.config_func), f"{model_name} config_func is not callable"
+            assert callable(
+                spec.config_func
+            ), f"{model_name} config_func is not callable"
 
             # Check that param_class is a class
-            assert inspect.isclass(spec.param_class), f"{model_name} param_class is not a class"
+            assert inspect.isclass(
+                spec.param_class
+            ), f"{model_name} param_class is not a class"
 
             # Check that param_class has random_seed
-            assert hasattr(spec.param_class, "__dataclass_fields__"), f"{model_name} param_class is not a dataclass"
+            assert hasattr(
+                spec.param_class, "__dataclass_fields__"
+            ), f"{model_name} param_class is not a dataclass"
             fields = spec.param_class.__dataclass_fields__
-            assert "random_seed" in fields, f"{model_name} param_class missing 'random_seed' field"
+            assert (
+                "random_seed" in fields
+            ), f"{model_name} param_class missing 'random_seed' field"
 
     def test_hyperopt_optimizer_sets_random_seed(self):
         """Test that the hyperopt optimizer pattern sets random_seed correctly."""
@@ -181,7 +209,11 @@ class TestHyperoptParameterConsistency:
                     return "random"  # Valid SamplerType value
                 elif "lr_scheduler_type" in name:
                     return "ReduceLROnPlateau"  # Valid LRSchedulerType value
-                elif "use_log_transform" in name or "use_soft_loss" in name or "use_zscore_norm" in name:
+                elif (
+                    "use_log_transform" in name
+                    or "use_soft_loss" in name
+                    or "use_zscore_norm" in name
+                ):
                     return True  # Boolean values
                 elif "train_batch_size" in name or "batch_size" in name:
                     return 2048  # Batch size values
@@ -191,7 +223,12 @@ class TestHyperoptParameterConsistency:
                     return "balanced"  # Class weight values
                 elif "learning_rate" in name:
                     return "optimal"  # Learning rate values
-                elif "warm_start" in name or "average" in name or "fit_intercept" in name or "shuffle" in name:
+                elif (
+                    "warm_start" in name
+                    or "average" in name
+                    or "fit_intercept" in name
+                    or "shuffle" in name
+                ):
                     return True  # Boolean values
                 elif "boosting_type" in name:
                     return "gbdt"  # Boosting type values
@@ -229,9 +266,13 @@ class TestHyperoptParameterConsistency:
             # Test that param_class can be instantiated with these parameters
             try:
                 params = spec.param_class(**param_dict)
-                assert params.random_seed == trial_seed, f"{model_name} param_class did not accept random_seed override"
+                assert (
+                    params.random_seed == trial_seed
+                ), f"{model_name} param_class did not accept random_seed override"
             except Exception as e:
-                pytest.fail(f"{model_name} param_class failed to instantiate with hyperopt parameters: {e}")
+                pytest.fail(
+                    f"{model_name} param_class failed to instantiate with hyperopt parameters: {e}"
+                )
 
     def test_parameter_grid_functions_accept_optuna_trial(self):
         """Test that all parameter grid functions accept an optuna.Trial object."""
@@ -247,14 +288,18 @@ class TestHyperoptParameterConsistency:
             sig = inspect.signature(config_func)
             params = list(sig.parameters.keys())
 
-            assert len(params) == 1, f"{config_func.__name__} should accept exactly one parameter"
-            assert params[0] == "trial", f"{config_func.__name__} should accept parameter named 'trial'"
+            assert (
+                len(params) == 1
+            ), f"{config_func.__name__} should accept exactly one parameter"
+            assert (
+                params[0] == "trial"
+            ), f"{config_func.__name__} should accept parameter named 'trial'"
 
             # Check type annotation
             param_annotation = sig.parameters["trial"].annotation
-            assert param_annotation == optuna.Trial, (
-                f"{config_func.__name__} trial parameter should be annotated as optuna.Trial"
-            )
+            assert (
+                param_annotation == optuna.Trial
+            ), f"{config_func.__name__} trial parameter should be annotated as optuna.Trial"
 
     def test_parameter_default_values_are_reasonable(self):
         """Test that default random_seed values are reasonable across all parameter classes."""
@@ -285,7 +330,9 @@ class TestHyperoptParameterConsistency:
         # The mapping to random_state should happen in the run_lightgbm_training function
         # This test ensures our parameter class uses the consistent naming
         assert hasattr(params, "random_seed")
-        assert not hasattr(params, "random_state"), "LightGBMParams should not have random_state attribute"
+        assert not hasattr(
+            params, "random_state"
+        ), "LightGBMParams should not have random_state attribute"
 
 
 class TestParameterClassDefaults:
@@ -303,9 +350,9 @@ class TestParameterClassDefaults:
     def test_use_log_transform_default(self, param_class):
         """Test that all parameter classes default to use_log_transform=True."""
         instance = param_class()
-        assert instance.use_log_transform is True, (
-            f"{param_class.__name__} should default to use_log_transform=True for gene expression data"
-        )
+        assert (
+            instance.use_log_transform is True
+        ), f"{param_class.__name__} should default to use_log_transform=True for gene expression data"
 
     @pytest.mark.parametrize(
         "param_class",
@@ -319,13 +366,29 @@ class TestParameterClassDefaults:
         instance = param_class()
 
         # Common neural network parameters
-        assert hasattr(instance, "train_batch_size"), f"{param_class.__name__} missing train_batch_size"
-        assert hasattr(instance, "dropout_rate"), f"{param_class.__name__} missing dropout_rate"
-        assert hasattr(instance, "mask_rate"), f"{param_class.__name__} missing mask_rate"
-        assert hasattr(instance, "noise_std"), f"{param_class.__name__} missing noise_std"
+        assert hasattr(
+            instance, "train_batch_size"
+        ), f"{param_class.__name__} missing train_batch_size"
+        assert hasattr(
+            instance, "dropout_rate"
+        ), f"{param_class.__name__} missing dropout_rate"
+        assert hasattr(
+            instance, "mask_rate"
+        ), f"{param_class.__name__} missing mask_rate"
+        assert hasattr(
+            instance, "noise_std"
+        ), f"{param_class.__name__} missing noise_std"
 
         # Check reasonable defaults
-        assert instance.train_batch_size > 0, f"{param_class.__name__} train_batch_size should be positive"
-        assert 0 <= instance.dropout_rate <= 1, f"{param_class.__name__} dropout_rate should be in [0,1]"
-        assert instance.mask_rate >= 0, f"{param_class.__name__} mask_rate should be non-negative"
-        assert instance.noise_std >= 0, f"{param_class.__name__} noise_std should be non-negative"
+        assert (
+            instance.train_batch_size > 0
+        ), f"{param_class.__name__} train_batch_size should be positive"
+        assert (
+            0 <= instance.dropout_rate <= 1
+        ), f"{param_class.__name__} dropout_rate should be in [0,1]"
+        assert (
+            instance.mask_rate >= 0
+        ), f"{param_class.__name__} mask_rate should be non-negative"
+        assert (
+            instance.noise_std >= 0
+        ), f"{param_class.__name__} noise_std should be non-negative"
