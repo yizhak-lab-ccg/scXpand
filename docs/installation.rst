@@ -65,70 +65,35 @@ Before setting up the development environment, you need to install `uv`, a fast 
 
 **Install in development mode:**
 
-.. code-block:: bash
+To set up a development environment, run the appropriate script for your system:
 
-    uv pip install -e ".[dev]"
+* **For Linux or macOS:**
 
-This will:
+  .. code-block:: bash
 
-* Install scXpand in editable mode
-* Install all development dependencies (testing, linting, documentation)
-* Set up PyTorch with automatic backend detection (CUDA if available, otherwise CPU/MPS)
+      bash scripts/install.sh
 
-**Install pre-commit hooks:**
+* **For Windows (command prompt):**
 
-.. code-block:: bash
+  .. code-block:: bash
 
-    pre-commit install
+      scripts\install.bat
 
-**For PyTorch installation with uv (Recommended):**
+These scripts will automatically:
+1. Create a virtual environment using `uv`.
+2. Activate the environment.
+3. Install scXpand in editable mode with all development dependencies.
+4. Install PyTorch with the optimal backend for your system.
+5. Set up pre-commit hooks.
 
-uv provides excellent PyTorch integration with automatic backend selection:
+After the script completes, the development environment will be ready to use.
 
-.. code-block:: bash
+To activate the virtual environment in a new terminal session, run one of the following commands depending on your shell:
 
-    # Install PyTorch with automatic backend detection
-    uv pip install torch torchvision torchaudio --torch-backend=auto
+.. code-block:: shell
 
-This will:
-* Automatically detect your system's optimal PyTorch backend
-* Install CUDA PyTorch if NVIDIA GPU is available
-* Fall back to CPU/MPS PyTorch if CUDA is not available
-* Use the most compatible PyTorch index for your system
+   # On Linux/macOS (bash/zsh):
+   source .venv/bin/activate
 
-**Alternative: Manual PyTorch installation with uv:**
-
-For specific CUDA versions:
-
-.. code-block:: bash
-
-    # CUDA 12.8 (latest)
-    uv pip install torch torchvision torchaudio --torch-backend=cu128
-
-    # CUDA 12.6
-    uv pip install torch torchvision torchaudio --torch-backend=cu126
-
-    # CPU-only
-    uv pip install torch torchvision torchaudio --torch-backend=cpu
-
-**Using uv for the entire development setup:**
-
-If you prefer using uv for everything:
-
-.. code-block:: bash
-
-    # Install scXpand in development mode with uv
-    uv pip install -e ".[dev]"
-
-    # Then install PyTorch with optimal backend
-    uv pip install torch torchvision torchaudio --torch-backend=auto
-
-    # Install pre-commit hooks
-    pre-commit install
-
-**Run tests to verify installation:**
-
-.. code-block:: bash
-
-    # Run tests with coverage and parallel execution
-    pytest --cov=src/scxpand --cov-report=term-missing -n auto
+   # On Windows (Command Prompt):
+   .venv\Scripts\activate.bat
