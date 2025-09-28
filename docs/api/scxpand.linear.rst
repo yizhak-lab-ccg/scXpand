@@ -3,7 +3,7 @@ scxpand.linear
 
 .. automodule:: scxpand.linear
 
-
+   
 .. rubric:: Modules
 
 .. autosummary::

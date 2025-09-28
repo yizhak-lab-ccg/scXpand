@@ -3,43 +3,6 @@ Contributing to scXpand
 
 We welcome contributions to scXpand! This document provides guidelines for contributing to the project.
 
-Quick Start
------------
-
-1. **Fork and clone the repository**
-2. **Set up development environment:**
-   Follow the development setup instructions in :doc:`installation`
-3. **Create a feature branch and make your changes**
-4. **Run tests and linting:**
-   .. code-block:: bash
-      # Run tests with coverage (parallel execution for faster results)
-      pytest --cov=src/scxpand --cov-report=term-missing -n auto
-
-      # Run linting and formatting
-      pre-commit run --all-files
-5. **Submit a pull request**
-
-Coding Standards
-----------------
-
-We use several tools to maintain code quality:
-
-- **Ruff** for code formatting and linting
-- **Pre-commit hooks** for automated checks
-- **Type hints** for better code documentation
-- **Comprehensive testing** with pytest
-
-All tools are configured in `pyproject.toml` and run automatically via pre-commit hooks.
-
-Pull Request Process
---------------------
-
-1. **Ensure all tests pass**
-2. **Update documentation** if needed
-3. **Add tests** for new functionality
-4. **Update CHANGELOG.md** with your changes
-5. **Request review** from maintainers
-
 Reporting Issues
 ----------------
 
@@ -51,10 +14,49 @@ When reporting issues, please include:
 - Minimal reproducible example
 - Expected vs actual behavior
 
-Development Setup
------------------
+Contributing Process
+--------------------
 
-For complete development setup instructions including prerequisites and environment configuration, see the "Development Setup (from Source)" section in :doc:`installation`.
+**Quick Start:**
+
+1. **Fork and clone the repository**
+2. **Set up development environment:**
+   Follow the development setup instructions in :doc:`installation`
+3. **Create a feature branch and make your changes**
+
+**Before submitting your pull request:**
+
+4. **Ensure all tests pass** and meet coverage requirements:
+
+   .. code-block:: bash
+
+      # Run tests with coverage
+      pytest --cov=src/scxpand --cov-report=term-missing -n auto
+
+5. **Add tests** for new functionality
+6. **Update documentation** if your changes affect the API or user-facing functionality
+7. **Update CHANGELOG.md** with your changes
+8. **Run pre-commit hooks** to ensure code quality:
+
+   .. code-block:: bash
+
+      # Run linting and formatting
+      pre-commit run --all-files
+
+**Submit your pull request:**
+
+9. **Create a pull request** with:
+
+   - Clear, descriptive title
+   - Detailed description of changes
+   - Reference to any related issues
+   - Screenshots or examples if applicable
+
+10. **Request review** from maintainers
+
+Your pull request will be reviewed and may require changes before being merged.
+
+
 
 Template Updates
 ----------------
@@ -108,7 +110,7 @@ The project maintains a minimum test coverage of 80%. Coverage reports are gener
 
 **Parallel Execution:**
 
-The `-n auto` flag automatically detects the optimal number of parallel workers based on your CPU cores. This significantly speeds up test execution, especially for the comprehensive test suite with 900+ tests.
+The `-n auto` flag automatically detects the optimal number of parallel workers based on your CPU cores.
 
 **Pre-commit Integration:**
 
