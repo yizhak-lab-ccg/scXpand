@@ -106,6 +106,41 @@ source = "vcs"
 [tool.hatch.version.raw-options]
 local_scheme = "no-local-version"
 
+[tool.hatch.envs.default]
+installer = "uv"
+features = [ "dev" ]
+
+[tool.hatch.envs.docs]
+features = [ "docs" ]
+scripts.build = "sphinx-build -M html docs docs/_build -W {args}"
+scripts.open = "python -m webbrowser -t docs/_build/html/index.html"
+scripts.clean = "git clean -fdX -- {args:docs}"
+
+# Test environments for different Python versions
+[[tool.hatch.envs.hatch-test.matrix]]
+deps = [ "stable" ]
+python = [ "3.11", "3.12", "3.13" ]
+
+# Test with pre-release dependencies
+[[tool.hatch.envs.hatch-test.matrix]]
+deps = [ "pre" ]
+python = [ "3.13" ]
+
+[tool.hatch.envs.hatch-test]
+features = [ "dev" ]
+
+[tool.hatch.envs.hatch-test.overrides]
+# If the matrix variable `deps` is set to "pre",
+# set the environment variable `UV_PRERELEASE` to "allow".
+matrix.deps.env-vars = [
+  { key = "UV_PRERELEASE", value = "allow", if = [ "pre" ] },
+]
+
+[tool.hatch.envs.hatch-test.scripts]
+run-cov = "pytest --cov=src/scxpand --cov-report=term-missing --cov-report=xml --cov-report=html {args}"
+cov-combine = "coverage combine"
+cov-report = "coverage report"
+
 [tool.ruff]
 target-version = "py311"
 line-length = 88
