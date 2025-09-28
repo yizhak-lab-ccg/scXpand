@@ -65,19 +65,20 @@ Before setting up the development environment, you need to install `uv`, a fast 
 
 **Install in development mode:**
 
-To set up a development environment, run the appropriate script for your system:
+
+To set up a development environment, run the appropriate script for your system (now located in the main folder):
 
 * **For Linux or macOS:**
 
-  .. code-block:: bash
+   .. code-block:: bash
 
-      bash scripts/install.sh
+         ./install.sh
 
 * **For Windows (command prompt):**
 
-  .. code-block:: bash
+   .. code-block:: bash
 
-      scripts\install.bat
+         install.bat
 
 These scripts will automatically:
 1. Create a virtual environment using `uv`.
