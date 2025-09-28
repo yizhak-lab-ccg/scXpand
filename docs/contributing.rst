@@ -7,21 +7,17 @@ Quick Start
 -----------
 
 1. **Fork and clone the repository**
-2. **Install in development mode:**
-   .. code-block:: bash
-      pip install -e ".[dev]"
-3. **Install pre-commit hooks:**
-   .. code-block:: bash
-      pre-commit install
-4. **Create a feature branch and make your changes**
-5. **Run tests and linting:**
+2. **Set up development environment:**
+   Follow the development setup instructions in :doc:`installation`
+3. **Create a feature branch and make your changes**
+4. **Run tests and linting:**
    .. code-block:: bash
       # Run tests with coverage (parallel execution for faster results)
       pytest --cov=src/scxpand --cov-report=term-missing -n auto
 
       # Run linting and formatting
       pre-commit run --all-files
-6. **Submit a pull request**
+5. **Submit a pull request**
 
 Coding Standards
 ----------------
@@ -58,7 +54,26 @@ When reporting issues, please include:
 Development Setup
 -----------------
 
-For development setup instructions, see :doc:`installation`.
+For complete development setup instructions including prerequisites and environment configuration, see the "Development Setup (from Source)" section in :doc:`installation`.
+
+Template Updates
+----------------
+
+This project uses the `scverse cookiecutter template <https://github.com/scverse/cookiecutter-scverse>`_ and can be updated when new template versions are released.
+
+To update the project with the latest template changes:
+
+.. code-block:: bash
+
+   # Check if updates are available
+   cruft check
+
+   # Update to the latest template version
+   cruft update
+
+   # Review and commit the changes
+   git add .
+   git commit -m "Update from cookiecutter template"
 
 Testing
 -------
