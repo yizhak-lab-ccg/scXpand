@@ -20,7 +20,11 @@ from scxpand.mlp.run_mlp_train import run_mlp_training
 from scxpand.util.classes import ModelType
 from scxpand.util.model_constants import BEST_CHECKPOINT_FILE, STUDY_INFO_FILE
 from scxpand.util.train_util import report_to_optuna_and_handle_pruning
-from tests.test_utils import create_temp_h5ad_file, windows_safe_context_manager
+from tests.test_utils import (
+    close_optuna_storage,
+    create_temp_h5ad_file,
+    windows_safe_context_manager,
+)
 
 
 class TestHyperparameterOptimizerBasics:
@@ -81,6 +85,7 @@ class TestHyperparameterOptimizerBasics:
             assert optimizer.num_workers == 2
             assert optimizer.resume is False
             assert optimizer.param_overrides == {"custom_param": 42}
+            optimizer.close()
 
     def test_invalid_model_type_raises_error(self, dummy_adata):
         """Test that invalid model type raises ValueError."""
@@ -154,6 +159,7 @@ class TestStudyCreationAndResume:
             assert study.study_name == "new_study"
             assert len(study.trials) == 0
             assert study.direction == optuna.study.StudyDirection.MAXIMIZE
+            close_optuna_storage(study)
 
     def test_resume_existing_study(self, dummy_adata):
         """Test resuming an existing study with trials."""
@@ -180,6 +186,7 @@ class TestStudyCreationAndResume:
                 study1 = optimizer1.create_study()
                 study1.optimize(func=optimizer1.objective, n_trials=2)
                 assert len(study1.trials) == 2
+            close_optuna_storage(study1)
 
             # Create new optimizer and resume
             optimizer2 = HyperparameterOptimizer(
@@ -193,6 +200,7 @@ class TestStudyCreationAndResume:
             study2 = optimizer2.create_study()
             assert len(study2.trials) == 2  # Should have previous trials
             assert study2.study_name == study_name
+            close_optuna_storage(study2)
 
     def test_resume_false_raises_error_for_existing_study(self, dummy_adata):
         """Test that resume=False raises error when existing study has trials."""
@@ -221,6 +229,7 @@ class TestStudyCreationAndResume:
                 study1 = optimizer1.create_study()
                 study1.optimize(func=optimizer1.objective, n_trials=2)
                 assert len(study1.trials) == 2
+            close_optuna_storage(study1)
 
             # Create trial directories on filesystem to test the logic
             trial_dir_0 = study_dir / "trial_0"
@@ -245,6 +254,7 @@ class TestStudyCreationAndResume:
             # Test the _handle_existing_study method directly since create_study() fails at database level
             with pytest.raises(ValueError, match=r"already exists.*with.*2 trial"):
                 optimizer2._handle_existing_study()
+            close_optuna_storage(optimizer2.create_study())
 
     def test_error_when_study_exists_and_not_resuming(self, dummy_adata):
         """Test error when study exists and resume=False."""
@@ -287,6 +297,7 @@ class TestStudyCreationAndResume:
             # Test the _handle_existing_study method directly since create_study() fails at database level
             with pytest.raises(ValueError, match="already exists"):
                 optimizer2._handle_existing_study()
+            close_optuna_storage(study1)
 
 
 class TestTrialSpecificResumeLogic:
@@ -562,6 +573,7 @@ class TestTrialSpecificResumeLogic:
             # The important thing is that the study_dir attribute gets set when needed
             study_dir_attr = study.user_attrs.get("study_dir")
             assert study_dir_attr == expected_study_dir or study_dir_attr is None
+            close_optuna_storage(study)
 
     def test_mixed_new_existing_trial_scenarios(self, dummy_adata):
         """Test mixed scenarios with both new and existing trials in the same study."""
@@ -987,6 +999,7 @@ class TestRunOptimization:
                     info = json.load(f)
                 assert info["total_trials"] == 3
                 assert info["completed_trials"] == 3
+            optimizer.close()
 
     def test_run_optimization_with_resume(self, dummy_adata):
         """Test optimization with resume functionality."""
@@ -1313,6 +1326,7 @@ class TestTrialResumeAndCleanup:
                 trial=trial2, current_score=0.90, epoch=1
             )
             assert trial2.user_attrs.get("reported_epochs") == [0, 1]
+            optimizer.close()
 
     def test_cleanup_incomplete_trials(self, dummy_adata):
         """Test cleanup of incomplete trials."""
@@ -1395,6 +1409,7 @@ class TestTrialResumeAndCleanup:
                 trial=trial, current_score=0.90, epoch=3
             )
             assert trial.user_attrs.get("reported_epochs") == [0, 1, 2, 3]
+            optimizer.close()
 
     def test_optimization_with_cleanup_on_resume(self, dummy_adata):
         """Test that optimization automatically cleans up incomplete trials when resuming."""
@@ -1743,6 +1758,7 @@ class TestHappyPathFunctionality:
                 "model": "test",
                 "version": "1.0",
             }
+            optimizer.close()
 
     def test_empty_studies_cleanup_safety(self, dummy_adata):
         """Test that cleanup is safe when called on empty studies."""
@@ -1772,6 +1788,11 @@ class TestHappyPathFunctionality:
                 study=empty_study, study_dir=study_dir, max_age_hours=0
             )
             assert cleaned_count == 0  # No trials to clean
+            try:
+                engine = empty_study._storage._engine
+                engine.dispose()
+            except Exception:
+                pass
 
     def test_normal_parameter_overrides_still_work(self, dummy_adata):
         """Test that parameter overrides continue to work normally."""
@@ -1835,3 +1856,4 @@ class TestHappyPathFunctionality:
                 assert hasattr(params, "train_batch_size")
                 assert params.n_epochs == 5
                 assert params.train_batch_size == 32
+                optimizer.close()
