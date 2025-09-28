@@ -185,13 +185,13 @@ pip install --pre scxpand
 
 **Install latest dev version (CUDA):**
 ```bash
-pip install --pre scxpand-cuda
+pip install --pre scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
 ```
 
 **Install specific dev version:**
 ```bash
 pip install --pre scxpand==0.3.8.dev0
-pip install --pre scxpand-cuda==0.3.8.dev0
+pip install --pre scxpand-cuda==0.3.8.dev0 --extra-index-url https://download.pytorch.org/whl/cu128
 ```
 
 ### From Source (Development)
