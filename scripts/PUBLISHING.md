@@ -67,11 +67,14 @@ The `release.sh` script automates the complete release pipeline with **VCS-based
    - If missing/empty, creates template and exits
    - Automatically moves content from `[Unreleased]` section
    - You edit CHANGELOG.md manually, then re-run script
-4. **Package Building**: Builds both `scxpand` (CPU/MPS) and `scxpand-cuda` (CUDA 12.8)
-5. **Git Operations**: Commits changes, pushes to main, creates version tag
-6. **GitHub Release**: Creates release with auto-generated notes (if GitHub CLI available)
-7. **Publishing**: Publishes both packages to PyPI
-8. **Verification**: Tests installation from PyPI
+4. **VCS Operations**: For VCS versioning, commits only if changes exist, creates and pushes version tag
+5. **Package Building**:
+   - Builds `scxpand` (CPU/MPS) with correct version from Git tag
+   - Builds `scxpand-cuda` (CUDA 12.8) using git staging to maintain clean versioning
+6. **Publishing**: Publishes both packages to PyPI (with confirmation prompt)
+7. **GitHub Release**: Creates release with auto-generated notes **after** PyPI confirmation
+8. **Documentation**: Triggers ReadTheDocs build
+9. **Verification**: Tests installation from PyPI
 
 ### Dev Releases (any branch)
 1. **Automated Versioning**: Automatically increments patch version and adds `.dev0` suffix
@@ -147,3 +150,23 @@ To change CUDA version:
 ```bash
 python scripts/create_cuda_pyproject.py -c cu124  # example for CUDA 12.4
 ```
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### "Working directory is not clean" Error
+- **Cause**: Uncommitted changes in working directory
+- **Solution**: Commit or stash changes before running release script
+
+#### PyPI Publishing Permission Denied
+- **Cause**: Using project-scoped token instead of account-scoped token
+- **Solution**: Create "Entire account" scoped token at https://pypi.org/manage/account/token/
+
+### Getting Help
+
+If you encounter issues not listed here:
+1. Run with `--dry-run` first to preview changes
+2. Check that all prerequisites are met
+3. Ensure working directory is clean and up-to-date
+4. Verify PyPI token has "Entire account" scope
