@@ -1301,8 +1301,8 @@ main() {
     create_and_push_tag
     build_and_test_packages
     show_changes
-    create_github_release
     publish_to_pypi
+    create_github_release
     trigger_readthedocs_build
     verify_releases
     show_summary
