@@ -9,11 +9,10 @@ build:
     python: "3.12"
   jobs:
     create_environment:
-      - asdf plugin add uv
-      - asdf install uv latest
-      - asdf global uv latest
+      - pip install --upgrade pip
+      - pip install uv
+      - uv pip install --system -e ".[docs]"
     build:
       html:
-        - uv pip install --system -e ".[docs]"
-        - sphinx-build -M html docs docs/_build
+        - python3.12 -m sphinx -M html docs docs/_build
         - mv docs/_build $READTHEDOCS_OUTPUT
