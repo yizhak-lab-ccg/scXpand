@@ -54,48 +54,35 @@ To work with the latest version on GitHub (for development or contributions):
     git clone https://github.com/yizhak-lab-ccg/scXpand.git
     cd scXpand
 
-scXpand follows the `scverse ecosystem <https://scverse.org/>`_ standards and uses modern Python packaging tools.
+scXpand uses `uv <https://docs.astral.sh/uv/>`_ for fast, reliable dependency management. Use the provided install scripts:
 
-**Prerequisites:**
+**macOS/Linux:**
 
-Before setting up the development environment, you need to install `uv`, a fast Python package installer and resolver:
+.. code-block:: bash
 
-* **Install uv**: Follow the `uv installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_ for your platform
-* **Verify installation**: Run ``uv --version`` to confirm uv is installed
+    ./install.sh
 
-**Install in development mode:**
+**Windows PowerShell:**
 
+.. code-block:: bash
 
-To set up a development environment, run the appropriate script for your system (now located in the main folder):
+    .\install.bat
 
-* **For Linux or macOS:**
+These scripts will:
 
-   .. code-block:: bash
+* Install Python 3.13 via uv
+* Create a virtual environment in ``.venv/``
+* Install all dependencies from the lock file
+* Set up PyTorch with appropriate GPU support
+* Register Jupyter kernel
+* Set up pre-commit hooks
 
-         ./install.sh
+Then activate the environment:
 
-* **For Windows (command prompt):**
+.. code-block:: bash
 
-   .. code-block:: bash
+    # macOS/Linux
+    source .venv/bin/activate
 
-         ./install.bat
-
-These scripts will automatically:
-
-1. Create a virtual environment using `uv`.
-2. Activate the environment.
-3. Install scXpand in editable mode with all development dependencies.
-4. Install PyTorch with the optimal backend for your system.
-5. Set up pre-commit hooks.
-
-After the script completes, the development environment will be ready to use.
-
-To activate the virtual environment in a new terminal session, run one of the following commands depending on your shell:
-
-.. code-block:: shell
-
-   # On Linux/macOS (bash/zsh):
-   source .venv/bin/activate
-
-   # On Windows (Command Prompt):
-   .venv\Scripts\activate.bat
+    # Windows PowerShell
+    .\.venv\Scripts\activate
