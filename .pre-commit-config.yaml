@@ -47,3 +47,10 @@ repos:
         language: system
         pass_filenames: false
         stages: [pre-push]
+      - id: pytest
+        name: pytest
+        entry: pytest
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+        args: [--tb=short, -n, auto]
