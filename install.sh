@@ -66,7 +66,12 @@ fi
 
 echo "Found uv: $UV_VERSION"
 
-# Handle existing .venv directory
+# Clear build artifacts and Python caches (but keep uv cache for faster installs)
+echo "Clearing build artifacts and Python caches..."
+rm -rf dist/ build/ *.egg-info/ 2>/dev/null || true
+find . -name "*.pyc" -delete 2>/dev/null || true
+find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+
 if [ -d ".venv" ]; then
     echo "Warning: Existing .venv directory found."
     read -p "Do you want to remove it and create a fresh environment? (y/N): " -n 1 -r
@@ -79,6 +84,9 @@ if [ -d ".venv" ]; then
         echo "If you encounter problems, please remove .venv manually and re-run this script."
     fi
 fi
+
+# Note: uv cache is preserved to avoid redownloading packages
+# Only clear it if you encounter persistent version issues
 
 # Install Python using uv
 echo "Installing Python $PYTHON_VERSION..."

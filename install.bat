@@ -68,7 +68,14 @@ goto :uv_ok
 
 echo Found uv: !UV_VERSION!
 
-:: Handle existing .venv directory
+:: Clear build artifacts and Python caches (but keep uv cache for faster installs)
+echo Clearing build artifacts and Python caches...
+if exist dist rmdir dist /s /q 2>nul
+if exist build rmdir build /s /q 2>nul
+if exist *.egg-info rmdir *.egg-info /s /q 2>nul
+for /d /r . %%d in (__pycache__) do @if exist "%%d" rmdir "%%d" /s /q 2>nul
+for /r . %%f in (*.pyc) do @if exist "%%f" del "%%f" 2>nul
+
 if exist .venv (
     echo Warning: Existing .venv directory found.
     set /p REPLY="Do you want to remove it and create a fresh environment? (y/N): "
@@ -80,6 +87,9 @@ if exist .venv (
         echo If you encounter problems, please remove .venv manually and re-run this script.
     )
 )
+
+:: Note: uv cache is preserved to avoid redownloading packages
+:: Only clear it if you encounter persistent version issues
 
 :: Install Python using uv
 echo Installing Python !PYTHON_VERSION!...
