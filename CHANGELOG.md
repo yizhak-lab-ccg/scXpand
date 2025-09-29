@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.1.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2025-09-29
+
+- fix scxpand-cuda pip version
+
+
 ## [0.4.0] - 2025-09-29
 
 - convert to Scverse cookiecutter template
