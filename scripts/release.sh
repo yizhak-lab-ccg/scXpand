@@ -680,7 +680,7 @@ build_standard_package() {
     build_package "standard" "standard package (scxpand - CPU/MPS support)" "Would build standard package with CPU/MPS support"
 }
 
-# Function to build CUDA package with Git stash approach
+# Function to build CUDA package using git worktree approach
 build_cuda_package() {
     print_package "Building CUDA package (scxpand-cuda - CUDA support)..."
 
@@ -695,35 +695,39 @@ build_cuda_package() {
         return 1
     }
 
-    # Use git stash to temporarily apply CUDA changes without affecting working directory status
-    print_status "Temporarily applying CUDA configuration..."
+    # Use git worktree for completely isolated CUDA build
+    print_status "Creating isolated build environment using git worktree..."
 
-    # Backup original pyproject.toml
-    backup_file "pyproject.toml" "backup" || {
-        print_error "Failed to backup original pyproject.toml"
-        return 1
-    }
+    local worktree_dir="temp/cuda_worktree"
+    local current_commit=$(git rev-parse HEAD)
 
-    # Replace with CUDA variant
-    mv temp/pyproject-cuda.toml pyproject.toml
+    # Clean up any existing worktree
+    rm -rf "$worktree_dir"
+    git worktree remove "$worktree_dir" 2>/dev/null || true
 
-    # Add the change to git index temporarily (so hatch-vcs sees it as staged, not dirty)
-    git add pyproject.toml
-
-    # Build package
-    print_status "Building CUDA package..."
-    if ! uv build; then
-        print_error "Failed to build CUDA package (scxpand-cuda - CUDA support)"
-        print_status "Check for syntax errors in pyproject.toml or missing dependencies"
-        # Restore files
-        git reset HEAD pyproject.toml
-        restore_file "pyproject.toml" "backup" "false"
+    # Create clean worktree at current commit
+    if ! git worktree add "$worktree_dir" "$current_commit"; then
+        print_error "Failed to create git worktree for CUDA build"
         return 1
     fi
 
-    # Restore original state
-    git reset HEAD pyproject.toml
-    restore_file "pyproject.toml" "backup" "false"
+    # Copy CUDA variant pyproject.toml to the worktree
+    cp temp/pyproject-cuda.toml "$worktree_dir/pyproject.toml"
+
+    # Build from the clean worktree
+    print_status "Building CUDA package from isolated environment..."
+    if ! (cd "$worktree_dir" && uv build --out-dir "../../dist"); then
+        print_error "Failed to build CUDA package (scxpand-cuda - CUDA support)"
+        print_status "Check for syntax errors in pyproject.toml or missing dependencies"
+        # Clean up worktree
+        git worktree remove "$worktree_dir" --force 2>/dev/null || true
+        rm -rf "$worktree_dir"
+        return 1
+    fi
+
+    # Clean up worktree
+    git worktree remove "$worktree_dir" --force 2>/dev/null || true
+    rm -rf "$worktree_dir"
 
     print_success "CUDA package (scxpand-cuda - CUDA support) built successfully"
     return 0
