@@ -440,3 +440,18 @@ class HyperparameterOptimizer:
             )
         except ValueError:
             print("No completed trials found")
+
+    def close(self) -> None:
+        """Clean up resources and close connections.
+
+        This method provides a clean way to close any database connections
+        or other resources that may be held by the optimizer.
+        """
+        # Close any storage connections if they exist
+        if hasattr(self, "storage") and hasattr(self.storage, "close"):
+            try:
+                self.storage.close()
+            except Exception as e:
+                logger.warning(f"Failed to close storage connection: {e}")
+
+        logger.debug("HyperparameterOptimizer resources cleaned up")

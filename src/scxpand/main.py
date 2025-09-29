@@ -218,10 +218,10 @@ def optimize_all(
     if not data_path:
         raise ValueError("data_path cannot be empty")
     data_file = Path(data_path)
+    if data_file.exists() and not data_file.is_file():
+        raise ValueError(f"Data path is not a file: {data_path}")
     if not data_file.exists():
         raise FileNotFoundError(f"Data file not found: {data_path}")
-    if not data_file.is_file():
-        raise ValueError(f"Data path is not a file: {data_path}")
 
     logger.info(f"Using device: {get_device()}")
 
