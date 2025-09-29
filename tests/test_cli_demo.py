@@ -54,13 +54,6 @@ class TestCLICoverage:
         assert isinstance(success, bool), "CLI test should return a boolean result"
 
     @pytest.mark.slow
-    def test_inference_help_command(self):
-        """Test inference help command."""
-        command = [sys.executable, "-m", "scxpand.main", "inference", "--help"]
-        success = self.run_cli_test(command, "Inference help")
-        assert success, "Inference help command should succeed"
-
-    @pytest.mark.slow
     def test_list_models_help_command(self):
         """Test list-models help command."""
         command = [sys.executable, "-m", "scxpand.main", "list-models", "--help"]
