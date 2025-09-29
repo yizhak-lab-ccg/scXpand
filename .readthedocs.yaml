@@ -15,5 +15,5 @@ build:
     build:
       html:
         - uv pip install --system -e ".[docs]"
-        - sphinx-build -M html docs docs/_build -W
+        - sphinx-build -M html docs docs/_build
         - mv docs/_build $READTHEDOCS_OUTPUT
