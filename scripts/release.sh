@@ -723,9 +723,9 @@ build_cuda_package() {
         return 1
     }
 
-    # Build from the clean worktree
-    print_status "Building CUDA package from isolated environment..."
-    if ! (cd "$worktree_dir" && uv build --out-dir "../../dist"); then
+    # Build from the clean worktree with version override
+    print_status "Building CUDA package with version override $NEW_VERSION..."
+    if ! (cd "$worktree_dir" && SETUPTOOLS_SCM_PRETEND_VERSION="$NEW_VERSION" uv build --out-dir "../../dist"); then
         print_error "Failed to build CUDA package (scxpand-cuda - CUDA support)"
         print_status "Check for syntax errors in pyproject.toml or missing dependencies"
         # Clean up worktree
