@@ -78,9 +78,10 @@ To set up a development environment, run the appropriate script for your system 
 
    .. code-block:: bash
 
-         install.bat
+         ./install.bat
 
 These scripts will automatically:
+
 1. Create a virtual environment using `uv`.
 2. Activate the environment.
 3. Install scXpand in editable mode with all development dependencies.
