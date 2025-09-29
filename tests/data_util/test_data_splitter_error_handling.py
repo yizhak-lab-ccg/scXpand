@@ -3,7 +3,6 @@
 import numpy as np
 import pandas as pd
 import pytest
-
 from anndata import AnnData
 
 from scxpand.data_util.data_splitter import split_data
@@ -20,7 +19,9 @@ class TestDataSplitterErrorHandling:
             "study": ["study1"] * n_cells,
             "patient": ["patient1"] * 50 + ["patient2"] * 50,
             "sample": [f"sample_{i}" for i in range(n_cells)],
-            "cancer_type": ["type1"] * 25 + ["type2"] * 25 + ["type1"] * 50,  # patient1 has both type1 and type2
+            "cancer_type": ["type1"] * 25
+            + ["type2"] * 25
+            + ["type1"] * 50,  # patient1 has both type1 and type2
             "imputed_labels": ["label1"] * n_cells,
             "tissue_type": ["tissue1"] * n_cells,
         }
@@ -29,7 +30,9 @@ class TestDataSplitterErrorHandling:
         X = np.random.rand(n_cells, 10)
         adata = AnnData(X=X, obs=obs_df)
 
-        with pytest.raises(ValueError, match="Patient study1:patient1 has multiple cancer types"):
+        with pytest.raises(
+            ValueError, match="Patient study1:patient1 has multiple cancer types"
+        ):
             split_data(adata, dev_ratio=0.2, random_seed=42)
 
     def test_split_data_single_cancer_type_per_patient_success(self):
@@ -77,7 +80,9 @@ class TestDataSplitterErrorHandling:
             "study": ["study1"] * n_cells,
             "patient": ["patient1"] * 50 + ["patient2"] * 50,
             "sample": [f"sample_{i}" for i in range(n_cells)],
-            "cancer_type": ["type1"] * 50 + ["type1"] * 25 + ["type2"] * 25,  # patient2 has mixed types
+            "cancer_type": ["type1"] * 50
+            + ["type1"] * 25
+            + ["type2"] * 25,  # patient2 has mixed types
             "imputed_labels": ["label1"] * n_cells,
             "tissue_type": ["tissue1"] * n_cells,
         }
@@ -87,7 +92,9 @@ class TestDataSplitterErrorHandling:
         adata = AnnData(X=X, obs=obs_df)
 
         # This should raise a ValueError because patient2 has multiple cancer types
-        with pytest.raises(ValueError, match="Patient study1:patient2 has multiple cancer types"):
+        with pytest.raises(
+            ValueError, match="Patient study1:patient2 has multiple cancer types"
+        ):
             split_data(adata, dev_ratio=0.2, random_seed=42)
 
     def test_split_data_preserves_stratification(self):

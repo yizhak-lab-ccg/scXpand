@@ -38,7 +38,9 @@ class TestRunPredictionPipeline:
     def mock_model(self):
         """Mock trained model."""
         model = Mock()
-        model.predict_proba = Mock(return_value=np.array([[0.2, 0.8], [0.8, 0.2], [0.1, 0.9]]))
+        model.predict_proba = Mock(
+            return_value=np.array([[0.2, 0.8], [0.8, 0.2], [0.1, 0.9]])
+        )
         return model
 
     @pytest.fixture
@@ -58,9 +60,13 @@ class TestRunPredictionPipeline:
         save_path = tmp_path / "predictions"
 
         with (
-            patch("scxpand.util.inference_utils.setup_inference_environment") as mock_setup,
+            patch(
+                "scxpand.util.inference_utils.setup_inference_environment"
+            ) as mock_setup,
             patch("scxpand.util.inference_utils.run_model_inference") as mock_inference,
-            patch("scxpand.core.prediction.evaluate_predictions_and_save") as mock_evaluate,
+            patch(
+                "scxpand.core.prediction.evaluate_predictions_and_save"
+            ) as mock_evaluate,
             patch("scxpand.core.prediction.ensure_directory_exists"),
             patch("anndata.read_h5ad") as mock_read_h5ad,
         ):
@@ -81,7 +87,9 @@ class TestRunPredictionPipeline:
             )
 
             # Verify mocks were called correctly
-            mock_setup.assert_called_once_with(model_type=ModelType.AUTOENCODER, model_path=model_path)
+            mock_setup.assert_called_once_with(
+                model_type=ModelType.AUTOENCODER, model_path=model_path
+            )
 
             mock_inference.assert_called_once_with(
                 model_type=ModelType.AUTOENCODER,
@@ -112,9 +120,13 @@ class TestRunPredictionPipeline:
         save_path = tmp_path / "predictions"
 
         with (
-            patch("scxpand.util.inference_utils.setup_inference_environment") as mock_setup,
+            patch(
+                "scxpand.util.inference_utils.setup_inference_environment"
+            ) as mock_setup,
             patch("scxpand.util.inference_utils.run_model_inference") as mock_inference,
-            patch("scxpand.core.prediction.evaluate_predictions_and_save") as mock_evaluate,
+            patch(
+                "scxpand.core.prediction.evaluate_predictions_and_save"
+            ) as mock_evaluate,
             patch("scxpand.core.prediction.ensure_directory_exists"),
         ):
             # Setup mocks
@@ -171,9 +183,13 @@ class TestRunPredictionPipeline:
         adata_no_expansion = ad.AnnData(X=X, obs=obs_data_no_expansion)
 
         with (
-            patch("scxpand.util.inference_utils.setup_inference_environment") as mock_setup,
+            patch(
+                "scxpand.util.inference_utils.setup_inference_environment"
+            ) as mock_setup,
             patch("scxpand.util.inference_utils.run_model_inference") as mock_inference,
-            patch("scxpand.core.prediction.evaluate_predictions_and_save") as mock_evaluate,
+            patch(
+                "scxpand.core.prediction.evaluate_predictions_and_save"
+            ) as mock_evaluate,
             patch("scxpand.core.prediction.ensure_directory_exists"),
         ):
             # Setup mocks
@@ -183,7 +199,9 @@ class TestRunPredictionPipeline:
 
             # Run the function
             result = run_prediction_pipeline(
-                model_type=ModelType.LIGHTGBM, model_path=str(model_path), adata=adata_no_expansion
+                model_type=ModelType.LIGHTGBM,
+                model_path=str(model_path),
+                adata=adata_no_expansion,
             )
 
             # Verify evaluation was called but returned empty metrics
@@ -193,7 +211,9 @@ class TestRunPredictionPipeline:
             assert result.metrics == {}  # Empty metrics when no ground truth
             assert result.model_info is None
 
-    def test_run_prediction_pipeline_with_eval_indices(self, tmp_path, mock_adata, mock_model, mock_data_format):
+    def test_run_prediction_pipeline_with_eval_indices(
+        self, tmp_path, mock_adata, mock_model, mock_data_format
+    ):
         """Test prediction pipeline with specific evaluation indices."""
         model_path = tmp_path / "model"
         model_path.mkdir()
@@ -201,9 +221,13 @@ class TestRunPredictionPipeline:
         mock_predictions = np.array([0.8, 0.9])  # Predictions for selected cells
 
         with (
-            patch("scxpand.util.inference_utils.setup_inference_environment") as mock_setup,
+            patch(
+                "scxpand.util.inference_utils.setup_inference_environment"
+            ) as mock_setup,
             patch("scxpand.util.inference_utils.run_model_inference") as mock_inference,
-            patch("scxpand.core.prediction.evaluate_predictions_and_save") as mock_evaluate,
+            patch(
+                "scxpand.core.prediction.evaluate_predictions_and_save"
+            ) as mock_evaluate,
             patch("scxpand.core.prediction.ensure_directory_exists"),
         ):
             # Setup mocks
@@ -241,13 +265,22 @@ class TestRunPredictionPipeline:
         model_path = tmp_path / "model"
 
         # Test missing both adata and data_path
-        with pytest.raises(ValueError, match="Either adata or data_path must be provided"):
-            run_prediction_pipeline(model_type=ModelType.MLP, model_path=str(model_path), adata=None, data_path=None)
+        with pytest.raises(
+            ValueError, match="Either adata or data_path must be provided"
+        ):
+            run_prediction_pipeline(
+                model_type=ModelType.MLP,
+                model_path=str(model_path),
+                adata=None,
+                data_path=None,
+            )
 
         # Test non-existent model path
         with pytest.raises(FileNotFoundError, match="Model path not found"):
             run_prediction_pipeline(
-                model_type=ModelType.MLP, model_path=str(tmp_path / "nonexistent"), data_path="dummy.h5ad"
+                model_type=ModelType.MLP,
+                model_path=str(tmp_path / "nonexistent"),
+                data_path="dummy.h5ad",
             )
 
     def test_run_prediction_pipeline_default_save_path(
@@ -258,9 +291,13 @@ class TestRunPredictionPipeline:
         model_path.mkdir()
 
         with (
-            patch("scxpand.util.inference_utils.setup_inference_environment") as mock_setup,
+            patch(
+                "scxpand.util.inference_utils.setup_inference_environment"
+            ) as mock_setup,
             patch("scxpand.util.inference_utils.run_model_inference") as mock_inference,
-            patch("scxpand.core.prediction.evaluate_predictions_and_save") as mock_evaluate,
+            patch(
+                "scxpand.core.prediction.evaluate_predictions_and_save"
+            ) as mock_evaluate,
             patch("scxpand.core.prediction.ensure_directory_exists"),
         ):
             # Setup mocks
@@ -270,7 +307,9 @@ class TestRunPredictionPipeline:
 
             # Run without explicit save_path
             result = run_prediction_pipeline(
-                model_type=ModelType.AUTOENCODER, model_path=str(model_path), adata=mock_adata
+                model_type=ModelType.AUTOENCODER,
+                model_path=str(model_path),
+                adata=mock_adata,
             )
 
             # Verify result
@@ -287,7 +326,9 @@ class TestRunPredictionPipeline:
         model_path.mkdir()
 
         with (
-            patch("scxpand.util.inference_utils.setup_inference_environment") as mock_setup,
+            patch(
+                "scxpand.util.inference_utils.setup_inference_environment"
+            ) as mock_setup,
             patch("scxpand.util.inference_utils.run_model_inference") as mock_inference,
             patch("scxpand.core.prediction.ensure_directory_exists"),
         ):
@@ -315,7 +356,9 @@ class TestRunPredictionPipeline:
         model_path.mkdir()
 
         with (
-            patch("scxpand.util.inference_utils.setup_inference_environment") as mock_setup,
+            patch(
+                "scxpand.util.inference_utils.setup_inference_environment"
+            ) as mock_setup,
             patch("scxpand.util.inference_utils.run_model_inference") as mock_inference,
             patch("scxpand.core.prediction.ensure_directory_exists"),
         ):
@@ -324,7 +367,9 @@ class TestRunPredictionPipeline:
             mock_inference.return_value = mock_predictions
 
             # Run pipeline - should complete without error
-            result = run_prediction_pipeline(model_type=ModelType.MLP, model_path=str(model_path), adata=mock_adata)
+            result = run_prediction_pipeline(
+                model_type=ModelType.MLP, model_path=str(model_path), adata=mock_adata
+            )
 
             # Verify mocks were called
             mock_setup.assert_called_once()
@@ -337,7 +382,9 @@ class TestRunPredictionPipeline:
 
     @patch("scxpand.util.inference_utils.setup_inference_environment")
     @patch("scxpand.util.inference_utils.run_model_inference")
-    def test_run_prediction_pipeline_exception_handling(self, mock_inference, mock_setup, tmp_path, mock_adata):
+    def test_run_prediction_pipeline_exception_handling(
+        self, mock_inference, mock_setup, tmp_path, mock_adata
+    ):
         """Test exception handling in prediction pipeline."""
         model_path = tmp_path / "model"
         model_path.mkdir()
@@ -346,7 +393,11 @@ class TestRunPredictionPipeline:
         mock_setup.side_effect = FileNotFoundError("Data format not found")
 
         with pytest.raises(FileNotFoundError, match="Data format not found"):
-            run_prediction_pipeline(model_type=ModelType.AUTOENCODER, model_path=str(model_path), adata=mock_adata)
+            run_prediction_pipeline(
+                model_type=ModelType.AUTOENCODER,
+                model_path=str(model_path),
+                adata=mock_adata,
+            )
 
         # Verify inference was not called due to setup failure
         mock_inference.assert_not_called()

@@ -53,7 +53,9 @@ class TestDecoderTransforms:
         output = decoder(sample_latent)
 
         # mu should be non-negative (result of mean_activation + inverse transforms)
-        assert torch.all(output.mu >= 0), "mu should be non-negative after inverse transforms"
+        assert torch.all(output.mu >= 0), (
+            "mu should be non-negative after inverse transforms"
+        )
         assert torch.all(torch.isfinite(output.mu)), "mu should be finite"
 
     def test_decoder_applies_theta_activation(self, simple_data_format, sample_latent):
@@ -71,11 +73,15 @@ class TestDecoderTransforms:
 
         # theta should be positive (result of theta_activation)
         assert output.theta is not None
-        assert torch.all(output.theta > 0), "theta should be positive after theta_activation"
+        assert torch.all(output.theta > 0), (
+            "theta should be positive after theta_activation"
+        )
         assert torch.all(output.theta >= 1e-4), "theta should respect minimum bound"
         assert torch.all(output.theta <= 1e4), "theta should respect maximum bound"
 
-    def test_decoder_applies_dropout_activation(self, simple_data_format, sample_latent):
+    def test_decoder_applies_dropout_activation(
+        self, simple_data_format, sample_latent
+    ):
         """Test that decoder applies dropout_activation for pi probabilities."""
         decoder = Decoder(
             latent_dim=16,
@@ -93,7 +99,9 @@ class TestDecoderTransforms:
         assert torch.all(output.pi >= 0), "pi should be >= 0"
         assert torch.all(output.pi <= 1), "pi should be <= 1"
 
-    def test_decoder_inverse_transforms_applied(self, simple_data_format, sample_latent):
+    def test_decoder_inverse_transforms_applied(
+        self, simple_data_format, sample_latent
+    ):
         """Test that decoder applies inverse transforms."""
         decoder = Decoder(
             latent_dim=16,
@@ -108,7 +116,9 @@ class TestDecoderTransforms:
 
         # mu should exist and be non-negative (after inverse transforms)
         assert output.mu is not None
-        assert torch.all(output.mu >= 0), "mu should be non-negative after inverse transforms"
+        assert torch.all(output.mu >= 0), (
+            "mu should be non-negative after inverse transforms"
+        )
 
     def test_decoder_with_log_transform(self, log_transform_data_format, sample_latent):
         """Test decoder with log transform in data format."""
@@ -124,7 +134,9 @@ class TestDecoderTransforms:
         output = decoder(sample_latent)
 
         # Should still produce valid outputs
-        assert torch.all(output.mu >= 0), "mu should be non-negative after inverse transforms"
+        assert torch.all(output.mu >= 0), (
+            "mu should be non-negative after inverse transforms"
+        )
 
     def test_decoder_conditional_heads(self, simple_data_format, sample_latent):
         """Test decoder with different combinations of pi and theta heads."""
@@ -183,7 +195,9 @@ class TestDecoderTransforms:
         # Test all outputs are valid
         assert torch.all(model_output.mu >= 0), "mu should be non-negative"
         assert torch.all(model_output.theta > 0), "theta should be positive"
-        assert torch.all(model_output.pi >= 0) and torch.all(model_output.pi <= 1), "pi should be in [0,1]"
+        assert torch.all(model_output.pi >= 0) and torch.all(model_output.pi <= 1), (
+            "pi should be in [0,1]"
+        )
 
     def test_fork_autoencoder_integration(self, simple_data_format):
         """Test that ForkAutoencoder properly integrates decoder transforms."""
@@ -204,7 +218,9 @@ class TestDecoderTransforms:
         # Test all outputs are valid
         assert torch.all(model_output.mu >= 0), "mu should be non-negative"
         assert torch.all(model_output.theta > 0), "theta should be positive"
-        assert torch.all(model_output.pi >= 0) and torch.all(model_output.pi <= 1), "pi should be in [0,1]"
+        assert torch.all(model_output.pi >= 0) and torch.all(model_output.pi <= 1), (
+            "pi should be in [0,1]"
+        )
 
     def test_transforms_preserve_batch_and_gene_dimensions(self, simple_data_format):
         """Test that transforms preserve tensor dimensions."""
@@ -249,7 +265,9 @@ class TestDecoderTransforms:
 
         # Gradients should flow back to input
         assert sample_latent.grad is not None
-        assert not torch.allclose(sample_latent.grad, torch.zeros_like(sample_latent.grad))
+        assert not torch.allclose(
+            sample_latent.grad, torch.zeros_like(sample_latent.grad)
+        )
 
     def test_numerical_stability_with_extreme_inputs(self, simple_data_format):
         """Test decoder stability with extreme input values."""
@@ -280,4 +298,6 @@ class TestDecoderTransforms:
             # Outputs should satisfy constraints
             assert torch.all(output.mu >= 0), "mu should be non-negative"
             assert torch.all(output.theta > 0), "theta should be positive"
-            assert torch.all(output.pi >= 0) and torch.all(output.pi <= 1), "pi should be in [0,1]"
+            assert torch.all(output.pi >= 0) and torch.all(output.pi <= 1), (
+                "pi should be in [0,1]"
+            )

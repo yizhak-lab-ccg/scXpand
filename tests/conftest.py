@@ -10,13 +10,14 @@ def test_always_passes():
 # Report torch version in the test run
 def pytest_configure(config):
     """Add torch version info to pytest output."""
-    config.addinivalue_line("markers", f"torch_version: PyTorch {torch.__version__} is available")
+    config.addinivalue_line(
+        "markers", f"torch_version: PyTorch {torch.__version__} is available"
+    )
 
 
 import anndata
 import numpy as np
 import pytest
-
 from scipy.sparse import csr_matrix
 
 
@@ -28,7 +29,9 @@ def dummy_adata():
 
     # Create realistic gene expression data
     np.random.seed(42)  # For reproducible tests
-    X = np.random.negative_binomial(n=5, p=0.3, size=(n_cells, n_genes)).astype(np.float32)
+    X = np.random.negative_binomial(n=5, p=0.3, size=(n_cells, n_genes)).astype(
+        np.float32
+    )
     X_sparse = csr_matrix(X)
 
     # Create realistic patient and metadata structure
@@ -40,11 +43,15 @@ def dummy_adata():
     patient_assignments = patient_assignments[:n_cells]
 
     # Create cancer type mapping - ensure consistency per patient
-    patient_to_cancer = {f"patient_{i}": "cancer_A" if i < 5 else "cancer_B" for i in range(n_patients)}
+    patient_to_cancer = {
+        f"patient_{i}": "cancer_A" if i < 5 else "cancer_B" for i in range(n_patients)
+    }
     cancer_types = np.array([patient_to_cancer[p] for p in patient_assignments])
 
     # Create study assignments that are consistent per patient
-    patient_to_study = {f"patient_{i}": "study1" if i < 5 else "study2" for i in range(n_patients)}
+    patient_to_study = {
+        f"patient_{i}": "study1" if i < 5 else "study2" for i in range(n_patients)
+    }
     study_assignments = np.array([patient_to_study[p] for p in patient_assignments])
 
     # Create realistic expansion labels with some structure
@@ -58,8 +65,12 @@ def dummy_adata():
 
     obs = {
         "expansion": expansion_labels,
-        "tissue_type": np.random.choice(["tissue_A", "tissue_B", "tissue_C"], size=n_cells),
-        "imputed_labels": np.random.choice(["label_1", "label_2", "label_3"], size=n_cells),
+        "tissue_type": np.random.choice(
+            ["tissue_A", "tissue_B", "tissue_C"], size=n_cells
+        ),
+        "imputed_labels": np.random.choice(
+            ["label_1", "label_2", "label_3"], size=n_cells
+        ),
         "clone_id_size": np.random.randint(1, 100, size=n_cells),
         "median_clone_size": np.random.randint(1, 50, size=n_cells),
         "study": study_assignments,  # Use consistent study assignments

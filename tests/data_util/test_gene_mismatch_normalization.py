@@ -4,7 +4,6 @@ This tests the complete pipeline when inference data has different genes than tr
 """
 
 import tempfile
-
 from pathlib import Path
 
 import anndata as ad
@@ -12,7 +11,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import torch
-
 from scipy.sparse import csr_matrix
 from torch.utils.data import DataLoader
 
@@ -76,7 +74,15 @@ class TestGeneMismatchNormalization:
             n_genes = 3
         elif gene_scenario == "extra_genes":
             # Has all training genes plus extra ones
-            gene_names = ["GENE_A", "GENE_B", "GENE_C", "GENE_D", "GENE_E", "GENE_F", "GENE_G"]
+            gene_names = [
+                "GENE_A",
+                "GENE_B",
+                "GENE_C",
+                "GENE_D",
+                "GENE_E",
+                "GENE_F",
+                "GENE_G",
+            ]
             n_genes = 7
         elif gene_scenario == "reordered_genes":
             # Same genes but different order
@@ -84,7 +90,12 @@ class TestGeneMismatchNormalization:
             n_genes = 5
         elif gene_scenario == "mixed_scenario":
             # Missing some, has extra, different order
-            gene_names = ["GENE_F", "GENE_C", "GENE_A", "GENE_G"]  # Missing B,D,E + extra F,G + reordered
+            gene_names = [
+                "GENE_F",
+                "GENE_C",
+                "GENE_A",
+                "GENE_G",
+            ]  # Missing B,D,E + extra F,G + reordered
             n_genes = 4
         else:
             raise ValueError(f"Unknown scenario: {gene_scenario}")
@@ -105,7 +116,13 @@ class TestGeneMismatchNormalization:
 
     def test_dataset_gene_transformation_scenarios(self, training_data_format):
         """Test that CellsDataset correctly handles different gene scenarios."""
-        scenarios = ["perfect_match", "missing_genes", "extra_genes", "reordered_genes", "mixed_scenario"]
+        scenarios = [
+            "perfect_match",
+            "missing_genes",
+            "extra_genes",
+            "reordered_genes",
+            "mixed_scenario",
+        ]
 
         for scenario in scenarios:
             with tempfile.TemporaryDirectory() as tmp_dir:
@@ -127,9 +144,13 @@ class TestGeneMismatchNormalization:
 
                 # Verify gene transformation was detected correctly
                 if scenario == "perfect_match":
-                    assert not dataset.needs_gene_transformation, f"Should not need transformation for {scenario}"
+                    assert not dataset.needs_gene_transformation, (
+                        f"Should not need transformation for {scenario}"
+                    )
                 else:
-                    assert dataset.needs_gene_transformation, f"Should need transformation for {scenario}"
+                    assert dataset.needs_gene_transformation, (
+                        f"Should need transformation for {scenario}"
+                    )
 
                 # Test batch loading
                 def make_collate_fn(ds):
@@ -150,11 +171,17 @@ class TestGeneMismatchNormalization:
                 )
 
                 # Verify no NaN/Inf values after normalization
-                assert not torch.any(torch.isnan(batch["x"])), f"NaN values found in {scenario}"
-                assert not torch.any(torch.isinf(batch["x"])), f"Inf values found in {scenario}"
+                assert not torch.any(torch.isnan(batch["x"])), (
+                    f"NaN values found in {scenario}"
+                )
+                assert not torch.any(torch.isinf(batch["x"])), (
+                    f"Inf values found in {scenario}"
+                )
 
                 # Verify the data is properly normalized (z-score should have reasonable range)
-                assert batch["x"].abs().max() < 50, f"Z-score values too large in {scenario}: {batch['x'].abs().max()}"
+                assert batch["x"].abs().max() < 50, (
+                    f"Z-score values too large in {scenario}: {batch['x'].abs().max()}"
+                )
 
     def test_missing_genes_filled_with_zeros(self, training_data_format):
         """Test that missing genes are correctly filled with zeros before normalization."""
@@ -179,7 +206,9 @@ class TestGeneMismatchNormalization:
             )
 
             # Test that transformation creates zeros for missing genes
-            raw_data = torch.rand(3, 3, dtype=torch.float32)  # [batch_size, n_raw_genes]
+            raw_data = torch.rand(
+                3, 3, dtype=torch.float32
+            )  # [batch_size, n_raw_genes]
             transformed = dataset.transform_batch_data(raw_data, in_place=False)
 
             # Check that missing gene positions (1 and 3) are processed correctly
@@ -187,17 +216,23 @@ class TestGeneMismatchNormalization:
             # Since missing genes start as 0, after row norm they stay 0, after log they stay 0,
             # after z-score they become -mu/sigma
             expected_missing_gene_b = -training_data_format.genes_mu[1] / (
-                training_data_format.genes_sigma[1] + 1e-7  # High precision for gene mismatch testing
+                training_data_format.genes_sigma[1]
+                + 1e-7  # High precision for gene mismatch testing
             )
             expected_missing_gene_d = -training_data_format.genes_mu[3] / (
-                training_data_format.genes_sigma[3] + 1e-7  # High precision for gene mismatch testing
+                training_data_format.genes_sigma[3]
+                + 1e-7  # High precision for gene mismatch testing
             )
 
             # All cells should have the same value for missing genes
-            assert torch.allclose(transformed[:, 1], torch.tensor(expected_missing_gene_b), atol=1e-5), (
+            assert torch.allclose(
+                transformed[:, 1], torch.tensor(expected_missing_gene_b), atol=1e-5
+            ), (
                 f"Missing GENE_B not handled correctly: {transformed[:, 1]} != {expected_missing_gene_b}"
             )
-            assert torch.allclose(transformed[:, 3], torch.tensor(expected_missing_gene_d), atol=1e-5), (
+            assert torch.allclose(
+                transformed[:, 3], torch.tensor(expected_missing_gene_d), atol=1e-5
+            ), (
                 f"Missing GENE_D not handled correctly: {transformed[:, 3]} != {expected_missing_gene_d}"
             )
 
@@ -218,7 +253,13 @@ class TestGeneMismatchNormalization:
             )
 
             # Verify gene mapping ignores extra genes
-            expected_indices = [0, 1, 2, 3, 4]  # Perfect match for first 5 genes, ignore F and G
+            expected_indices = [
+                0,
+                1,
+                2,
+                3,
+                4,
+            ]  # Perfect match for first 5 genes, ignore F and G
             assert np.array_equal(dataset.gene_indices, expected_indices), (
                 f"Gene indices wrong: {dataset.gene_indices} != {expected_indices}"
             )
@@ -292,9 +333,9 @@ class TestGeneMismatchNormalization:
             reordered_batch = cells_collate_fn(batch_indices, reordered_dataset)
 
             # Results should be identical after reordering
-            assert torch.allclose(reference_batch["x"], reordered_batch["x"], atol=1e-5), (
-                "Reordered genes should produce identical results"
-            )
+            assert torch.allclose(
+                reference_batch["x"], reordered_batch["x"], atol=1e-5
+            ), "Reordered genes should produce identical results"
 
     def test_inference_vs_training_consistency(self, training_data_format):
         """Test that inference normalization is consistent with training normalization approaches."""
@@ -330,7 +371,9 @@ class TestGeneMismatchNormalization:
 
             # Method 2: Using direct normalization (training/LightGBM approach)
             X_direct = load_and_preprocess_data_numpy(
-                data_path=test_file, row_indices=row_indices, data_format=training_data_format
+                data_path=test_file,
+                row_indices=row_indices,
+                data_format=training_data_format,
             )
 
             # Convert to tensor for comparison
@@ -360,7 +403,9 @@ class TestGeneMismatchNormalization:
             if n_cells > 3:
                 X_edge[3, :] = [0.001, 0.001, 0.001]  # Very small values
             if n_cells > 4:
-                X_edge[4:, :] = np.random.poisson(5, size=(n_cells - 4, 3))  # Normal values
+                X_edge[4:, :] = np.random.poisson(
+                    5, size=(n_cells - 4, 3)
+                )  # Normal values
 
             inference_adata.X = csr_matrix(X_edge)
 
@@ -391,8 +436,12 @@ class TestGeneMismatchNormalization:
             X_processed = batch["x"]
 
             # Verify no NaN or Inf values
-            assert not torch.any(torch.isnan(X_processed)), "Edge cases should not produce NaN"
-            assert not torch.any(torch.isinf(X_processed)), "Edge cases should not produce Inf"
+            assert not torch.any(torch.isnan(X_processed)), (
+                "Edge cases should not produce NaN"
+            )
+            assert not torch.any(torch.isinf(X_processed)), (
+                "Edge cases should not produce Inf"
+            )
 
             # Verify all-zero row is handled correctly
             # After row normalization, all-zero row stays zero
@@ -401,7 +450,9 @@ class TestGeneMismatchNormalization:
             expected_zero_row = torch.tensor(
                 [
                     -training_data_format.genes_mu[i]
-                    / (training_data_format.genes_sigma[i] + 1e-7)  # High precision for zero row testing
+                    / (
+                        training_data_format.genes_sigma[i] + 1e-7
+                    )  # High precision for zero row testing
                     for i in range(training_data_format.n_genes)
                 ],
                 dtype=torch.float32,
@@ -440,7 +491,9 @@ class TestGeneMismatchIntegrationWithModels:
         inference_adata = ad.AnnData(X=X, obs=obs, var=var)
 
         # Test that prepare_adata_for_training with reorder_genes=True works
-        prepared_adata = data_format.prepare_adata_for_training(inference_adata, reorder_genes=True)
+        prepared_adata = data_format.prepare_adata_for_training(
+            inference_adata, reorder_genes=True
+        )
 
         # Genes should now be in correct order
         assert list(prepared_adata.var_names) == data_format.gene_names, (
@@ -448,10 +501,14 @@ class TestGeneMismatchIntegrationWithModels:
         )
 
         # Test that prepare_adata_for_training with reorder_genes=False doesn't change order
-        unchanged_adata = data_format.prepare_adata_for_training(inference_adata, reorder_genes=False)
-        assert list(unchanged_adata.var_names) == ["GENE_C", "GENE_A", "GENE_B"], (
-            "Genes should not be reordered when reorder_genes=False"
+        unchanged_adata = data_format.prepare_adata_for_training(
+            inference_adata, reorder_genes=False
         )
+        assert list(unchanged_adata.var_names) == [
+            "GENE_C",
+            "GENE_A",
+            "GENE_B",
+        ], "Genes should not be reordered when reorder_genes=False"
 
         # Note: Full inference testing would require mock models, which is beyond scope here
 
@@ -476,8 +533,12 @@ class TestNormalizationParameterConsistency:
         X_torch = torch.from_numpy(X_numpy.copy()).float()
 
         # Test that both numpy and torch preprocessing use same parameters
-        X_numpy_processed = preprocess_expression_data(X=X_numpy, data_format=data_format)
-        X_torch_processed = preprocess_expression_data(X=X_torch, data_format=data_format)
+        X_numpy_processed = preprocess_expression_data(
+            X=X_numpy, data_format=data_format
+        )
+        X_torch_processed = preprocess_expression_data(
+            X=X_torch, data_format=data_format
+        )
 
         # Should be identical
         assert np.allclose(X_numpy_processed, X_torch_processed.numpy(), rtol=1e-6), (
@@ -490,7 +551,9 @@ class TestNormalizationParameterConsistency:
 
         # Apply just row normalization
 
-        X_row_norm = apply_row_normalization(X=X_test, target_sum=data_format.target_sum)
+        X_row_norm = apply_row_normalization(
+            X=X_test, target_sum=data_format.target_sum
+        )
 
         assert np.allclose(X_row_norm.sum(axis=1), data_format.target_sum), (
             f"Row normalization should use custom target_sum: {X_row_norm.sum()} != {data_format.target_sum}"
@@ -498,7 +561,9 @@ class TestNormalizationParameterConsistency:
 
         # Test that log transform is correctly disabled
         X_after_row_norm = X_row_norm.copy()
-        X_after_row_norm_original = X_after_row_norm.copy()  # Keep original for expected calculation
+        X_after_row_norm_original = (
+            X_after_row_norm.copy()
+        )  # Keep original for expected calculation
 
         # Full preprocessing with log_transform=False
         X_full = preprocess_expression_data(X=X_after_row_norm, data_format=data_format)
@@ -508,6 +573,10 @@ class TestNormalizationParameterConsistency:
         expected_raw = (X_after_row_norm_original - data_format.genes_mu) / (
             data_format.genes_sigma + DEFAULT_EPS
         )  # Use the same eps as the transforms
-        expected = np.clip(expected_raw, -DEFAULT_SIGMA_CLIP_FACTOR, DEFAULT_SIGMA_CLIP_FACTOR)
+        expected = np.clip(
+            expected_raw, -DEFAULT_SIGMA_CLIP_FACTOR, DEFAULT_SIGMA_CLIP_FACTOR
+        )
 
-        assert np.allclose(X_full, expected, rtol=1e-6), "Log transform should be disabled when use_log_transform=False"
+        assert np.allclose(X_full, expected, rtol=1e-6), (
+            "Log transform should be disabled when use_log_transform=False"
+        )

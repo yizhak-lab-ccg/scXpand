@@ -7,7 +7,11 @@ import pandas as pd
 import pytest
 
 from scxpand.util.classes import ModelType
-from scxpand.util.io import ensure_directory_exists, load_eval_indices, save_predictions_to_csv
+from scxpand.util.io import (
+    ensure_directory_exists,
+    load_eval_indices,
+    save_predictions_to_csv,
+)
 
 
 class TestLoadEvalIndices:
@@ -43,7 +47,9 @@ class TestLoadEvalIndices:
         """Test handling of non-existent file."""
         nonexistent_file = tmp_path / "nonexistent.txt"
 
-        with pytest.raises(FileNotFoundError, match="Evaluation indices file not found"):
+        with pytest.raises(
+            FileNotFoundError, match="Evaluation indices file not found"
+        ):
             load_eval_indices(str(nonexistent_file))
 
     def test_load_eval_indices_empty_file(self, tmp_path):
@@ -110,17 +116,28 @@ class TestSavePredictionsToCsv:
             {
                 "cell_id": ["cell_1", "cell_2", "cell_3", "cell_4", "cell_5"],
                 "tissue_type": ["tumor", "normal", "tumor", "normal", "tumor"],
-                "expansion": ["expanded", "non-expanded", "expanded", "non-expanded", "expanded"],
+                "expansion": [
+                    "expanded",
+                    "non-expanded",
+                    "expanded",
+                    "non-expanded",
+                    "expanded",
+                ],
             }
         )
 
-    def test_save_predictions_to_csv_with_enum(self, tmp_path, mock_predictions, mock_obs_df):
+    def test_save_predictions_to_csv_with_enum(
+        self, tmp_path, mock_predictions, mock_obs_df
+    ):
         """Test saving predictions with ModelType enum."""
         save_path = tmp_path / "results"
         save_path.mkdir()
 
         save_predictions_to_csv(
-            predictions=mock_predictions, obs_df=mock_obs_df, model_type=ModelType.AUTOENCODER, save_path=save_path
+            predictions=mock_predictions,
+            obs_df=mock_obs_df,
+            model_type=ModelType.AUTOENCODER,
+            save_path=save_path,
         )
 
         # Verify file was created
@@ -137,17 +154,28 @@ class TestSavePredictionsToCsv:
         assert "autoencoder_prediction" in saved_df.columns
 
         # Check predictions were saved correctly
-        np.testing.assert_array_almost_equal(saved_df["autoencoder_prediction"].values, mock_predictions)
+        np.testing.assert_array_almost_equal(
+            saved_df["autoencoder_prediction"].values, mock_predictions
+        )
 
         # Check that original data is preserved
-        pd.testing.assert_frame_equal(saved_df[["cell_id", "tissue_type", "expansion"]], mock_obs_df)
+        pd.testing.assert_frame_equal(
+            saved_df[["cell_id", "tissue_type", "expansion"]], mock_obs_df
+        )
 
-    def test_save_predictions_to_csv_with_string(self, tmp_path, mock_predictions, mock_obs_df):
+    def test_save_predictions_to_csv_with_string(
+        self, tmp_path, mock_predictions, mock_obs_df
+    ):
         """Test saving predictions with string model type."""
         save_path = tmp_path / "results"
         save_path.mkdir()
 
-        save_predictions_to_csv(predictions=mock_predictions, obs_df=mock_obs_df, model_type="mlp", save_path=save_path)
+        save_predictions_to_csv(
+            predictions=mock_predictions,
+            obs_df=mock_obs_df,
+            model_type="mlp",
+            save_path=save_path,
+        )
 
         # Verify file was created with correct name
         expected_file = save_path / "mlp_predictions.csv"
@@ -157,13 +185,18 @@ class TestSavePredictionsToCsv:
         saved_df = pd.read_csv(expected_file)
         assert "mlp_prediction" in saved_df.columns
 
-    def test_save_predictions_to_csv_creates_directory(self, tmp_path, mock_predictions, mock_obs_df):
+    def test_save_predictions_to_csv_creates_directory(
+        self, tmp_path, mock_predictions, mock_obs_df
+    ):
         """Test that save directory is created if it doesn't exist."""
         save_path = tmp_path / "nonexistent" / "nested" / "path"
         # Directory doesn't exist yet
 
         save_predictions_to_csv(
-            predictions=mock_predictions, obs_df=mock_obs_df, model_type=ModelType.LIGHTGBM, save_path=save_path
+            predictions=mock_predictions,
+            obs_df=mock_obs_df,
+            model_type=ModelType.LIGHTGBM,
+            save_path=save_path,
         )
 
         # Verify directory was created
@@ -174,7 +207,9 @@ class TestSavePredictionsToCsv:
         expected_file = save_path / "lightgbm_predictions.csv"
         assert expected_file.exists()
 
-    def test_save_predictions_to_csv_overwrite_existing(self, tmp_path, mock_predictions, mock_obs_df):
+    def test_save_predictions_to_csv_overwrite_existing(
+        self, tmp_path, mock_predictions, mock_obs_df
+    ):
         """Test that existing file is overwritten."""
         save_path = tmp_path / "results"
         save_path.mkdir()
@@ -186,7 +221,10 @@ class TestSavePredictionsToCsv:
 
         # Save new predictions
         save_predictions_to_csv(
-            predictions=mock_predictions, obs_df=mock_obs_df, model_type=ModelType.SVM, save_path=save_path
+            predictions=mock_predictions,
+            obs_df=mock_obs_df,
+            model_type=ModelType.SVM,
+            save_path=save_path,
         )
 
         # Verify file was overwritten
@@ -195,13 +233,18 @@ class TestSavePredictionsToCsv:
         assert "svm_prediction" in saved_df.columns
         assert len(saved_df) == len(mock_predictions)
 
-    def test_save_predictions_to_csv_file_structure(self, tmp_path, mock_predictions, mock_obs_df):
+    def test_save_predictions_to_csv_file_structure(
+        self, tmp_path, mock_predictions, mock_obs_df
+    ):
         """Test the structure and content of saved prediction files."""
         save_path = tmp_path / "results"
         save_path.mkdir()
 
         save_predictions_to_csv(
-            predictions=mock_predictions, obs_df=mock_obs_df, model_type=ModelType.LOGISTIC, save_path=save_path
+            predictions=mock_predictions,
+            obs_df=mock_obs_df,
+            model_type=ModelType.LOGISTIC,
+            save_path=save_path,
         )
 
         # Check file was created with correct name
@@ -211,7 +254,9 @@ class TestSavePredictionsToCsv:
         # Check file content structure
         saved_df = pd.read_csv(prediction_file)
         assert len(saved_df) == len(mock_predictions)
-        assert len(saved_df.columns) == len(mock_obs_df.columns) + 1  # original + prediction column
+        assert (
+            len(saved_df.columns) == len(mock_obs_df.columns) + 1
+        )  # original + prediction column
 
     def test_save_predictions_to_csv_empty_data(self, tmp_path):
         """Test handling of empty predictions and observations."""
@@ -222,7 +267,10 @@ class TestSavePredictionsToCsv:
         empty_obs_df = pd.DataFrame()
 
         save_predictions_to_csv(
-            predictions=empty_predictions, obs_df=empty_obs_df, model_type=ModelType.MLP, save_path=save_path
+            predictions=empty_predictions,
+            obs_df=empty_obs_df,
+            model_type=ModelType.MLP,
+            save_path=save_path,
         )
 
         # Should create file even with empty data
@@ -242,9 +290,14 @@ class TestSavePredictionsToCsv:
         wrong_predictions = np.array([0.8, 0.2])  # Only 2 predictions for 5 obs
 
         # Should raise ValueError due to length mismatch
-        with pytest.raises(ValueError, match=r"Predictions length.*doesn't match obs_df length"):
+        with pytest.raises(
+            ValueError, match=r"Predictions length.*doesn't match obs_df length"
+        ):
             save_predictions_to_csv(
-                predictions=wrong_predictions, obs_df=mock_obs_df, model_type=ModelType.AUTOENCODER, save_path=save_path
+                predictions=wrong_predictions,
+                obs_df=mock_obs_df,
+                model_type=ModelType.AUTOENCODER,
+                save_path=save_path,
             )
 
 

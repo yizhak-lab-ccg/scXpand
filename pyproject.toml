@@ -1,205 +1,227 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = [
+  "hatch-vcs",
+  "hatchling",
+]
+
 [project]
 name = "scxpand"
-version = "0.3.6"
-requires-python = ">=3.11,<3.14"
 description = "Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing"
 readme = "README.md"
+keywords = [
+  "bioinformatics",
+  "clonal-expansion",
+  "machine-learning",
+  "RNA-seq",
+  "single-cell",
+  "T-cell",
+]
 license = "MIT"
 authors = [
-    {name = "Ron Amit", email = "ronamit@ef.technion.ac.il"},
-    {name = "Ofir Shorer", email = "ofirshorer@campus.technion.ac.il"}
+  { name = "Ron Amit", email = "ronamit@ef.technion.ac.il" },
+  { name = "Ofir Shorer", email = "ofirshorer@campus.technion.ac.il" },
 ]
-keywords = ["single-cell", "RNA-seq", "T-cell", "clonal-expansion", "machine-learning", "bioinformatics"]
+requires-python = ">=3.11"
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Science/Research",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Topic :: Scientific/Engineering :: Bio-Informatics",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
-
+dynamic = [
+  "version",
+]
 dependencies = [
-    "scanpy>=1.11.1",
-    "plotly>=6.0.1",
-    "matplotlib>=3.10.0",
-    "scikit-learn>=1.7.1",
-    "lightgbm>=4.6.0",
-    "tensorboard>=2.19.0",
-    "fire>=0.7.0",
-    "optuna>=4.3.0",
-    "seaborn>=0.13.2",
-    "pydantic>=2.10.6",
-    "anndata>=0.11.4",
-    "structlog>=24.0.0",
-    "igraph>=0.11.4",
-    "shap>=0.48.0",
-    "bbknn>=1.6.0",
-    "scrublet>=0.2.3",
-    "scirpy>=0.9.3",
-    "tabulate>=0.9.0",
-    "requests>=2.31.0",
-    "tqdm>=4.66.0",
-    "pooch>=1.8.0",
-    "torch>=2.5.0",
-    "torchvision>=0.20.0",
-    "torchaudio>=2.5.0",
+  "anndata>=0.11.4",
+  "bbknn>=1.6",
+  "fire>=0.7",
+  "igraph>=0.11.4",
+  "lightgbm>=4.6",
+  "matplotlib>=3.10",
+  "optuna>=4.3",
+  "plotly>=6.0.1",
+  "pooch>=1.8",
+  "pydantic>=2.10.6",
+  "requests>=2.31",
+  "scanpy>=1.11.1",
+  "scikit-learn>=1.7.1",
+  "scirpy>=0.9.3",
+  "scrublet>=0.2.3",
+  "seaborn>=0.13.2",
+  "shap>=0.48",
+  "structlog>=24",
+  "tabulate>=0.9",
+  "tensorboard>=2.19",
+  "torch>=2.5",
+  "tqdm>=4.66",
+]
+optional-dependencies.dev = [
+  "cruft>=2.16",
+  "ipykernel>=6.29.5",
+  "ipywidgets>=8.1.5",
+  "jupyter>=1.1.1",
+  "jupyter-client>=8.6.3",
+  "jupyter-core>=5.7.2",
+  "pre-commit>=4.2",
+  "pytest>=8.3.4",
+  "pytest-cov>=6",
+  "pytest-xdist>=3.6",
+  "ruff>=0.12.7",
+]
+optional-dependencies.docs = [
+  "colorama>=0.4.6",
+  "docutils>=0.21.2",
+  "ipython>=9.5",
+  "myst-nb>=1.3",
+  "myst-parser>=4.0.1",
+  "sphinx>=8.1.3",
+  "sphinx-autobuild>=2025.8.25",
+  "sphinx-autodoc-typehints>=3.0.1",
+  "sphinx-book-theme>=1.1.4",
+  "sphinx-copybutton>=0.5.2",
+  "sphinxcontrib-bibtex>=2.6.5",
+  "sphinxext-opengraph>=0.13",
+  "watchdog>=6",
+]
+urls.Documentation = "https://scxpand.readthedocs.io/en/latest/"
+urls.Homepage = "https://github.com/yizhak-lab-ccg/scXpand"
+urls.Issues = "https://github.com/yizhak-lab-ccg/scXpand/issues"
+urls.Logo = "https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_logo_gray.png"
+urls.Repository = "https://github.com/yizhak-lab-ccg/scXpand"
+scripts.scxpand = "scxpand.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = [ "src/scxpand" ]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+local_scheme = "no-local-version"
+
+[tool.hatch.envs.default]
+installer = "uv"
+features = [ "dev" ]
+
+[tool.hatch.envs.docs]
+features = [ "docs" ]
+scripts.build = "sphinx-build -M html docs docs/_build -W {args}"
+scripts.open = "python -m webbrowser -t docs/_build/html/index.html"
+scripts.clean = "git clean -fdX -- {args:docs}"
+
+# Test environments for different Python versions
+[[tool.hatch.envs.hatch-test.matrix]]
+deps = [ "stable" ]
+python = [ "3.11", "3.12", "3.13" ]
+
+# Test with pre-release dependencies
+[[tool.hatch.envs.hatch-test.matrix]]
+deps = [ "pre" ]
+python = [ "3.13" ]
+
+[tool.hatch.envs.hatch-test]
+features = [ "dev" ]
+
+[tool.hatch.envs.hatch-test.overrides]
+# If the matrix variable `deps` is set to "pre",
+# set the environment variable `UV_PRERELEASE` to "allow".
+matrix.deps.env-vars = [
+  { key = "UV_PRERELEASE", value = "allow", if = [ "pre" ] },
 ]
 
-[project.urls]
-Homepage = "https://github.com/yizhak-lab-ccg/scXpand"
-Documentation = "https://scxpand.readthedocs.io/en/latest/"
-Repository = "https://github.com/yizhak-lab-ccg/scXpand"
-Issues = "https://github.com/yizhak-lab-ccg/scXpand/issues"
-Logo = "https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_logo_gray.png"
+[tool.hatch.envs.hatch-test.scripts]
+run-cov = "pytest --cov=src/scxpand --cov-report=term-missing --cov-report=xml --cov-report=html {args}"
+cov-combine = "coverage combine"
+cov-report = "coverage report"
 
-[project.scripts]
-scxpand = "scxpand.main:main"
+[tool.ruff]
+target-version = "py311"
+line-length = 88
 
-[project.optional-dependencies]
-cpu = [
-    "torch>=2.5.0",
-    "torchvision>=0.20.0",
-    "torchaudio>=2.5.0",
+format.indent-style = "space"
+format.quote-style = "double"
+format.line-ending = "auto"
+format.skip-magic-trailing-comma = false
+lint.select = [
+  "B",  # flake8-bugbear
+  "C4", # flake8-comprehensions
+  "E",  # pycodestyle errors
+  "F",  # pyflakes
+  "I",  # isort
+  "UP", # pyupgrade
+  "W",  # pycodestyle warnings
 ]
-cuda = [
-    "torch>=2.5.0",
-    "torchvision>=0.20.0",
-    "torchaudio>=2.5.0",
+lint.ignore = [
+  "B008", # do not perform function calls in argument defaults
+  "C901", # too complex
+  "E402", # module level import not at top of file (common in notebooks)
+  "E501", # line too long, handled by ruff format
+  "F841", # local variable assigned but never used
 ]
-dev = [
-    "vulture>=2.14",
-    "pytest>=8.3.4",
-    "pytest-xdist>=3.6.0",
-    "pytest-cov>=6.0.0",
-    "ruff>=0.12.7",
-    "pre-commit>=4.2.0",
-    "ipykernel>=6.29.5",
-    "ipywidgets>=8.1.5",
-    "jupyter>=1.1.1",
-    "jupyter-client>=8.6.3",
-    "jupyter-core>=5.7.2",
+lint.per-file-ignores."*.ipynb" = [ "E402" ] # notebooks often have imports after other code
+lint.per-file-ignores."__init__.py" = [ "F401" ]
+lint.per-file-ignores."tests/**" = [ "F841" ] # test files often have unused variables
+
+[tool.pytest.ini_options]
+testpaths = [ "tests" ]
+addopts = [
+  "--strict-markers",
+  "--strict-config",
+  "--cov=src/scxpand",
+  "--cov-report=term-missing",
+  "--cov-report=xml",
+  "--cov-report=html",
+  "--cov-fail-under=80",
 ]
-docs = [
-    "sphinx>=8.1.3",
-    "sphinx-book-theme>=1.1.4",
-    "myst-nb>=1.3.0",
-    "sphinx-copybutton>=0.5.2",
-    "myst-parser>=4.0.1",
-    "docutils>=0.21.2",
-    "sphinxcontrib-bibtex>=2.6.5",
-    "sphinx-autodoc-typehints>=3.0.1",
-    "ipython>=9.5.0",
-    "sphinxext-opengraph>=0.13.0",
-    "sphinx-autobuild>=2025.8.25",
-    "watchdog>=6.0.0",
-    "colorama>=0.4.6",
+markers = [
+  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+  "integration: marks tests as integration tests",
+]
+filterwarnings = [
+  "ignore::DeprecationWarning",
+  "ignore::PendingDeprecationWarning",
+  "ignore::UserWarning",
+  "ignore::FutureWarning",
 ]
 
-[build-system]
-requires = ["setuptools>=77.0.3", "wheel"]
-build-backend = "setuptools.build_meta"
+[tool.coverage.run]
+source = [ "src/scxpand" ]
+omit = [
+  "*/tests/*",
+  "*/test_*",
+  "*/__pycache__/*",
+  "*/.*",
+]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["scxpand*"]
-exclude = ["tests*", "docs*", "notebooks*", "temp*", "data*", "results*", "_notebooks*", "examples*", "scripts*"]
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "if self.debug:",
+  "if settings.DEBUG",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if 0:",
+  "if __name__ == .__main__.:",
+  "class .*\\bProtocol\\):",
+  "@(abc\\.)?abstractmethod",
+]
 
 [tool.uv]
-preview = true
-
 conflicts = [
-    [
-        { extra = "cpu" },
-        { extra = "cuda" },
-    ],
+  [
+    { extra = "cpu" },
+    { extra = "cuda" },
+  ],
 ]
+
 [[tool.uv.index]]
 name = "pytorch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
 explicit = true
-
-[tool.uv.sources]
-torch = { index = "pytorch-cpu", extra = "cpu" }
-torchvision = { index = "pytorch-cpu", extra = "cpu" }
-torchaudio = { index = "pytorch-cpu", extra = "cpu" }
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = ["--tb=short", "--disable-warnings"]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-]
-filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::PendingDeprecationWarning",
-    "ignore::UserWarning",
-    "ignore::FutureWarning",
-]
-
-[dependency-groups]
-docs = [
-    "colorama>=0.4.6",
-    "docutils>=0.21.2",
-    "ipython>=9.5.0",
-    "myst-nb>=1.3.0",
-    "myst-parser>=4.0.1",
-    "sphinx>=8.1.3",
-    "sphinx-autobuild>=2025.8.25",
-    "sphinx-autodoc-typehints>=3.0.1",
-    "sphinx-book-theme>=1.1.4",
-    "sphinx-copybutton>=0.5.2",
-    "sphinxcontrib-bibtex>=2.6.5",
-    "sphinxext-opengraph>=0.13.0",
-    "watchdog>=6.0.0",
-]
-
-
-[tool.vulture]
-# Configuration for vulture: https://github.com/jendrikseipp/vulture
-# Ignore specific functions and variables that are used but not detected by static analysis
-ignore_names = [
-    # Functions that are used but not detected by vulture
-    "encode_categorical_value",
-    "encode_categorical_features_batch",
-    "metrics_dict_to_dataframes",
-    "plot_roc_curves_per_strata",
-    "load_model",
-    "model_config",
-    "deterministic",
-    "benchmark",
-    "run_inference",
-    "configure_logging",
-    # InferenceResults methods
-    "n_predictions",
-    "has_metrics",
-    "has_model_info",
-    "get_auroc",
-    "get_harmonic_avg_auroc",
-    "to_dict",
-    # Standard class method parameters
-    "cls",
-    # LightGBM enum values - part of complete API definition
-    "DART",
-    "GOSS",
-    "RF",
-    "MULTICLASS",
-    "REGRESSION",
-    "LAMBDARANK",
-    "MULTICLASS_LOGLOSS",
-    "RMSE",
-    "MAE",
-    "AUC",
-    "NDCG",
-    "download_model",
-    "load_model",
-    "load_sklearn_model",
-    "load_nn_model",
-    "load_ae_model",
-    "load_and_validate_model",
-    "load_model_state_dict",
-]
-paths = ["scxpand"]
-min_confidence = 60

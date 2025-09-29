@@ -1,6 +1,5 @@
 import pytest
 import torch
-
 from torch.distributions import NegativeBinomial
 
 from scxpand.autoencoders.ae_modules import theta_activation
@@ -50,7 +49,9 @@ class TestNegativeBinomialParameterization:
 
             # Verify mean calculation
             computed_mean = dist.mean
-            assert torch.allclose(computed_mean, mean_vals, atol=1e-5), "Distribution mean should match input mean"
+            assert torch.allclose(computed_mean, mean_vals, atol=1e-5), (
+                "Distribution mean should match input mean"
+            )
 
         except Exception as e:
             pytest.fail(f"NegativeBinomial distribution creation failed: {e}")
@@ -89,7 +90,9 @@ class TestNegativeBinomialParameterization:
         var_large = mean_val + (mean_val**2) / large_theta
 
         # Smaller theta should lead to larger variance (more overdispersion)
-        assert var_small > var_large, "Smaller theta should lead to higher variance (overdispersion)"
+        assert var_small > var_large, (
+            "Smaller theta should lead to higher variance (overdispersion)"
+        )
 
         # Both should be greater than Poisson variance (mean)
         assert var_small > mean_val, "NB variance should exceed Poisson variance"
@@ -102,7 +105,9 @@ class TestNegativeBinomialParameterization:
 
         # Check monotonicity
         diffs = torch.diff(theta_vals)
-        assert torch.all(diffs >= 0), "theta_activation should be monotonically increasing"
+        assert torch.all(diffs >= 0), (
+            "theta_activation should be monotonically increasing"
+        )
 
     def test_theta_activation_asymptotic_behavior(self):
         """Test asymptotic behavior of theta_activation."""
@@ -120,8 +125,12 @@ class TestNegativeBinomialParameterization:
         small_theta = theta_activation(small_x)
 
         # Should be close to minimum bound
-        assert torch.all(small_theta <= 0.01), "theta_activation should approach minimum for large negative values"
-        assert torch.all(small_theta >= 1e-4), "theta_activation should respect minimum bound"
+        assert torch.all(small_theta <= 0.01), (
+            "theta_activation should approach minimum for large negative values"
+        )
+        assert torch.all(small_theta >= 1e-4), (
+            "theta_activation should respect minimum bound"
+        )
 
     def test_realistic_parameter_ranges(self):
         """Test with realistic parameter ranges for single-cell data."""
@@ -147,7 +156,9 @@ class TestNegativeBinomialParameterization:
             logits = torch.log(mean_sample / theta_sample)
 
             # All parameters should be valid
-            assert torch.all(total_count > 0), "All total_count parameters should be positive"
+            assert torch.all(total_count > 0), (
+                "All total_count parameters should be positive"
+            )
 
             # Test that we can create distributions
             try:
@@ -187,14 +198,18 @@ class TestNegativeBinomialParameterization:
 
         # Check that gradients were computed
         assert raw_theta.grad is not None, "Gradients should be computed"
-        assert not torch.allclose(raw_theta.grad, torch.zeros_like(raw_theta.grad)), "Gradients should be non-zero"
+        assert not torch.allclose(raw_theta.grad, torch.zeros_like(raw_theta.grad)), (
+            "Gradients should be non-zero"
+        )
 
     def test_comparison_with_poisson_baseline(self):
         """Test that NB reduces to Poisson as theta approaches large values."""
         mean_val = 5.0
 
         # Use maximum allowable theta from our activation function
-        large_theta = theta_activation(torch.tensor([15.0]))  # Large theta within bounds
+        large_theta = theta_activation(
+            torch.tensor([15.0])
+        )  # Large theta within bounds
 
         # NB variance: mean + mean^2/theta
         nb_variance = mean_val + (mean_val**2) / large_theta
@@ -203,4 +218,6 @@ class TestNegativeBinomialParameterization:
         # With large theta, NB variance should be closer to Poisson variance
         # But due to our clamping, allow for reasonable tolerance
         relative_error = torch.abs(nb_variance - poisson_variance) / poisson_variance
-        assert relative_error < 0.5, f"Large theta should reduce overdispersion, got relative error: {relative_error}"
+        assert relative_error < 0.5, (
+            f"Large theta should reduce overdispersion, got relative error: {relative_error}"
+        )

@@ -24,7 +24,13 @@ class TestEvaluatePredictionsAndSave:
         return pd.DataFrame(
             {
                 "cell_id": ["cell_1", "cell_2", "cell_3", "cell_4", "cell_5"],
-                "expansion": ["expanded", "non-expanded", "expanded", "non-expanded", "expanded"],
+                "expansion": [
+                    "expanded",
+                    "non-expanded",
+                    "expanded",
+                    "non-expanded",
+                    "expanded",
+                ],
                 "clone_id_size": [5, 2, 8, 1, 6],
                 "median_clone_size": [3, 3, 3, 3, 3],
                 "tissue_type": ["tumor", "normal", "tumor", "normal", "tumor"],
@@ -51,7 +57,12 @@ class TestEvaluatePredictionsAndSave:
         }
 
     def test_evaluate_predictions_and_save_success(
-        self, tmp_path, mock_predictions, mock_obs_df, mock_ground_truth, mock_evaluation_results
+        self,
+        tmp_path,
+        mock_predictions,
+        mock_obs_df,
+        mock_ground_truth,
+        mock_evaluation_results,
     ):
         """Test successful evaluation and saving."""
         save_path = tmp_path / "results"
@@ -82,7 +93,10 @@ class TestEvaluatePredictionsAndSave:
 
             # Verify save_predictions_to_csv was called correctly
             mock_save_csv.assert_called_once_with(
-                predictions=mock_predictions, obs_df=mock_obs_df, model_type=ModelType.AUTOENCODER, save_path=save_path
+                predictions=mock_predictions,
+                obs_df=mock_obs_df,
+                model_type=ModelType.AUTOENCODER,
+                save_path=save_path,
             )
 
             # Verify evaluate_and_save was called correctly
@@ -101,7 +115,12 @@ class TestEvaluatePredictionsAndSave:
             assert result == mock_evaluation_results
 
     def test_evaluate_predictions_and_save_with_trial(
-        self, tmp_path, mock_predictions, mock_obs_df, mock_ground_truth, mock_evaluation_results
+        self,
+        tmp_path,
+        mock_predictions,
+        mock_obs_df,
+        mock_ground_truth,
+        mock_evaluation_results,
     ):
         """Test evaluation with Optuna trial object."""
         save_path = tmp_path / "results"
@@ -139,7 +158,12 @@ class TestEvaluatePredictionsAndSave:
             assert result == mock_evaluation_results
 
     def test_evaluate_predictions_and_save_default_parameters(
-        self, tmp_path, mock_predictions, mock_obs_df, mock_ground_truth, mock_evaluation_results
+        self,
+        tmp_path,
+        mock_predictions,
+        mock_obs_df,
+        mock_ground_truth,
+        mock_evaluation_results,
     ):
         """Test evaluation with default parameters."""
         save_path = tmp_path / "results"
@@ -156,7 +180,10 @@ class TestEvaluatePredictionsAndSave:
 
             # Run with minimal parameters (using defaults)
             result = evaluate_predictions_and_save(
-                y_pred_prob=mock_predictions, obs_df=mock_obs_df, model_type=ModelType.LIGHTGBM, save_path=save_path
+                y_pred_prob=mock_predictions,
+                obs_df=mock_obs_df,
+                model_type=ModelType.LIGHTGBM,
+                save_path=save_path,
             )
 
             # Verify default parameters were used
@@ -169,7 +196,9 @@ class TestEvaluatePredictionsAndSave:
             # Verify result is returned
             assert result == mock_evaluation_results
 
-    def test_evaluate_predictions_and_save_array_shapes_mismatch(self, tmp_path, mock_obs_df):
+    def test_evaluate_predictions_and_save_array_shapes_mismatch(
+        self, tmp_path, mock_obs_df
+    ):
         """Test handling of mismatched array shapes."""
         save_path = tmp_path / "results"
         save_path.mkdir()
@@ -190,7 +219,10 @@ class TestEvaluatePredictionsAndSave:
             # Should propagate the error from evaluate_and_save
             with pytest.raises(ValueError, match="Shape mismatch"):
                 evaluate_predictions_and_save(
-                    y_pred_prob=wrong_predictions, obs_df=mock_obs_df, model_type=ModelType.SVM, save_path=save_path
+                    y_pred_prob=wrong_predictions,
+                    obs_df=mock_obs_df,
+                    model_type=ModelType.SVM,
+                    save_path=save_path,
                 )
 
             # Verify that extraction and saving were attempted
@@ -198,7 +230,12 @@ class TestEvaluatePredictionsAndSave:
             mock_save_csv.assert_called_once()
 
     def test_evaluate_predictions_and_save_logging(
-        self, tmp_path, mock_predictions, mock_obs_df, mock_ground_truth, mock_evaluation_results
+        self,
+        tmp_path,
+        mock_predictions,
+        mock_obs_df,
+        mock_ground_truth,
+        mock_evaluation_results,
     ):
         """Test that the function completes successfully (basic integration test)."""
         save_path = tmp_path / "results"
@@ -248,7 +285,10 @@ class TestEvaluatePredictionsAndSave:
 
             # Run evaluation - should complete without error even without AUROC
             result = evaluate_predictions_and_save(
-                y_pred_prob=mock_predictions, obs_df=mock_obs_df, model_type=ModelType.LOGISTIC, save_path=save_path
+                y_pred_prob=mock_predictions,
+                obs_df=mock_obs_df,
+                model_type=ModelType.LOGISTIC,
+                save_path=save_path,
             )
 
             # Verify function completed and returned results
@@ -256,7 +296,12 @@ class TestEvaluatePredictionsAndSave:
             assert "AUROC" not in result  # Confirm AUROC is indeed missing
 
     def test_evaluate_predictions_and_save_path_handling(
-        self, tmp_path, mock_predictions, mock_obs_df, mock_ground_truth, mock_evaluation_results
+        self,
+        tmp_path,
+        mock_predictions,
+        mock_obs_df,
+        mock_ground_truth,
+        mock_evaluation_results,
     ):
         """Test that Path objects are handled correctly."""
         save_path = tmp_path / "results"
@@ -307,7 +352,10 @@ class TestEvaluatePredictionsAndSave:
 
             # Should handle empty arrays gracefully
             result = evaluate_predictions_and_save(
-                y_pred_prob=empty_predictions, obs_df=empty_obs_df, model_type=ModelType.LIGHTGBM, save_path=save_path
+                y_pred_prob=empty_predictions,
+                obs_df=empty_obs_df,
+                model_type=ModelType.LIGHTGBM,
+                save_path=save_path,
             )
 
             # With empty DataFrame (no expansion column), extract_is_expanded should not be called

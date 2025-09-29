@@ -6,7 +6,6 @@ data_format was not used in inference.
 """
 
 import inspect
-
 from unittest.mock import MagicMock, patch
 
 import anndata as ad
@@ -54,13 +53,17 @@ class TestLightGBMPreprocessingCompatibility:
 
         return ad.AnnData(X=X, obs=obs_df, var=var_df)
 
-    def test_inference_uses_data_format_parameter(self, sample_adata, sample_data_format):
+    def test_inference_uses_data_format_parameter(
+        self, sample_adata, sample_data_format
+    ):
         """Test that LightGBM inference accepts and uses the data_format parameter."""
         mock_model = MagicMock()
         mock_model.predict_proba.return_value = np.random.rand(15, 2)
 
         # Test in-memory data processing
-        with patch("scxpand.lightgbm.run_lightgbm_.preprocess_expression_data") as mock_preprocess:
+        with patch(
+            "scxpand.lightgbm.run_lightgbm_.preprocess_expression_data"
+        ) as mock_preprocess:
             mock_preprocess.return_value = np.random.randn(15, 20)
 
             result = run_lightgbm_inference(
@@ -89,7 +92,9 @@ class TestLightGBMPreprocessingCompatibility:
         mock_model = MagicMock()
         mock_model.predict_proba.return_value = np.random.rand(15, 2)
 
-        with patch("scxpand.lightgbm.run_lightgbm_._prepare_data_for_lightgbm_inference") as mock_prepare:
+        with patch(
+            "scxpand.lightgbm.run_lightgbm_._prepare_data_for_lightgbm_inference"
+        ) as mock_prepare:
             mock_prepare.return_value = np.random.randn(15, 20)
 
             result = run_lightgbm_inference(
@@ -117,7 +122,9 @@ class TestLightGBMPreprocessingCompatibility:
         eval_indices = np.array([0, 2, 4, 6, 8])
         mock_model.predict_proba.return_value = np.random.rand(len(eval_indices), 2)
 
-        with patch("scxpand.lightgbm.run_lightgbm_.preprocess_expression_data") as mock_preprocess:
+        with patch(
+            "scxpand.lightgbm.run_lightgbm_.preprocess_expression_data"
+        ) as mock_preprocess:
             mock_preprocess.return_value = np.random.randn(len(eval_indices), 20)
 
             result = run_lightgbm_inference(
@@ -159,7 +166,10 @@ class TestLightGBMPreprocessingCompatibility:
             # Return processed data with correct shape
             return np.random.randn(X.shape[0], data_format.n_genes)
 
-        with patch("scxpand.lightgbm.run_lightgbm_.preprocess_expression_data", side_effect=mock_preprocess_func):
+        with patch(
+            "scxpand.lightgbm.run_lightgbm_.preprocess_expression_data",
+            side_effect=mock_preprocess_func,
+        ):
             result = run_lightgbm_inference(
                 model=mock_model,
                 data_format=sample_data_format,
@@ -186,7 +196,9 @@ class TestLightGBMPreprocessingCompatibility:
         mock_probs = mock_probs / mock_probs.sum(axis=1, keepdims=True)  # Normalize
         mock_model.predict_proba.return_value = mock_probs
 
-        with patch("scxpand.lightgbm.run_lightgbm_.preprocess_expression_data") as mock_preprocess:
+        with patch(
+            "scxpand.lightgbm.run_lightgbm_.preprocess_expression_data"
+        ) as mock_preprocess:
             mock_preprocess.return_value = np.random.randn(n_samples, 20)
 
             result = run_lightgbm_inference(
@@ -216,7 +228,9 @@ class TestLightGBMPreprocessingCompatibility:
         decision_scores = np.random.randn(n_samples)
         mock_model.decision_function.return_value = decision_scores
 
-        with patch("scxpand.lightgbm.run_lightgbm_.preprocess_expression_data") as mock_preprocess:
+        with patch(
+            "scxpand.lightgbm.run_lightgbm_.preprocess_expression_data"
+        ) as mock_preprocess:
             mock_preprocess.return_value = np.random.randn(n_samples, 20)
 
             result = run_lightgbm_inference(
@@ -239,7 +253,9 @@ class TestLightGBMPreprocessingCompatibility:
         mock_model = MagicMock()
 
         # This should raise ValueError for missing data
-        with pytest.raises(ValueError, match="Either adata or data_path must be provided"):
+        with pytest.raises(
+            ValueError, match="Either adata or data_path must be provided"
+        ):
             run_lightgbm_inference(
                 model=mock_model,
                 data_format=sample_data_format,
@@ -270,7 +286,9 @@ class TestLightGBMPreprocessingCompatibility:
         def validate_preprocess_params(X, data_format):
             # Validate parameter types
             assert isinstance(X, np.ndarray), f"X should be numpy array, got {type(X)}"
-            assert isinstance(data_format, DataFormat), f"data_format should be DataFormat, got {type(data_format)}"
+            assert isinstance(data_format, DataFormat), (
+                f"data_format should be DataFormat, got {type(data_format)}"
+            )
 
             # Validate X properties
             assert X.ndim == 2, f"X should be 2D, got {X.ndim}D"
@@ -278,7 +296,10 @@ class TestLightGBMPreprocessingCompatibility:
 
             return np.random.randn(X.shape[0], data_format.n_genes)
 
-        with patch("scxpand.lightgbm.run_lightgbm_.preprocess_expression_data", side_effect=validate_preprocess_params):
+        with patch(
+            "scxpand.lightgbm.run_lightgbm_.preprocess_expression_data",
+            side_effect=validate_preprocess_params,
+        ):
             result = run_lightgbm_inference(
                 model=mock_model,
                 data_format=sample_data_format,
@@ -299,11 +320,15 @@ class TestRegressionPrevention:
         params = sig.parameters
 
         # The function MUST accept data_format parameter
-        assert "data_format" in params, "run_lightgbm_inference must accept data_format parameter"
+        assert "data_format" in params, (
+            "run_lightgbm_inference must accept data_format parameter"
+        )
 
         # data_format should be a required parameter (not optional with None default)
         data_format_param = params["data_format"]
-        assert data_format_param.default == inspect.Parameter.empty, "data_format should be required"
+        assert data_format_param.default == inspect.Parameter.empty, (
+            "data_format should be required"
+        )
 
     def test_preprocessing_function_calls(self, tmp_path):
         """Regression test: Ensure preprocessing functions are actually called."""
@@ -325,7 +350,9 @@ class TestRegressionPrevention:
         mock_model.predict_proba.return_value = np.random.rand(n_cells, 2)
 
         # Test in-memory preprocessing
-        with patch("scxpand.lightgbm.run_lightgbm_.preprocess_expression_data") as mock_preprocess:
+        with patch(
+            "scxpand.lightgbm.run_lightgbm_.preprocess_expression_data"
+        ) as mock_preprocess:
             mock_preprocess.return_value = X
 
             run_lightgbm_inference(
@@ -343,7 +370,9 @@ class TestRegressionPrevention:
         file_path = tmp_path / "test.h5ad"
         adata.write_h5ad(file_path)
 
-        with patch("scxpand.lightgbm.run_lightgbm_._prepare_data_for_lightgbm_inference") as mock_prepare:
+        with patch(
+            "scxpand.lightgbm.run_lightgbm_._prepare_data_for_lightgbm_inference"
+        ) as mock_prepare:
             mock_prepare.return_value = X
 
             run_lightgbm_inference(
@@ -375,7 +404,9 @@ class TestRegressionPrevention:
 
         # This should NOT raise TypeError about unexpected keyword argument
         try:
-            with patch("scxpand.lightgbm.run_lightgbm_.preprocess_expression_data") as mock_preprocess:
+            with patch(
+                "scxpand.lightgbm.run_lightgbm_.preprocess_expression_data"
+            ) as mock_preprocess:
                 mock_preprocess.return_value = X
 
                 result = run_lightgbm_inference(
@@ -410,9 +441,13 @@ class TestRegressionPrevention:
         )
 
         # Create test data with different genes (simulating new data)
-        test_genes = [f"gene_{i}" for i in range(5, 15)]  # 5 overlapping, 5 new, 5 missing
+        test_genes = [
+            f"gene_{i}" for i in range(5, 15)
+        ]  # 5 overlapping, 5 new, 5 missing
         n_cells = 20
-        X = np.random.exponential(scale=2.0, size=(n_cells, len(test_genes))).astype(np.float32)
+        X = np.random.exponential(scale=2.0, size=(n_cells, len(test_genes))).astype(
+            np.float32
+        )
 
         obs_df = pd.DataFrame(
             {
@@ -438,7 +473,9 @@ class TestRegressionPrevention:
         )
 
         assert isinstance(result, np.ndarray)
-        assert result.shape == (n_cells,), f"Expected shape ({n_cells},), got {result.shape}"
+        assert result.shape == (n_cells,), (
+            f"Expected shape ({n_cells},), got {result.shape}"
+        )
 
         # Test file-based inference with gene mismatch
         file_path = tmp_path / "test_gene_mismatch.h5ad"
@@ -453,4 +490,6 @@ class TestRegressionPrevention:
         )
 
         assert isinstance(result, np.ndarray)
-        assert result.shape == (n_cells,), f"Expected shape ({n_cells},), got {result.shape}"
+        assert result.shape == (n_cells,), (
+            f"Expected shape ({n_cells},), got {result.shape}"
+        )

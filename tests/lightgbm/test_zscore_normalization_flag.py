@@ -5,7 +5,6 @@ and that it affects data preprocessing, performance, and hyperparameter optimiza
 """
 
 import tempfile
-
 from pathlib import Path
 
 import anndata as ad
@@ -76,7 +75,9 @@ class TestLightGBMParams:
 
     def test_other_params_with_zscore_disabled(self):
         """Test that other parameters work correctly when use_zscore_norm is disabled."""
-        params = LightGBMParams(use_zscore_norm=False, num_leaves=50, learning_rate=0.05, n_estimators=200)
+        params = LightGBMParams(
+            use_zscore_norm=False, num_leaves=50, learning_rate=0.05, n_estimators=200
+        )
         assert params.use_zscore_norm is False
         assert params.num_leaves == 50
         assert params.learning_rate == 0.05
@@ -180,7 +181,10 @@ class TestPrepareDataForTraining:
 
     def test_zscore_enabled_computes_statistics(self, dummy_adata):
         """Test that gene statistics are computed when z-score is enabled."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             data_path = Path(temp_dir) / "test_data.h5ad"
             save_dir = Path(temp_dir) / "results"
 
@@ -188,7 +192,11 @@ class TestPrepareDataForTraining:
             ctx.register_file(data_path)
 
             bundle = prepare_data_for_training(
-                data_path=data_path, use_zscore_norm=True, save_dir=save_dir, dev_ratio=0.2, batch_size=100
+                data_path=data_path,
+                use_zscore_norm=True,
+                save_dir=save_dir,
+                dev_ratio=0.2,
+                batch_size=100,
             )
             ctx.register_adata(bundle.adata)
 
@@ -199,7 +207,10 @@ class TestPrepareDataForTraining:
 
     def test_zscore_disabled_skips_statistics(self, dummy_adata):
         """Test that gene statistics computation is skipped when z-score is disabled."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             data_path = Path(temp_dir) / "test_data.h5ad"
             save_dir = Path(temp_dir) / "results"
 
@@ -207,7 +218,11 @@ class TestPrepareDataForTraining:
             ctx.register_file(data_path)
 
             bundle = prepare_data_for_training(
-                data_path=data_path, use_zscore_norm=False, save_dir=save_dir, dev_ratio=0.2, batch_size=100
+                data_path=data_path,
+                use_zscore_norm=False,
+                save_dir=save_dir,
+                dev_ratio=0.2,
+                batch_size=100,
             )
             ctx.register_adata(bundle.adata)
 
@@ -222,7 +237,10 @@ class TestCellsDataset:
 
     def test_dataset_with_zscore_enabled(self, dummy_adata):
         """Test CellsDataset when z-score normalization is enabled."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             data_path = Path(temp_dir) / "test_data.h5ad"
             dummy_adata.write_h5ad(data_path)
             ctx.register_file(data_path)
@@ -236,7 +254,9 @@ class TestCellsDataset:
                 genes_sigma=np.random.rand(dummy_adata.n_vars).astype(np.float32) + 0.1,
             )
 
-            dataset = CellsDataset(data_format=data_format, data_path=data_path, is_train=False)
+            dataset = CellsDataset(
+                data_format=data_format, data_path=data_path, is_train=False
+            )
 
             assert dataset.use_zscore_norm is True
             assert dataset.genes_mu_tensor is not None
@@ -244,7 +264,10 @@ class TestCellsDataset:
 
     def test_dataset_with_zscore_disabled(self, dummy_adata):
         """Test CellsDataset when z-score normalization is disabled."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             data_path = Path(temp_dir) / "test_data.h5ad"
             dummy_adata.write_h5ad(data_path)
             ctx.register_file(data_path)
@@ -258,7 +281,9 @@ class TestCellsDataset:
                 genes_sigma=np.random.rand(dummy_adata.n_vars).astype(np.float32) + 0.1,
             )
 
-            dataset = CellsDataset(data_format=data_format, data_path=data_path, is_train=False)
+            dataset = CellsDataset(
+                data_format=data_format, data_path=data_path, is_train=False
+            )
 
             assert dataset.use_zscore_norm is False
             assert dataset.genes_mu_tensor is None
@@ -304,7 +329,10 @@ class TestPerformanceOptimization:
         # Expand the dataset
         large_adata = ad.concat([large_adata] * 10, axis=0)  # 1000 cells
 
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             data_path = Path(temp_dir) / "test_data.h5ad"
             large_adata.write_h5ad(data_path)
             ctx.register_file(data_path)
@@ -329,8 +357,14 @@ class TestPerformanceOptimization:
             ctx.register_adata(bundle_no_zscore.adata)
 
             # Verify that the gene statistics are different
-            assert not np.allclose(bundle_zscore.data_format.genes_mu, bundle_no_zscore.data_format.genes_mu)
-            assert not np.allclose(bundle_zscore.data_format.genes_sigma, bundle_no_zscore.data_format.genes_sigma)
+            assert not np.allclose(
+                bundle_zscore.data_format.genes_mu,
+                bundle_no_zscore.data_format.genes_mu,
+            )
+            assert not np.allclose(
+                bundle_zscore.data_format.genes_sigma,
+                bundle_no_zscore.data_format.genes_sigma,
+            )
 
 
 class TestIntegration:
@@ -338,7 +372,10 @@ class TestIntegration:
 
     def test_end_to_end_zscore_workflow(self, dummy_adata):
         """Test the complete workflow with z-score normalization enabled/disabled."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             data_path = Path(temp_dir) / "test_data.h5ad"
             dummy_adata.write_h5ad(data_path)
             ctx.register_file(data_path)
@@ -369,10 +406,16 @@ class TestIntegration:
             assert bundle_no_zscore.data_format.use_zscore_norm is False
 
             # Test dataset creation
-            dataset_zscore = CellsDataset(data_format=bundle_zscore.data_format, data_path=data_path, is_train=False)
+            dataset_zscore = CellsDataset(
+                data_format=bundle_zscore.data_format,
+                data_path=data_path,
+                is_train=False,
+            )
 
             dataset_no_zscore = CellsDataset(
-                data_format=bundle_no_zscore.data_format, data_path=data_path, is_train=False
+                data_format=bundle_no_zscore.data_format,
+                data_path=data_path,
+                is_train=False,
             )
 
             # Verify dataset configuration

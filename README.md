@@ -50,59 +50,23 @@ A framework for predicting T-cell clonal expansion from single-cell RNA sequenci
 
 ## Installation
 
-<details>
-<summary><b>Installing the Published Package: For regular use</b></summary>
+For detailed installation instructions, please refer to our **[Installation Guide](https://scxpand.readthedocs.io/en/latest/installation.html)**.
 
-scXpand is available in two variants to match your hardware:
+### Published Version Install
 
-#### NVIDIA GPU with CUDA Support
+**CUDA version (NVIDIA GPU):**
+```bash
+pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
+```
 
-- **Using pip:**
-  ```bash
-  pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
-  ```
-- **Using uv:**
-  ```bash
-  uv pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
-  ```
+**CPU/Apple Silicon/Other GPUs:**
+```bash
+pip install --upgrade scxpand
+```
 
-#### CPU, Apple Silicon, or Non-CUDA GPUs
+### Development Setup (Install from Source)
 
-- **Using pip:**
-  ```bash
-  pip install --upgrade scxpand
-  ```
-- **Using uv:**
-  ```bash
-  uv pip install --upgrade scxpand
-  ```
-
-</details>
-
-<details>
-<summary><b>Local Development Setup: For contributing or working with the source code</b></summary>
-
-If you want to contribute or work with the latest source code, follow these steps:
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yizhak-lab-ccg/scXpand.git
-   cd scXpand
-   ```
-
-2. **Run the install script:**
-   - **Windows PowerShell:**
-     ```bash
-     .\install.bat
-     ```
-   - **macOS/Linux:**
-     ```bash
-     ./install.sh
-     ```
-
-</details>
-
-> See the [full installation guide](https://scxpand.readthedocs.io/en/latest/installation.html) for detailed setup instructions.
+See the [Installation Guide](https://scxpand.readthedocs.io/en/latest/installation.html)
 
 ---
 

@@ -1,4 +1,4 @@
-﻿scxpand.util.logger
+scxpand.util.logger
 ===================
 
 .. automodule:: scxpand.util.logger

@@ -37,6 +37,7 @@ NC='\033[0m' # No Color
 # Default values
 DRY_RUN=false
 VERSION_TYPE="patch"
+DEV_RELEASE=false
 
 # Function to print colored output
 print_status() {
@@ -87,6 +88,7 @@ show_usage() {
     echo "  --patch            Bump patch version (default)"
     echo "  --minor            Bump minor version"
     echo "  --major            Bump major version"
+    echo "  --dev              Create a dev release (no GitHub announcement)"
     echo "  --help, -h         Show this help message"
     echo ""
     echo "Examples:"
@@ -94,6 +96,8 @@ show_usage() {
     echo "  $0 --dry-run       # Patch release dry run"
     echo "  $0 --minor         # Minor release for both packages"
     echo "  $0 --major --dry-run # Major release dry run"
+    echo "  $0 --dev           # Dev release (no GitHub announcement)"
+    echo "  $0 --dev --dry-run # Dev release dry run"
     echo ""
     echo "Environment Setup:"
     echo "  PyPI Token (required for publishing):"
@@ -112,9 +116,15 @@ show_usage() {
     echo ""
     echo "Automated Features:"
     echo "  - Automatic CHANGELOG.md updates with version and date"
-    echo "  - GitHub release creation with auto-generated release notes"
+    echo "  - GitHub release creation with auto-generated release notes (skipped for --dev)"
     echo "  - Dual package building and publishing (CPU/MPS + CUDA)"
-    echo "  - ReadTheDocs documentation build triggering"
+    echo "  - ReadTheDocs documentation build triggering (skipped for --dev)"
+    echo ""
+    echo "Dev Release Features:"
+    echo "  - Publishes packages to PyPI with dev version suffix (e.g., 0.3.6.dev1)"
+    echo "  - Skips GitHub release creation and announcement"
+    echo "  - Skips ReadTheDocs documentation build"
+    echo "  - Useful for testing releases before official announcement"
 }
 
 # Parse command line arguments
@@ -134,6 +144,11 @@ while [[ $# -gt 0 ]]; do
             ;;
         --major)
             VERSION_TYPE="major"
+            shift
+            ;;
+        --dev)
+            DEV_RELEASE=true
+            VERSION_TYPE="patch"  # Dev releases are typically patch-based
             shift
             ;;
         --help|-h)
@@ -185,12 +200,15 @@ check_prerequisites() {
         exit 1
     fi
 
-    # Check if we're on main branch
+    # Check if we're on main branch (skip for dev releases)
     local current_branch=$(git branch --show-current)
-    if [ "$current_branch" != "main" ]; then
+    if [ "$current_branch" != "main" ] && [ "$DEV_RELEASE" = false ]; then
         print_error "Not on main branch (currently on: $current_branch)"
         print_status "Please checkout main branch first: git checkout main"
         exit 1
+    elif [ "$current_branch" != "main" ] && [ "$DEV_RELEASE" = true ]; then
+        print_warning "Dev release from branch: $current_branch (not main)"
+        print_status "This is allowed for dev releases"
     fi
 
     # Check if working directory is clean
@@ -201,19 +219,24 @@ check_prerequisites() {
         exit 1
     fi
 
-    # Check if we're up to date with remote
+    # Check if we're up to date with remote (skip for dev releases from non-main branches)
     print_status "Fetching latest changes from remote..."
     if ! git fetch origin; then
         print_error "Failed to fetch from remote origin"
         print_status "Please check your network connection and git credentials"
         exit 1
     fi
-    local local_commit=$(git rev-parse HEAD)
-    local remote_commit=$(git rev-parse origin/main)
-    if [ "$local_commit" != "$remote_commit" ]; then
-        print_error "Local branch is not up to date with remote origin/main"
-        print_status "Please pull latest changes: git pull origin main, and push your changes: git push origin main"
-        exit 1
+
+    if [ "$DEV_RELEASE" = true ] && [ "$current_branch" != "main" ]; then
+        print_warning "Dev release from non-main branch: Skipping remote sync check"
+    else
+        local local_commit=$(git rev-parse HEAD)
+        local remote_commit=$(git rev-parse origin/main)
+        if [ "$local_commit" != "$remote_commit" ]; then
+            print_error "Local branch is not up to date with remote origin/main"
+            print_status "Please pull latest changes: git pull origin main, and push your changes: git push origin main"
+            exit 1
+        fi
     fi
 
     # Note: Unpushed commits check is redundant since we already verified
@@ -357,68 +380,98 @@ validate_changelog() {
     fi
 }
 
+# Function to create dev version number
+create_dev_version() {
+    local base_version="$1"
+
+    # For VCS versioning with hatch-vcs, we can only use .dev0
+    # Extract the clean base version (remove .devX suffix if present)
+    local clean_base_version=$(echo "$base_version" | sed 's/\.dev[0-9]*$//')
+
+    # For automation, if we already have a .dev0 version, increment the base version
+    if git tag -l "v${clean_base_version}.dev0" | grep -q "v${clean_base_version}.dev0"; then
+        # Increment the patch version for the next dev release
+        local major=$(echo "$clean_base_version" | cut -d. -f1)
+        local minor=$(echo "$clean_base_version" | cut -d. -f2)
+        local patch=$(echo "$clean_base_version" | cut -d. -f3)
+        patch=$((patch + 1))
+        clean_base_version="${major}.${minor}.${patch}"
+    fi
+
+    # For VCS versioning, hatch-vcs only supports .dev0 for development versions
+    echo "${clean_base_version}.dev0"
+}
+
 # Function to preview version bump and validate changelog
 preview_and_validate() {
-    print_status "Previewing $VERSION_TYPE version bump..."
-
-    local current_version=$(uv version | cut -d' ' -f2)
-    print_status "Current version: $current_version"
-
-    # Validate version format (should be x.y.z)
-    if ! echo "$current_version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-        print_error "Invalid version format: $current_version (expected x.y.z)"
-        exit 1
+    if [ "$DEV_RELEASE" = true ]; then
+        print_status "Previewing dev release..."
+    else
+        print_status "Previewing $VERSION_TYPE version bump..."
     fi
+
+    # Get current version from VCS
+    local current_version=$(python -c "import tomllib; data=tomllib.load(open('pyproject.toml', 'rb')); print('0.0.0') if 'version' not in data['project'] else print(data['project']['version'])")
+
+    # For VCS versioning, we need to get the latest tag
+    local latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+    local base_version=$(echo "$latest_tag" | sed 's/^v//')
+
+    print_status "Latest tag: $latest_tag"
+    print_status "Base version: $base_version"
 
     # Calculate what the new version would be (without modifying files)
     local new_version
-    case "$VERSION_TYPE" in
-        "major")
-            new_version=$(echo "$current_version" | awk -F. '{print ($1+1)".0.0"}')
-            ;;
-        "minor")
-            new_version=$(echo "$current_version" | awk -F. '{print $1"."($2+1)".0"}')
-            ;;
-        "patch")
-            new_version=$(echo "$current_version" | awk -F. '{print $1"."$2"."($3+1)}')
-            ;;
-        *)
-            print_error "Invalid version type: $VERSION_TYPE"
-            exit 1
-            ;;
-    esac
+    if [ "$DEV_RELEASE" = true ]; then
+        # For dev releases, use the base version and add .devN
+        new_version=$(create_dev_version "$base_version")
+        print_status "Dev release: $base_version → $new_version"
+    else
+        case "$VERSION_TYPE" in
+            "major")
+                new_version=$(echo "$base_version" | awk -F. '{print ($1+1)".0.0"}')
+                ;;
+            "minor")
+                new_version=$(echo "$base_version" | awk -F. '{print $1"."($2+1)".0"}')
+                ;;
+            "patch")
+                new_version=$(echo "$base_version" | awk -F. '{print $1"."$2"."($3+1)}')
+                ;;
+            *)
+                print_error "Invalid version type: $VERSION_TYPE"
+                exit 1
+                ;;
+        esac
+        print_status "Would bump to version: $new_version"
+    fi
 
-    print_status "Would bump to version: $new_version"
     export NEW_VERSION="$new_version"
 
-    # Validate changelog entry BEFORE actually bumping version
-    validate_changelog
+    # For dev releases, skip changelog validation
+    if [ "$DEV_RELEASE" = false ]; then
+        # Validate changelog entry BEFORE actually bumping version
+        validate_changelog
+    else
+        print_status "Dev release: Skipping changelog validation"
+    fi
 }
 
 # Function to bump version (only called after validation passes)
 bump_version() {
-    print_status "Bumping $VERSION_TYPE version..."
-
-    # Get current version from main pyproject.toml
-    current_version=$(uv version | cut -d' ' -f2)
-    print_status "Current version: $current_version"
-
-    # Backup original pyproject.toml before version bump (for restoration on cancellation)
-    if [ "$DRY_RUN" = false ]; then
-        backup_file "pyproject.toml" "original"
+    if [ "$DEV_RELEASE" = true ]; then
+        print_status "Setting dev version..."
+    else
+        print_status "Bumping $VERSION_TYPE version..."
     fi
 
-    # Bump version in main pyproject.toml
+    # For VCS versioning, we don't modify pyproject.toml
+    # Instead, we create a Git tag and let hatch-vcs handle the version
     if [ "$DRY_RUN" = false ]; then
-        uv version --bump "$VERSION_TYPE"
+        print_status "VCS versioning: Version will be determined from Git tag v$NEW_VERSION"
+        print_success "Version will be: $NEW_VERSION (from Git tag)"
+    else
+        print_status "DRY RUN: Would create Git tag v$NEW_VERSION for VCS versioning"
     fi
-
-    # Get new version
-    new_version=$(uv version | cut -d' ' -f2)
-    print_success "Version bumped to: $new_version"
-
-    # Export for later use
-    export NEW_VERSION="$new_version"
 }
 
 # Function to clean build directories
@@ -474,7 +527,16 @@ restore_file() {
 }
 
 cleanup_backups() {
+    # Remove all backup files created during the release process
     rm -f pyproject.toml.original pyproject.toml.backup pyproject.toml.temp
+    rm -f pyproject.toml.bak
+    rm -f temp/pyproject-cuda*.toml
+    rm -f pyproject-cuda-temp*.toml
+
+    # Clean up any temporary build artifacts
+    rm -rf temp/test_cuda_env 2>/dev/null || true
+
+    print_status "Cleaned up backup and temporary files"
 }
 
 
@@ -822,18 +884,58 @@ execute_git_command() {
 
 # Function to commit and push changes
 commit_and_push() {
-    execute_git_command \
-        "git add -A && git commit -m 'Bump version to $NEW_VERSION and update CHANGELOG.md (dual package release)' && git push origin main" \
-        "Committing and pushing changes" \
-        "Would commit and push changes"
+    local commit_message
+    local current_branch=$(git branch --show-current)
+
+    if [ "$DEV_RELEASE" = true ]; then
+        commit_message="Dev release version $NEW_VERSION (dual package release)"
+    else
+        commit_message="Release version $NEW_VERSION (dual package release)"
+    fi
+
+    if [ "$DEV_RELEASE" = true ] && [ "$current_branch" != "main" ]; then
+        # For dev releases from non-main branches, just push to current branch
+        # Check if there are any changes to commit first
+        if git diff --quiet && git diff --cached --quiet; then
+            print_status "No changes to commit for VCS versioning dev release"
+            execute_git_command \
+                "git push origin $current_branch" \
+                "Pushing dev release to $current_branch" \
+                "Would push dev release to $current_branch"
+        else
+            execute_git_command \
+                "git add -A && git commit -m '$commit_message' && git push origin $current_branch" \
+                "Committing and pushing dev release changes to $current_branch" \
+                "Would commit and push dev release changes to $current_branch"
+        fi
+    else
+        # Regular release or dev release from main branch
+        execute_git_command \
+            "git add -A && git commit -m '$commit_message' && git push origin main" \
+            "Committing and pushing changes" \
+            "Would commit and push changes"
+    fi
 }
 
-# Function to create and push tag
+# Function to create and push tag with conflict handling
 create_and_push_tag() {
+    local tag_name="v$NEW_VERSION"
+
+    # Check if tag already exists
+    if git tag -l "$tag_name" | grep -q "$tag_name"; then
+        print_warning "Tag $tag_name already exists. Deleting and recreating..."
+        if [ "$DRY_RUN" = false ]; then
+            git tag -d "$tag_name" 2>/dev/null || true
+            git push origin ":refs/tags/$tag_name" 2>/dev/null || true
+        else
+            print_status "DRY RUN: Would delete existing tag $tag_name"
+        fi
+    fi
+
     execute_git_command \
-        "git tag 'v$NEW_VERSION' && git push origin 'v$NEW_VERSION'" \
-        "Creating and pushing tag v$NEW_VERSION" \
-        "Would create and push tag v$NEW_VERSION"
+        "git tag '$tag_name' && git push origin '$tag_name'" \
+        "Creating and pushing tag $tag_name" \
+        "Would create and push tag $tag_name"
 }
 
 # Function to publish both packages to PyPI
@@ -931,6 +1033,11 @@ EOF
 
 # Function to create GitHub release
 create_github_release() {
+    if [ "$DEV_RELEASE" = true ]; then
+        print_status "Dev release: Skipping GitHub release creation"
+        return
+    fi
+
     if [ "$DRY_RUN" = true ]; then
         print_status "DRY RUN: Would create GitHub release v$NEW_VERSION..."
         return
@@ -964,6 +1071,11 @@ create_github_release() {
 
 # Function to trigger ReadTheDocs build
 trigger_readthedocs_build() {
+    if [ "$DEV_RELEASE" = true ]; then
+        print_status "Dev release: Skipping ReadTheDocs build"
+        return
+    fi
+
     if [ "$DRY_RUN" = true ]; then
         print_status "DRY RUN: Would trigger ReadTheDocs build..."
         return
@@ -1026,35 +1138,85 @@ show_summary() {
     if [ "$DRY_RUN" = true ]; then
         print_success "DRY RUN completed successfully!"
         echo
-        print_status "What would happen in a real dual release:"
-        echo "  - Preview version bump: $NEW_VERSION ($VERSION_TYPE)"
-        echo "  - Validate CHANGELOG.md entry (create template if missing)"
-        echo "  - Bump version in pyproject.toml"
-        echo "  - Packages: scxpand (CPU/MPS) and scxpand-cuda (CUDA)"
-        echo "  - Commit message: 'Bump version to $NEW_VERSION and update CHANGELOG.md (dual package release)'"
-        echo "  - Tag: v$NEW_VERSION"
-        echo "  - Push to main branch"
-        echo "  - Create GitHub release with auto-generated notes"
-        echo "  - Publish both packages to PyPI"
-        echo "  - Trigger ReadTheDocs documentation build"
+        if [ "$DEV_RELEASE" = true ]; then
+            print_status "What would happen in a real dev release:"
+            echo "  - Preview dev version: $NEW_VERSION"
+            echo "  - Skip CHANGELOG.md validation"
+            echo "  - Set dev version in pyproject.toml"
+            echo "  - Packages: scxpand (CPU/MPS) and scxpand-cuda (CUDA)"
+            echo "  - Commit message: 'Dev release version $NEW_VERSION (dual package release)'"
+            echo "  - Tag: v$NEW_VERSION"
+            echo "  - Push to main branch"
+            echo "  - Skip GitHub release creation"
+            echo "  - Publish both packages to PyPI"
+            echo "  - Skip ReadTheDocs documentation build"
+        else
+            print_status "What would happen in a real dual release:"
+            echo "  - Preview version bump: $NEW_VERSION ($VERSION_TYPE)"
+            echo "  - Validate CHANGELOG.md entry (create template if missing)"
+            echo "  - Bump version in pyproject.toml"
+            echo "  - Packages: scxpand (CPU/MPS) and scxpand-cuda (CUDA)"
+            echo "  - Commit message: 'Bump version to $NEW_VERSION and update CHANGELOG.md (dual package release)'"
+            echo "  - Tag: v$NEW_VERSION"
+            echo "  - Push to main branch"
+            echo "  - Create GitHub release with auto-generated notes"
+            echo "  - Publish both packages to PyPI"
+            echo "  - Trigger ReadTheDocs documentation build"
+        fi
         echo
         print_warning "This was a DRY RUN - no actual changes were made to git or PyPI"
-        print_status "To perform the actual release, run: ./scripts/release.sh --$VERSION_TYPE"
+        if [ "$DEV_RELEASE" = true ]; then
+            print_status "To perform the actual dev release, run: ./scripts/release.sh --dev"
+        else
+            print_status "To perform the actual release, run: ./scripts/release.sh --$VERSION_TYPE"
+        fi
     else
-        print_success "Dual package $VERSION_TYPE release completed successfully!"
-        echo
-        print_status "Summary:"
-        echo "  - Version: $NEW_VERSION ($VERSION_TYPE)"
-        echo "  - Tag: v$NEW_VERSION"
-        echo "  - Standard Package (CPU/MPS): https://pypi.org/project/scxpand/"
-        echo "  - CUDA Package:               https://pypi.org/project/scxpand-cuda/"
-        echo "  - Documentation:              https://scxpand.readthedocs.io/en/latest/"
-        echo "  - GitHub: $REPO_URL/releases/tag/v$NEW_VERSION"
-        echo "  - Changelog: $REPO_URL/blob/main/CHANGELOG.md"
-        echo
-        print_success "CHANGELOG.md entry validated for version $NEW_VERSION"
-        if [ "$SKIP_GITHUB_RELEASE" != true ]; then
-            print_success "GitHub release automatically created at: $REPO_URL/releases/tag/v$NEW_VERSION"
+        if [ "$DEV_RELEASE" = true ]; then
+            print_success "Dev release completed successfully!"
+            echo
+            print_status "Summary:"
+            echo "  - Version: $NEW_VERSION (dev)"
+            echo "  - Tag: v$NEW_VERSION"
+            echo "  - Standard Package (CPU/MPS): https://pypi.org/project/scxpand/"
+            echo "  - CUDA Package:               https://pypi.org/project/scxpand-cuda/"
+            echo "  - GitHub release: SKIPPED (dev release)"
+            echo "  - Documentation build: SKIPPED (dev release)"
+            echo
+            print_success "Dev release published to PyPI without GitHub announcement"
+            echo
+            print_status "Installation Instructions:"
+            echo "  Standard version (CPU/MPS):"
+            echo "    pip install scxpand==$NEW_VERSION"
+            echo
+            echo "  CUDA version (GPU):"
+            echo "    pip install scxpand-cuda==$NEW_VERSION --extra-index-url https://download.pytorch.org/whl/cu128"
+            echo
+        else
+            print_success "Dual package $VERSION_TYPE release completed successfully!"
+            echo
+            print_status "Summary:"
+            echo "  - Version: $NEW_VERSION ($VERSION_TYPE)"
+            echo "  - Tag: v$NEW_VERSION"
+            echo "  - Standard Package (CPU/MPS): https://pypi.org/project/scxpand/"
+            echo "  - CUDA Package:               https://pypi.org/project/scxpand-cuda/"
+            echo "  - Documentation:              https://scxpand.readthedocs.io/en/latest/"
+            echo "  - GitHub: $REPO_URL/releases/tag/v$NEW_VERSION"
+            echo "  - Changelog: $REPO_URL/blob/main/CHANGELOG.md"
+            echo
+            print_success "CHANGELOG.md entry validated for version $NEW_VERSION"
+            if [ "$SKIP_GITHUB_RELEASE" != true ]; then
+                print_success "GitHub release automatically created at: $REPO_URL/releases/tag/v$NEW_VERSION"
+            fi
+            echo
+            print_status "Installation Instructions:"
+            echo "  Standard version (CPU/MPS):"
+            echo "    pip install scxpand==$NEW_VERSION"
+            echo
+            echo "  CUDA version (GPU):"
+            echo "    pip install scxpand-cuda==$NEW_VERSION --extra-index-url https://download.pytorch.org/whl/cu128"
+            echo
+            print_status "Test the installation:"
+            echo "  python -c \"import scxpand; print(f'scXpand {scxpand.__version__} installed successfully!')\""
         fi
     fi
     echo
@@ -1063,14 +1225,26 @@ show_summary() {
 # Main execution
 main() {
     echo "=========================================="
-    if [ "$DRY_RUN" = true ]; then
-        echo "  scXpand Release Script - DRY RUN"
+    if [ "$DEV_RELEASE" = true ]; then
+        if [ "$DRY_RUN" = true ]; then
+            echo "  scXpand Dev Release Script - DRY RUN"
+        else
+            echo "  scXpand Dev Release Script"
+        fi
     else
-        echo "  scXpand Release Script"
+        if [ "$DRY_RUN" = true ]; then
+            echo "  scXpand Release Script - DRY RUN"
+        else
+            echo "  scXpand Release Script"
+        fi
     fi
     echo "=========================================="
     echo
-    print_status "Release type: $VERSION_TYPE"
+    if [ "$DEV_RELEASE" = true ]; then
+        print_status "Release type: dev (no GitHub announcement)"
+    else
+        print_status "Release type: $VERSION_TYPE"
+    fi
     print_status "Packages: scxpand (CPU/MPS) + scxpand-cuda (CUDA)"
     if [ "$DRY_RUN" = true ]; then
         print_warning "DRY RUN MODE - No actual changes will be made"
@@ -1081,10 +1255,10 @@ main() {
     check_prerequisites
     preview_and_validate
     bump_version
-    build_and_test_packages
-    show_changes
     commit_and_push
     create_and_push_tag
+    build_and_test_packages
+    show_changes
     create_github_release
     publish_to_pypi
     trigger_readthedocs_build
@@ -1092,9 +1266,7 @@ main() {
     show_summary
 
     # Clean up backup files after successful completion
-    if [ "$DRY_RUN" = false ]; then
-        cleanup_backups
-    fi
+    cleanup_backups
 }
 
 # Consolidated cleanup on exit

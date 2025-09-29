@@ -1,7 +1,6 @@
 """Integration tests for hyperparameter optimization functionality."""
 
 import tempfile
-
 from pathlib import Path
 from unittest.mock import patch
 
@@ -11,7 +10,10 @@ from tests.test_utils import create_temp_h5ad_file, windows_safe_context_manager
 
 def test_optimize_single_model(dummy_adata):
     """Test hyperparameter optimization for a single model type."""
-    with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+    with (
+        tempfile.TemporaryDirectory() as temp_dir,
+        windows_safe_context_manager() as ctx,
+    ):
         # Create test file
         test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
         ctx.register_file(test_file_path)
@@ -37,7 +39,10 @@ def test_optimize_single_model(dummy_adata):
 
 def test_optimize_all_models(dummy_adata):
     """Test hyperparameter optimization for all model types."""
-    with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+    with (
+        tempfile.TemporaryDirectory() as temp_dir,
+        windows_safe_context_manager() as ctx,
+    ):
         # Create test file
         test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
         ctx.register_file(test_file_path)

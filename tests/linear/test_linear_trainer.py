@@ -1,7 +1,6 @@
 """Tests for linear model trainer."""
 
 import tempfile
-
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -61,20 +60,31 @@ class TestLinearTrainer:
             mock_prepare.return_value = mock_data_bundle
 
             # Mock the CellsDataset and DataLoader creation
-            with patch("scxpand.linear.linear_trainer.CellsDataset") as mock_dataset_class:
-                with patch("scxpand.linear.linear_trainer.create_train_dataloader") as mock_train_dl:
-                    with patch("scxpand.linear.linear_trainer.create_eval_dataloader") as mock_eval_dl:
+            with patch(
+                "scxpand.linear.linear_trainer.CellsDataset"
+            ) as mock_dataset_class:
+                with patch(
+                    "scxpand.linear.linear_trainer.create_train_dataloader"
+                ) as mock_train_dl:
+                    with patch(
+                        "scxpand.linear.linear_trainer.create_eval_dataloader"
+                    ) as mock_eval_dl:
                         mock_train_dataset = MagicMock()
                         mock_dev_dataset = MagicMock()
                         mock_train_dataloader = MagicMock()
                         mock_dev_dataloader = MagicMock()
 
-                        mock_train_dataset.y.numpy.return_value = np.random.randint(0, 2, 80)
+                        mock_train_dataset.y.numpy.return_value = np.random.randint(
+                            0, 2, 80
+                        )
                         mock_train_dataset.__len__.return_value = 80
                         mock_dev_dataset.__len__.return_value = 20
 
                         # Return different datasets for train and dev
-                        mock_dataset_class.side_effect = [mock_train_dataset, mock_dev_dataset]
+                        mock_dataset_class.side_effect = [
+                            mock_train_dataset,
+                            mock_dev_dataset,
+                        ]
                         mock_train_dl.return_value = mock_train_dataloader
                         mock_eval_dl.return_value = mock_dev_dataloader
 
@@ -86,7 +96,13 @@ class TestLinearTrainer:
                         assert (
                             len(result) == 5
                         )  # Should return model, train_dataset, train_dataloader, dev_dataset, dev_dataloader
-                        model, train_dataset, train_dataloader, dev_dataset, dev_dataloader = result
+                        (
+                            model,
+                            train_dataset,
+                            train_dataloader,
+                            dev_dataset,
+                            dev_dataloader,
+                        ) = result
                         assert train_dataset == mock_train_dataset
                         assert dev_dataset == mock_dev_dataset
                         assert train_dataloader == mock_train_dataloader
@@ -128,12 +144,24 @@ class TestLinearTrainer:
                     return_value=iter(
                         [
                             {
-                                "x": MagicMock(numpy=MagicMock(return_value=np.random.rand(10, 20))),
-                                "y": MagicMock(numpy=MagicMock(return_value=np.random.randint(0, 2, 10))),
+                                "x": MagicMock(
+                                    numpy=MagicMock(return_value=np.random.rand(10, 20))
+                                ),
+                                "y": MagicMock(
+                                    numpy=MagicMock(
+                                        return_value=np.random.randint(0, 2, 10)
+                                    )
+                                ),
                             },
                             {
-                                "x": MagicMock(numpy=MagicMock(return_value=np.random.rand(10, 20))),
-                                "y": MagicMock(numpy=MagicMock(return_value=np.random.randint(0, 2, 10))),
+                                "x": MagicMock(
+                                    numpy=MagicMock(return_value=np.random.rand(10, 20))
+                                ),
+                                "y": MagicMock(
+                                    numpy=MagicMock(
+                                        return_value=np.random.randint(0, 2, 10)
+                                    )
+                                ),
                             },
                         ]
                     )
@@ -150,7 +178,11 @@ class TestLinearTrainer:
                 # Mock the evaluate_model and finalize_training methods directly
                 with patch.object(trainer, "evaluate_model") as mock_evaluate:
                     with patch.object(trainer, "finalize_training") as mock_finalize:
-                        mock_evaluate.return_value = (0.75, {"AUROC": 0.8}, np.random.rand(20))
+                        mock_evaluate.return_value = (
+                            0.75,
+                            {"AUROC": 0.8},
+                            np.random.rand(20),
+                        )
                         mock_finalize.return_value = {"dev": {"AUROC": 0.8}}
 
                         results = trainer.run_training(
@@ -168,7 +200,9 @@ class TestLinearTrainer:
         """Test training with early stopping."""
         with tempfile.TemporaryDirectory() as temp_dir:
             base_save_dir = Path(temp_dir)
-            prm = LinearClassifierParam(n_epochs=10, early_stopping_patience=2, eval_interval=1)
+            prm = LinearClassifierParam(
+                n_epochs=10, early_stopping_patience=2, eval_interval=1
+            )
             trainer = LinearTrainer(prm=prm, base_save_dir=base_save_dir)
 
             # Setup mocks
@@ -197,12 +231,24 @@ class TestLinearTrainer:
                     return_value=iter(
                         [
                             {
-                                "x": MagicMock(numpy=MagicMock(return_value=np.random.rand(10, 20))),
-                                "y": MagicMock(numpy=MagicMock(return_value=np.random.randint(0, 2, 10))),
+                                "x": MagicMock(
+                                    numpy=MagicMock(return_value=np.random.rand(10, 20))
+                                ),
+                                "y": MagicMock(
+                                    numpy=MagicMock(
+                                        return_value=np.random.randint(0, 2, 10)
+                                    )
+                                ),
                             },
                             {
-                                "x": MagicMock(numpy=MagicMock(return_value=np.random.rand(10, 20))),
-                                "y": MagicMock(numpy=MagicMock(return_value=np.random.randint(0, 2, 10))),
+                                "x": MagicMock(
+                                    numpy=MagicMock(return_value=np.random.rand(10, 20))
+                                ),
+                                "y": MagicMock(
+                                    numpy=MagicMock(
+                                        return_value=np.random.randint(0, 2, 10)
+                                    )
+                                ),
                             },
                         ]
                     )
@@ -221,7 +267,10 @@ class TestLinearTrainer:
                     with patch.object(trainer, "finalize_training") as mock_finalize:
                         # Return decreasing scores to trigger early stopping
                         scores = [0.8, 0.7, 0.6]  # Decreasing scores
-                        mock_evaluate.side_effect = [(score, {"AUROC": score}, np.random.rand(20)) for score in scores]
+                        mock_evaluate.side_effect = [
+                            (score, {"AUROC": score}, np.random.rand(20))
+                            for score in scores
+                        ]
                         mock_finalize.return_value = {"dev": {"AUROC": 0.8}}
 
                         results = trainer.run_training(
@@ -260,7 +309,9 @@ class TestRunLinearTraining:
             )
 
             assert "dev" in results
-            mock_trainer_class.assert_called_once_with(prm=prm, base_save_dir=base_save_dir)
+            mock_trainer_class.assert_called_once_with(
+                prm=prm, base_save_dir=base_save_dir
+            )
             mock_trainer_instance.run_training.assert_called_once()
 
 
@@ -274,7 +325,10 @@ class TestLinearTrainerEarlyStopping:
         n_genes = 20
         X = np.random.rand(n_cells, n_genes)
         obs = pd.DataFrame(
-            {"cell_type": np.random.choice(["A", "B"], n_cells), "is_malignant": np.random.choice([0, 1], n_cells)}
+            {
+                "cell_type": np.random.choice(["A", "B"], n_cells),
+                "is_malignant": np.random.choice([0, 1], n_cells),
+            }
         )
         return ad.AnnData(X=X, obs=obs)
 
@@ -290,7 +344,9 @@ class TestLinearTrainerEarlyStopping:
         """Test that early stopping is NOT triggered when scores are improving."""
         with tempfile.TemporaryDirectory() as temp_dir:
             base_save_dir = Path(temp_dir)
-            prm = LinearClassifierParam(n_epochs=10, early_stopping_patience=3, eval_interval=1)
+            prm = LinearClassifierParam(
+                n_epochs=10, early_stopping_patience=3, eval_interval=1
+            )
             trainer = LinearTrainer(prm=prm, base_save_dir=base_save_dir)
 
             # Setup mocks
@@ -317,7 +373,8 @@ class TestLinearTrainerEarlyStopping:
                             0.95,
                         ]  # Continuously improving
                         mock_evaluate.side_effect = [
-                            (score, {"AUROC": score}, np.random.rand(20)) for score in improving_scores
+                            (score, {"AUROC": score}, np.random.rand(20))
+                            for score in improving_scores
                         ]
                         mock_finalize.return_value = {"dev": {"AUROC": 0.9}}
 
@@ -338,7 +395,9 @@ class TestLinearTrainerEarlyStopping:
         """Test that early stopping IS triggered when scores stop improving."""
         with tempfile.TemporaryDirectory() as temp_dir:
             base_save_dir = Path(temp_dir)
-            prm = LinearClassifierParam(n_epochs=10, early_stopping_patience=2, eval_interval=1)
+            prm = LinearClassifierParam(
+                n_epochs=10, early_stopping_patience=2, eval_interval=1
+            )
             trainer = LinearTrainer(prm=prm, base_save_dir=base_save_dir)
 
             # Setup mocks
@@ -352,9 +411,16 @@ class TestLinearTrainerEarlyStopping:
                 with patch.object(trainer, "evaluate_model") as mock_evaluate:
                     with patch.object(trainer, "finalize_training") as mock_finalize:
                         # Return scores that plateau - should trigger early stopping after patience
-                        plateau_scores = [0.8, 0.7, 0.6, 0.65, 0.64]  # Initial improvement then plateau
+                        plateau_scores = [
+                            0.8,
+                            0.7,
+                            0.6,
+                            0.65,
+                            0.64,
+                        ]  # Initial improvement then plateau
                         mock_evaluate.side_effect = [
-                            (score, {"AUROC": score}, np.random.rand(20)) for score in plateau_scores
+                            (score, {"AUROC": score}, np.random.rand(20))
+                            for score in plateau_scores
                         ]
                         mock_finalize.return_value = {"dev": {"AUROC": 0.8}}
 
@@ -375,7 +441,9 @@ class TestLinearTrainerEarlyStopping:
         """Test early stopping with scores that improve then worsen."""
         with tempfile.TemporaryDirectory() as temp_dir:
             base_save_dir = Path(temp_dir)
-            prm = LinearClassifierParam(n_epochs=15, early_stopping_patience=3, eval_interval=1)
+            prm = LinearClassifierParam(
+                n_epochs=15, early_stopping_patience=3, eval_interval=1
+            )
             trainer = LinearTrainer(prm=prm, base_save_dir=base_save_dir)
 
             # Setup mocks
@@ -389,9 +457,18 @@ class TestLinearTrainerEarlyStopping:
                 with patch.object(trainer, "evaluate_model") as mock_evaluate:
                     with patch.object(trainer, "finalize_training") as mock_finalize:
                         # Scores improve then worsen - should trigger early stopping
-                        mixed_scores = [0.5, 0.7, 0.9, 0.85, 0.8, 0.75, 0.7]  # Peak at 0.9, then decline
+                        mixed_scores = [
+                            0.5,
+                            0.7,
+                            0.9,
+                            0.85,
+                            0.8,
+                            0.75,
+                            0.7,
+                        ]  # Peak at 0.9, then decline
                         mock_evaluate.side_effect = [
-                            (score, {"AUROC": score}, np.random.rand(20)) for score in mixed_scores
+                            (score, {"AUROC": score}, np.random.rand(20))
+                            for score in mixed_scores
                         ]
                         mock_finalize.return_value = {"dev": {"AUROC": 0.9}}
 
@@ -413,7 +490,9 @@ class TestLinearTrainerEarlyStopping:
         with tempfile.TemporaryDirectory() as temp_dir:
             base_save_dir = Path(temp_dir)
             # Set eval_interval=2 so evaluation happens every 2 epochs
-            prm = LinearClassifierParam(n_epochs=10, early_stopping_patience=2, eval_interval=2)
+            prm = LinearClassifierParam(
+                n_epochs=10, early_stopping_patience=2, eval_interval=2
+            )
             trainer = LinearTrainer(prm=prm, base_save_dir=base_save_dir)
 
             # Setup mocks
@@ -426,11 +505,14 @@ class TestLinearTrainerEarlyStopping:
 
                 with patch.object(trainer, "train_epoch") as mock_train_epoch:
                     with patch.object(trainer, "evaluate_model") as mock_evaluate:
-                        with patch.object(trainer, "finalize_training") as mock_finalize:
+                        with patch.object(
+                            trainer, "finalize_training"
+                        ) as mock_finalize:
                             # Return declining scores
                             declining_scores = [0.8, 0.7, 0.6]
                             mock_evaluate.side_effect = [
-                                (score, {"AUROC": score}, np.random.rand(20)) for score in declining_scores
+                                (score, {"AUROC": score}, np.random.rand(20))
+                                for score in declining_scores
                             ]
                             mock_finalize.return_value = {"dev": {"AUROC": 0.8}}
 
@@ -476,15 +558,29 @@ class TestLinearTrainerEarlyStopping:
             return_value=iter(
                 [
                     {
-                        "x": MagicMock(numpy=MagicMock(return_value=np.random.rand(10, 20))),
-                        "y": MagicMock(numpy=MagicMock(return_value=np.random.randint(0, 2, 10))),
+                        "x": MagicMock(
+                            numpy=MagicMock(return_value=np.random.rand(10, 20))
+                        ),
+                        "y": MagicMock(
+                            numpy=MagicMock(return_value=np.random.randint(0, 2, 10))
+                        ),
                     },
                     {
-                        "x": MagicMock(numpy=MagicMock(return_value=np.random.rand(10, 20))),
-                        "y": MagicMock(numpy=MagicMock(return_value=np.random.randint(0, 2, 10))),
+                        "x": MagicMock(
+                            numpy=MagicMock(return_value=np.random.rand(10, 20))
+                        ),
+                        "y": MagicMock(
+                            numpy=MagicMock(return_value=np.random.randint(0, 2, 10))
+                        ),
                     },
                 ]
             )
         )
 
-        return mock_model, mock_train_dataset, mock_train_dataloader, mock_dev_dataset, mock_dev_dataloader
+        return (
+            mock_model,
+            mock_train_dataset,
+            mock_train_dataloader,
+            mock_dev_dataset,
+            mock_dev_dataloader,
+        )

@@ -7,7 +7,6 @@ ranges to ensure they are correctly implemented and follow best practices.
 import optuna
 import pytest
 import torch
-
 from torch.utils.data import DataLoader, TensorDataset
 
 from scxpand.hyperopt.param_grids import (
@@ -42,7 +41,9 @@ class TestLRSchedulerConfigurations:
         prefix = "test_"
 
         # Test ReduceLROnPlateau
-        config = create_optimized_lr_scheduler_config(trial, "ReduceLROnPlateau", n_epochs, prefix)
+        config = create_optimized_lr_scheduler_config(
+            trial, "ReduceLROnPlateau", n_epochs, prefix
+        )
         assert config["type"] == "ReduceLROnPlateau"
         assert "factor" in config
         assert "patience" in config
@@ -52,7 +53,9 @@ class TestLRSchedulerConfigurations:
         assert 1e-7 <= config["min_lr"] <= 1e-5
 
         # Test OneCycleLR
-        config = create_optimized_lr_scheduler_config(trial, "OneCycleLR", n_epochs, prefix)
+        config = create_optimized_lr_scheduler_config(
+            trial, "OneCycleLR", n_epochs, prefix
+        )
         assert config["type"] == "OneCycleLR"
         assert "warmup_ratio" in config
         assert 0.05 <= config["warmup_ratio"] <= 0.3
@@ -66,7 +69,9 @@ class TestLRSchedulerConfigurations:
         assert 0.1 <= config["gamma"] <= 0.7
 
         # Test CosineAnnealingLR
-        config = create_optimized_lr_scheduler_config(trial, "CosineAnnealingLR", n_epochs, prefix)
+        config = create_optimized_lr_scheduler_config(
+            trial, "CosineAnnealingLR", n_epochs, prefix
+        )
         assert config["type"] == "CosineAnnealingLR"
         assert "T_max" in config
         assert "eta_min" in config
@@ -74,12 +79,16 @@ class TestLRSchedulerConfigurations:
         assert 1e-7 <= config["eta_min"] <= 1e-5
 
         # Test ConstantLR
-        config = create_optimized_lr_scheduler_config(trial, "ConstantLR", n_epochs, prefix)
+        config = create_optimized_lr_scheduler_config(
+            trial, "ConstantLR", n_epochs, prefix
+        )
         assert config["type"] == "ConstantLR"
         assert len(config) == 1  # Only type, no additional params
 
         # Test NoScheduler
-        config = create_optimized_lr_scheduler_config(trial, "NoScheduler", n_epochs, prefix)
+        config = create_optimized_lr_scheduler_config(
+            trial, "NoScheduler", n_epochs, prefix
+        )
         assert config["type"] == "NoScheduler"
         assert len(config) == 1  # Only type, no additional params
 
@@ -191,7 +200,9 @@ class TestLRSchedulerConfigurations:
                 train_log_interval=10,
             )
 
-            optimizer = get_optimizer(model=mock_model, optimizer_params=param.get_optimizer_params())
+            optimizer = get_optimizer(
+                model=mock_model, optimizer_params=param.get_optimizer_params()
+            )
 
             # This should not raise any exceptions
             lr_scheduler = get_lr_scheduler(
@@ -219,13 +230,17 @@ class TestLRSchedulerConfigurations:
         prefix = "test_"
 
         # Test ReduceLROnPlateau ranges
-        config = create_optimized_lr_scheduler_config(trial, "ReduceLROnPlateau", n_epochs, prefix)
+        config = create_optimized_lr_scheduler_config(
+            trial, "ReduceLROnPlateau", n_epochs, prefix
+        )
         assert 0.1 <= config["factor"] <= 0.7  # Reasonable factor range
         assert 3 <= config["patience"] <= 15  # Reasonable patience range
         assert 1e-7 <= config["min_lr"] <= 1e-5  # Reasonable min_lr range
 
         # Test OneCycleLR ranges
-        config = create_optimized_lr_scheduler_config(trial, "OneCycleLR", n_epochs, prefix)
+        config = create_optimized_lr_scheduler_config(
+            trial, "OneCycleLR", n_epochs, prefix
+        )
         assert 0.05 <= config["warmup_ratio"] <= 0.3  # Reasonable warmup range
 
         # Test StepLR ranges
@@ -234,6 +249,8 @@ class TestLRSchedulerConfigurations:
         assert 0.1 <= config["gamma"] <= 0.7  # Reasonable gamma range
 
         # Test CosineAnnealingLR ranges
-        config = create_optimized_lr_scheduler_config(trial, "CosineAnnealingLR", n_epochs, prefix)
+        config = create_optimized_lr_scheduler_config(
+            trial, "CosineAnnealingLR", n_epochs, prefix
+        )
         assert n_epochs <= config["T_max"] <= n_epochs * 2  # Reasonable T_max range
         assert 1e-7 <= config["eta_min"] <= 1e-5  # Reasonable eta_min range

@@ -3,7 +3,6 @@
 import inspect
 import json
 import tempfile
-
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -12,12 +11,20 @@ import pytest
 
 from scxpand.core.model_types import MODEL_TYPES
 from scxpand.hyperopt.hyperopt_optimizer import HyperparameterOptimizer
-from scxpand.hyperopt.hyperopt_utils import _has_results_indicators, cleanup_incomplete_trials, trial_callback
+from scxpand.hyperopt.hyperopt_utils import (
+    _has_results_indicators,
+    cleanup_incomplete_trials,
+    trial_callback,
+)
 from scxpand.mlp.run_mlp_train import run_mlp_training
 from scxpand.util.classes import ModelType
 from scxpand.util.model_constants import BEST_CHECKPOINT_FILE, STUDY_INFO_FILE
 from scxpand.util.train_util import report_to_optuna_and_handle_pruning
-from tests.test_utils import create_temp_h5ad_file, windows_safe_context_manager
+from tests.test_utils import (
+    close_optuna_storage,
+    create_temp_h5ad_file,
+    windows_safe_context_manager,
+)
 
 
 class TestHyperparameterOptimizerBasics:
@@ -25,7 +32,10 @@ class TestHyperparameterOptimizerBasics:
 
     def test_optimizer_initialization(self, dummy_adata):
         """Test that optimizer initializes correctly with various parameters."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -46,7 +56,10 @@ class TestHyperparameterOptimizerBasics:
 
     def test_optimizer_initialization_with_custom_params(self, dummy_adata):
         """Test optimizer initialization with custom parameters."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -72,10 +85,14 @@ class TestHyperparameterOptimizerBasics:
             assert optimizer.num_workers == 2
             assert optimizer.resume is False
             assert optimizer.param_overrides == {"custom_param": 42}
+            optimizer.close()
 
     def test_invalid_model_type_raises_error(self, dummy_adata):
         """Test that invalid model type raises ValueError."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -95,7 +112,10 @@ class TestHyperparameterOptimizerBasics:
 
     def test_storage_directory_creation(self, dummy_adata):
         """Test that storage directories are created correctly."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -119,7 +139,10 @@ class TestStudyCreationAndResume:
 
     def test_create_new_study_when_none_exists(self, dummy_adata):
         """Test creating a new study when no existing study exists."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -136,10 +159,14 @@ class TestStudyCreationAndResume:
             assert study.study_name == "new_study"
             assert len(study.trials) == 0
             assert study.direction == optuna.study.StudyDirection.MAXIMIZE
+            close_optuna_storage(study)
 
     def test_resume_existing_study(self, dummy_adata):
         """Test resuming an existing study with trials."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -159,6 +186,7 @@ class TestStudyCreationAndResume:
                 study1 = optimizer1.create_study()
                 study1.optimize(func=optimizer1.objective, n_trials=2)
                 assert len(study1.trials) == 2
+            close_optuna_storage(study1)
 
             # Create new optimizer and resume
             optimizer2 = HyperparameterOptimizer(
@@ -172,10 +200,14 @@ class TestStudyCreationAndResume:
             study2 = optimizer2.create_study()
             assert len(study2.trials) == 2  # Should have previous trials
             assert study2.study_name == study_name
+            close_optuna_storage(study2)
 
     def test_resume_false_raises_error_for_existing_study(self, dummy_adata):
         """Test that resume=False raises error when existing study has trials."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -197,6 +229,7 @@ class TestStudyCreationAndResume:
                 study1 = optimizer1.create_study()
                 study1.optimize(func=optimizer1.objective, n_trials=2)
                 assert len(study1.trials) == 2
+            close_optuna_storage(study1)
 
             # Create trial directories on filesystem to test the logic
             trial_dir_0 = study_dir / "trial_0"
@@ -221,10 +254,14 @@ class TestStudyCreationAndResume:
             # Test the _handle_existing_study method directly since create_study() fails at database level
             with pytest.raises(ValueError, match=r"already exists.*with.*2 trial"):
                 optimizer2._handle_existing_study()
+            close_optuna_storage(optimizer2.create_study())
 
     def test_error_when_study_exists_and_not_resuming(self, dummy_adata):
         """Test error when study exists and resume=False."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -260,6 +297,7 @@ class TestStudyCreationAndResume:
             # Test the _handle_existing_study method directly since create_study() fails at database level
             with pytest.raises(ValueError, match="already exists"):
                 optimizer2._handle_existing_study()
+            close_optuna_storage(study1)
 
 
 class TestTrialSpecificResumeLogic:
@@ -272,9 +310,14 @@ class TestTrialSpecificResumeLogic:
         mock_runner.__signature__ = inspect.signature(run_mlp_training)
         return mock_runner
 
-    def test_new_trial_always_starts_fresh_regardless_of_global_resume(self, dummy_adata):
+    def test_new_trial_always_starts_fresh_regardless_of_global_resume(
+        self, dummy_adata
+    ):
         """Test that new trials start fresh even when global resume=True."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -312,12 +355,19 @@ class TestTrialSpecificResumeLogic:
                 print(f"DEBUG: all call_args = {call_args}")
 
                 # Check if resume is in kwargs
-                assert "resume" in kwargs, f"resume not found in kwargs: {list(kwargs.keys())}"
+                assert "resume" in kwargs, (
+                    f"resume not found in kwargs: {list(kwargs.keys())}"
+                )
                 assert kwargs["resume"] is False  # New trial should get resume=False
 
-    def test_existing_trial_with_checkpoints_resumes_when_global_resume_true(self, dummy_adata):
+    def test_existing_trial_with_checkpoints_resumes_when_global_resume_true(
+        self, dummy_adata
+    ):
         """Test that existing trials with checkpoints resume when global resume=True."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -351,11 +401,18 @@ class TestTrialSpecificResumeLogic:
                 # Verify that resume=True was passed to the runner for existing trial
                 call_args = mock_runner.call_args
                 assert call_args is not None
-                assert call_args[1]["resume"] is True  # Existing trial should get resume=True
+                assert (
+                    call_args[1]["resume"] is True
+                )  # Existing trial should get resume=True
 
-    def test_existing_trial_without_checkpoints_starts_fresh_when_global_resume_true(self, dummy_adata):
+    def test_existing_trial_without_checkpoints_starts_fresh_when_global_resume_true(
+        self, dummy_adata
+    ):
         """Test that existing trials without valid checkpoints start fresh even when global resume=True."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -389,11 +446,16 @@ class TestTrialSpecificResumeLogic:
                 # Verify that resume=False was passed to the runner
                 call_args = mock_runner.call_args
                 assert call_args is not None
-                assert call_args[1]["resume"] is False  # No valid checkpoints = start fresh
+                assert (
+                    call_args[1]["resume"] is False
+                )  # No valid checkpoints = start fresh
 
     def test_all_trials_start_fresh_when_global_resume_false(self, dummy_adata):
         """Test that all trials start fresh when global resume=False, regardless of checkpoints."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -427,11 +489,16 @@ class TestTrialSpecificResumeLogic:
                 # Verify that resume=False was passed even with existing checkpoints
                 call_args = mock_runner.call_args
                 assert call_args is not None
-                assert call_args[1]["resume"] is False  # Global resume=False overrides checkpoints
+                assert (
+                    call_args[1]["resume"] is False
+                )  # Global resume=False overrides checkpoints
 
     def test_data_format_creation_vs_loading_based_on_trial_resume(self, dummy_adata):
         """Test that data_format.json is created for new trials and loaded for resuming trials."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -444,7 +511,9 @@ class TestTrialSpecificResumeLogic:
             )
 
             # Mock the prepare_data_for_training function to track calls
-            with patch("scxpand.mlp.run_mlp_train.prepare_data_for_training") as mock_prepare:
+            with patch(
+                "scxpand.mlp.run_mlp_train.prepare_data_for_training"
+            ) as mock_prepare:
                 mock_prepare.return_value = MagicMock()
 
                 # Test 1: New trial (no checkpoints) should call with resume=False
@@ -482,7 +551,10 @@ class TestTrialSpecificResumeLogic:
 
     def test_study_attributes_set_correctly(self, dummy_adata):
         """Test that study attributes are set correctly."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -501,10 +573,14 @@ class TestTrialSpecificResumeLogic:
             # The important thing is that the study_dir attribute gets set when needed
             study_dir_attr = study.user_attrs.get("study_dir")
             assert study_dir_attr == expected_study_dir or study_dir_attr is None
+            close_optuna_storage(study)
 
     def test_mixed_new_existing_trial_scenarios(self, dummy_adata):
         """Test mixed scenarios with both new and existing trials in the same study."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -574,7 +650,10 @@ class TestTrialSpecificResumeLogic:
 
     def test_data_format_json_creation_vs_loading_in_trials(self, dummy_adata):
         """Test that trial resume logic works correctly based on RESULTS_INDICATORS."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -627,7 +706,10 @@ class TestObjectiveFunction:
 
     def test_objective_function_basic_execution(self, dummy_adata):
         """Test that objective function executes without errors."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -639,7 +721,9 @@ class TestObjectiveFunction:
 
             # Mock the runner to return a score
             mock_result = {"harmonic_avg": {"AUROC": 0.85}}
-            with patch.object(MODEL_TYPES[ModelType.MLP], "runner", return_value=mock_result):
+            with patch.object(
+                MODEL_TYPES[ModelType.MLP], "runner", return_value=mock_result
+            ):
                 study = optimizer.create_study()
                 trial = study.ask()
 
@@ -650,7 +734,10 @@ class TestObjectiveFunction:
 
     def test_objective_function_with_parameter_overrides(self, dummy_adata):
         """Test objective function with parameter overrides."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -677,7 +764,16 @@ class TestObjectiveFunction:
                 num_workers=0,
             ):
                 # Store the parameters for verification (suppress unused arg warnings)
-                _ = (data_path, base_save_dir, device, dev_ratio, trial, score_metric, resume, num_workers)
+                _ = (
+                    data_path,
+                    base_save_dir,
+                    device,
+                    dev_ratio,
+                    trial,
+                    score_metric,
+                    resume,
+                    num_workers,
+                )
                 mock_runner.call_params = prm
                 return mock_result
 
@@ -699,7 +795,10 @@ class TestObjectiveFunction:
 
     def test_objective_function_handles_nan_score(self, dummy_adata):
         """Test that objective function handles NaN scores correctly."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -712,7 +811,9 @@ class TestObjectiveFunction:
             # Mock runner to return NaN score
             mock_result = {"harmonic_avg": {"AUROC": float("nan")}}
 
-            with patch.object(MODEL_TYPES[ModelType.MLP], "runner", return_value=mock_result):
+            with patch.object(
+                MODEL_TYPES[ModelType.MLP], "runner", return_value=mock_result
+            ):
                 study = optimizer.create_study()
                 trial = study.ask()
 
@@ -724,7 +825,10 @@ class TestObjectiveFunction:
 
     def test_objective_function_handles_exceptions(self, dummy_adata):
         """Test that objective function handles exceptions properly."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -735,7 +839,11 @@ class TestObjectiveFunction:
             )
 
             # Mock runner to raise exception (using ConnectionError as it's in CATCHABLE_EXCEPTIONS)
-            with patch.object(MODEL_TYPES[ModelType.MLP], "runner", side_effect=ConnectionError("Training failed")):
+            with patch.object(
+                MODEL_TYPES[ModelType.MLP],
+                "runner",
+                side_effect=ConnectionError("Training failed"),
+            ):
                 study = optimizer.create_study()
                 trial = study.ask()
 
@@ -745,7 +853,10 @@ class TestObjectiveFunction:
 
     def test_objective_function_fail_fast_mode(self, dummy_adata):
         """Test that fail_fast mode re-raises exceptions immediately."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -758,7 +869,11 @@ class TestObjectiveFunction:
             )
 
             # Mock runner to raise exception
-            with patch.object(MODEL_TYPES[ModelType.MLP], "runner", side_effect=ConnectionError("Training failed")):
+            with patch.object(
+                MODEL_TYPES[ModelType.MLP],
+                "runner",
+                side_effect=ConnectionError("Training failed"),
+            ):
                 study = optimizer_fail_fast.create_study()
                 trial = study.ask()
 
@@ -775,7 +890,11 @@ class TestObjectiveFunction:
             )
 
             # Mock runner to raise exception
-            with patch.object(MODEL_TYPES[ModelType.MLP], "runner", side_effect=ConnectionError("Training failed")):
+            with patch.object(
+                MODEL_TYPES[ModelType.MLP],
+                "runner",
+                side_effect=ConnectionError("Training failed"),
+            ):
                 study = optimizer_normal.create_study()
                 trial = study.ask()
 
@@ -786,7 +905,10 @@ class TestObjectiveFunction:
 
     def test_objective_function_respects_trial_pruning(self, dummy_adata):
         """Test that objective function properly handles trial pruning."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -797,7 +919,9 @@ class TestObjectiveFunction:
             )
 
             # Mock runner to raise TrialPruned
-            with patch.object(MODEL_TYPES[ModelType.MLP], "runner", side_effect=optuna.TrialPruned()):
+            with patch.object(
+                MODEL_TYPES[ModelType.MLP], "runner", side_effect=optuna.TrialPruned()
+            ):
                 study = optimizer.create_study()
                 trial = study.ask()
 
@@ -806,7 +930,10 @@ class TestObjectiveFunction:
 
     def test_objective_function_creates_trial_directory(self, dummy_adata):
         """Test that objective function creates trial directories."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -820,7 +947,9 @@ class TestObjectiveFunction:
 
             mock_result = {"harmonic_avg": {"AUROC": 0.85}}
 
-            with patch.object(MODEL_TYPES[ModelType.MLP], "runner", return_value=mock_result):
+            with patch.object(
+                MODEL_TYPES[ModelType.MLP], "runner", return_value=mock_result
+            ):
                 study = optimizer.create_study()
                 trial = study.ask()
                 trial_number = trial.number
@@ -838,7 +967,10 @@ class TestRunOptimization:
 
     def test_run_optimization_basic(self, dummy_adata):
         """Test basic optimization run."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -851,7 +983,9 @@ class TestRunOptimization:
             )
 
             # Mock objective to return consistent scores
-            with patch.object(optimizer, "objective", return_value=0.85) as mock_objective:
+            with patch.object(
+                optimizer, "objective", return_value=0.85
+            ) as mock_objective:
                 study = optimizer.run_optimization(n_trials=3)
 
                 assert len(study.trials) == 3
@@ -865,10 +999,14 @@ class TestRunOptimization:
                     info = json.load(f)
                 assert info["total_trials"] == 3
                 assert info["completed_trials"] == 3
+            optimizer.close()
 
     def test_run_optimization_with_resume(self, dummy_adata):
         """Test optimization with resume functionality."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -903,7 +1041,10 @@ class TestRunOptimization:
 
     def test_run_optimization_with_callbacks(self, dummy_adata):
         """Test that optimization uses callbacks correctly."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -931,7 +1072,10 @@ class TestPrintResults:
 
     def test_print_results_with_completed_trials(self, dummy_adata, capsys):
         """Test print_results with completed trials."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -954,7 +1098,10 @@ class TestPrintResults:
 
     def test_print_results_with_no_completed_trials(self, dummy_adata, capsys):
         """Test print_results when no trials completed."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -976,7 +1123,10 @@ class TestPrintResults:
 
     def test_print_results_loads_existing_study(self, dummy_adata, capsys):
         """Test that print_results can load existing study when none provided."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1002,7 +1152,10 @@ class TestOptimizerEdgeCases:
 
     def test_different_model_types_independent_studies(self, dummy_adata):
         """Test that different model types create independent studies."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1034,7 +1187,10 @@ class TestOptimizerEdgeCases:
 
     def test_custom_config_path_integration(self, dummy_adata):
         """Test integration with custom config path."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1053,8 +1209,14 @@ class TestOptimizerEdgeCases:
 
             # Mock the load_and_override_params function to verify it's called
             with (
-                patch("scxpand.hyperopt.hyperopt_optimizer.load_and_override_params") as mock_load,
-                patch.object(MODEL_TYPES[ModelType.MLP], "runner", return_value={"harmonic_avg": {"AUROC": 0.85}}),
+                patch(
+                    "scxpand.hyperopt.hyperopt_optimizer.load_and_override_params"
+                ) as mock_load,
+                patch.object(
+                    MODEL_TYPES[ModelType.MLP],
+                    "runner",
+                    return_value={"harmonic_avg": {"AUROC": 0.85}},
+                ),
             ):
                 study = optimizer.create_study()
                 trial = study.ask()
@@ -1067,7 +1229,10 @@ class TestOptimizerEdgeCases:
 
     def test_pruner_configuration(self, dummy_adata):
         """Test that pruner is configured correctly."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1087,7 +1252,10 @@ class TestOptimizerEdgeCases:
 
     def test_sampler_configuration(self, dummy_adata):
         """Test that sampler is configured with correct seed."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1112,7 +1280,10 @@ class TestTrialResumeAndCleanup:
 
     def test_duplicate_epoch_reporting_prevention(self, dummy_adata):
         """Test that duplicate epoch reports are prevented when resuming."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1128,7 +1299,9 @@ class TestTrialResumeAndCleanup:
             trial = study.ask()
 
             # First report should succeed
-            report_to_optuna_and_handle_pruning(trial=trial, current_score=0.85, epoch=0)
+            report_to_optuna_and_handle_pruning(
+                trial=trial, current_score=0.85, epoch=0
+            )
 
             # Finalize the trial to access its intermediate values
             study.tell(trial, 0.85)
@@ -1144,15 +1317,23 @@ class TestTrialResumeAndCleanup:
             trial2.set_user_attr("reported_epochs", [0])
 
             # Second report for same epoch should be skipped (no logging test)
-            report_to_optuna_and_handle_pruning(trial=trial2, current_score=0.90, epoch=0)
+            report_to_optuna_and_handle_pruning(
+                trial=trial2, current_score=0.90, epoch=0
+            )
 
             # Report a new epoch (should work normally)
-            report_to_optuna_and_handle_pruning(trial=trial2, current_score=0.90, epoch=1)
+            report_to_optuna_and_handle_pruning(
+                trial=trial2, current_score=0.90, epoch=1
+            )
             assert trial2.user_attrs.get("reported_epochs") == [0, 1]
+            optimizer.close()
 
     def test_cleanup_incomplete_trials(self, dummy_adata):
         """Test cleanup of incomplete trials."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1184,16 +1365,23 @@ class TestTrialResumeAndCleanup:
             mock_study.trials = [mock_trial_0, mock_trial_1]
 
             # Run cleanup with immediate cleanup (max_age_hours=0)
-            cleaned_count = cleanup_incomplete_trials(study=mock_study, study_dir=study_dir, max_age_hours=0)
+            cleaned_count = cleanup_incomplete_trials(
+                study=mock_study, study_dir=study_dir, max_age_hours=0
+            )
 
             # Should have cleaned up the trial without valid checkpoint
             assert cleaned_count == 1
             assert not incomplete_trial_dir.exists()
-            assert complete_trial_dir.exists()  # Should not touch trial with valid checkpoint
+            assert (
+                complete_trial_dir.exists()
+            )  # Should not touch trial with valid checkpoint
 
     def test_trial_resume_with_existing_reports(self, dummy_adata):
         """Test that resuming a trial with existing epoch reports works correctly."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1212,15 +1400,23 @@ class TestTrialResumeAndCleanup:
             trial.set_user_attr("reported_epochs", [0, 1, 2])
 
             # Try to report epoch 2 again (should be skipped, no logging test)
-            report_to_optuna_and_handle_pruning(trial=trial, current_score=0.90, epoch=2)
+            report_to_optuna_and_handle_pruning(
+                trial=trial, current_score=0.90, epoch=2
+            )
 
             # Report a new epoch (should work normally)
-            report_to_optuna_and_handle_pruning(trial=trial, current_score=0.90, epoch=3)
+            report_to_optuna_and_handle_pruning(
+                trial=trial, current_score=0.90, epoch=3
+            )
             assert trial.user_attrs.get("reported_epochs") == [0, 1, 2, 3]
+            optimizer.close()
 
     def test_optimization_with_cleanup_on_resume(self, dummy_adata):
         """Test that optimization automatically cleans up incomplete trials when resuming."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1256,15 +1452,22 @@ class TestTrialResumeAndCleanup:
             )
 
             with patch.object(optimizer2, "objective", return_value=0.90):
-                with patch("scxpand.hyperopt.hyperopt_optimizer.cleanup_incomplete_trials") as mock_cleanup:
+                with patch(
+                    "scxpand.hyperopt.hyperopt_optimizer.cleanup_incomplete_trials"
+                ) as mock_cleanup:
                     study2 = optimizer2.run_optimization(n_trials=1)
 
                     # Cleanup should have been called
-                    mock_cleanup.assert_called_once_with(study=study2, study_dir=optimizer2.study_dir)
+                    mock_cleanup.assert_called_once_with(
+                        study=study2, study_dir=optimizer2.study_dir
+                    )
 
     def test_different_model_types_resume_independently(self, dummy_adata):
         """Test that different model types can resume independently without interference."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1301,7 +1504,10 @@ class TestTrialResumeAndCleanup:
 
     def test_trial_callback_handles_failed_trials(self, dummy_adata):
         """Test that trial callback properly handles and cleans up failed trials."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1336,7 +1542,10 @@ class TestHappyPathFunctionality:
 
     def test_normal_epoch_reporting_workflow(self, dummy_adata):
         """Test that normal epoch reporting works correctly without any changes."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1355,8 +1564,10 @@ class TestHappyPathFunctionality:
             epochs = [0, 1, 2, 3, 4]
             scores = [0.60, 0.65, 0.70, 0.75, 0.80]
 
-            for epoch, score in zip(epochs, scores):
-                report_to_optuna_and_handle_pruning(trial=trial, current_score=score, epoch=epoch)
+            for epoch, score in zip(epochs, scores, strict=False):
+                report_to_optuna_and_handle_pruning(
+                    trial=trial, current_score=score, epoch=epoch
+                )
 
             # Complete the trial
             study.tell(trial, 0.80)
@@ -1364,7 +1575,7 @@ class TestHappyPathFunctionality:
 
             # Verify all epochs were reported correctly
             assert len(frozen_trial.intermediate_values) == len(epochs)
-            for epoch, expected_score in zip(epochs, scores):
+            for epoch, expected_score in zip(epochs, scores, strict=False):
                 assert epoch in frozen_trial.intermediate_values
                 assert frozen_trial.intermediate_values[epoch] == expected_score
 
@@ -1373,7 +1584,10 @@ class TestHappyPathFunctionality:
 
     def test_normal_study_creation_and_completion(self, dummy_adata):
         """Test that normal study creation and completion works without interference."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1386,12 +1600,18 @@ class TestHappyPathFunctionality:
             )
 
             # Mock successful training runs
-            with patch.object(optimizer, "objective", side_effect=[0.70, 0.75, 0.80, 0.85]):
+            with patch.object(
+                optimizer, "objective", side_effect=[0.70, 0.75, 0.80, 0.85]
+            ):
                 study = optimizer.run_optimization(n_trials=4)
 
                 # Verify all trials completed successfully
                 assert len(study.trials) == 4
-                completed_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
+                completed_trials = [
+                    t
+                    for t in study.trials
+                    if t.state == optuna.trial.TrialState.COMPLETE
+                ]
                 assert len(completed_trials) == 4
 
                 # Verify best trial is correctly identified
@@ -1401,7 +1621,10 @@ class TestHappyPathFunctionality:
 
     def test_first_time_study_creation(self, dummy_adata):
         """Test that creating a study for the first time works normally."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1430,7 +1653,10 @@ class TestHappyPathFunctionality:
 
     def test_multiple_model_types_normal_operation(self, dummy_adata):
         """Test that multiple model types work normally without interference."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1459,7 +1685,10 @@ class TestHappyPathFunctionality:
 
     def test_normal_trial_pruning_behavior(self, dummy_adata):
         """Test that normal trial pruning behavior works correctly."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1477,15 +1706,22 @@ class TestHappyPathFunctionality:
             # Mock trial.should_prune() to return True after first report
             with patch.object(trial, "should_prune", side_effect=[False, True]):
                 # First report should succeed
-                report_to_optuna_and_handle_pruning(trial=trial, current_score=0.60, epoch=0)
+                report_to_optuna_and_handle_pruning(
+                    trial=trial, current_score=0.60, epoch=0
+                )
 
                 # Second report should trigger pruning
                 with pytest.raises(optuna.TrialPruned):
-                    report_to_optuna_and_handle_pruning(trial=trial, current_score=0.55, epoch=1)
+                    report_to_optuna_and_handle_pruning(
+                        trial=trial, current_score=0.55, epoch=1
+                    )
 
     def test_no_interference_with_user_attrs(self, dummy_adata):
         """Test that our new user attributes don't interfere with existing ones."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1505,7 +1741,9 @@ class TestHappyPathFunctionality:
             trial.set_user_attr("custom_info", {"model": "test", "version": "1.0"})
 
             # Report an epoch
-            report_to_optuna_and_handle_pruning(trial=trial, current_score=0.75, epoch=0)
+            report_to_optuna_and_handle_pruning(
+                trial=trial, current_score=0.75, epoch=0
+            )
 
             # Complete the trial
             study.tell(trial, 0.75)
@@ -1516,11 +1754,18 @@ class TestHappyPathFunctionality:
 
             # Verify existing attributes are preserved
             assert frozen_trial.user_attrs.get("custom_metric") == 0.90
-            assert frozen_trial.user_attrs.get("custom_info") == {"model": "test", "version": "1.0"}
+            assert frozen_trial.user_attrs.get("custom_info") == {
+                "model": "test",
+                "version": "1.0",
+            }
+            optimizer.close()
 
     def test_empty_studies_cleanup_safety(self, dummy_adata):
         """Test that cleanup is safe when called on empty studies."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1539,12 +1784,22 @@ class TestHappyPathFunctionality:
             )
 
             # Cleanup should work safely on empty study
-            cleaned_count = cleanup_incomplete_trials(study=empty_study, study_dir=study_dir, max_age_hours=0)
+            cleaned_count = cleanup_incomplete_trials(
+                study=empty_study, study_dir=study_dir, max_age_hours=0
+            )
             assert cleaned_count == 0  # No trials to clean
+            try:
+                engine = empty_study._storage._engine
+                engine.dispose()
+            except Exception:
+                pass
 
     def test_normal_parameter_overrides_still_work(self, dummy_adata):
         """Test that parameter overrides continue to work normally."""
-        with tempfile.TemporaryDirectory() as temp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as temp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
             ctx.register_file(test_file_path)
 
@@ -1573,7 +1828,16 @@ class TestHappyPathFunctionality:
             ):
                 # Store the parameters for verification
                 # Suppress unused argument warnings
-                _ = (data_path, base_save_dir, device, dev_ratio, trial, score_metric, resume, num_workers)
+                _ = (
+                    data_path,
+                    base_save_dir,
+                    device,
+                    dev_ratio,
+                    trial,
+                    score_metric,
+                    resume,
+                    num_workers,
+                )
                 mock_runner.call_params = prm
                 return mock_result
 
@@ -1592,3 +1856,4 @@ class TestHappyPathFunctionality:
                 assert hasattr(params, "train_batch_size")
                 assert params.n_epochs == 5
                 assert params.train_batch_size == 32
+                optimizer.close()

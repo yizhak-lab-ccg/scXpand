@@ -10,26 +10,43 @@ class TestErrorHandling:
         """Test that errors are categorized correctly for trial failure vs continuation."""
         # Verify specific error types are classified correctly
         assert MemoryError in CRITICAL_ERRORS, "MemoryError should cause trial failure"
-        assert RuntimeError in CRITICAL_ERRORS, "RuntimeError should cause trial failure"
+        assert RuntimeError in CRITICAL_ERRORS, (
+            "RuntimeError should cause trial failure"
+        )
         assert ValueError in CRITICAL_ERRORS, "ValueError should cause trial failure"
-        assert FileNotFoundError in CRITICAL_ERRORS, "FileNotFoundError should cause trial failure"
+        assert FileNotFoundError in CRITICAL_ERRORS, (
+            "FileNotFoundError should cause trial failure"
+        )
 
-        assert ConnectionError in CATCHABLE_EXCEPTIONS, "ConnectionError should be recoverable"
-        assert TimeoutError in CATCHABLE_EXCEPTIONS, "TimeoutError should be recoverable"
+        assert ConnectionError in CATCHABLE_EXCEPTIONS, (
+            "ConnectionError should be recoverable"
+        )
+        assert TimeoutError in CATCHABLE_EXCEPTIONS, (
+            "TimeoutError should be recoverable"
+        )
         assert ImportError in CATCHABLE_EXCEPTIONS, "ImportError should be recoverable"
         assert OSError in CATCHABLE_EXCEPTIONS, "OSError should be recoverable"
 
     def test_error_handling_design(self):
         """Test the design principles of error handling."""
         # Verify that critical scenarios are properly categorized
-        critical_error_types = [MemoryError, RuntimeError, ValueError, FileNotFoundError]
+        critical_error_types = [
+            MemoryError,
+            RuntimeError,
+            ValueError,
+            FileNotFoundError,
+        ]
         for error_type in critical_error_types:
-            assert error_type in CRITICAL_ERRORS, f"{error_type.__name__} should be critical"
+            assert error_type in CRITICAL_ERRORS, (
+                f"{error_type.__name__} should be critical"
+            )
 
         # Verify that recoverable scenarios are properly categorized
         recoverable_error_types = [ConnectionError, TimeoutError, ImportError, OSError]
         for error_type in recoverable_error_types:
-            assert error_type in CATCHABLE_EXCEPTIONS, f"{error_type.__name__} should be recoverable"
+            assert error_type in CATCHABLE_EXCEPTIONS, (
+                f"{error_type.__name__} should be recoverable"
+            )
 
     def test_out_of_memory_handling(self):
         """Test specific handling of out-of-memory scenarios."""
@@ -53,10 +70,14 @@ class TestErrorHandling:
     def test_error_types_are_exceptions(self):
         """Test that all error types are actually exception classes."""
         for error_type in CRITICAL_ERRORS:
-            assert issubclass(error_type, Exception), f"{error_type} should be an Exception subclass"
+            assert issubclass(error_type, Exception), (
+                f"{error_type} should be an Exception subclass"
+            )
 
         for error_type in CATCHABLE_EXCEPTIONS:
-            assert issubclass(error_type, Exception), f"{error_type} should be an Exception subclass"
+            assert issubclass(error_type, Exception), (
+                f"{error_type} should be an Exception subclass"
+            )
 
     def test_no_overlap_between_error_categories(self):
         """Test that critical and catchable errors don't overlap."""

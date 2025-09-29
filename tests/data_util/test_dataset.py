@@ -1,6 +1,5 @@
 import os
 import tempfile
-
 from functools import partial
 from pathlib import Path
 
@@ -9,13 +8,16 @@ import numpy as np
 import pandas as pd
 import pytest
 import torch
-
 from anndata import AnnData
 from scipy.sparse import csr_matrix
 from torch.utils.data import DataLoader
 
 from scxpand.data_util.data_format import DataFormat
-from scxpand.data_util.dataloaders import BalancedLabelsBatchSampler, BalancedTypesBatchSampler, create_eval_dataloader
+from scxpand.data_util.dataloaders import (
+    BalancedLabelsBatchSampler,
+    BalancedTypesBatchSampler,
+    create_eval_dataloader,
+)
 from scxpand.data_util.dataset import (
     CellsDataset,
     apply_post_normalization_augmentations,
@@ -123,12 +125,16 @@ class TestSeparatedAugmentations:
             )
         # Apply preprocessing directly (no need for dataset method)
 
-        X_normalized_tensor = preprocess_expression_data(X=X_masked_raw, data_format=data_format, eps=1e-10)
+        X_normalized_tensor = preprocess_expression_data(
+            X=X_masked_raw, data_format=data_format, eps=1e-10
+        )
         print(f"Normalized masked X: {X_normalized_tensor}")
 
         # Expected values: (0 - mu) / sigma = -mu / sigma
         expected_values = -genes_mu / genes_sigma
-        expected_tensor = torch.tensor([expected_values, expected_values], dtype=torch.float32)
+        expected_tensor = torch.tensor(
+            [expected_values, expected_values], dtype=torch.float32
+        )
         print(f"Expected values: {expected_tensor}")
 
         assert torch.allclose(X_normalized_tensor, expected_tensor, atol=1e-6), (
@@ -138,19 +144,27 @@ class TestSeparatedAugmentations:
     def test_noise_after_normalization(self) -> None:
         """Test that noise is applied after normalization."""
         # Create normalized test data
-        X_normalized = torch.tensor([[0.0, 1.0, -1.0], [2.0, -2.0, 0.5]], dtype=torch.float32)
+        X_normalized = torch.tensor(
+            [[0.0, 1.0, -1.0], [2.0, -2.0, 0.5]], dtype=torch.float32
+        )
 
         # Apply noise
-        X_with_noise = apply_post_normalization_augmentations(X_normalized, noise_std=0.1)
+        X_with_noise = apply_post_normalization_augmentations(
+            X_normalized, noise_std=0.1
+        )
 
         # Should not be identical due to noise
-        assert not torch.allclose(X_with_noise, X_normalized), "Noise should change the normalized values"
+        assert not torch.allclose(X_with_noise, X_normalized), (
+            "Noise should change the normalized values"
+        )
 
         # Should be close but not identical
         difference = torch.abs(X_with_noise - X_normalized)
         assert torch.all(difference < 1.0), "Noise should be reasonable in magnitude"
 
-    def test_full_pipeline_with_separated_augmentations(self, mock_dataset: CellsDataset) -> None:
+    def test_full_pipeline_with_separated_augmentations(
+        self, mock_dataset: CellsDataset
+    ) -> None:
         """Test the full pipeline with separated augmentations."""
         # Create dataset with both masking and noise
         dataset_params = DataAugmentParams(mask_rate=0.5, noise_std=0.1)
@@ -167,7 +181,9 @@ class TestSeparatedAugmentations:
             X_final = batch["x"]
 
             # Check that we have reasonable values (not all zeros, not all the same)
-            assert not torch.allclose(X_final, torch.zeros_like(X_final)), "Final batch should not be all zeros"
+            assert not torch.allclose(X_final, torch.zeros_like(X_final)), (
+                "Final batch should not be all zeros"
+            )
 
             # Check that values are in a reasonable range for normalized data
             # Single-cell data can have values > 10 after z-score normalization
@@ -176,7 +192,9 @@ class TestSeparatedAugmentations:
             )
 
             print(f"Final batch shape: {X_final.shape}")
-            print(f"Final batch stats - mean: {X_final.mean():.3f}, std: {X_final.std():.3f}")
+            print(
+                f"Final batch stats - mean: {X_final.mean():.3f}, std: {X_final.std():.3f}"
+            )
             print(f"Final batch range: [{X_final.min():.3f}, {X_final.max():.3f}]")
 
         finally:
@@ -184,7 +202,9 @@ class TestSeparatedAugmentations:
             mock_dataset.dataset_params = original_params
             mock_dataset.is_train = False
 
-    def test_masking_produces_expected_missing_signal(self, mock_dataset: CellsDataset) -> None:
+    def test_masking_produces_expected_missing_signal(
+        self, mock_dataset: CellsDataset
+    ) -> None:
         """Test that masking produces the expected 'missing gene' signal."""
         # Create dataset with only masking (no noise)
         dataset_params = DataAugmentParams(mask_rate=1.0, noise_std=0.0)  # 100% masking
@@ -203,15 +223,21 @@ class TestSeparatedAugmentations:
             # All values should be -mu/sigma (the "missing gene" signal)
             expected_masked_value = torch.from_numpy(
                 -mock_dataset.data_format.genes_mu
-                / (mock_dataset.data_format.genes_sigma + 1e-10)  # Match dataset preprocessing eps
+                / (
+                    mock_dataset.data_format.genes_sigma + 1e-10
+                )  # Match dataset preprocessing eps
             ).float()
 
-            assert torch.allclose(X_masked, expected_masked_value.unsqueeze(0), atol=1e-6), (
+            assert torch.allclose(
+                X_masked, expected_masked_value.unsqueeze(0), atol=1e-6
+            ), (
                 f"All masked values should be -mu/sigma (missing gene signal). "
                 f"Expected: {expected_masked_value}, Got: {X_masked[0]}"
             )
 
-            print(f"Missing gene signal: {expected_masked_value[:5]}...")  # Show first 5 values
+            print(
+                f"Missing gene signal: {expected_masked_value[:5]}..."
+            )  # Show first 5 values
 
         finally:
             # Restore original parameters
@@ -232,9 +258,15 @@ def mock_adata() -> AnnData:
     # Create observation DataFrame with controlled distributions
     obs: pd.DataFrame = pd.DataFrame(
         {
-            "tissue_type": np.random.choice(["tissue1", "tissue2"], size=n_cells, p=[0.6, 0.4]),
-            "imputed_labels": np.random.choice(["label1", "label2"], size=n_cells, p=[0.7, 0.3]),
-            "expansion": np.random.choice(["expanded", "not_expanded"], size=n_cells, p=[0.3, 0.7]),
+            "tissue_type": np.random.choice(
+                ["tissue1", "tissue2"], size=n_cells, p=[0.6, 0.4]
+            ),
+            "imputed_labels": np.random.choice(
+                ["label1", "label2"], size=n_cells, p=[0.7, 0.3]
+            ),
+            "expansion": np.random.choice(
+                ["expanded", "not_expanded"], size=n_cells, p=[0.3, 0.7]
+            ),
             "clone_id_size": np.random.randint(1, 100, size=n_cells),
             "median_clone_size": np.random.randint(1, 100, size=n_cells),
         }
@@ -291,7 +323,9 @@ def mock_dataset(mock_adata: AnnData, tmp_path: Path) -> CellsDataset:
         adata=adata_loaded,
         row_inds_train=row_inds,
     )
-    new_adata = data_format.prepare_adata_for_training(adata_loaded, reorder_genes=False)
+    new_adata = data_format.prepare_adata_for_training(
+        adata_loaded, reorder_genes=False
+    )
 
     # Ensure all required columns are present in obs (required for CellsDataset and tests)
     required_cols = [
@@ -332,7 +366,9 @@ class TestCategoricalFeatureEncoding:
             "imputed_labels": {"label1": 0, "label2": 1},
         }
         obs_df = pd.DataFrame(obs_np)
-        result = encode_categorical_features_batch(obs_df, aux_categorical_types, categorical_mappings)
+        result = encode_categorical_features_batch(
+            obs_df, aux_categorical_types, categorical_mappings
+        )
         # Should be shape (3, 4): 2 tissue + 2 label
         assert result.shape == (3, 4)
         # First row: tissue1, label1 -> [1,0,1,0]
@@ -346,12 +382,16 @@ class TestCategoricalFeatureEncoding:
 class TestBatchSamplers:
     def test_balanced_labels_batch_sampler(self, mock_dataset: CellsDataset) -> None:
         mock_dataset.obs_df = pd.DataFrame(mock_dataset.obs_df)
-        mock_dataset.y = torch.FloatTensor((mock_dataset.obs_df["expansion"].to_numpy() == "expanded").astype(int))
+        mock_dataset.y = torch.FloatTensor(
+            (mock_dataset.obs_df["expansion"].to_numpy() == "expanded").astype(int)
+        )
         batch_size: int = 32
         sampler = BalancedTypesBatchSampler(mock_dataset, batch_size)
         all_batches = list(sampler)
         for batch in all_batches:
-            assert len(batch) == batch_size, f"Batch size expected {batch_size}, got {len(batch)}"
+            assert len(batch) == batch_size, (
+                f"Batch size expected {batch_size}, got {len(batch)}"
+            )
         all_indices = np.concatenate(all_batches)
         assert np.all(all_indices >= 0) and np.all(all_indices < len(mock_dataset)), (
             "All indices should be within valid range"
@@ -361,7 +401,9 @@ class TestBatchSamplers:
             batch_obs_df = mock_dataset.obs_df.iloc[indices]
             distributions = {
                 "tissue_type": batch_obs_df["tissue_type"].value_counts(normalize=True),
-                "imputed_labels": batch_obs_df["imputed_labels"].value_counts(normalize=True),
+                "imputed_labels": batch_obs_df["imputed_labels"].value_counts(
+                    normalize=True
+                ),
                 "expansion": batch_obs_df["expansion"].value_counts(normalize=True),
             }
             return distributions
@@ -378,9 +420,7 @@ class TestBatchSamplers:
                 )
 
             def composite_key(idx: int) -> str:
-                return (
-                    f"{mock_dataset.obs_df['tissue_type'].iloc[idx]}_{mock_dataset.obs_df['imputed_labels'].iloc[idx]}"
-                )
+                return f"{mock_dataset.obs_df['tissue_type'].iloc[idx]}_{mock_dataset.obs_df['imputed_labels'].iloc[idx]}"
 
             composite_counts: dict[str, dict[int, int]] = {}
             for idx in batch_arr:
@@ -390,12 +430,14 @@ class TestBatchSamplers:
                 composite_counts[comp][label] += 1
             composite_original: dict[str, list[int]] = {}
             for idx in range(len(mock_dataset.obs_df["tissue_type"])):
-                comp = (
-                    f"{mock_dataset.obs_df['tissue_type'].iloc[idx]}_{mock_dataset.obs_df['imputed_labels'].iloc[idx]}"
-                )
+                comp = f"{mock_dataset.obs_df['tissue_type'].iloc[idx]}_{mock_dataset.obs_df['imputed_labels'].iloc[idx]}"
                 label = int(mock_dataset.y[idx].item())
                 composite_original.setdefault(comp, []).append(label)
-            balanced_composites = {comp for comp, labels in composite_original.items() if len(np.unique(labels)) == 2}
+            balanced_composites = {
+                comp
+                for comp, labels in composite_original.items()
+                if len(np.unique(labels)) == 2
+            }
             for comp in balanced_composites:
                 if comp in composite_counts:
                     counts = composite_counts[comp]
@@ -406,12 +448,16 @@ class TestBatchSamplers:
                         )
 
     def test_balanced_types_batch_sampler(self, mock_dataset: CellsDataset) -> None:
-        mock_dataset.y = torch.FloatTensor((mock_dataset.obs_df["expansion"].to_numpy() == "expanded").astype(int))
+        mock_dataset.y = torch.FloatTensor(
+            (mock_dataset.obs_df["expansion"].to_numpy() == "expanded").astype(int)
+        )
         batch_size: int = 32
         sampler = BalancedTypesBatchSampler(mock_dataset, batch_size)
         all_batches = list(sampler)
         for batch in all_batches:
-            assert len(batch) == batch_size, f"Batch size expected {batch_size}, got {len(batch)}"
+            assert len(batch) == batch_size, (
+                f"Batch size expected {batch_size}, got {len(batch)}"
+            )
         all_indices = np.concatenate(all_batches)
         assert np.all(all_indices >= 0) and np.all(all_indices < len(mock_dataset)), (
             "All indices should be within valid range"
@@ -421,7 +467,9 @@ class TestBatchSamplers:
             batch_obs_df = mock_dataset.obs_df.iloc[indices]
             distributions = {
                 "tissue_type": batch_obs_df["tissue_type"].value_counts(normalize=True),
-                "imputed_labels": batch_obs_df["imputed_labels"].value_counts(normalize=True),
+                "imputed_labels": batch_obs_df["imputed_labels"].value_counts(
+                    normalize=True
+                ),
                 "expansion": batch_obs_df["expansion"].value_counts(normalize=True),
             }
             return distributions
@@ -438,9 +486,7 @@ class TestBatchSamplers:
                 )
 
             def composite_key(idx: int) -> str:
-                return (
-                    f"{mock_dataset.obs_df['tissue_type'].iloc[idx]}_{mock_dataset.obs_df['imputed_labels'].iloc[idx]}"
-                )
+                return f"{mock_dataset.obs_df['tissue_type'].iloc[idx]}_{mock_dataset.obs_df['imputed_labels'].iloc[idx]}"
 
             composite_counts: dict[str, dict[int, int]] = {}
             for idx in batch_arr:
@@ -450,12 +496,14 @@ class TestBatchSamplers:
                 composite_counts[comp][label] += 1
             composite_original: dict[str, list[int]] = {}
             for idx in range(len(mock_dataset.obs_df["tissue_type"])):
-                comp = (
-                    f"{mock_dataset.obs_df['tissue_type'].iloc[idx]}_{mock_dataset.obs_df['imputed_labels'].iloc[idx]}"
-                )
+                comp = f"{mock_dataset.obs_df['tissue_type'].iloc[idx]}_{mock_dataset.obs_df['imputed_labels'].iloc[idx]}"
                 label = int(mock_dataset.y[idx].item())
                 composite_original.setdefault(comp, []).append(label)
-            balanced_composites = {comp for comp, labels in composite_original.items() if len(np.unique(labels)) == 2}
+            balanced_composites = {
+                comp
+                for comp, labels in composite_original.items()
+                if len(np.unique(labels)) == 2
+            }
             for comp in balanced_composites:
                 if comp in composite_counts:
                     counts = composite_counts[comp]
@@ -465,7 +513,9 @@ class TestBatchSamplers:
                             f"Labels should be balanced in composite group {comp}: {counts}"
                         )
 
-    def test_balanced_types_batch_sampler_edge_cases(self, mock_dataset: CellsDataset) -> None:
+    def test_balanced_types_batch_sampler_edge_cases(
+        self, mock_dataset: CellsDataset
+    ) -> None:
         mock_dataset.obs_df = pd.DataFrame(mock_dataset.obs_df)
         sampler_temp = BalancedTypesBatchSampler(mock_dataset, batch_size=32)
         num_strata: int = len(sampler_temp.feature_strata)
@@ -485,7 +535,9 @@ class TestBatchSamplers:
         for batch in large_batches:
             assert len(batch) == 128, "Large batches should maintain specified size"
 
-    def test_balanced_types_batch_sampler_balance(self, mock_dataset: CellsDataset) -> None:
+    def test_balanced_types_batch_sampler_balance(
+        self, mock_dataset: CellsDataset
+    ) -> None:
         mock_dataset.obs_df = pd.DataFrame(mock_dataset.obs_df)
         batch_size: int = 32
         sampler = BalancedTypesBatchSampler(mock_dataset, batch_size)
@@ -502,14 +554,18 @@ class TestBatchSamplers:
                     f"Stratum {stratum} expected {expected} samples, got {batch_counts[stratum]}"
                 )
 
-    def test_balanced_types_batch_sampler_consistency(self, mock_dataset: CellsDataset) -> None:
+    def test_balanced_types_batch_sampler_consistency(
+        self, mock_dataset: CellsDataset
+    ) -> None:
         mock_dataset.obs_df = pd.DataFrame(mock_dataset.obs_df)
         batch_size: int = 32
         sampler = BalancedTypesBatchSampler(mock_dataset, batch_size)
         n_epochs: int = 3
         epoch_batches = [list(sampler) for _ in range(n_epochs)]
         n_batches: list[int] = [len(batches) for batches in epoch_batches]
-        assert all(n == n_batches[0] for n in n_batches), "Number of batches should be consistent across epochs"
+        assert all(n == n_batches[0] for n in n_batches), (
+            "Number of batches should be consistent across epochs"
+        )
         for epoch_idx, batches in enumerate(epoch_batches):
             for batch_idx, batch in enumerate(batches):
                 assert len(batch) == batch_size, (
@@ -530,11 +586,14 @@ class TestBatchSamplers:
                     )
         first_batches: list[list[int]] = epoch_batches[0]
         for other_epoch_batches in epoch_batches[1:]:
-            assert not all(set(b1) == set(b2) for b1, b2 in zip(first_batches, other_epoch_batches)), (
-                "Batch composition should vary between epochs due to randomization"
-            )
+            assert not all(
+                set(b1) == set(b2)
+                for b1, b2 in zip(first_batches, other_epoch_batches, strict=False)
+            ), "Batch composition should vary between epochs due to randomization"
 
-    def test_balanced_labels_batch_sampler_distribution(self, mock_dataset: CellsDataset) -> None:
+    def test_balanced_labels_batch_sampler_distribution(
+        self, mock_dataset: CellsDataset
+    ) -> None:
         batch_size: int = 32
         sampler = BalancedLabelsBatchSampler(mock_dataset, batch_size)
         for batch in list(sampler):
@@ -545,7 +604,9 @@ class TestBatchSamplers:
                 f"Labels not balanced in batch: positives={pos_count}, negatives={neg_count}"
             )
 
-    def test_balanced_labels_batch_sampler_coverage(self, mock_dataset: CellsDataset) -> None:
+    def test_balanced_labels_batch_sampler_coverage(
+        self, mock_dataset: CellsDataset
+    ) -> None:
         batch_size: int = 32
         sampler = BalancedLabelsBatchSampler(mock_dataset, batch_size)
         all_indices = set()
@@ -554,8 +615,12 @@ class TestBatchSamplers:
         labels = mock_dataset.y.numpy()
         pos_indices = set(np.where(labels == 1)[0])
         neg_indices = set(np.where(labels == 0)[0])
-        assert len(all_indices.intersection(pos_indices)) > 0, "No positive samples were used"
-        assert len(all_indices.intersection(neg_indices)) > 0, "No negative samples were used"
+        assert len(all_indices.intersection(pos_indices)) > 0, (
+            "No positive samples were used"
+        )
+        assert len(all_indices.intersection(neg_indices)) > 0, (
+            "No negative samples were used"
+        )
 
         # Check that all available samples of each class are used when needed
         pos_used_unique = all_indices.intersection(pos_indices)
@@ -578,7 +643,9 @@ class TestBatchSamplers:
             f"Expected to use {expected_neg_unique} unique negative samples, got {len(neg_used_unique)}"
         )
 
-    def test_balanced_types_batch_sampler_stratum_isolation(self, mock_dataset: CellsDataset) -> None:
+    def test_balanced_types_batch_sampler_stratum_isolation(
+        self, mock_dataset: CellsDataset
+    ) -> None:
         mock_dataset.obs_df = pd.DataFrame(mock_dataset.obs_df)
         batch_size: int = 32
         sampler = BalancedTypesBatchSampler(mock_dataset, batch_size)
@@ -593,7 +660,9 @@ class TestBatchSamplers:
         # Each index should appear exactly once
         # Remove this test
 
-    def test_balanced_types_batch_sampler_small_strata(self, mock_dataset: CellsDataset) -> None:
+    def test_balanced_types_batch_sampler_small_strata(
+        self, mock_dataset: CellsDataset
+    ) -> None:
         mock_dataset.obs_df = pd.DataFrame(mock_dataset.obs_df)
         batch_size: int = 32
         sampler = BalancedTypesBatchSampler(mock_dataset, batch_size)
@@ -606,11 +675,14 @@ class TestBatchSamplers:
             for batch in list(sampler)[:3]:
                 for stratum, indices in small_strata.items():
                     stratum_appearances = sum(1 for idx in batch if idx in indices)
-                    assert stratum_appearances == sampler.n_items_in_batch_per_stratum[stratum], (
-                        f"Small stratum {stratum} not properly represented in batch"
-                    )
+                    assert (
+                        stratum_appearances
+                        == sampler.n_items_in_batch_per_stratum[stratum]
+                    ), f"Small stratum {stratum} not properly represented in batch"
 
-    def test_balanced_types_batch_sampler_reproducibility(self, mock_dataset: CellsDataset) -> None:
+    def test_balanced_types_batch_sampler_reproducibility(
+        self, mock_dataset: CellsDataset
+    ) -> None:
         mock_dataset.obs_df = pd.DataFrame(mock_dataset.obs_df)
         batch_size: int = 32
         np.random.seed(42)
@@ -619,13 +691,17 @@ class TestBatchSamplers:
         np.random.seed(42)
         sampler2 = BalancedTypesBatchSampler(mock_dataset, batch_size)
         batches2 = list(sampler2)
-        assert len(batches1) == len(batches2), "Different number of batches with same seed"
-        for b1, b2 in zip(batches1, batches2):
+        assert len(batches1) == len(batches2), (
+            "Different number of batches with same seed"
+        )
+        for b1, b2 in zip(batches1, batches2, strict=False):
             assert b1 == b2, "Different batch composition with same seed"
 
 
 class TestCellsDataset:
-    def test_cells_dataset_obsm_categorical_features(self, mock_adata: AnnData, tmp_path: Path) -> None:
+    def test_cells_dataset_obsm_categorical_features(
+        self, mock_adata: AnnData, tmp_path: Path
+    ) -> None:
         prm = MLPParam(
             n_epochs=100,
             early_stopping_patience=10,
@@ -662,7 +738,9 @@ class TestCellsDataset:
             adata=adata_loaded_append,
             row_inds_train=row_inds,
         )
-        adata_append = data_format_append.prepare_adata_for_training(adata_loaded_append, reorder_genes=False)
+        adata_append = data_format_append.prepare_adata_for_training(
+            adata_loaded_append, reorder_genes=False
+        )
         data_format_obsm = DataFormat(
             use_log_transform=False,
             aux_categorical_types=["tissue_type", "imputed_labels"],
@@ -673,7 +751,9 @@ class TestCellsDataset:
             adata=adata_loaded_obsm,
             row_inds_train=row_inds,
         )
-        adata_obsm = data_format_obsm.prepare_adata_for_training(adata_loaded_obsm, reorder_genes=False)
+        adata_obsm = data_format_obsm.prepare_adata_for_training(
+            adata_loaded_obsm, reorder_genes=False
+        )
         required_cols = ["expansion", "clone_id_size", "median_clone_size"]
         for col in required_cols:
             if col not in adata_append.obs.columns:
@@ -699,12 +779,18 @@ class TestCellsDataset:
             is_train=True,
         )
 
-        for dataset, data_format in zip([dataset_append, dataset_obsm], [data_format_append, data_format_obsm]):
+        for dataset, data_format in zip(
+            [dataset_append, dataset_obsm],
+            [data_format_append, data_format_obsm],
+            strict=False,
+        ):
             loader = DataLoader(
                 dataset,
                 batch_size=8,
                 shuffle=False,
-                collate_fn=lambda batch, dataset=dataset: cells_collate_fn(batch, dataset),
+                collate_fn=lambda batch, dataset=dataset: cells_collate_fn(
+                    batch, dataset
+                ),
             )
             batch = next(iter(loader))
             assert isinstance(batch, dict)
@@ -715,7 +801,9 @@ class TestCellsDataset:
             expected_n_features = data_format.n_genes
             assert batch["x"].shape[1] == expected_n_features
 
-    def test_cellsdataset_batch_collate_fn(self, mock_adata: AnnData, tmp_path: Path) -> None:
+    def test_cellsdataset_batch_collate_fn(
+        self, mock_adata: AnnData, tmp_path: Path
+    ) -> None:
         data_format = DataFormat(
             use_log_transform=False,
             aux_categorical_types=["tissue_type", "imputed_labels"],
@@ -729,7 +817,9 @@ class TestCellsDataset:
             adata=adata_loaded,
             row_inds_train=row_inds,
         )
-        adata = data_format.prepare_adata_for_training(adata_loaded, reorder_genes=False)
+        adata = data_format.prepare_adata_for_training(
+            adata_loaded, reorder_genes=False
+        )
         processed_file = tmp_path / "test_adata_obsm.h5ad"
         adata.write_h5ad(processed_file)
         prm = MLPParam(
@@ -771,20 +861,30 @@ class TestCellsDataset:
         assert "x" in batch and "y" in batch, "Batch must contain 'x' and 'y' keys"
         assert isinstance(batch["x"], torch.Tensor), "'x' must be a torch.Tensor"
         assert isinstance(batch["y"], torch.Tensor), "'y' must be a torch.Tensor"
-        assert batch["x"].shape[0] == batch_size, f"Expected batch size {batch_size}, got {batch['x'].shape[0]}"
-        assert batch["y"].shape[0] == batch_size, f"Expected batch size {batch_size}, got {batch['y'].shape[0]}"
+        assert batch["x"].shape[0] == batch_size, (
+            f"Expected batch size {batch_size}, got {batch['x'].shape[0]}"
+        )
+        assert batch["y"].shape[0] == batch_size, (
+            f"Expected batch size {batch_size}, got {batch['y'].shape[0]}"
+        )
         expected_features = dataset.n_genes
         assert batch["x"].shape[1] == expected_features, (
             f"Expected feature dimension {expected_features}, got {batch['x'].shape[1]}"
         )
         if dataset.y_soft is not None:
-            assert "y_soft" in batch, "Batch must contain 'y_soft' if soft labels are present"
-            assert isinstance(batch["y_soft"], torch.Tensor), "'y_soft' must be a torch.Tensor"
+            assert "y_soft" in batch, (
+                "Batch must contain 'y_soft' if soft labels are present"
+            )
+            assert isinstance(batch["y_soft"], torch.Tensor), (
+                "'y_soft' must be a torch.Tensor"
+            )
             assert batch["y_soft"].shape[0] == batch_size, (
                 f"Expected batch size {batch_size}, got {batch['y_soft'].shape[0]}"
             )
 
-    def test_data_preprocessing_consistency(self, mock_adata: AnnData, tmp_path: Path) -> None:
+    def test_data_preprocessing_consistency(
+        self, mock_adata: AnnData, tmp_path: Path
+    ) -> None:
         """Test that data preprocessing works consistently with augmentations."""
         prm = MLPParam(
             n_epochs=100,
@@ -821,7 +921,9 @@ class TestCellsDataset:
             adata=adata_loaded,
             row_inds_train=row_inds,
         )
-        adata = data_format.prepare_adata_for_training(adata_loaded, reorder_genes=False)
+        adata = data_format.prepare_adata_for_training(
+            adata_loaded, reorder_genes=False
+        )
         required_cols = ["expansion", "clone_id_size", "median_clone_size"]
         for col in required_cols:
             if col not in adata.obs.columns:
@@ -860,11 +962,18 @@ class TestCellsDataset:
         )
 
         # With augmentations, the data should be different (due to noise/masking)
-        if prm.get_dataset_params().mask_rate > 0 or prm.get_dataset_params().noise_std > 0:
-            max_diff = torch.max(torch.abs(batch_with_aug["x"] - batch_without_aug["x"]))
+        if (
+            prm.get_dataset_params().mask_rate > 0
+            or prm.get_dataset_params().noise_std > 0
+        ):
+            max_diff = torch.max(
+                torch.abs(batch_with_aug["x"] - batch_without_aug["x"])
+            )
             assert max_diff > 1e-6, "Augmentations should modify the data"
 
-    def test_cellsdataset_feature_extraction_consistency(self, mock_adata: AnnData, tmp_path: Path) -> None:
+    def test_cellsdataset_feature_extraction_consistency(
+        self, mock_adata: AnnData, tmp_path: Path
+    ) -> None:
         """Test that feature extraction works consistently with different batch sizes."""
         n_cells: int = len(mock_adata.obs)
         row_inds: np.ndarray = np.arange(n_cells)
@@ -903,7 +1012,9 @@ class TestCellsDataset:
             adata=adata_loaded,
             row_inds_train=row_inds,
         )
-        adata = data_format.prepare_adata_for_training(adata_loaded, reorder_genes=False)
+        adata = data_format.prepare_adata_for_training(
+            adata_loaded, reorder_genes=False
+        )
         required_cols = ["expansion", "clone_id_size", "median_clone_size"]
         for col in required_cols:
             if col not in adata.obs.columns:
@@ -938,9 +1049,13 @@ class TestCellsDataset:
                 X_raw = raw_adata.X[batch_indices, :].toarray()
                 X_tensor = torch.from_numpy(X_raw).float()
                 # Apply preprocessing directly (no need for dataset method)
-                X_expected_tensor = preprocess_expression_data(X=X_tensor, data_format=dataset.data_format, eps=1e-10)
+                X_expected_tensor = preprocess_expression_data(
+                    X=X_tensor, data_format=dataset.data_format, eps=1e-10
+                )
                 X_expected = X_expected_tensor.detach().cpu().numpy()
-                assert np.allclose(x_genes, X_expected, atol=1e-5), "Gene features do not match expected preprocessing"
+                assert np.allclose(x_genes, X_expected, atol=1e-5), (
+                    "Gene features do not match expected preprocessing"
+                )
             finally:
                 raw_adata.file.close()
 
@@ -967,7 +1082,9 @@ class TestCellsDataset:
             num_batches += 1
         assert num_batches > 0, "No batches were loaded from the DataLoader"
 
-    def test_separated_methods_equivalence(self, mock_adata: AnnData, tmp_path: Path) -> None:
+    def test_separated_methods_equivalence(
+        self, mock_adata: AnnData, tmp_path: Path
+    ) -> None:
         """Test that calling the separated methods produces consistent results."""
         row_inds = np.arange(len(mock_adata.obs))
         raw_file = tmp_path / "raw_adata.h5ad"
@@ -984,7 +1101,9 @@ class TestCellsDataset:
             adata=adata_loaded_combined,
             row_inds_train=row_inds,
         )
-        adata_combined = data_format_combined.prepare_adata_for_training(adata_loaded_combined, reorder_genes=False)
+        adata_combined = data_format_combined.prepare_adata_for_training(
+            adata_loaded_combined, reorder_genes=False
+        )
 
         # Method 2: Separated methods
         data_format_separated = DataFormat(
@@ -997,14 +1116,23 @@ class TestCellsDataset:
             adata=adata_loaded_separated,
             row_inds_train=row_inds,
         )
-        adata_separated = data_format_separated.prepare_adata_for_training(adata_loaded_separated, reorder_genes=False)
+        adata_separated = data_format_separated.prepare_adata_for_training(
+            adata_loaded_separated, reorder_genes=False
+        )
 
         # Verify DataFormat objects are equivalent
         assert data_format_combined.n_genes == data_format_separated.n_genes
         assert data_format_combined.gene_names == data_format_separated.gene_names
-        assert np.allclose(data_format_combined.genes_mu, data_format_separated.genes_mu)
-        assert np.allclose(data_format_combined.genes_sigma, data_format_separated.genes_sigma)
-        assert data_format_combined.aux_categorical_mappings == data_format_separated.aux_categorical_mappings
+        assert np.allclose(
+            data_format_combined.genes_mu, data_format_separated.genes_mu
+        )
+        assert np.allclose(
+            data_format_combined.genes_sigma, data_format_separated.genes_sigma
+        )
+        assert (
+            data_format_combined.aux_categorical_mappings
+            == data_format_separated.aux_categorical_mappings
+        )
 
         # Verify AnnData objects are equivalent
         assert adata_combined.n_obs == adata_separated.n_obs
@@ -1042,7 +1170,9 @@ class TestCellsDataset:
             target_sum=1e4,
         )
 
-        dataset_params = DataAugmentParams(mask_rate=0.0, noise_std=0.0, soft_loss_beta=1.0)
+        dataset_params = DataAugmentParams(
+            mask_rate=0.0, noise_std=0.0, soft_loss_beta=1.0
+        )
 
         # Test inference mode with missing columns - should not raise KeyError
         dataset = CellsDataset(
@@ -1093,7 +1223,8 @@ class TestCellsDataset:
         # Create obs DataFrame with only some metadata columns
         obs_df = pd.DataFrame(
             {
-                "expansion": ["expanded"] * 5 + ["non-expanded"] * 5,  # Only expansion column
+                "expansion": ["expanded"] * 5
+                + ["non-expanded"] * 5,  # Only expansion column
                 # Missing: clone_id_size, median_clone_size
             }
         )
@@ -1114,7 +1245,9 @@ class TestCellsDataset:
             target_sum=1e4,
         )
 
-        dataset_params = DataAugmentParams(mask_rate=0.0, noise_std=0.0, soft_loss_beta=1.0)
+        dataset_params = DataAugmentParams(
+            mask_rate=0.0, noise_std=0.0, soft_loss_beta=1.0
+        )
 
         # Test training mode with partial columns
         dataset = CellsDataset(
@@ -1155,22 +1288,40 @@ class TestOptimizedInferenceWithGeneMismatches:
         """Test that gene mapping is correctly initialized during dataset creation."""
         # Verify that the optimized dataset has the required attributes
         assert hasattr(mock_dataset, "gene_overlap"), "Dataset should have gene_overlap"
-        assert hasattr(mock_dataset, "missing_genes"), "Dataset should have missing_genes"
+        assert hasattr(mock_dataset, "missing_genes"), (
+            "Dataset should have missing_genes"
+        )
         assert hasattr(mock_dataset, "extra_genes"), "Dataset should have extra_genes"
-        assert hasattr(mock_dataset, "transform_batch_data"), "Dataset should have transform_batch_data method"
-        assert hasattr(mock_dataset, "needs_gene_transformation"), "Dataset should have needs_gene_transformation"
+        assert hasattr(mock_dataset, "transform_batch_data"), (
+            "Dataset should have transform_batch_data method"
+        )
+        assert hasattr(mock_dataset, "needs_gene_transformation"), (
+            "Dataset should have needs_gene_transformation"
+        )
 
         # Verify gene mapping properties (gene_indices may be None if no transformation needed)
         if mock_dataset.needs_gene_transformation:
-            assert hasattr(mock_dataset, "gene_indices"), "Dataset should have gene_indices when transformation needed"
-            assert len(mock_dataset.gene_indices) == mock_dataset.n_genes, "Gene indices should match n_genes"
+            assert hasattr(mock_dataset, "gene_indices"), (
+                "Dataset should have gene_indices when transformation needed"
+            )
+            assert len(mock_dataset.gene_indices) == mock_dataset.n_genes, (
+                "Gene indices should match n_genes"
+            )
         else:
-            assert mock_dataset.gene_indices is None, "Gene indices should be None when no transformation needed"
-        assert len(mock_dataset.gene_overlap) >= 0, "Gene overlap should be non-negative"
-        assert len(mock_dataset.missing_genes) >= 0, "Missing genes should be non-negative"
+            assert mock_dataset.gene_indices is None, (
+                "Gene indices should be None when no transformation needed"
+            )
+        assert len(mock_dataset.gene_overlap) >= 0, (
+            "Gene overlap should be non-negative"
+        )
+        assert len(mock_dataset.missing_genes) >= 0, (
+            "Missing genes should be non-negative"
+        )
         assert len(mock_dataset.extra_genes) >= 0, "Extra genes should be non-negative"
 
-    def test_batch_transformation_with_perfect_match(self, mock_dataset: CellsDataset) -> None:
+    def test_batch_transformation_with_perfect_match(
+        self, mock_dataset: CellsDataset
+    ) -> None:
         """Test batch transformation when inference data perfectly matches training data."""
         # Create a small test batch
         batch_size = 5
@@ -1178,17 +1329,22 @@ class TestOptimizedInferenceWithGeneMismatches:
         test_batch_raw = torch.rand(batch_size, n_raw_genes, dtype=torch.float32)
 
         # Transform the batch
-        transformed_batch = mock_dataset.transform_batch_data(test_batch_raw, in_place=False)
+        transformed_batch = mock_dataset.transform_batch_data(
+            test_batch_raw, in_place=False
+        )
 
         # Check output properties
         assert isinstance(transformed_batch, torch.Tensor), "Should return torch.Tensor"
-        assert transformed_batch.shape == (batch_size, mock_dataset.n_genes), (
-            f"Expected shape ({batch_size}, {mock_dataset.n_genes})"
-        )
+        assert transformed_batch.shape == (
+            batch_size,
+            mock_dataset.n_genes,
+        ), f"Expected shape ({batch_size}, {mock_dataset.n_genes})"
         assert torch.isfinite(transformed_batch).all(), "All values should be finite"
 
         # Check that preprocessing was applied (values should be normalized)
-        assert transformed_batch.std() > 0, "Standard deviation should be positive after normalization"
+        assert transformed_batch.std() > 0, (
+            "Standard deviation should be positive after normalization"
+        )
 
     def test_batch_transformation_with_missing_genes(self, tmp_path: Path) -> None:
         """Test batch transformation when inference data has missing genes compared to training."""
@@ -1212,7 +1368,9 @@ class TestOptimizedInferenceWithGeneMismatches:
         adata_inference.write_h5ad(file_path)
 
         # Create data format with more genes (simulating training with more genes)
-        extra_genes = [f"missing_gene_{i}" for i in range(n_training_genes - n_inference_genes)]
+        extra_genes = [
+            f"missing_gene_{i}" for i in range(n_training_genes - n_inference_genes)
+        ]
         all_gene_names = list(var_df.index) + extra_genes
 
         data_format = DataFormat(
@@ -1235,7 +1393,9 @@ class TestOptimizedInferenceWithGeneMismatches:
         assert len(dataset.missing_genes) == n_training_genes - n_inference_genes, (
             f"Expected {n_training_genes - n_inference_genes} missing genes"
         )
-        assert len(dataset.gene_indices) == n_training_genes, f"Expected {n_training_genes} gene indices"
+        assert len(dataset.gene_indices) == n_training_genes, (
+            f"Expected {n_training_genes} gene indices"
+        )
 
         # Check that missing genes have index -1
         missing_indices = dataset.gene_indices[dataset.gene_indices == -1]
@@ -1248,19 +1408,24 @@ class TestOptimizedInferenceWithGeneMismatches:
         transformed_batch = dataset.transform_batch_data(test_batch_raw, in_place=False)
 
         # Check output shape
-        assert transformed_batch.shape == (3, n_training_genes), f"Expected shape (3, {n_training_genes})"
+        assert transformed_batch.shape == (
+            3,
+            n_training_genes,
+        ), f"Expected shape (3, {n_training_genes})"
 
         # Check that missing genes are filled with zeros (before preprocessing)
         # The missing genes should have the "missing gene signal" after preprocessing
-        missing_gene_positions = [i for i, idx in enumerate(dataset.gene_indices) if idx == -1]
+        missing_gene_positions = [
+            i for i, idx in enumerate(dataset.gene_indices) if idx == -1
+        ]
         for pos in missing_gene_positions:
             # After preprocessing, missing genes should have the -mu/sigma signal
             expected_missing_value = -dataset.genes_mu[pos] / (
                 dataset.genes_sigma[pos] + 1e-10
             )  # Match dataset preprocessing eps
-            assert torch.allclose(transformed_batch[:, pos], torch.tensor(expected_missing_value)), (
-                f"Missing gene at position {pos} should have missing signal"
-            )
+            assert torch.allclose(
+                transformed_batch[:, pos], torch.tensor(expected_missing_value)
+            ), f"Missing gene at position {pos} should have missing signal"
 
     def test_batch_transformation_with_extra_genes(self, tmp_path: Path) -> None:
         """Test batch transformation when inference data has extra genes compared to training."""
@@ -1306,24 +1471,33 @@ class TestOptimizedInferenceWithGeneMismatches:
         assert len(dataset.extra_genes) == n_inference_genes - n_training_genes, (
             f"Expected {n_inference_genes - n_training_genes} extra genes"
         )
-        assert len(dataset.gene_indices) == n_training_genes, f"Expected {n_training_genes} gene indices"
+        assert len(dataset.gene_indices) == n_training_genes, (
+            f"Expected {n_training_genes} gene indices"
+        )
 
         # Check that all indices are valid (>= 0) since we have all training genes
         valid_indices = dataset.gene_indices[dataset.gene_indices >= 0]
-        assert len(valid_indices) == n_training_genes, f"Expected {n_training_genes} valid indices"
+        assert len(valid_indices) == n_training_genes, (
+            f"Expected {n_training_genes} valid indices"
+        )
 
         # Test batch transformation
         test_batch_raw = torch.rand(3, n_inference_genes, dtype=torch.float32)
         transformed_batch = dataset.transform_batch_data(test_batch_raw, in_place=False)
 
         # Check output shape
-        assert transformed_batch.shape == (3, n_training_genes), f"Expected shape (3, {n_training_genes})"
+        assert transformed_batch.shape == (
+            3,
+            n_training_genes,
+        ), f"Expected shape (3, {n_training_genes})"
 
         # Check that the transformation correctly maps the training genes
         for i, target_idx in enumerate(dataset.gene_indices):
             if target_idx >= 0:  # Gene exists in inference data
                 # The transformed values should be different from raw due to preprocessing
-                assert not torch.allclose(transformed_batch[:, i], torch.tensor(test_batch_raw[:, target_idx]))
+                assert not torch.allclose(
+                    transformed_batch[:, i], torch.tensor(test_batch_raw[:, target_idx])
+                )
 
     def test_collate_fn_with_gene_mismatch(self, tmp_path: Path) -> None:
         """Test that collate_fn works correctly with gene count mismatches."""
@@ -1371,7 +1545,10 @@ class TestOptimizedInferenceWithGeneMismatches:
         # Check batch properties
         assert "x" in batch, "Batch should contain 'x'"
         assert isinstance(batch["x"], torch.Tensor), "'x' should be torch.Tensor"
-        assert batch["x"].shape == (3, n_training_genes), f"Expected shape (3, {n_training_genes})"
+        assert batch["x"].shape == (
+            3,
+            n_training_genes,
+        ), f"Expected shape (3, {n_training_genes})"
         assert torch.isfinite(batch["x"]).all(), "All values should be finite"
 
     def test_optimized_inference_consistency(self, tmp_path: Path) -> None:
@@ -1415,7 +1592,9 @@ class TestOptimizedInferenceWithGeneMismatches:
 
         # Create data loader
 
-        data_loader = create_eval_dataloader(dataset=dataset, batch_size=4, num_workers=0)
+        data_loader = create_eval_dataloader(
+            dataset=dataset, batch_size=4, num_workers=0
+        )
 
         # Run inference twice
         results_1 = [batch["x"] for batch in data_loader]
@@ -1426,8 +1605,13 @@ class TestOptimizedInferenceWithGeneMismatches:
         all_results_2 = torch.cat(results_2, dim=0)
 
         # Check consistency
-        assert torch.allclose(all_results_1, all_results_2, rtol=1e-6), "Results should be identical between runs"
-        assert all_results_1.shape == (8, n_training_genes), f"Expected shape (8, {n_training_genes})"
+        assert torch.allclose(all_results_1, all_results_2, rtol=1e-6), (
+            "Results should be identical between runs"
+        )
+        assert all_results_1.shape == (
+            8,
+            n_training_genes,
+        ), f"Expected shape (8, {n_training_genes})"
 
     def test_memory_efficiency(self, tmp_path: Path) -> None:
         """Test that the optimized system doesn't load entire dataset into memory."""
@@ -1469,17 +1653,24 @@ class TestOptimizedInferenceWithGeneMismatches:
         )
 
         # Check that we don't have a cached adata (should be None)
-        assert not hasattr(dataset, "_adata") or dataset._adata is None, "Dataset should not cache full AnnData"
+        assert not hasattr(dataset, "_adata") or dataset._adata is None, (
+            "Dataset should not cache full AnnData"
+        )
 
         # Check that we have the transformation components
         assert hasattr(dataset, "gene_indices"), "Dataset should have gene_indices"
-        assert hasattr(dataset, "transform_batch_data"), "Dataset should have transform_batch_data method"
+        assert hasattr(dataset, "transform_batch_data"), (
+            "Dataset should have transform_batch_data method"
+        )
 
         # Test that we can process batches without loading full data
         test_batch_raw = torch.rand(5, n_inference_genes, dtype=torch.float32)
         transformed_batch = dataset.transform_batch_data(test_batch_raw, in_place=False)
 
-        assert transformed_batch.shape == (5, n_training_genes), f"Expected shape (5, {n_training_genes})"
+        assert transformed_batch.shape == (
+            5,
+            n_training_genes,
+        ), f"Expected shape (5, {n_training_genes})"
 
     def test_tensor_optimization_no_conversions(self, tmp_path: Path) -> None:
         """Test that tensor inputs avoid unnecessary conversions in transform_batch_data."""
@@ -1520,11 +1711,15 @@ class TestOptimizedInferenceWithGeneMismatches:
 
         # Test with tensor input (tensor-only API)
         test_batch_tensor = torch.rand(3, n_inference_genes, dtype=torch.float32)
-        result_from_tensor = dataset.transform_batch_data(test_batch_tensor, in_place=False)
+        result_from_tensor = dataset.transform_batch_data(
+            test_batch_tensor, in_place=False
+        )
 
         # Test with second tensor to verify consistency
         test_batch_tensor2 = test_batch_tensor.clone()
-        result_from_tensor2 = dataset.transform_batch_data(test_batch_tensor2, in_place=False)
+        result_from_tensor2 = dataset.transform_batch_data(
+            test_batch_tensor2, in_place=False
+        )
 
         # Results should be identical for same input
         assert torch.allclose(result_from_tensor, result_from_tensor2, atol=1e-10), (
@@ -1624,8 +1819,12 @@ class TestOptimizedInferenceWithGeneMismatches:
         result_tensor = preprocess_expression_data(X_tensor, data_format)
 
         # Check types
-        assert isinstance(result_numpy, np.ndarray), "Numpy input should return numpy array"
-        assert isinstance(result_tensor, torch.Tensor), "Tensor input should return tensor"
+        assert isinstance(result_numpy, np.ndarray), (
+            "Numpy input should return numpy array"
+        )
+        assert isinstance(result_tensor, torch.Tensor), (
+            "Tensor input should return tensor"
+        )
 
         # Check values are equivalent
         result_tensor_np = result_tensor.detach().cpu().numpy()
@@ -1673,8 +1872,12 @@ class TestOptimizedInferenceWithGeneMismatches:
         )
 
         # Check that no transformation is needed
-        assert not dataset.needs_gene_transformation, "Should not need gene transformation"
-        assert dataset.gene_indices is None, "Gene indices should be None when no transformation needed"
+        assert not dataset.needs_gene_transformation, (
+            "Should not need gene transformation"
+        )
+        assert dataset.gene_indices is None, (
+            "Gene indices should be None when no transformation needed"
+        )
         assert len(dataset.missing_genes) == 0, "Should have no missing genes"
         assert len(dataset.extra_genes) == 0, "Should have no extra genes"
         assert len(dataset.gene_overlap) == n_genes, "Should have all genes overlapping"
@@ -1684,12 +1887,17 @@ class TestOptimizedInferenceWithGeneMismatches:
         transformed_batch = dataset.transform_batch_data(test_batch_raw, in_place=False)
 
         # Check output properties
-        assert transformed_batch.shape == (10, n_genes), f"Expected shape (10, {n_genes})"
+        assert transformed_batch.shape == (
+            10,
+            n_genes,
+        ), f"Expected shape (10, {n_genes})"
         assert torch.isfinite(transformed_batch).all(), "All values should be finite"
 
         # The transformed data should be different from raw due to preprocessing
         # but the gene order should be preserved (no reordering needed)
-        assert not torch.allclose(transformed_batch, test_batch_raw), "Preprocessing should modify the data"
+        assert not torch.allclose(transformed_batch, test_batch_raw), (
+            "Preprocessing should modify the data"
+        )
 
 
 if __name__ == "__main__":

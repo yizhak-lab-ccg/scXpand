@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import scipy.sparse as sp
-
 from anndata import AnnData
 
 from scxpand.data_util.data_format import DataFormat
@@ -102,7 +101,13 @@ def test_compute_preprocessed_genes_means_stds(tmp_path, monkeypatch):
     """Test computation of gene means and standard deviations from sparse matrix."""
 
     # Mock compute_preprocessed_genes_means_stds to bypass the actual implementation
-    def mock_compute_for_all(_data_path, _row_inds, _batch_size=None, _target_sum=None, _use_log_transform=None):
+    def mock_compute_for_all(
+        _data_path,
+        _row_inds,
+        _batch_size=None,
+        _target_sum=None,
+        _use_log_transform=None,
+    ):
         return np.array([5 / 3, 7 / 3], dtype=np.float32), np.sqrt(
             np.array(
                 [
@@ -113,17 +118,36 @@ def test_compute_preprocessed_genes_means_stds(tmp_path, monkeypatch):
             )
         )
 
-    def mock_compute_for_subset(data_path, row_inds=None, batch_size=None, target_sum=None, use_log_transform=None):
-        if row_inds is not None and len(row_inds) == 2 and row_inds[0] == 0 and row_inds[1] == 2:
+    def mock_compute_for_subset(
+        data_path,
+        row_inds=None,
+        batch_size=None,
+        target_sum=None,
+        use_log_transform=None,
+    ):
+        if (
+            row_inds is not None
+            and len(row_inds) == 2
+            and row_inds[0] == 0
+            and row_inds[1] == 2
+        ):
             return np.array([0.5, 2.0], dtype=np.float32), np.sqrt(
                 np.array(
                     [(1**2 + 0**2) / 2 - (0.5) ** 2, (2**2 + 2**2) / 2 - (2.0) ** 2],
                     dtype=np.float32,
                 )
             )
-        return mock_compute_for_all(data_path, row_inds, batch_size, target_sum, use_log_transform)
+        return mock_compute_for_all(
+            data_path, row_inds, batch_size, target_sum, use_log_transform
+        )
 
-    def mock_compute_for_same(_data_path, _row_inds, _batch_size=None, _target_sum=None, _use_log_transform=None):
+    def mock_compute_for_same(
+        _data_path,
+        _row_inds,
+        _batch_size=None,
+        _target_sum=None,
+        _use_log_transform=None,
+    ):
         return np.array([1.0], dtype=np.float32), np.array([0.0], dtype=np.float32)
 
     # Create a small sparse matrix with known values
@@ -140,7 +164,10 @@ def test_compute_preprocessed_genes_means_stds(tmp_path, monkeypatch):
     adata.write_h5ad(temp_file)
 
     # Patch for the first test
-    monkeypatch.setattr("scxpand.data_util.statistics.compute_preprocessed_genes_means_stds", mock_compute_for_all)
+    monkeypatch.setattr(
+        "scxpand.data_util.statistics.compute_preprocessed_genes_means_stds",
+        mock_compute_for_all,
+    )
 
     # Test computing stats for all rows
     row_inds = np.array([0, 1, 2])
@@ -162,7 +189,10 @@ def test_compute_preprocessed_genes_means_stds(tmp_path, monkeypatch):
     np.testing.assert_allclose(stds, expected_stds, rtol=1e-6)
 
     # Patch for the subset test
-    monkeypatch.setattr("scxpand.data_util.statistics.compute_preprocessed_genes_means_stds", mock_compute_for_subset)
+    monkeypatch.setattr(
+        "scxpand.data_util.statistics.compute_preprocessed_genes_means_stds",
+        mock_compute_for_subset,
+    )
 
     # Test computing stats for subset of rows
     row_inds_subset = np.array([0, 2])
@@ -172,19 +202,26 @@ def test_compute_preprocessed_genes_means_stds(tmp_path, monkeypatch):
     # Column 0: values [1, 0] -> mean = 1/2, std = sqrt((1^2 + 0^2)/2 - (1/2)^2)
     # Column 1: values [2, 2] -> mean = 4/2, std = sqrt((2^2 + 2^2)/2 - (4/2)^2)
     expected_means_subset = np.array([0.5, 2.0])
-    expected_vars_subset = np.array([(1**2 + 0**2) / 2 - (0.5) ** 2, (2**2 + 2**2) / 2 - (2.0) ** 2])
+    expected_vars_subset = np.array(
+        [(1**2 + 0**2) / 2 - (0.5) ** 2, (2**2 + 2**2) / 2 - (2.0) ** 2]
+    )
     expected_stds_subset = np.sqrt(expected_vars_subset)
 
     np.testing.assert_allclose(means_subset, expected_means_subset, rtol=1e-6)
     np.testing.assert_allclose(stds_subset, expected_stds_subset, rtol=1e-6)
 
     # Test with explicit batch size
-    means_batched, stds_batched = mock_compute_for_subset(temp_file, row_inds, batch_size=1)
+    means_batched, stds_batched = mock_compute_for_subset(
+        temp_file, row_inds, batch_size=1
+    )
     np.testing.assert_allclose(means_batched, expected_means, rtol=1e-6)
     np.testing.assert_allclose(stds_batched, expected_stds, rtol=1e-6)
 
     # Patch for the same values test
-    monkeypatch.setattr("scxpand.data_util.statistics.compute_preprocessed_genes_means_stds", mock_compute_for_same)
+    monkeypatch.setattr(
+        "scxpand.data_util.statistics.compute_preprocessed_genes_means_stds",
+        mock_compute_for_same,
+    )
 
     # Test handling of edge case that could produce small negative variances
     # Create a matrix where all values in a column are the same
@@ -207,12 +244,21 @@ def test_compute_preprocessed_genes_means_stds_empty(tmp_path, monkeypatch):
 
     # We'll bypass the actual compute_preprocessed_genes_means_stds completely to avoid division by zero
     # with empty row_inds
-    def mock_compute_empty(_data_path, _row_inds, _batch_size=None, _target_sum=None, _use_log_transform=None):
+    def mock_compute_empty(
+        _data_path,
+        _row_inds,
+        _batch_size=None,
+        _target_sum=None,
+        _use_log_transform=None,
+    ):
         # Return fixed values regardless of input
         return np.zeros(5), np.ones(5)
 
     # Patch the function directly
-    monkeypatch.setattr("scxpand.data_util.statistics.compute_preprocessed_genes_means_stds", mock_compute_empty)
+    monkeypatch.setattr(
+        "scxpand.data_util.statistics.compute_preprocessed_genes_means_stds",
+        mock_compute_empty,
+    )
 
     # Create a dummy file path (we won't actually use it since our mock ignores it)
     temp_file = tmp_path / "test_adata_empty.h5ad"
@@ -244,11 +290,20 @@ def test_compute_preprocessed_genes_means_stds_multi_batch(tmp_path, monkeypatch
     expected_stds = np.std(X_np, axis=0, ddof=0)
 
     # Mock compute_preprocessed_genes_means_stds to bypass the actual implementation
-    def mock_compute_multi_batch(_data_path, _row_inds, _batch_size=None, _target_sum=None, _use_log_transform=None):
+    def mock_compute_multi_batch(
+        _data_path,
+        _row_inds,
+        _batch_size=None,
+        _target_sum=None,
+        _use_log_transform=None,
+    ):
         return expected_means, expected_stds
 
     # Patch the function
-    monkeypatch.setattr("scxpand.data_util.statistics.compute_preprocessed_genes_means_stds", mock_compute_multi_batch)
+    monkeypatch.setattr(
+        "scxpand.data_util.statistics.compute_preprocessed_genes_means_stds",
+        mock_compute_multi_batch,
+    )
 
     # Create an AnnData object with CSR matrix
     adata = AnnData(X)
@@ -282,12 +337,21 @@ def test_compute_preprocessed_genes_means_stds_batch_retry(tmp_path, monkeypatch
     expected_stds = np.std(X_normalized, axis=0, ddof=0)
 
     # Create a complete mock that will completely bypass the real implementation
-    def mock_compute_retry(_data_path, _row_inds, _batch_size=None, _target_sum=None, _use_log_transform=None):
+    def mock_compute_retry(
+        _data_path,
+        _row_inds,
+        _batch_size=None,
+        _target_sum=None,
+        _use_log_transform=None,
+    ):
         # This mock ignores the input parameters and returns fixed values
         return expected_means, expected_stds
 
     # Patch the function
-    monkeypatch.setattr("scxpand.data_util.statistics.compute_preprocessed_genes_means_stds", mock_compute_retry)
+    monkeypatch.setattr(
+        "scxpand.data_util.statistics.compute_preprocessed_genes_means_stds",
+        mock_compute_retry,
+    )
 
     # Create an AnnData with CSR matrix
     adata = AnnData(X)
@@ -390,7 +454,9 @@ def test_z_score_normalization_large_sparse():
         for c in cols:
             orig = X_sparse[r, c]
             expected = (
-                (orig - genes_mu[c]) / (genes_sigma[c] + 1e-6) if orig != 0 else -genes_mu[c] / (genes_sigma[c] + 1e-6)
+                (orig - genes_mu[c]) / (genes_sigma[c] + 1e-6)
+                if orig != 0
+                else -genes_mu[c] / (genes_sigma[c] + 1e-6)
             )
             actual = result[r, c]
             np.testing.assert_allclose(actual, expected, rtol=1e-5)
@@ -440,7 +506,9 @@ def test_compute_preprocessed_genes_means_stds_realistic(tmp_path):
 
     # Test with a subset of rows
     row_inds_subset = np.array([0, 2])
-    means_subset, stds_subset = compute_preprocessed_genes_means_stds(temp_file, row_inds_subset)
+    means_subset, stds_subset = compute_preprocessed_genes_means_stds(
+        temp_file, row_inds_subset
+    )
 
     # Expected values for the subset (after preprocessing)
     X_subset = X_dense[[0, 2], :]  # rows 0 and 2
@@ -458,7 +526,9 @@ def test_compute_preprocessed_genes_means_stds_realistic(tmp_path):
 
 class TestExtractIsExpanded:
     def test_extract_is_expanded_series(self):
-        expansion_data = pd.DataFrame({"expansion": ["expanded", "not_expanded", "expanded", "foo"]})
+        expansion_data = pd.DataFrame(
+            {"expansion": ["expanded", "not_expanded", "expanded", "foo"]}
+        )
         result = extract_is_expanded(expansion_data)
         expected = np.array([1, 0, 1, 0])
         assert np.array_equal(result, expected)
@@ -582,7 +652,9 @@ def test_compute_preprocessed_genes_means_stds_numerical_verification(tmp_path):
     print(f"Actual subset stds: {stds_subset}")
 
     # Verify subset results
-    np.testing.assert_allclose(means_subset, expected_subset_means, rtol=1e-5, atol=1e-5)
+    np.testing.assert_allclose(
+        means_subset, expected_subset_means, rtol=1e-5, atol=1e-5
+    )
     np.testing.assert_allclose(stds_subset, expected_subset_stds, rtol=1e-5, atol=1e-5)
 
 

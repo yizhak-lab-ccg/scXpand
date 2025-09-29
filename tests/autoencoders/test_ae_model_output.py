@@ -108,7 +108,9 @@ class TestAutoencoderModelOutput:
         assert torch.all(output.theta > 0), "theta should be positive"
 
         # Test that pi is in [0,1]
-        assert torch.all(output.pi >= 0) and torch.all(output.pi <= 1), "pi should be in [0,1]"
+        assert torch.all(output.pi >= 0) and torch.all(output.pi <= 1), (
+            "pi should be in [0,1]"
+        )
 
     def test_fork_autoencoder_decode_output_type(self, data_format, sample_input):
         """Test ForkAutoencoder.decode returns DecoderOutput."""
@@ -133,7 +135,9 @@ class TestAutoencoderModelOutput:
         assert torch.all(output.theta > 0), "theta should be positive"
 
         # Test that pi is in [0,1]
-        assert torch.all(output.pi >= 0) and torch.all(output.pi <= 1), "pi should be in [0,1]"
+        assert torch.all(output.pi >= 0) and torch.all(output.pi <= 1), (
+            "pi should be in [0,1]"
+        )
 
     def test_autoencoder_model_without_pi_theta(self, data_format, sample_input):
         """Test AutoencoderModel.decode with pi and theta disabled."""
@@ -203,4 +207,6 @@ class TestAutoencoderModelOutput:
         # Test that activation constraints are satisfied
         assert torch.all(model_output.mu >= 0), "mu should be non-negative"
         assert torch.all(model_output.theta > 0), "theta should be positive"
-        assert torch.all(model_output.pi >= 0) and torch.all(model_output.pi <= 1), "pi should be in [0,1]"
+        assert torch.all(model_output.pi >= 0) and torch.all(model_output.pi <= 1), (
+            "pi should be in [0,1]"
+        )

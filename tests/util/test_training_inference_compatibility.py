@@ -10,7 +10,6 @@ fixed in the inference pipeline, ensuring that:
 
 import inspect
 import json
-
 from unittest.mock import MagicMock, patch
 
 import anndata as ad
@@ -24,7 +23,11 @@ from scxpand.lightgbm.run_lightgbm_ import run_lightgbm_inference
 from scxpand.linear.sklearn_utils import run_linear_inference
 from scxpand.mlp.mlp_trainer import run_mlp_inference
 from scxpand.util.inference_utils import load_model, run_model_inference
-from scxpand.util.model_constants import BEST_CHECKPOINT_FILE, DATA_FORMAT_NPZ_FILE, SKLEARN_MODEL_FILE
+from scxpand.util.model_constants import (
+    BEST_CHECKPOINT_FILE,
+    DATA_FORMAT_NPZ_FILE,
+    SKLEARN_MODEL_FILE,
+)
 
 
 class TestTrainingInferenceCompatibility:
@@ -75,7 +78,9 @@ class TestTrainingInferenceCompatibility:
         mock_model = MagicMock()
 
         # Mock the LightGBM inference function to verify it receives data_format
-        with patch("scxpand.util.inference_utils.run_lightgbm_inference") as mock_inference:
+        with patch(
+            "scxpand.util.inference_utils.run_lightgbm_inference"
+        ) as mock_inference:
             mock_inference.return_value = np.random.rand(25)
 
             # This should NOT raise TypeError about unexpected keyword argument
@@ -144,7 +149,9 @@ class TestTrainingInferenceCompatibility:
 
         # Test Linear models - should receive batch_size (this was the bug)
         for model_type in ["logistic", "svm"]:
-            with patch("scxpand.util.inference_utils.run_linear_inference") as mock_inference:
+            with patch(
+                "scxpand.util.inference_utils.run_linear_inference"
+            ) as mock_inference:
                 mock_inference.return_value = np.random.rand(25)
 
                 run_model_inference(
@@ -176,7 +183,9 @@ class TestTrainingInferenceCompatibility:
         mock_model = MagicMock()
 
         # Mock the utility function that's actually called now
-        with patch("scxpand.lightgbm.run_lightgbm_._prepare_data_for_lightgbm_inference") as mock_prepare:
+        with patch(
+            "scxpand.lightgbm.run_lightgbm_._prepare_data_for_lightgbm_inference"
+        ) as mock_prepare:
             mock_prepare.return_value = np.random.randn(n_cells, n_genes)
 
             # Test file-based preprocessing
@@ -194,7 +203,9 @@ class TestTrainingInferenceCompatibility:
             assert call_args.kwargs["data_format"] is mock_data_format
             assert call_args.kwargs["data_path"] == file_path
             assert call_args.kwargs["adata"] is None
-            np.testing.assert_array_equal(call_args.kwargs["eval_row_inds"], np.arange(n_cells))
+            np.testing.assert_array_equal(
+                call_args.kwargs["eval_row_inds"], np.arange(n_cells)
+            )
 
             # Test in-memory preprocessing
             mock_prepare.reset_mock()
@@ -212,7 +223,9 @@ class TestTrainingInferenceCompatibility:
             assert call_args.kwargs["data_format"] is mock_data_format
             assert call_args.kwargs["adata"] is adata
             assert call_args.kwargs["data_path"] is None
-            np.testing.assert_array_equal(call_args.kwargs["eval_row_inds"], np.arange(n_cells))
+            np.testing.assert_array_equal(
+                call_args.kwargs["eval_row_inds"], np.arange(n_cells)
+            )
 
     def test_inference_function_signatures_compatibility(self):
         """Test that all inference functions have compatible signatures.
@@ -223,7 +236,13 @@ class TestTrainingInferenceCompatibility:
         # All inference functions are already imported at the top
 
         # Expected parameters that run_inference passes
-        expected_params = {"model", "data_format", "adata", "data_path", "eval_row_inds"}
+        expected_params = {
+            "model",
+            "data_format",
+            "adata",
+            "data_path",
+            "eval_row_inds",
+        }
 
         # Parameters that should be passed to batched models
         batched_params = {"batch_size", "num_workers"}
@@ -231,25 +250,39 @@ class TestTrainingInferenceCompatibility:
         # Check MLP inference
         mlp_sig = inspect.signature(run_mlp_inference)
         mlp_params = set(mlp_sig.parameters.keys())
-        assert expected_params.issubset(mlp_params), f"MLP missing params: {expected_params - mlp_params}"
-        assert batched_params.issubset(mlp_params), f"MLP missing batch params: {batched_params - mlp_params}"
+        assert expected_params.issubset(mlp_params), (
+            f"MLP missing params: {expected_params - mlp_params}"
+        )
+        assert batched_params.issubset(mlp_params), (
+            f"MLP missing batch params: {batched_params - mlp_params}"
+        )
 
         # Check Autoencoder inference
         ae_sig = inspect.signature(run_ae_inference)
         ae_params = set(ae_sig.parameters.keys())
-        assert expected_params.issubset(ae_params), f"AE missing params: {expected_params - ae_params}"
-        assert batched_params.issubset(ae_params), f"AE missing batch params: {batched_params - ae_params}"
+        assert expected_params.issubset(ae_params), (
+            f"AE missing params: {expected_params - ae_params}"
+        )
+        assert batched_params.issubset(ae_params), (
+            f"AE missing batch params: {batched_params - ae_params}"
+        )
 
         # Check Linear inference
         linear_sig = inspect.signature(run_linear_inference)
         linear_params = set(linear_sig.parameters.keys())
-        assert expected_params.issubset(linear_params), f"Linear missing params: {expected_params - linear_params}"
-        assert batched_params.issubset(linear_params), f"Linear missing batch params: {batched_params - linear_params}"
+        assert expected_params.issubset(linear_params), (
+            f"Linear missing params: {expected_params - linear_params}"
+        )
+        assert batched_params.issubset(linear_params), (
+            f"Linear missing batch params: {batched_params - linear_params}"
+        )
 
         # Check LightGBM inference (updated signature)
         lgb_sig = inspect.signature(run_lightgbm_inference)
         lgb_params = set(lgb_sig.parameters.keys())
-        assert expected_params.issubset(lgb_params), f"LightGBM missing params: {expected_params - lgb_params}"
+        assert expected_params.issubset(lgb_params), (
+            f"LightGBM missing params: {expected_params - lgb_params}"
+        )
         # Note: LightGBM doesn't use batching, so we don't check for batch_size/num_workers
 
     def test_data_format_consistency_across_models(self, mock_adata, mock_data_format):
@@ -313,10 +346,17 @@ class TestTrainingInferenceCompatibility:
             if model_type in ["mlp", "autoencoder"]:
                 (results_path / BEST_CHECKPOINT_FILE).touch()
                 # Create data_format files for neural networks
-                data_format_data = {"n_genes": 10, "gene_names": [f"g{i}" for i in range(10)]}
+                data_format_data = {
+                    "n_genes": 10,
+                    "gene_names": [f"g{i}" for i in range(10)],
+                }
                 with open(results_path / "data_format.json", "w") as f:
                     json.dump(data_format_data, f)
-                np.savez(results_path / DATA_FORMAT_NPZ_FILE, genes_mu=np.zeros(10), genes_sigma=np.ones(10))
+                np.savez(
+                    results_path / DATA_FORMAT_NPZ_FILE,
+                    genes_mu=np.zeros(10),
+                    genes_sigma=np.ones(10),
+                )
             else:
                 (results_path / SKLEARN_MODEL_FILE).touch()
 
@@ -358,7 +398,9 @@ class TestTrainingInferenceCompatibility:
             )
 
         # Test missing data (both adata and data_path are None)
-        with pytest.raises(ValueError, match="Either adata or data_path must be provided"):
+        with pytest.raises(
+            ValueError, match="Either adata or data_path must be provided"
+        ):
             run_model_inference(
                 model_type="mlp",
                 model=mock_model,
@@ -404,7 +446,9 @@ class TestTrainingInferenceCompatibility:
             assert call_kwargs["device"] == test_device
 
         # Test Linear models - should NOT receive device (they don't use it)
-        with patch("scxpand.util.inference_utils.run_linear_inference") as mock_inference:
+        with patch(
+            "scxpand.util.inference_utils.run_linear_inference"
+        ) as mock_inference:
             mock_inference.return_value = np.random.rand(25)
 
             run_model_inference(
@@ -445,7 +489,9 @@ class TestTrainingInferenceCompatibility:
                 )
 
                 call_kwargs = mock_inference.call_args.kwargs
-                np.testing.assert_array_equal(call_kwargs["eval_row_inds"], test_indices)
+                np.testing.assert_array_equal(
+                    call_kwargs["eval_row_inds"], test_indices
+                )
 
 
 class TestRegressionPrevention:
@@ -455,20 +501,27 @@ class TestRegressionPrevention:
         """Regression test: LightGBM inference must accept data_format parameter."""
         # Verify the function signature includes data_format
         sig = inspect.signature(run_lightgbm_inference)
-        assert "data_format" in sig.parameters, "LightGBM inference must accept data_format parameter"
+        assert "data_format" in sig.parameters, (
+            "LightGBM inference must accept data_format parameter"
+        )
 
         # Verify data_format is not optional (has no default value of None)
         data_format_param = sig.parameters["data_format"]
         assert (
-            data_format_param.default == inspect.Parameter.empty or data_format_param.annotation != "DataFormat | None"
+            data_format_param.default == inspect.Parameter.empty
+            or data_format_param.annotation != "DataFormat | None"
         ), "data_format should be required parameter"
 
     def test_batch_size_propagation_regression(self):
         """Regression test: batch_size must be passed to linear models."""
         # Verify the function signature includes batch_size and num_workers
         sig = inspect.signature(run_linear_inference)
-        assert "batch_size" in sig.parameters, "Linear inference must accept batch_size parameter"
-        assert "num_workers" in sig.parameters, "Linear inference must accept num_workers parameter"
+        assert "batch_size" in sig.parameters, (
+            "Linear inference must accept batch_size parameter"
+        )
+        assert "num_workers" in sig.parameters, (
+            "Linear inference must accept num_workers parameter"
+        )
 
     def test_preprocessing_consistency_regression(self):
         """Regression test: LightGBM inference must use same preprocessing as training."""
@@ -492,7 +545,9 @@ class TestRegressionPrevention:
         mock_model.predict_proba.return_value = np.random.rand(5, 2)
 
         # Test that the utility function is called (which handles preprocessing)
-        with patch("scxpand.lightgbm.run_lightgbm_._prepare_data_for_lightgbm_inference") as mock_prepare:
+        with patch(
+            "scxpand.lightgbm.run_lightgbm_._prepare_data_for_lightgbm_inference"
+        ) as mock_prepare:
             mock_prepare.return_value = X
 
             # This should call the utility function for data preparation

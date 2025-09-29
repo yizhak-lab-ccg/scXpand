@@ -1,14 +1,12 @@
 """Tests for linear trainer components."""
 
 import tempfile
-
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
 import pytest
-
 from torch.utils.data import DataLoader
 
 from scxpand.data_util.dataset import CellsDataset
@@ -85,7 +83,11 @@ class TestTrainingSession:
         mock_logger = MagicMock()
 
         session.update_best_model(
-            model=model, current_score=0.85, epoch=15, dev_set_metrics={"AUROC": 0.8}, logger=mock_logger
+            model=model,
+            current_score=0.85,
+            epoch=15,
+            dev_set_metrics={"AUROC": 0.8},
+            logger=mock_logger,
         )
 
         assert session.best_score == 0.85
@@ -153,12 +155,20 @@ class TestLinearTrainer:
             return_value=iter(
                 [
                     {
-                        "x": MagicMock(numpy=MagicMock(return_value=np.random.rand(25, 10))),
-                        "y": MagicMock(numpy=MagicMock(return_value=np.random.randint(0, 2, 25))),
+                        "x": MagicMock(
+                            numpy=MagicMock(return_value=np.random.rand(25, 10))
+                        ),
+                        "y": MagicMock(
+                            numpy=MagicMock(return_value=np.random.randint(0, 2, 25))
+                        ),
                     },
                     {
-                        "x": MagicMock(numpy=MagicMock(return_value=np.random.rand(25, 10))),
-                        "y": MagicMock(numpy=MagicMock(return_value=np.random.randint(0, 2, 25))),
+                        "x": MagicMock(
+                            numpy=MagicMock(return_value=np.random.rand(25, 10))
+                        ),
+                        "y": MagicMock(
+                            numpy=MagicMock(return_value=np.random.randint(0, 2, 25))
+                        ),
                     },
                 ]
             )
@@ -222,7 +232,9 @@ class TestLinearTrainer:
 
     @patch("scxpand.linear.linear_trainer.calculate_metrics")
     @patch("scxpand.linear.linear_trainer.flatten_nested_dict")
-    def test_evaluate_model(self, mock_flatten, mock_calc_metrics, mock_eval_dataset, mock_eval_dataloader):
+    def test_evaluate_model(
+        self, mock_flatten, mock_calc_metrics, mock_eval_dataset, mock_eval_dataloader
+    ):
         """Test model evaluation."""
         prm = LinearClassifierParam()
         base_save_dir = Path("test_dir")
@@ -235,7 +247,9 @@ class TestLinearTrainer:
         mock_flatten.return_value = {"harmonic_avg/AUROC": 0.75}
 
         # Mock LinearBatchPredictor
-        with patch("scxpand.linear.linear_trainer.LinearBatchPredictor") as mock_predictor_class:
+        with patch(
+            "scxpand.linear.linear_trainer.LinearBatchPredictor"
+        ) as mock_predictor_class:
             mock_predictor = MagicMock()
             mock_predictor.predict_all.return_value = np.random.rand(50)
             mock_predictor_class.return_value = mock_predictor
@@ -262,7 +276,9 @@ class TestLinearTrainer:
 
     @patch("scxpand.linear.linear_trainer.evaluate_predictions_and_save")
     @patch("scxpand.linear.linear_trainer.joblib.dump")
-    def test_finalize_training(self, mock_dump, mock_eval_save, mock_eval_dataset, mock_eval_dataloader):
+    def test_finalize_training(
+        self, mock_dump, mock_eval_save, mock_eval_dataset, mock_eval_dataloader
+    ):
         """Test training finalization."""
         prm = LinearClassifierParam()
         base_save_dir = Path("test_dir")
@@ -280,7 +296,9 @@ class TestLinearTrainer:
             mock_eval_save.return_value = {"AUROC": 0.8, "accuracy": 0.75}
 
             # Mock LinearBatchPredictor
-            with patch("scxpand.linear.linear_trainer.LinearBatchPredictor") as mock_predictor_class:
+            with patch(
+                "scxpand.linear.linear_trainer.LinearBatchPredictor"
+            ) as mock_predictor_class:
                 mock_predictor = MagicMock()
                 mock_predictor.predict_all.return_value = np.random.rand(50)
                 mock_predictor_class.return_value = mock_predictor

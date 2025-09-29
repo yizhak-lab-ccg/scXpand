@@ -35,18 +35,30 @@ class TestFetchModelAndRunInference:
         mock_info.version = "1.0.0"
         return mock_info
 
-    def test_fetch_model_and_run_inference_model_name_success(self, tmp_path, mock_adata, mock_model_info):
+    def test_fetch_model_and_run_inference_model_name_success(
+        self, tmp_path, mock_adata, mock_model_info
+    ):
         """Test successful inference with model name."""
         data_path = tmp_path / "test_data.h5ad"
         mock_adata.write_h5ad(data_path)
 
-        mock_results = InferenceResults(predictions=np.array([0.8, 0.2, 0.9]), metrics={"AUROC": 0.85})
+        mock_results = InferenceResults(
+            predictions=np.array([0.8, 0.2, 0.9]), metrics={"AUROC": 0.85}
+        )
 
         with (
-            patch("scxpand.pretrained.inference_api.get_pretrained_model_info") as mock_get_info,
-            patch("scxpand.pretrained.inference_api.download_pretrained_model") as mock_download,
-            patch("scxpand.pretrained.inference_api.run_prediction_pipeline") as mock_pipeline,
-            patch("scxpand.pretrained.inference_api.load_model_type") as mock_load_model_type,
+            patch(
+                "scxpand.pretrained.inference_api.get_pretrained_model_info"
+            ) as mock_get_info,
+            patch(
+                "scxpand.pretrained.inference_api.download_pretrained_model"
+            ) as mock_download,
+            patch(
+                "scxpand.pretrained.inference_api.run_prediction_pipeline"
+            ) as mock_pipeline,
+            patch(
+                "scxpand.pretrained.inference_api.load_model_type"
+            ) as mock_load_model_type,
         ):
             # Setup mocks
             mock_get_info.return_value = mock_model_info
@@ -79,25 +91,39 @@ class TestFetchModelAndRunInference:
             assert result.model_info is not None
             assert result.model_info.model_name == "test_model"
             assert result.model_info.version == "1.0.0"
-            assert result.model_info.model_type == "mlp"  # Auto-detected from model_type.txt
+            assert (
+                result.model_info.model_type == "mlp"
+            )  # Auto-detected from model_type.txt
             assert result.model_info.source == "registry"
 
-    def test_fetch_model_and_run_inference_model_doi_success(self, tmp_path, mock_adata):
+    def test_fetch_model_and_run_inference_model_doi_success(
+        self, tmp_path, mock_adata
+    ):
         """Test successful inference with model DOI."""
         data_path = tmp_path / "test_data.h5ad"
         mock_adata.write_h5ad(data_path)
 
-        mock_results = InferenceResults(predictions=np.array([0.7, 0.3, 0.8]), metrics={"AUROC": 0.82})
+        mock_results = InferenceResults(
+            predictions=np.array([0.7, 0.3, 0.8]), metrics={"AUROC": 0.82}
+        )
 
         with (
-            patch("scxpand.pretrained.inference_api.download_pretrained_model") as mock_download,
-            patch("scxpand.pretrained.inference_api.run_prediction_pipeline") as mock_pipeline,
-            patch("scxpand.pretrained.inference_api.load_model_type") as mock_load_model_type,
+            patch(
+                "scxpand.pretrained.inference_api.download_pretrained_model"
+            ) as mock_download,
+            patch(
+                "scxpand.pretrained.inference_api.run_prediction_pipeline"
+            ) as mock_pipeline,
+            patch(
+                "scxpand.pretrained.inference_api.load_model_type"
+            ) as mock_load_model_type,
         ):
             # Setup mocks
             mock_download.return_value = Path("/cache/external_model")
             mock_pipeline.return_value = mock_results
-            mock_load_model_type.return_value = "autoencoder"  # Auto-detected model type
+            mock_load_model_type.return_value = (
+                "autoencoder"  # Auto-detected model type
+            )
 
             _result = fetch_model_and_run_inference(
                 model_url="https://your-platform.com/model.zip",
@@ -106,7 +132,9 @@ class TestFetchModelAndRunInference:
             )
 
             # Verify function calls
-            mock_download.assert_called_once_with(model_url="https://your-platform.com/model.zip")
+            mock_download.assert_called_once_with(
+                model_url="https://your-platform.com/model.zip"
+            )
             mock_pipeline.assert_called_once()
 
             # Check pipeline arguments
@@ -116,15 +144,27 @@ class TestFetchModelAndRunInference:
             assert pipeline_kwargs["num_workers"] == 2
             # model_type is now auto-detected from model_type.txt, not passed as parameter
 
-    def test_fetch_model_and_run_inference_adata_input(self, mock_adata, mock_model_info):
+    def test_fetch_model_and_run_inference_adata_input(
+        self, mock_adata, mock_model_info
+    ):
         """Test inference with in-memory AnnData input."""
-        mock_results = InferenceResults(predictions=np.array([0.6, 0.4, 0.7]), metrics={"AUROC": 0.80})
+        mock_results = InferenceResults(
+            predictions=np.array([0.6, 0.4, 0.7]), metrics={"AUROC": 0.80}
+        )
 
         with (
-            patch("scxpand.pretrained.inference_api.get_pretrained_model_info") as mock_get_info,
-            patch("scxpand.pretrained.inference_api.download_pretrained_model") as mock_download,
-            patch("scxpand.pretrained.inference_api.run_prediction_pipeline") as mock_pipeline,
-            patch("scxpand.pretrained.inference_api.load_model_type") as mock_load_model_type,
+            patch(
+                "scxpand.pretrained.inference_api.get_pretrained_model_info"
+            ) as mock_get_info,
+            patch(
+                "scxpand.pretrained.inference_api.download_pretrained_model"
+            ) as mock_download,
+            patch(
+                "scxpand.pretrained.inference_api.run_prediction_pipeline"
+            ) as mock_pipeline,
+            patch(
+                "scxpand.pretrained.inference_api.load_model_type"
+            ) as mock_load_model_type,
         ):
             # Setup mocks
             mock_get_info.return_value = mock_model_info
@@ -146,12 +186,16 @@ class TestFetchModelAndRunInference:
 
     def test_fetch_model_and_run_inference_no_model_source_error(self):
         """Test error when no model source is provided."""
-        with pytest.raises(ValueError, match="Either model_name or model_url must be provided"):
+        with pytest.raises(
+            ValueError, match="Either model_name or model_url must be provided"
+        ):
             fetch_model_and_run_inference(data_path="test.h5ad")
 
     def test_fetch_model_and_run_inference_both_model_sources_error(self):
         """Test error when both model sources are provided."""
-        with pytest.raises(ValueError, match="Cannot specify both model_name and model_url"):
+        with pytest.raises(
+            ValueError, match="Cannot specify both model_name and model_url"
+        ):
             fetch_model_and_run_inference(
                 model_name="test_model",
                 model_url="https://your-platform.com/model.zip",
@@ -160,7 +204,9 @@ class TestFetchModelAndRunInference:
 
     def test_fetch_model_and_run_inference_no_data_source_error(self):
         """Test error when no data source is provided."""
-        with pytest.raises(ValueError, match="Either adata or data_path must be provided"):
+        with pytest.raises(
+            ValueError, match="Either adata or data_path must be provided"
+        ):
             fetch_model_and_run_inference(model_name="test_model")
 
     def test_fetch_model_and_run_inference_missing_data_file_error(self, tmp_path):
@@ -168,9 +214,13 @@ class TestFetchModelAndRunInference:
         missing_file = tmp_path / "missing.h5ad"
 
         with pytest.raises(FileNotFoundError, match="Data file not found"):
-            fetch_model_and_run_inference(model_name="test_model", data_path=str(missing_file))
+            fetch_model_and_run_inference(
+                model_name="test_model", data_path=str(missing_file)
+            )
 
-    def test_fetch_model_and_run_inference_default_batch_size(self, tmp_path, mock_adata, mock_model_info):
+    def test_fetch_model_and_run_inference_default_batch_size(
+        self, tmp_path, mock_adata, mock_model_info
+    ):
         """Test that default batch size is applied correctly."""
         data_path = tmp_path / "test_data.h5ad"
         mock_adata.write_h5ad(data_path)
@@ -178,9 +228,15 @@ class TestFetchModelAndRunInference:
         mock_results = InferenceResults(predictions=np.array([0.5]), metrics={})
 
         with (
-            patch("scxpand.pretrained.inference_api.get_pretrained_model_info") as mock_get_info,
-            patch("scxpand.pretrained.inference_api.download_pretrained_model") as mock_download,
-            patch("scxpand.pretrained.inference_api.run_prediction_pipeline") as mock_pipeline,
+            patch(
+                "scxpand.pretrained.inference_api.get_pretrained_model_info"
+            ) as mock_get_info,
+            patch(
+                "scxpand.pretrained.inference_api.download_pretrained_model"
+            ) as mock_download,
+            patch(
+                "scxpand.pretrained.inference_api.run_prediction_pipeline"
+            ) as mock_pipeline,
         ):
             # Setup mocks
             mock_get_info.return_value = mock_model_info
@@ -197,7 +253,9 @@ class TestFetchModelAndRunInference:
             pipeline_kwargs = mock_pipeline.call_args[1]
             assert pipeline_kwargs["batch_size"] == 1024  # Default value
 
-    def test_fetch_model_and_run_inference_no_ground_truth(self, tmp_path, mock_adata, mock_model_info):
+    def test_fetch_model_and_run_inference_no_ground_truth(
+        self, tmp_path, mock_adata, mock_model_info
+    ):
         """Test inference when ground truth is not available."""
         data_path = tmp_path / "test_data.h5ad"
         mock_adata.write_h5ad(data_path)
@@ -208,9 +266,15 @@ class TestFetchModelAndRunInference:
         )
 
         with (
-            patch("scxpand.pretrained.inference_api.get_pretrained_model_info") as mock_get_info,
-            patch("scxpand.pretrained.inference_api.download_pretrained_model") as mock_download,
-            patch("scxpand.pretrained.inference_api.run_prediction_pipeline") as mock_pipeline,
+            patch(
+                "scxpand.pretrained.inference_api.get_pretrained_model_info"
+            ) as mock_get_info,
+            patch(
+                "scxpand.pretrained.inference_api.download_pretrained_model"
+            ) as mock_download,
+            patch(
+                "scxpand.pretrained.inference_api.run_prediction_pipeline"
+            ) as mock_pipeline,
         ):
             # Setup mocks
             mock_get_info.return_value = mock_model_info

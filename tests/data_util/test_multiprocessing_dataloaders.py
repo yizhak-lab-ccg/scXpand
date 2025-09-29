@@ -17,7 +17,6 @@ import sys
 import tempfile
 import threading
 import time
-
 from unittest.mock import patch
 
 import anndata as ad
@@ -79,8 +78,12 @@ def sample_data_format(sample_adata):
     )
 
     # Create dummy normalization parameters
-    data_format.genes_mu = np.random.normal(0, 1, sample_adata.n_vars).astype(np.float32)
-    data_format.genes_sigma = np.random.uniform(0.5, 2.0, sample_adata.n_vars).astype(np.float32)
+    data_format.genes_mu = np.random.normal(0, 1, sample_adata.n_vars).astype(
+        np.float32
+    )
+    data_format.genes_sigma = np.random.uniform(0.5, 2.0, sample_adata.n_vars).astype(
+        np.float32
+    )
 
     return data_format
 
@@ -124,7 +127,9 @@ class TestSamplerPickling:
         # Note: They won't be identical because RNG state advances during iteration
         # But they should have same structure
         assert len(original_batches) == len(unpickled_batches)
-        for orig_batch, unpick_batch in zip(original_batches, unpickled_batches):
+        for orig_batch, unpick_batch in zip(
+            original_batches, unpickled_batches, strict=False
+        ):
             assert len(orig_batch) == len(unpick_batch)
 
     def test_balanced_types_sampler_pickling(self, sample_dataset):
@@ -160,8 +165,12 @@ class TestRNGIsolation:
         gen2.manual_seed(42)
 
         # Apply same augmentation with same generators - should be identical
-        result1 = apply_pre_normalization_augmentations(X.clone(), mask_rate=0.3, generator=gen1)
-        result2 = apply_pre_normalization_augmentations(X.clone(), mask_rate=0.3, generator=gen2)
+        result1 = apply_pre_normalization_augmentations(
+            X.clone(), mask_rate=0.3, generator=gen1
+        )
+        result2 = apply_pre_normalization_augmentations(
+            X.clone(), mask_rate=0.3, generator=gen2
+        )
 
         assert torch.allclose(result1, result2)
 
@@ -172,8 +181,12 @@ class TestRNGIsolation:
         gen4.manual_seed(456)
 
         # Apply same augmentation with different generators - should be different
-        result3 = apply_pre_normalization_augmentations(X.clone(), mask_rate=0.3, generator=gen3)
-        result4 = apply_pre_normalization_augmentations(X.clone(), mask_rate=0.3, generator=gen4)
+        result3 = apply_pre_normalization_augmentations(
+            X.clone(), mask_rate=0.3, generator=gen3
+        )
+        result4 = apply_pre_normalization_augmentations(
+            X.clone(), mask_rate=0.3, generator=gen4
+        )
 
         assert not torch.allclose(result3, result4)
 
@@ -187,8 +200,12 @@ class TestRNGIsolation:
         gen2 = torch.Generator()
         gen2.manual_seed(42)
 
-        result1 = apply_post_normalization_augmentations(X.clone(), noise_std=0.1, generator=gen1)
-        result2 = apply_post_normalization_augmentations(X.clone(), noise_std=0.1, generator=gen2)
+        result1 = apply_post_normalization_augmentations(
+            X.clone(), noise_std=0.1, generator=gen1
+        )
+        result2 = apply_post_normalization_augmentations(
+            X.clone(), noise_std=0.1, generator=gen2
+        )
 
         assert torch.allclose(result1, result2)
 
@@ -198,8 +215,12 @@ class TestRNGIsolation:
         gen4 = torch.Generator()
         gen4.manual_seed(456)
 
-        result3 = apply_post_normalization_augmentations(X.clone(), noise_std=0.1, generator=gen3)
-        result4 = apply_post_normalization_augmentations(X.clone(), noise_std=0.1, generator=gen4)
+        result3 = apply_post_normalization_augmentations(
+            X.clone(), noise_std=0.1, generator=gen3
+        )
+        result4 = apply_post_normalization_augmentations(
+            X.clone(), noise_std=0.1, generator=gen4
+        )
 
         assert not torch.allclose(result3, result4)
 
@@ -301,16 +322,22 @@ class TestDataLoaderMultiprocessing:
 
         return False, ""
 
-    @pytest.mark.parametrize("num_workers", [0, 1])  # Reduced from [0, 1, 2] to speed up test
+    @pytest.mark.parametrize(
+        "num_workers", [0, 1]
+    )  # Reduced from [0, 1, 2] to speed up test
     def test_train_dataloader_with_workers(self, sample_dataset, num_workers):
         """Test that train dataloader works with different worker counts."""
         should_skip, reason = self._should_skip_multiprocessing_test(num_workers)
         if should_skip:
             pytest.skip(reason)
 
-        loader_params = DataLoaderParams(batch_size=8, shuffle=True, sampler_type="balanced_labels")
+        loader_params = DataLoaderParams(
+            batch_size=8, shuffle=True, sampler_type="balanced_labels"
+        )
 
-        dataloader = create_train_dataloader(sample_dataset, loader_params, num_workers=num_workers)
+        dataloader = create_train_dataloader(
+            sample_dataset, loader_params, num_workers=num_workers
+        )
 
         # Test that we can iterate through the dataloader
         batches = []
@@ -327,7 +354,9 @@ class TestDataLoaderMultiprocessing:
 
         assert len(batches) > 0
 
-    @pytest.mark.parametrize("num_workers", [0, 1])  # Reduced from [0, 1, 2] to speed up test
+    @pytest.mark.parametrize(
+        "num_workers", [0, 1]
+    )  # Reduced from [0, 1, 2] to speed up test
     def test_eval_dataloader_with_workers(self, sample_dataset, num_workers):
         """Test that eval dataloader works with different worker counts."""
         should_skip, reason = self._should_skip_multiprocessing_test(num_workers)
@@ -341,7 +370,9 @@ class TestDataLoaderMultiprocessing:
             adata=sample_dataset._adata,
         )
 
-        dataloader = create_eval_dataloader(eval_dataset, batch_size=8, num_workers=num_workers)
+        dataloader = create_eval_dataloader(
+            eval_dataset, batch_size=8, num_workers=num_workers
+        )
 
         # Test that we can iterate through the dataloader
         batches = []
@@ -368,8 +399,12 @@ class TestDataLoaderMultiprocessing:
         try:
             mp.set_start_method("fork", force=True)
 
-            loader_params = DataLoaderParams(batch_size=4, shuffle=True, sampler_type="balanced_labels")
-            dataloader = create_train_dataloader(sample_dataset, loader_params, num_workers=1)
+            loader_params = DataLoaderParams(
+                batch_size=4, shuffle=True, sampler_type="balanced_labels"
+            )
+            dataloader = create_train_dataloader(
+                sample_dataset, loader_params, num_workers=1
+            )
 
             # Should be able to iterate without issues
             batch = next(iter(dataloader))
@@ -392,12 +427,16 @@ class TestDataLoaderMultiprocessing:
         try:
             mp.set_start_method("spawn", force=True)
 
-            loader_params = DataLoaderParams(batch_size=4, shuffle=True, sampler_type="balanced_labels")
+            loader_params = DataLoaderParams(
+                batch_size=4, shuffle=True, sampler_type="balanced_labels"
+            )
 
             # With spawn method, we expect potential issues
             # This test documents the behavior rather than asserting success
             try:
-                dataloader = create_train_dataloader(sample_dataset, loader_params, num_workers=1)
+                dataloader = create_train_dataloader(
+                    sample_dataset, loader_params, num_workers=1
+                )
                 batch = next(iter(dataloader))
                 # If we get here, spawn method worked (which is fine)
                 assert "x" in batch
@@ -422,10 +461,14 @@ class TestDataLoaderMultiprocessing:
 
         # Windows file locking issues mean we need special handling
         with windows_safe_context_manager():
-            loader_params = DataLoaderParams(batch_size=4, shuffle=False, sampler_type="random")
+            loader_params = DataLoaderParams(
+                batch_size=4, shuffle=False, sampler_type="random"
+            )
 
             # Test with num_workers=0 (should always work)
-            dataloader = create_train_dataloader(sample_dataset, loader_params, num_workers=0)
+            dataloader = create_train_dataloader(
+                sample_dataset, loader_params, num_workers=0
+            )
             batch = next(iter(dataloader))
             assert "x" in batch
 
@@ -536,7 +579,9 @@ class TestDatasetPickling:
         # Should have same length
         assert len(unpickled_dataset) == len(sample_dataset)
 
-    @pytest.mark.skipif(platform.system() == "Windows", reason="Windows file locking issues")
+    @pytest.mark.skipif(
+        platform.system() == "Windows", reason="Windows file locking issues"
+    )
     def test_dataset_pickling_with_file_handles(self, sample_adata, sample_data_format):
         """Test dataset pickling behavior with open file handles."""
         with tempfile.NamedTemporaryFile(suffix=".h5ad", delete=False) as tmp_file:
@@ -645,7 +690,9 @@ class TestWorkerProcessBehavior:
             )
 
             with patch("torch.utils.data.get_worker_info") as mock_worker_info:
-                mock_worker_info.return_value = type("WorkerInfo", (), {"id": worker_id})()
+                mock_worker_info.return_value = type(
+                    "WorkerInfo", (), {"id": worker_id}
+                )()
                 gen = dataset._get_worker_generator()
                 generators.append(gen)
                 random_outputs.append(torch.rand(3, generator=gen))
@@ -673,7 +720,9 @@ class TestErrorHandlingAndEdgeCases:
         # Should return empty tensors with correct structure
         assert "x" in result
         assert result["x"].shape[0] == 0  # Empty batch dimension
-        assert result["x"].shape[1] == sample_dataset.n_genes  # Correct feature dimension
+        assert (
+            result["x"].shape[1] == sample_dataset.n_genes
+        )  # Correct feature dimension
 
         if "y" in result:
             assert result["y"].shape[0] == 0  # Empty batch dimension
@@ -687,7 +736,9 @@ class TestErrorHandlingAndEdgeCases:
 
     def test_dataloader_with_zero_batch_size(self, sample_dataset):
         """Test dataloader creation with invalid batch sizes."""
-        loader_params = DataLoaderParams(batch_size=0, shuffle=True, sampler_type="random")
+        loader_params = DataLoaderParams(
+            batch_size=0, shuffle=True, sampler_type="random"
+        )
 
         with pytest.raises(ValueError, match="batch_size"):
             create_train_dataloader(sample_dataset, loader_params, num_workers=0)
@@ -734,7 +785,9 @@ class TestErrorHandlingAndEdgeCases:
                     gen = sample_dataset._get_worker_generator()
                     random_val = torch.rand(1, generator=gen)
                     results.append(random_val.item())
-                    time.sleep(0.001)  # Small delay to increase chance of race conditions
+                    time.sleep(
+                        0.001
+                    )  # Small delay to increase chance of race conditions
             except Exception as e:
                 exceptions.append(e)
 
@@ -770,7 +823,9 @@ class TestErrorHandlingAndEdgeCases:
 
         # Reference count should be similar (allowing for some variation)
         final_refs = sys.getrefcount(sample_dataset)
-        assert abs(final_refs - initial_refs) <= 2, f"Memory leak detected: {initial_refs} -> {final_refs}"
+        assert abs(final_refs - initial_refs) <= 2, (
+            f"Memory leak detected: {initial_refs} -> {final_refs}"
+        )
 
     @pytest.mark.skipif(platform.system() == "Windows", reason="Unix-specific test")
     def test_unix_fork_behavior_simulation(self, sample_dataset):

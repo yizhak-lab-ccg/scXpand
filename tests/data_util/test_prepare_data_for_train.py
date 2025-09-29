@@ -1,12 +1,10 @@
 import tempfile
-
 from pathlib import Path
 
 import anndata as ad
 import numpy as np
 import pandas as pd
 import pytest
-
 from anndata import AnnData
 from scipy.sparse import csr_matrix
 
@@ -45,7 +43,9 @@ def mock_adata_with_required_columns() -> AnnData:
             "cancer_type": [patients[i][2] for i in patient_assignments],
             "tissue_type": np.random.choice(["tissue1", "tissue2"], size=n_cells),
             "imputed_labels": np.random.choice(["label1", "label2"], size=n_cells),
-            "sample": np.random.choice(["sample1", "sample2", "sample3", "sample4"], size=n_cells),
+            "sample": np.random.choice(
+                ["sample1", "sample2", "sample3", "sample4"], size=n_cells
+            ),
         }
     )
     obs.index = obs.index.astype(str)
@@ -54,9 +54,14 @@ def mock_adata_with_required_columns() -> AnnData:
 
 
 class TestPrepareDataForTraining:
-    def test_prepare_data_with_adata_input(self, mock_adata_with_required_columns: AnnData) -> None:
+    def test_prepare_data_with_adata_input(
+        self, mock_adata_with_required_columns: AnnData
+    ) -> None:
         """Test prepare_data_for_training with adata input."""
-        with tempfile.TemporaryDirectory() as tmp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as tmp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             # Save adata to file since data_path is now mandatory
             data_file = Path(tmp_dir) / "test_data.h5ad"
             mock_adata_with_required_columns.write_h5ad(data_file)
@@ -88,14 +93,21 @@ class TestPrepareDataForTraining:
             assert len(result.row_inds_train) + len(result.row_inds_dev) == 1000
             # Patient-based splitting may not result in exact percentages
             train_ratio = len(result.row_inds_train) / 1000
-            assert 0.6 <= train_ratio <= 0.9  # Should be roughly 80% but allow variation due to patient boundaries
+            assert (
+                0.6 <= train_ratio <= 0.9
+            )  # Should be roughly 80% but allow variation due to patient boundaries
 
             # Verify adata is processed
             # Note: backing mode now depends on whether preprocessing was applied
 
-    def test_prepare_data_with_data_path_input(self, mock_adata_with_required_columns: AnnData) -> None:
+    def test_prepare_data_with_data_path_input(
+        self, mock_adata_with_required_columns: AnnData
+    ) -> None:
         """Test prepare_data_for_training with data_path input (no adata)."""
-        with tempfile.TemporaryDirectory() as tmp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as tmp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             # Save the adata to a file
             data_file = Path(tmp_dir) / "test_data.h5ad"
             mock_adata_with_required_columns.write_h5ad(data_file)
@@ -121,9 +133,14 @@ class TestPrepareDataForTraining:
             # Verify adata is backed (data loaded from disk)
             assert result.adata.isbacked
 
-    def test_prepare_data_separated_methods_equivalence(self, mock_adata_with_required_columns: AnnData) -> None:
+    def test_prepare_data_separated_methods_equivalence(
+        self, mock_adata_with_required_columns: AnnData
+    ) -> None:
         """Test that using separated methods produces the same result as the integrated function."""
-        with tempfile.TemporaryDirectory() as tmp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as tmp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             tmp_path = Path(tmp_dir)
             # Save the adata to a file
             data_file = tmp_path / "test_data.h5ad"
@@ -169,15 +186,28 @@ class TestPrepareDataForTraining:
                 adata=adata_loaded,
                 row_inds_train=row_inds_train,
             )
-            adata_manual = data_format_manual.prepare_adata_for_training(adata_loaded, reorder_genes=False)
+            adata_manual = data_format_manual.prepare_adata_for_training(
+                adata_loaded, reorder_genes=False
+            )
             ctx.register_adata(adata_manual)
 
             # Compare results
             assert result_integrated.data_format.n_genes == data_format_manual.n_genes
-            assert result_integrated.data_format.gene_names == data_format_manual.gene_names
-            assert np.allclose(result_integrated.data_format.genes_mu, data_format_manual.genes_mu)
-            assert np.allclose(result_integrated.data_format.genes_sigma, data_format_manual.genes_sigma)
-            assert result_integrated.data_format.aux_categorical_mappings == data_format_manual.aux_categorical_mappings
+            assert (
+                result_integrated.data_format.gene_names
+                == data_format_manual.gene_names
+            )
+            assert np.allclose(
+                result_integrated.data_format.genes_mu, data_format_manual.genes_mu
+            )
+            assert np.allclose(
+                result_integrated.data_format.genes_sigma,
+                data_format_manual.genes_sigma,
+            )
+            assert (
+                result_integrated.data_format.aux_categorical_mappings
+                == data_format_manual.aux_categorical_mappings
+            )
 
             # Compare data splits (should be identical with same random seed)
             assert np.array_equal(result_integrated.row_inds_train, row_inds_train)
@@ -186,7 +216,10 @@ class TestPrepareDataForTraining:
             # Compare processed adata objects
             assert result_integrated.adata.n_obs == adata_manual.n_obs
             assert result_integrated.adata.n_vars == adata_manual.n_vars
-            assert result_integrated.adata.var_names.tolist() == adata_manual.var_names.tolist()
+            assert (
+                result_integrated.adata.var_names.tolist()
+                == adata_manual.var_names.tolist()
+            )
 
             # Compare processed expression matrices
             # Handle different matrix types: sparse matrices, HDF5 datasets, CSRDatasets, dense arrays
@@ -195,8 +228,14 @@ class TestPrepareDataForTraining:
                     return X.toarray()
                 elif str(type(X)).endswith("_CSRDataset'>"):  # AnnData CSRDataset
                     matrix = X[:]  # This returns a sparse matrix
-                    return matrix.toarray() if hasattr(matrix, "toarray") else np.array(matrix)
-                elif hasattr(X, "shape") and hasattr(X, "__getitem__"):  # HDF5 dataset or array-like
+                    return (
+                        matrix.toarray()
+                        if hasattr(matrix, "toarray")
+                        else np.array(matrix)
+                    )
+                elif hasattr(X, "shape") and hasattr(
+                    X, "__getitem__"
+                ):  # HDF5 dataset or array-like
                     return np.array(X[:])
                 else:
                     return np.array(X)
@@ -206,9 +245,14 @@ class TestPrepareDataForTraining:
 
             assert np.allclose(X_integrated, X_manual, rtol=1e-6, atol=1e-6)
 
-    def test_prepare_data_resume_functionality(self, mock_adata_with_required_columns: AnnData) -> None:
+    def test_prepare_data_resume_functionality(
+        self, mock_adata_with_required_columns: AnnData
+    ) -> None:
         """Test the resume functionality."""
-        with tempfile.TemporaryDirectory() as tmp_dir, windows_safe_context_manager() as ctx:
+        with (
+            tempfile.TemporaryDirectory() as tmp_dir,
+            windows_safe_context_manager() as ctx,
+        ):
             # Save the adata to a file
             data_file = Path(tmp_dir) / "test_data.h5ad"
             mock_adata_with_required_columns.write_h5ad(data_file)

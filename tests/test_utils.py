@@ -2,7 +2,6 @@ import gc
 import os
 import platform
 import time
-
 from pathlib import Path
 
 import pytest
@@ -78,6 +77,30 @@ def ensure_h5ad_handles_closed(*adatas):
         if adata is not None:
             close_adata_safely(adata)
     gc.collect()  # Force cleanup
+
+
+def close_optuna_storage(study):
+    """Safely close Optuna storage to avoid Windows file lock issues."""
+    if study is None:
+        return
+
+    # Get the underlying storage object
+    storage = study._storage
+    if storage is None:
+        return
+
+    # For RDBStorage (like SQLite), we can access the engine and dispose of it
+    if hasattr(storage, "_engine"):
+        # This is an internal API, but necessary for reliable cleanup on Windows
+        try:
+            storage._engine.dispose()
+        except Exception:
+            # Ignore errors during cleanup
+            pass
+
+    # Force garbage collection
+    del study
+    gc.collect()
 
 
 def windows_safe_tempfile_cleanup(temp_dir, *file_patterns):

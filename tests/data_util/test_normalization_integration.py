@@ -1,7 +1,6 @@
 """Integration tests for normalization functions with LightGBM and dataset components."""
 
 import tempfile
-
 from pathlib import Path
 
 import anndata as ad
@@ -9,7 +8,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import torch
-
 from scipy.sparse import csr_matrix
 from torch.utils.data import DataLoader
 
@@ -60,7 +58,9 @@ class TestLightGBMIntegration:
                 "cancer_type": [patients[i][2] for i in patient_assignments],
                 "tissue_type": np.random.choice(["tissue1", "tissue2"], size=n_cells),
                 "imputed_labels": np.random.choice(["label1", "label2"], size=n_cells),
-                "sample": np.random.choice(["sample1", "sample2", "sample3", "sample4"], size=n_cells),
+                "sample": np.random.choice(
+                    ["sample1", "sample2", "sample3", "sample4"], size=n_cells
+                ),
             }
         )
         obs.index = obs.index.astype(str)
@@ -133,7 +133,9 @@ class TestLightGBMIntegration:
             row_inds = data_bundle.row_inds_train[:5]  # Small subset
 
             # Method 1: Use new function
-            X_new = load_and_preprocess_data_numpy(data_path=data_file, data_format=data_format, row_indices=row_inds)
+            X_new = load_and_preprocess_data_numpy(
+                data_path=data_file, data_format=data_format, row_indices=row_inds
+            )
 
             # Method 2: Manual preprocessing (old way)
             X_raw = adata.X[row_inds]
@@ -148,7 +150,9 @@ class TestLightGBMIntegration:
 
             # Apply row normalization manually
             row_sums = X_raw.sum(axis=1, keepdims=True)
-            scaling_factors = np.where(row_sums > 0, data_format.target_sum / row_sums, 1.0)
+            scaling_factors = np.where(
+                row_sums > 0, data_format.target_sum / row_sums, 1.0
+            )
             X_manual = X_raw * scaling_factors
 
             if data_format.use_log_transform:
@@ -237,7 +241,9 @@ class TestDatasetIntegration:
                 dataset,
                 batch_size=5,
                 shuffle=False,
-                collate_fn=lambda batch_indices: cells_collate_fn(batch_indices, dataset),
+                collate_fn=lambda batch_indices: cells_collate_fn(
+                    batch_indices, dataset
+                ),
             )
 
             # Get a batch
@@ -281,7 +287,9 @@ class TestDatasetIntegration:
                 dataset,
                 batch_size=3,
                 shuffle=False,
-                collate_fn=lambda batch_indices: cells_collate_fn(batch_indices, dataset),
+                collate_fn=lambda batch_indices: cells_collate_fn(
+                    batch_indices, dataset
+                ),
             )
             batch = next(iter(dataloader))
             X_dataset = batch["x"]
@@ -297,7 +305,9 @@ class TestDatasetIntegration:
 
             # Apply direct preprocessing
             X_direct_torch = torch.from_numpy(X_raw).float()
-            X_direct_processed = preprocess_expression_data(X_direct_torch.clone(), data_format=data_format)
+            X_direct_processed = preprocess_expression_data(
+                X_direct_torch.clone(), data_format=data_format
+            )
 
             # Should be very close (allowing for minor floating point differences)
             assert torch.allclose(X_dataset, X_direct_processed, rtol=1e-5, atol=1e-6)
@@ -313,7 +323,9 @@ class TestDatasetIntegration:
         data_format_reordered = DataFormat(
             gene_names=reordered_genes,
             n_genes=data_format.n_genes,
-            genes_mu=data_format.genes_mu[::-1].copy(),  # Reverse and copy to avoid negative stride
+            genes_mu=data_format.genes_mu[
+                ::-1
+            ].copy(),  # Reverse and copy to avoid negative stride
             genes_sigma=data_format.genes_sigma[::-1].copy(),
             target_sum=data_format.target_sum,
             use_log_transform=data_format.use_log_transform,
@@ -349,7 +361,9 @@ class TestDatasetIntegration:
                 dataset,
                 batch_size=2,
                 shuffle=False,
-                collate_fn=lambda batch_indices: cells_collate_fn(batch_indices, dataset),
+                collate_fn=lambda batch_indices: cells_collate_fn(
+                    batch_indices, dataset
+                ),
             )
             batch = next(iter(dataloader))
             X_transformed = batch["x"]
@@ -465,7 +479,9 @@ class TestEpsilonIntegration:
         # Create AnnData with metadata similar to notebook
         obs = pd.DataFrame(
             {
-                "imputed_labels": np.random.choice(["is_CD4", "is_CD8", "is_NK"], n_cells),
+                "imputed_labels": np.random.choice(
+                    ["is_CD4", "is_CD8", "is_NK"], n_cells
+                ),
                 "tissue_type": np.random.choice(["Tumor", "Normal"], n_cells),
                 "patient_id": np.random.choice(["P1", "P2", "P3"], n_cells),
             }
@@ -477,7 +493,9 @@ class TestEpsilonIntegration:
         adata = ad.AnnData(X=csr_matrix(X), obs=obs, var=var)
 
         # Filter to CD4 Tumor cells (like in notebook)
-        cd4_tumor_mask = (obs["imputed_labels"] == "is_CD4") & (obs["tissue_type"] == "Tumor")
+        cd4_tumor_mask = (obs["imputed_labels"] == "is_CD4") & (
+            obs["tissue_type"] == "Tumor"
+        )
         filtered_indices = np.where(cd4_tumor_mask)[0]
 
         # Create data format with scaling factors
@@ -489,7 +507,9 @@ class TestEpsilonIntegration:
         )
 
         # Create scaling factors for training data
-        train_indices = np.arange(min(400, len(filtered_indices)))  # Subset for training
+        train_indices = np.arange(
+            min(400, len(filtered_indices))
+        )  # Subset for training
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir) / "notebook_test.h5ad"
@@ -510,7 +530,9 @@ class TestEpsilonIntegration:
             dataset = CellsDataset(
                 data_format=data_format,
                 row_inds=eval_indices,
-                dataset_params=DataAugmentParams(soft_loss_beta=1.0, mask_rate=0.0, noise_std=0.0),
+                dataset_params=DataAugmentParams(
+                    soft_loss_beta=1.0, mask_rate=0.0, noise_std=0.0
+                ),
                 is_train=False,
                 data_path=temp_path,
             )
@@ -519,7 +541,9 @@ class TestEpsilonIntegration:
                 dataset,
                 batch_size=50,
                 shuffle=False,
-                collate_fn=lambda batch_indices: cells_collate_fn(batch_indices, dataset),
+                collate_fn=lambda batch_indices: cells_collate_fn(
+                    batch_indices, dataset
+                ),
             )
 
             batch = next(iter(dataloader))
@@ -597,18 +621,26 @@ class TestEpsilonIntegration:
             )
 
             # Test different epsilon values
-            eps_values = [1e-10, 1e-3, 1e-1]  # High precision, medium, large (ensure measurable differences)
+            eps_values = [
+                1e-10,
+                1e-3,
+                1e-1,
+            ]  # High precision, medium, large (ensure measurable differences)
 
             test_indices = np.arange(50)
 
             for eps_val in eps_values:
                 # Method 1: Dataset approach (we can't easily control epsilon here,
                 # so we'll test that it uses 1e-10 internally)
-                if eps_val == 1e-10:  # Only test the epsilon that CellsDataset actually uses
+                if (
+                    eps_val == 1e-10
+                ):  # Only test the epsilon that CellsDataset actually uses
                     dataset = CellsDataset(
                         data_format=data_format,
                         row_inds=test_indices,
-                        dataset_params=DataAugmentParams(soft_loss_beta=1.0, mask_rate=0.0, noise_std=0.0),
+                        dataset_params=DataAugmentParams(
+                            soft_loss_beta=1.0, mask_rate=0.0, noise_std=0.0
+                        ),
                         is_train=False,
                         data_path=temp_path,
                     )
@@ -682,7 +714,9 @@ class TestEpsilonIntegration:
 
         for _i in range(3):  # Run multiple times
             X_copy = X.copy()
-            result = preprocess_expression_data(X=X_copy, data_format=data_format, eps=SHARED_EPS)
+            result = preprocess_expression_data(
+                X=X_copy, data_format=data_format, eps=SHARED_EPS
+            )
             results.append(result)
 
         # All results should be identical
@@ -703,7 +737,9 @@ class TestEpsilonIntegration:
         )
 
         max_diff = np.abs(results[0] - result_different_eps).max()
-        assert max_diff > 1e-12, "Different epsilon should produce measurably different results"
+        assert max_diff > 1e-12, (
+            "Different epsilon should produce measurably different results"
+        )
 
 
 class TestPerformance:

@@ -239,7 +239,9 @@ class TestListPretrainedModelsCommand:
             logged_messages = [call.args[0] for call in mock_logger.info.call_args_list]
 
             # Should contain header
-            assert any("Available pre-trained models:" in msg for msg in logged_messages)
+            assert any(
+                "Available pre-trained models:" in msg for msg in logged_messages
+            )
 
             # Should contain model names
             assert any("model1" in msg for msg in logged_messages)
@@ -254,7 +256,9 @@ class TestListPretrainedModelsCommand:
             assert any("URL configured: No" in msg for msg in logged_messages)
 
             # Should contain model type auto-detection message
-            assert any("Auto-detected from model_type.txt" in msg for msg in logged_messages)
+            assert any(
+                "Auto-detected from model_type.txt" in msg for msg in logged_messages
+            )
 
     def test_list_pretrained_models_empty_registry(self):
         """Test list_pretrained_models with empty model registry."""
@@ -266,4 +270,6 @@ class TestListPretrainedModelsCommand:
 
             # Should still show header
             logged_messages = [call.args[0] for call in mock_logger.info.call_args_list]
-            assert any("Available pre-trained models:" in msg for msg in logged_messages)
+            assert any(
+                "Available pre-trained models:" in msg for msg in logged_messages
+            )

@@ -1,138 +1,120 @@
 Contributing to scXpand
 =======================
 
-We welcome contributions to scXpand! This guide will help you contribute effectively to the project.
+We welcome contributions to scXpand! This document provides guidelines for contributing to the project.
 
-Development Setup
------------------
+Reporting Issues
+----------------
 
-For development setup instructions, see :doc:`installation`.
+When reporting issues, please include:
+
+- Python version
+- scXpand version
+- Operating system
+- Minimal reproducible example
+- Expected vs actual behavior
+
+Contributing Process
+--------------------
+
+**Quick Start:**
+
+1. **Fork and clone the repository**
+2. **Set up development environment:**
+   Follow the development setup instructions in :doc:`installation`
+3. **Create a feature branch and make your changes**
+
+**Before submitting your pull request:**
+
+4. **Ensure all tests pass** and meet coverage requirements:
+
+   .. code-block:: bash
+
+      # Run tests with coverage
+      pytest --cov=src/scxpand --cov-report=term-missing -n auto
+
+5. **Add tests** for new functionality
+6. **Update documentation** if your changes affect the API or user-facing functionality
+7. **Update CHANGELOG.md** with your changes
+8. **Run pre-commit hooks** to ensure code quality:
+
+   .. code-block:: bash
+
+      # Run linting and formatting
+      pre-commit run --all-files
+
+**Submit your pull request:**
+
+9. **Create a pull request** with:
+
+   - Clear, descriptive title
+   - Detailed description of changes
+   - Reference to any related issues
+   - Screenshots or examples if applicable
+
+10. **Request review** from maintainers
+
+Your pull request will be reviewed and may require changes before being merged.
 
 
-Contributing Workflow
----------------------
 
-External Contributor Workflow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Template Updates
+----------------
 
-**1. Fork the Repository**
+This project uses the `scverse cookiecutter template <https://github.com/scverse/cookiecutter-scverse>`_ and can be updated when new template versions are released.
 
-Fork the scXpand repository on GitHub by clicking the "Fork" button on the main repository page.
-
-**2. Clone Your Fork**
-
-.. code-block:: bash
-
-   git clone https://github.com/YOUR_USERNAME/scXpand.git
-   cd scXpand
-
-**3. Add Upstream Remote**
-
-This allows you to sync your fork with the main repository. Replace ORIGINAL_OWNER with the main scXpand repo owner (e.g., scXpandTeam):
-
-.. code-block:: bash
-
-   git remote add upstream https://github.com/ORIGINAL_OWNER/scXpand.git
-
-**4. Create Branch**
-
-.. code-block:: bash
-
-   git checkout -b your-feature-name
-
-**5. Make Changes**
-
-Implement your changes with appropriate tests and documentation updates.
-
-**6. Test Your Changes**
-
-.. code-block:: bash
-
-   # Run all tests
-   uv run pytest -n auto
-
-   # Run specific tests for your changes
-   uv run pytest tests/your_test_file.py
-
-**7. Commit Guidelines**
-
-Write clear, descriptive commit messages.
-Keep commits focused on a single change when possible.
-
-**8. Push to Your Fork**
-
-.. code-block:: bash
-
-   git push origin your-feature-name
-
-**9. Create Pull Request**
-
-On GitHub, create a pull request from your fork's branch to the main repository's main branch.
-
-Keeping Your Fork Up to Date
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For external contributors, regularly sync your fork with the upstream repository to avoid merge conflicts:
+To update the project with the latest template changes:
 
 .. code-block:: bash
 
-   # Fetch latest changes from upstream
-   git fetch upstream
+   # Check if updates are available
+   cruft check
 
-   # Switch to main branch
-   git checkout main
+   # Update to the latest template version
+   cruft update
 
-   # Merge upstream changes
-   git merge upstream/main
+   # Review and commit the changes
+   git add .
+   git commit -m "Update from cookiecutter template"
 
-   # Push updated main to your fork
-   git push origin main
+Testing
+-------
 
-Maintainer Workflow
-~~~~~~~~~~~~~~~~~~~
+**Running Tests:**
 
-**1. Create Branch**
-
-.. code-block:: bash
-
-   git checkout -b your-feature-name
-
-**2. Make Changes**
-
-Implement your changes with appropriate tests and documentation updates.
-
-**3. Test Your Changes**
+The project uses pytest with coverage reporting and parallel execution for efficient testing:
 
 .. code-block:: bash
 
-   # Run all tests
-   uv run pytest -n auto
+    # Run all tests with coverage and parallel execution (recommended)
+    pytest --cov=src/scxpand --cov-report=term-missing -n auto
 
-   # Run specific tests for your changes
-   uv run pytest tests/your_test_file.py
+    # Run tests without parallel execution (if you encounter issues)
+    pytest --cov=src/scxpand --cov-report=term-missing
 
-**4. Commit Guidelines**
+    # Run specific test files or modules
+    pytest tests/data_util/test_data_format.py
 
-Write clear, descriptive commit messages.
-Keep commits focused on a single change when possible.
+    # Run tests with verbose output
+    pytest --cov=src/scxpand --cov-report=term-missing -n auto -v
 
-**5. Push Branch**
+    # Run tests and generate HTML coverage report
+    pytest --cov=src/scxpand --cov-report=html --cov-report=term-missing -n auto
 
-.. code-block:: bash
+**Test Coverage:**
 
-   git push origin your-feature-name
+The project maintains a minimum test coverage of 80%. Coverage reports are generated in multiple formats:
+- Terminal output with missing lines
+- HTML report in the `htmlcov/` directory
+- XML report for CI/CD integration
 
-**6. Create Pull Request**
+**Parallel Execution:**
 
-On GitHub, create a pull request targeting the main branch.
+The `-n auto` flag automatically detects the optimal number of parallel workers based on your CPU cores.
 
-**Pull Request Checklist**
+**Pre-commit Integration:**
 
-- [ ] Tests added for new functionality
-- [ ] All tests pass locally
-- [ ] Documentation updated if needed
-- [ ] PR description clearly explains changes
-- [ ] Branch is up-to-date with main
+Tests are also run automatically via pre-commit hooks to ensure code quality before commits.
 
 Release Process
 ===============
@@ -141,6 +123,25 @@ Release Process
 
 We use an automated release script that handles the entire publishing process to PyPI.
 For detailed instructions, see :doc:`../scripts/PUBLISHING`.
+
+Dev Releases
+------------
+
+For testing releases before official announcement, use dev releases:
+
+.. code-block:: bash
+
+    # Create a dev release (no GitHub announcement)
+    ./scripts/release.sh --dev
+
+    # Dry run for dev release
+    ./scripts/release.sh --dev --dry-run
+
+Dev releases:
+- Publish packages to PyPI with dev version suffix (e.g., 0.3.6.dev1)
+- Skip GitHub release creation and announcement
+- Skip ReadTheDocs documentation build
+- Useful for testing releases on other machines before official release
 
 Version Management
 ------------------

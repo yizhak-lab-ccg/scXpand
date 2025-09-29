@@ -6,7 +6,6 @@ inference functions.
 """
 
 import inspect
-
 from unittest.mock import MagicMock, patch
 
 import anndata as ad
@@ -80,7 +79,9 @@ class TestParameterPropagation:
             assert call_kwargs["device"] == "cuda:0"
             assert call_kwargs["batch_size"] == 64
             assert call_kwargs["num_workers"] == 4
-            np.testing.assert_array_equal(call_kwargs["eval_row_inds"], test_params["eval_row_inds"])
+            np.testing.assert_array_equal(
+                call_kwargs["eval_row_inds"], test_params["eval_row_inds"]
+            )
 
     def test_autoencoder_parameter_propagation(self, mock_adata, mock_data_format):
         """Test that all parameters are correctly passed to Autoencoder inference."""
@@ -113,7 +114,9 @@ class TestParameterPropagation:
             assert call_kwargs["device"] == "cpu"
             assert call_kwargs["batch_size"] == 128
             assert call_kwargs["num_workers"] == 2
-            np.testing.assert_array_equal(call_kwargs["eval_row_inds"], test_params["eval_row_inds"])
+            np.testing.assert_array_equal(
+                call_kwargs["eval_row_inds"], test_params["eval_row_inds"]
+            )
 
     def test_linear_parameter_propagation(self, mock_adata, mock_data_format):
         """Test that all parameters are correctly passed to Linear inference."""
@@ -131,7 +134,9 @@ class TestParameterPropagation:
                 "eval_row_inds": np.array([1, 3, 5, 7, 9]),
             }
 
-            with patch("scxpand.util.inference_utils.run_linear_inference") as mock_inference:
+            with patch(
+                "scxpand.util.inference_utils.run_linear_inference"
+            ) as mock_inference:
                 mock_inference.return_value = np.random.rand(5)
 
                 run_model_inference(**test_params)
@@ -146,7 +151,9 @@ class TestParameterPropagation:
                 assert call_kwargs["data_path"] is None
                 assert call_kwargs["batch_size"] == 256
                 assert call_kwargs["num_workers"] == 8
-                np.testing.assert_array_equal(call_kwargs["eval_row_inds"], test_params["eval_row_inds"])
+                np.testing.assert_array_equal(
+                    call_kwargs["eval_row_inds"], test_params["eval_row_inds"]
+                )
 
     def test_lightgbm_parameter_propagation(self, mock_adata, mock_data_format):
         """Test that all parameters are correctly passed to LightGBM inference."""
@@ -160,7 +167,9 @@ class TestParameterPropagation:
             "eval_row_inds": np.array([0, 2, 4, 6]),
         }
 
-        with patch("scxpand.util.inference_utils.run_lightgbm_inference") as mock_inference:
+        with patch(
+            "scxpand.util.inference_utils.run_lightgbm_inference"
+        ) as mock_inference:
             mock_inference.return_value = np.random.rand(4)
 
             run_model_inference(**test_params)
@@ -173,7 +182,9 @@ class TestParameterPropagation:
             assert call_kwargs["data_format"] is mock_data_format
             assert call_kwargs["adata"] is mock_adata
             assert call_kwargs["data_path"] is None
-            np.testing.assert_array_equal(call_kwargs["eval_row_inds"], test_params["eval_row_inds"])
+            np.testing.assert_array_equal(
+                call_kwargs["eval_row_inds"], test_params["eval_row_inds"]
+            )
             # Note: LightGBM doesn't use batch_size/num_workers, so we don't check for them
 
     def test_parameter_defaults_handling(self, mock_adata, mock_data_format):
@@ -330,7 +341,9 @@ class TestFunctionSignatureCompatibility:
             assert "data_format" in params, f"{func_name} missing data_format parameter"
 
             # Check that eval_row_inds parameter exists
-            assert "eval_row_inds" in params, f"{func_name} missing eval_row_inds parameter"
+            assert "eval_row_inds" in params, (
+                f"{func_name} missing eval_row_inds parameter"
+            )
 
     def test_return_type_consistency(self):
         """Test that all inference functions return numpy arrays."""

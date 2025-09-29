@@ -5,7 +5,6 @@ it correctly handles various scenarios and prevents multiprocessing conflicts.
 """
 
 import tempfile
-
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -60,7 +59,9 @@ class TestOpenAdataMultiprocessingSafe:
         """Test using pre-loaded AnnData object."""
         test_indices = np.array([0, 1, 2])
 
-        with open_adata_multiprocessing_safe(data_path=None, adata=sample_adata, indices=test_indices) as (
+        with open_adata_multiprocessing_safe(
+            data_path=None, adata=sample_adata, indices=test_indices
+        ) as (
             adata,
             indices,
         ):
@@ -72,7 +73,9 @@ class TestOpenAdataMultiprocessingSafe:
         """Test loading from file with backed='r' mode."""
         test_indices = np.array([5, 10, 15])
 
-        with open_adata_multiprocessing_safe(data_path=temp_h5ad_file, adata=None, indices=test_indices) as (
+        with open_adata_multiprocessing_safe(
+            data_path=temp_h5ad_file, adata=None, indices=test_indices
+        ) as (
             adata,
             indices,
         ):
@@ -85,14 +88,18 @@ class TestOpenAdataMultiprocessingSafe:
 
     def test_without_indices(self, temp_h5ad_file):
         """Test that function works when indices is None."""
-        with open_adata_multiprocessing_safe(data_path=temp_h5ad_file, adata=None, indices=None) as (adata, indices):
+        with open_adata_multiprocessing_safe(
+            data_path=temp_h5ad_file, adata=None, indices=None
+        ) as (adata, indices):
             assert adata is not None
             assert indices is None
             assert adata.shape == (100, 50)
 
     def test_error_when_no_data_source(self):
         """Test that appropriate error is raised when neither data_path nor adata is provided."""
-        with pytest.raises(ValueError, match="Either data_path or adata must be provided"):
+        with pytest.raises(
+            ValueError, match="Either data_path or adata must be provided"
+        ):
             with open_adata_multiprocessing_safe(
                 data_path=None,
                 adata=None,
@@ -170,7 +177,9 @@ class TestOpenAdataMultiprocessingSafe:
 
         # Simulate multiple workers accessing the same file
         for test_indices in test_indices_list:
-            with open_adata_multiprocessing_safe(data_path=temp_h5ad_file, adata=None, indices=test_indices) as (
+            with open_adata_multiprocessing_safe(
+                data_path=temp_h5ad_file, adata=None, indices=test_indices
+            ) as (
                 adata,
                 indices,
             ):

@@ -1,11 +1,9 @@
 import tempfile
-
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pytest
-
 from anndata import AnnData
 from scipy.sparse import csr_matrix
 
@@ -153,7 +151,9 @@ class TestZScoreNormalizationDense:
         # Check that normalization was applied correctly and result is returned
         expected = (X_original - mu) / (sigma + DEFAULT_EPS)
         np.testing.assert_array_almost_equal(result, expected, decimal=5)
-        np.testing.assert_array_almost_equal(X, expected, decimal=5)  # Also check in-place modification
+        np.testing.assert_array_almost_equal(
+            X, expected, decimal=5
+        )  # Also check in-place modification
 
     def test_dense_with_different_mu_sigma(self):
         """Test dense normalization with different mu and sigma values."""
@@ -265,14 +265,18 @@ class TestDataFormatRefactoredMethods:
         missing_genes = set()
         superfluous_genes = set()
 
-        result = data_format._reorder_final_genes(adata, curr_genes, missing_genes, superfluous_genes)
+        result = data_format._reorder_final_genes(
+            adata, curr_genes, missing_genes, superfluous_genes
+        )
 
         assert result.var_names.tolist() == data_format.gene_names
         # Should reorder from [3,1,4,2] to [1,2,3,4] based on gene order
         expected_data = np.array([[1.0, 2.0, 3.0, 4.0]])
         np.testing.assert_array_equal(result.X.toarray(), expected_data)
 
-    def test_reorder_final_genes_missing_from_mapping_error(self, data_format: DataFormat):
+    def test_reorder_final_genes_missing_from_mapping_error(
+        self, data_format: DataFormat
+    ):
         """Test _reorder_final_genes raises error when genes are missing from mapping."""
         X = csr_matrix(np.array([[1.0, 2.0]]), dtype=np.float32)
         var = pd.DataFrame(index=["gene1", "gene_unknown"])
@@ -284,7 +288,9 @@ class TestDataFormatRefactoredMethods:
         superfluous_genes = set()
 
         with pytest.raises(ValueError, match="Genes missing from mapping"):
-            data_format._reorder_final_genes(adata, curr_genes, missing_genes, superfluous_genes)
+            data_format._reorder_final_genes(
+                adata, curr_genes, missing_genes, superfluous_genes
+            )
 
     def test_handle_gene_differences_integration(self, data_format: DataFormat):
         """Test _handle_gene_differences method with missing and superfluous genes."""
@@ -297,7 +303,9 @@ class TestDataFormatRefactoredMethods:
         missing_genes = {"gene2", "gene4"}
         superfluous_genes = {"gene_extra"}
 
-        result = data_format._handle_gene_differences(adata, curr_genes, missing_genes, superfluous_genes)
+        result = data_format._handle_gene_differences(
+            adata, curr_genes, missing_genes, superfluous_genes
+        )
 
         assert result.var_names.tolist() == data_format.gene_names
         assert result.n_vars == 4
@@ -345,11 +353,16 @@ class TestDataFormatSaveLoad:
             assert loaded_df.use_log_transform == original_df.use_log_transform
             assert loaded_df.use_zscore_norm == original_df.use_zscore_norm
             assert loaded_df.aux_categorical_types == original_df.aux_categorical_types
-            assert loaded_df.aux_categorical_mappings == original_df.aux_categorical_mappings
+            assert (
+                loaded_df.aux_categorical_mappings
+                == original_df.aux_categorical_mappings
+            )
 
             # Verify numpy arrays are correctly preserved
             np.testing.assert_array_equal(loaded_df.genes_mu, original_df.genes_mu)
-            np.testing.assert_array_equal(loaded_df.genes_sigma, original_df.genes_sigma)
+            np.testing.assert_array_equal(
+                loaded_df.genes_sigma, original_df.genes_sigma
+            )
 
     def test_create_data_format_with_categorical_mappings(self):
         """Test create_data_format method with categorical features."""

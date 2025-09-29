@@ -3,7 +3,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from scxpand.data_util.data_splitter import PATIENT_ID_SEPARATOR, get_patient_identifiers, split_data
+from scxpand.data_util.data_splitter import (
+    PATIENT_ID_SEPARATOR,
+    get_patient_identifiers,
+    split_data,
+)
 
 
 @pytest.fixture
@@ -15,9 +19,13 @@ def mock_adata():
     # Use string indices from the start to avoid AnnData warnings
     obs = pd.DataFrame(
         {
-            "study": np.repeat(["study1", "study1", "study2", "study2"], [25, 25, 25, 25]),
+            "study": np.repeat(
+                ["study1", "study1", "study2", "study2"], [25, 25, 25, 25]
+            ),
             "patient": np.repeat(["p1", "p2", "p3", "p4"], [25, 25, 25, 25]),
-            "cancer_type": np.repeat(["typeA", "typeB"], [50, 50]),  # 2 patients per cancer type
+            "cancer_type": np.repeat(
+                ["typeA", "typeB"], [50, 50]
+            ),  # 2 patients per cancer type
             "tissue_type": np.tile(["normal", "tumor"], 50),
             "imputed_labels": np.tile(["label1", "label2"], 50),
             "sample": [f"s{i}" for i in range(100)],
@@ -65,8 +73,12 @@ def test_split_data_cancer_distribution(mock_adata):
     row_inds_train, row_inds_dev = split_data(mock_adata, dev_ratio, random_seed=42)
 
     # Get cancer type distributions
-    train_cancers = mock_adata.obs.iloc[row_inds_train]["cancer_type"].value_counts(normalize=True)
-    dev_cancers = mock_adata.obs.iloc[row_inds_dev]["cancer_type"].value_counts(normalize=True)
+    train_cancers = mock_adata.obs.iloc[row_inds_train]["cancer_type"].value_counts(
+        normalize=True
+    )
+    dev_cancers = mock_adata.obs.iloc[row_inds_dev]["cancer_type"].value_counts(
+        normalize=True
+    )
 
     # Test: Cancer type distributions should be roughly similar (within 15% difference)
     for cancer_type in train_cancers.index:
@@ -97,7 +109,9 @@ class TestGetPatientIdentifiers:
 
     def test_valid_patient_identifiers(self):
         """Test generation of valid patient identifiers."""
-        obs_df = pd.DataFrame({"study": ["study1", "study2", "study1"], "patient": ["p1", "p2", "p3"]})
+        obs_df = pd.DataFrame(
+            {"study": ["study1", "study2", "study1"], "patient": ["p1", "p2", "p3"]}
+        )
 
         result = get_patient_identifiers(obs_df)
         expected = pd.Series(["study1:p1", "study2:p2", "study1:p3"])
@@ -108,19 +122,28 @@ class TestGetPatientIdentifiers:
         """Test that study identifiers containing separator raise ValueError."""
         obs_df = pd.DataFrame({"study": ["study:1", "study2"], "patient": ["p1", "p2"]})
 
-        with pytest.raises(ValueError, match="Study identifiers cannot contain ':' character"):
+        with pytest.raises(
+            ValueError, match="Study identifiers cannot contain ':' character"
+        ):
             get_patient_identifiers(obs_df)
 
     def test_invalid_patient_with_separator(self):
         """Test that patient identifiers containing separator raise ValueError."""
         obs_df = pd.DataFrame({"study": ["study1", "study2"], "patient": ["p:1", "p2"]})
 
-        with pytest.raises(ValueError, match="Patient identifiers cannot contain ':' character"):
+        with pytest.raises(
+            ValueError, match="Patient identifiers cannot contain ':' character"
+        ):
             get_patient_identifiers(obs_df)
 
     def test_multiple_invalid_studies(self):
         """Test error message includes all invalid study identifiers."""
-        obs_df = pd.DataFrame({"study": ["study:1", "study:2", "valid_study"], "patient": ["p1", "p2", "p3"]})
+        obs_df = pd.DataFrame(
+            {
+                "study": ["study:1", "study:2", "valid_study"],
+                "patient": ["p1", "p2", "p3"],
+            }
+        )
 
         with pytest.raises(ValueError, match="Found invalid studies") as exc_info:
             get_patient_identifiers(obs_df)
@@ -131,7 +154,12 @@ class TestGetPatientIdentifiers:
 
     def test_multiple_invalid_patients(self):
         """Test error message includes all invalid patient identifiers."""
-        obs_df = pd.DataFrame({"study": ["study1", "study2", "study3"], "patient": ["p:1", "p:2", "valid_patient"]})
+        obs_df = pd.DataFrame(
+            {
+                "study": ["study1", "study2", "study3"],
+                "patient": ["p:1", "p:2", "valid_patient"],
+            }
+        )
 
         with pytest.raises(ValueError, match="Found invalid patients") as exc_info:
             get_patient_identifiers(obs_df)
@@ -160,7 +188,12 @@ class TestGetPatientIdentifiers:
 
     def test_special_characters_allowed(self):
         """Test that other special characters (except separator) are allowed."""
-        obs_df = pd.DataFrame({"study": ["study-1", "study_2", "study.3"], "patient": ["p@1", "p#2", "p$3"]})
+        obs_df = pd.DataFrame(
+            {
+                "study": ["study-1", "study_2", "study.3"],
+                "patient": ["p@1", "p#2", "p$3"],
+            }
+        )
 
         result = get_patient_identifiers(obs_df)
         expected = pd.Series(["study-1:p@1", "study_2:p#2", "study.3:p$3"])
@@ -169,7 +202,12 @@ class TestGetPatientIdentifiers:
 
     def test_whitespace_handling(self):
         """Test handling of whitespace in identifiers."""
-        obs_df = pd.DataFrame({"study": ["study 1", " study2", "study3 "], "patient": ["p 1", " p2", "p3 "]})
+        obs_df = pd.DataFrame(
+            {
+                "study": ["study 1", " study2", "study3 "],
+                "patient": ["p 1", " p2", "p3 "],
+            }
+        )
 
         result = get_patient_identifiers(obs_df)
         expected = pd.Series(["study 1:p 1", " study2: p2", "study3 :p3 "])
@@ -178,7 +216,9 @@ class TestGetPatientIdentifiers:
 
     def test_na_values_converted_to_string(self):
         """Test that NaN values are converted to string representation."""
-        obs_df = pd.DataFrame({"study": ["study1", np.nan, "study3"], "patient": ["p1", "p2", np.nan]})
+        obs_df = pd.DataFrame(
+            {"study": ["study1", np.nan, "study3"], "patient": ["p1", "p2", np.nan]}
+        )
 
         result = get_patient_identifiers(obs_df)
         # NaN becomes "nan" when converted to string
