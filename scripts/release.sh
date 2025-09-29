@@ -227,6 +227,15 @@ check_prerequisites() {
         exit 1
     fi
 
+    # Synchronize tags with remote to ensure consistency
+    print_status "Synchronizing tags with remote..."
+    if ! git fetch --prune origin '+refs/tags/*:refs/tags/*'; then
+        print_warning "Failed to synchronize tags with remote (continuing anyway)"
+        print_status "This may cause version detection issues if tags are out of sync"
+    else
+        print_success "Tags synchronized with remote"
+    fi
+
     if [ "$DEV_RELEASE" = true ] && [ "$current_branch" != "main" ]; then
         print_warning "Dev release from non-main branch: Skipping remote sync check"
     else
