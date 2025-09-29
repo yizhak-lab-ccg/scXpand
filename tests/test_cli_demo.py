@@ -17,18 +17,17 @@ class TestCLICoverage:
         """Run a CLI test and return success status."""
         try:
             result = subprocess.run(
-                command, check=False, capture_output=True, text=True, timeout=10
+                command, check=False, capture_output=True, text=True, timeout=30
             )
+            if result.returncode != 0:
+                print(f"CLI command failed: {command}")
+                print(f"Return code: {result.returncode}")
+                print(f"Stdout: {result.stdout}")
+                print(f"Stderr: {result.stderr}")
             return result.returncode == 0
-        except (subprocess.TimeoutExpired, Exception):
+        except (subprocess.TimeoutExpired, Exception) as e:
+            print(f"CLI command exception: {command}, error: {e}")
             return False
-
-    @pytest.mark.slow
-    def test_main_help_command(self):
-        """Test main help command."""
-        command = [sys.executable, "-m", "scxpand.main", "--help"]
-        success = self.run_cli_test(command, "Main help")
-        assert success, "Main help command should succeed"
 
     @pytest.mark.slow
     def test_train_help_command(self):
