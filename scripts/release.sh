@@ -1320,10 +1320,10 @@ main() {
     preview_and_validate
     bump_version
     commit_and_push
-    create_and_push_tag
     build_and_test_packages
     show_changes
     publish_to_pypi
+    create_and_push_tag
     create_github_release
     trigger_readthedocs_build
     verify_releases
