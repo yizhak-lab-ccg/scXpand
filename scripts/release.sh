@@ -671,9 +671,53 @@ build_standard_package() {
     build_package "standard" "standard package (scxpand - CPU/MPS support)" "Would build standard package with CPU/MPS support"
 }
 
-# Function to build CUDA package
+# Function to build CUDA package with Git stash approach
 build_cuda_package() {
-    build_package "cuda" "CUDA package (scxpand-cuda - CUDA support)" "Would build CUDA package with CUDA support"
+    print_package "Building CUDA package (scxpand-cuda - CUDA support)..."
+
+    if [ "$DRY_RUN" = true ]; then
+        print_status "DRY RUN: Would build CUDA package with CUDA support"
+        return 0
+    fi
+
+    # Create CUDA variant configuration
+    create_cuda_pyproject || {
+        print_error "Failed to create CUDA variant configuration"
+        return 1
+    }
+
+    # Use git stash to temporarily apply CUDA changes without affecting working directory status
+    print_status "Temporarily applying CUDA configuration..."
+
+    # Backup original pyproject.toml
+    backup_file "pyproject.toml" "backup" || {
+        print_error "Failed to backup original pyproject.toml"
+        return 1
+    }
+
+    # Replace with CUDA variant
+    mv temp/pyproject-cuda.toml pyproject.toml
+
+    # Add the change to git index temporarily (so hatch-vcs sees it as staged, not dirty)
+    git add pyproject.toml
+
+    # Build package
+    print_status "Building CUDA package..."
+    if ! uv build; then
+        print_error "Failed to build CUDA package (scxpand-cuda - CUDA support)"
+        print_status "Check for syntax errors in pyproject.toml or missing dependencies"
+        # Restore files
+        git reset HEAD pyproject.toml
+        restore_file "pyproject.toml" "backup" "false"
+        return 1
+    fi
+
+    # Restore original state
+    git reset HEAD pyproject.toml
+    restore_file "pyproject.toml" "backup" "false"
+
+    print_success "CUDA package (scxpand-cuda - CUDA support) built successfully"
+    return 0
 }
 
 # Function to test package imports and CUDA configuration
