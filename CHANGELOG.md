@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.1.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-09-29
+
+- convert to Scverse cookiecutter template
+
+
 ## [0.3.6] - 2025-09-17
 
 - `save_path` parameter in inference function - now `None` means no saving results to file
