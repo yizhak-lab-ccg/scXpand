@@ -716,7 +716,7 @@ build_cuda_package() {
 
     # Make the worktree completely clean by committing the CUDA changes
     print_status "Committing CUDA configuration in isolated worktree..."
-    (cd "$worktree_dir" && git add pyproject.toml && git commit -m "CUDA build configuration" --quiet) || {
+    (cd "$worktree_dir" && git add pyproject.toml && git commit -m "CUDA build configuration" --no-verify --quiet) || {
         print_error "Failed to commit CUDA configuration in worktree"
         git worktree remove "$worktree_dir" --force 2>/dev/null || true
         rm -rf "$worktree_dir"
@@ -981,25 +981,46 @@ commit_and_push() {
     fi
 }
 
-# Function to create and push tag with conflict handling
-create_and_push_tag() {
+# Function to create local tag for building (without pushing)
+create_local_tag_for_build() {
     local tag_name="v$NEW_VERSION"
+
+    if [ "$DRY_RUN" = true ]; then
+        print_status "DRY RUN: Would create local tag $tag_name for version detection"
+        return
+    fi
 
     # Check if tag already exists
     if git tag -l "$tag_name" | grep -q "$tag_name"; then
-        print_warning "Tag $tag_name already exists. Deleting and recreating..."
-        if [ "$DRY_RUN" = false ]; then
-            git tag -d "$tag_name" 2>/dev/null || true
-            git push origin ":refs/tags/$tag_name" 2>/dev/null || true
-        else
-            print_status "DRY RUN: Would delete existing tag $tag_name"
-        fi
+        print_warning "Tag $tag_name already exists locally. Deleting and recreating..."
+        git tag -d "$tag_name" 2>/dev/null || true
     fi
 
-    execute_git_command \
-        "git tag '$tag_name' && git push origin '$tag_name'" \
-        "Creating and pushing tag $tag_name" \
-        "Would create and push tag $tag_name"
+    print_status "Creating local tag $tag_name for version detection..."
+    if git tag "$tag_name"; then
+        print_success "Local tag $tag_name created successfully"
+    else
+        print_error "Failed to create local tag $tag_name"
+        exit 1
+    fi
+}
+
+# Function to push tag to remote after PyPI confirmation
+push_tag_to_remote() {
+    local tag_name="v$NEW_VERSION"
+
+    if [ "$DRY_RUN" = true ]; then
+        print_status "DRY RUN: Would push tag $tag_name to remote"
+        return
+    fi
+
+    print_status "Pushing tag $tag_name to remote..."
+    if git push origin "$tag_name"; then
+        print_success "Tag $tag_name pushed to remote successfully"
+    else
+        print_error "Failed to push tag $tag_name to remote"
+        exit 1
+    fi
 }
 
 # Function to publish both packages to PyPI
@@ -1320,10 +1341,11 @@ main() {
     preview_and_validate
     bump_version
     commit_and_push
+    create_local_tag_for_build
     build_and_test_packages
     show_changes
     publish_to_pypi
-    create_and_push_tag
+    push_tag_to_remote
     create_github_release
     trigger_readthedocs_build
     verify_releases
