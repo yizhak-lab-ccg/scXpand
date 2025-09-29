@@ -711,8 +711,17 @@ build_cuda_package() {
         return 1
     fi
 
-    # Copy CUDA variant pyproject.toml to the worktree
+    # Copy CUDA variant pyproject.toml to the worktree and commit it to make it clean
     cp temp/pyproject-cuda.toml "$worktree_dir/pyproject.toml"
+
+    # Make the worktree completely clean by committing the CUDA changes
+    print_status "Committing CUDA configuration in isolated worktree..."
+    (cd "$worktree_dir" && git add pyproject.toml && git commit -m "CUDA build configuration" --quiet) || {
+        print_error "Failed to commit CUDA configuration in worktree"
+        git worktree remove "$worktree_dir" --force 2>/dev/null || true
+        rm -rf "$worktree_dir"
+        return 1
+    }
 
     # Build from the clean worktree
     print_status "Building CUDA package from isolated environment..."
