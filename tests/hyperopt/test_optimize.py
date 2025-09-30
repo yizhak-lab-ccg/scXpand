@@ -42,12 +42,13 @@ class TestHyperparameterOptimizerBasics:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_optimizer_initialization",
                 num_workers=0,
             )
 
             assert optimizer.model_type == ModelType.MLP
             assert optimizer.data_path == Path(test_file_path)
-            assert optimizer.study_name == "mlp_opt"  # Default name
+            assert optimizer.study_name == "test_optimizer_initialization"
             assert optimizer.score_metric == "harmonic_avg/AUROC"  # Default metric
             assert optimizer.seed_base == 42  # Default seed
             assert optimizer.num_workers == 0
@@ -98,6 +99,7 @@ class TestHyperparameterOptimizerBasics:
                 HyperparameterOptimizer(
                     model_type="invalid_model",
                     data_path=test_file_path,
+                    study_name="test_invalid_model_type",
                 )
 
     def test_nonexistent_data_path_raises_error(self):
@@ -106,6 +108,7 @@ class TestHyperparameterOptimizerBasics:
             HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path="/nonexistent/path.h5ad",
+                study_name="test_nonexistent_path",
             )
 
     def test_storage_directory_creation(self, dummy_adata):
@@ -321,6 +324,7 @@ class TestTrialSpecificResumeLogic:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_trial_resume_logic_new_trial",
                 storage_path=Path(temp_dir) / "studies",
                 resume=True,  # Global resume=True
                 num_workers=0,
@@ -371,6 +375,7 @@ class TestTrialSpecificResumeLogic:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_trial_resume_logic_existing_trial",
                 storage_path=Path(temp_dir) / "studies",
                 resume=True,  # Global resume=True
                 num_workers=0,
@@ -416,6 +421,7 @@ class TestTrialSpecificResumeLogic:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_trial_resume_logic_no_checkpoints",
                 storage_path=Path(temp_dir) / "studies",
                 resume=True,  # Global resume=True
                 num_workers=0,
@@ -459,6 +465,7 @@ class TestTrialSpecificResumeLogic:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_trial_resume_logic_global_false",
                 storage_path=Path(temp_dir) / "studies",
                 resume=False,  # Global resume=False
                 num_workers=0,
@@ -502,6 +509,7 @@ class TestTrialSpecificResumeLogic:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_data_format_creation_vs_loading",
                 storage_path=Path(temp_dir) / "studies",
                 resume=True,
                 num_workers=0,
@@ -558,6 +566,7 @@ class TestTrialSpecificResumeLogic:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_study_dir_attribute",
                 storage_path=Path(temp_dir) / "studies",
                 num_workers=0,
             )
@@ -584,6 +593,7 @@ class TestTrialSpecificResumeLogic:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_study_attributes_set_correctly",
                 storage_path=Path(temp_dir) / "studies",
                 resume=True,  # Global resume=True
                 num_workers=0,
@@ -713,6 +723,7 @@ class TestObjectiveFunction:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_objective_function_success",
                 num_workers=0,
             )
 
@@ -744,6 +755,7 @@ class TestObjectiveFunction:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_objective_function_parameter_overrides",
                 num_workers=0,
                 n_epochs=5,  # Parameter override
                 train_batch_size=32,  # Parameter override (using correct field name)
@@ -808,6 +820,7 @@ class TestObjectiveFunction:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_objective_function_nan_score",
                 num_workers=0,
             )
 
@@ -841,6 +854,7 @@ class TestObjectiveFunction:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_objective_function_exceptions",
                 num_workers=0,
             )
 
@@ -873,6 +887,7 @@ class TestObjectiveFunction:
             optimizer_fail_fast = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_objective_function_fail_fast",
                 num_workers=0,
                 fail_fast=True,
             )
@@ -894,6 +909,7 @@ class TestObjectiveFunction:
             optimizer_normal = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_objective_function_normal",
                 num_workers=0,
                 fail_fast=False,
             )
@@ -924,6 +940,7 @@ class TestObjectiveFunction:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_objective_function_trial_pruning",
                 num_workers=0,
             )
 
@@ -1104,6 +1121,7 @@ class TestPrintResults:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_print_results_with_completed_trials",
                 num_workers=0,
             )
 
@@ -1159,6 +1177,7 @@ class TestPrintResults:
             optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_print_results_loads_existing_study",
                 num_workers=0,
             )
 
@@ -1192,6 +1211,7 @@ class TestOptimizerEdgeCases:
             mlp_optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_different_model_types_mlp",
                 storage_path=storage_path,
                 num_workers=0,
             )
@@ -1200,6 +1220,7 @@ class TestOptimizerEdgeCases:
             svm_optimizer = HyperparameterOptimizer(
                 model_type=ModelType.SVM,
                 data_path=test_file_path,
+                study_name="test_different_model_types_svm",
                 storage_path=storage_path,
                 num_workers=0,
             )
