@@ -85,7 +85,6 @@ class TestHyperparameterOptimizerBasics:
             assert optimizer.num_workers == 2
             assert optimizer.resume is False
             assert optimizer.param_overrides == {"custom_param": 42}
-            optimizer.close()
 
     def test_invalid_model_type_raises_error(self, dummy_adata):
         """Test that invalid model type raises ValueError."""
@@ -999,7 +998,6 @@ class TestRunOptimization:
                     info = json.load(f)
                 assert info["total_trials"] == 3
                 assert info["completed_trials"] == 3
-            optimizer.close()
 
     def test_run_optimization_with_resume(self, dummy_adata):
         """Test optimization with resume functionality."""
@@ -1326,7 +1324,6 @@ class TestTrialResumeAndCleanup:
                 trial=trial2, current_score=0.90, epoch=1
             )
             assert trial2.user_attrs.get("reported_epochs") == [0, 1]
-            optimizer.close()
 
     def test_cleanup_incomplete_trials(self, dummy_adata):
         """Test cleanup of incomplete trials."""
@@ -1409,7 +1406,6 @@ class TestTrialResumeAndCleanup:
                 trial=trial, current_score=0.90, epoch=3
             )
             assert trial.user_attrs.get("reported_epochs") == [0, 1, 2, 3]
-            optimizer.close()
 
     def test_optimization_with_cleanup_on_resume(self, dummy_adata):
         """Test that optimization automatically cleans up incomplete trials when resuming."""
@@ -1758,7 +1754,6 @@ class TestHappyPathFunctionality:
                 "model": "test",
                 "version": "1.0",
             }
-            optimizer.close()
 
     def test_empty_studies_cleanup_safety(self, dummy_adata):
         """Test that cleanup is safe when called on empty studies."""
@@ -1856,4 +1851,3 @@ class TestHappyPathFunctionality:
                 assert hasattr(params, "train_batch_size")
                 assert params.n_epochs == 5
                 assert params.train_batch_size == 32
-                optimizer.close()
