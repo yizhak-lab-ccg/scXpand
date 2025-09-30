@@ -52,7 +52,18 @@
         "**/*.zip",
         "**/*.tar.gz",
         "**/*.sqlite",
-        "**/*.db"
+        "**/*.db",
+        "**/data/**",
+        "**/wandb/**",
+        "**/dummy_save_dir/**",
+        "**/_notebooks/**",
+        "**/norm_bug/**",
+        "**/.scxpand_cache/**",
+        "**/docs/_build/**",
+        "**/docs/.doctrees/**",
+        "**/_build/**",
+        "**/.DS_Store",
+        "**/*.code-workspace"
       ],
       "_render_devdocs": true,
       "_jinja2_env_vars": {
