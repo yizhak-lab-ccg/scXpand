@@ -1229,8 +1229,8 @@ class TestOptimizerEdgeCases:
             mlp_study = mlp_optimizer.create_study()
             svm_study = svm_optimizer.create_study()
 
-            assert mlp_study.study_name == "mlp_opt"
-            assert svm_study.study_name == "svm_opt"
+            assert mlp_study.study_name == "test_different_model_types_mlp"
+            assert svm_study.study_name == "test_different_model_types_svm"
 
             # Register studies for cleanup
             ctx.register_study(mlp_study)
