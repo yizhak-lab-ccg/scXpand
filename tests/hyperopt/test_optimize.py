@@ -21,7 +21,6 @@ from scxpand.util.classes import ModelType
 from scxpand.util.model_constants import BEST_CHECKPOINT_FILE, STUDY_INFO_FILE
 from scxpand.util.train_util import report_to_optuna_and_handle_pruning
 from tests.test_utils import (
-    close_optuna_storage,
     create_temp_h5ad_file,
     windows_safe_context_manager,
 )
@@ -158,7 +157,7 @@ class TestStudyCreationAndResume:
             assert study.study_name == "new_study"
             assert len(study.trials) == 0
             assert study.direction == optuna.study.StudyDirection.MAXIMIZE
-            close_optuna_storage(study)
+            ctx.register_study(study)
 
     def test_resume_existing_study(self, dummy_adata):
         """Test resuming an existing study with trials."""
@@ -185,7 +184,7 @@ class TestStudyCreationAndResume:
                 study1 = optimizer1.create_study()
                 study1.optimize(func=optimizer1.objective, n_trials=2)
                 assert len(study1.trials) == 2
-            close_optuna_storage(study1)
+            ctx.register_study(study1)
 
             # Create new optimizer and resume
             optimizer2 = HyperparameterOptimizer(
@@ -199,7 +198,7 @@ class TestStudyCreationAndResume:
             study2 = optimizer2.create_study()
             assert len(study2.trials) == 2  # Should have previous trials
             assert study2.study_name == study_name
-            close_optuna_storage(study2)
+            ctx.register_study(study2)
 
     def test_resume_false_raises_error_for_existing_study(self, dummy_adata):
         """Test that resume=False raises error when existing study has trials."""
@@ -228,7 +227,7 @@ class TestStudyCreationAndResume:
                 study1 = optimizer1.create_study()
                 study1.optimize(func=optimizer1.objective, n_trials=2)
                 assert len(study1.trials) == 2
-            close_optuna_storage(study1)
+            ctx.register_study(study1)
 
             # Create trial directories on filesystem to test the logic
             trial_dir_0 = study_dir / "trial_0"
@@ -296,7 +295,6 @@ class TestStudyCreationAndResume:
             # Test the _handle_existing_study method directly since create_study() fails at database level
             with pytest.raises(ValueError, match="already exists"):
                 optimizer2._handle_existing_study()
-            close_optuna_storage(study1)
 
 
 class TestTrialSpecificResumeLogic:
@@ -572,7 +570,7 @@ class TestTrialSpecificResumeLogic:
             # The important thing is that the study_dir attribute gets set when needed
             study_dir_attr = study.user_attrs.get("study_dir")
             assert study_dir_attr == expected_study_dir or study_dir_attr is None
-            close_optuna_storage(study)
+            ctx.register_study(study)
 
     def test_mixed_new_existing_trial_scenarios(self, dummy_adata):
         """Test mixed scenarios with both new and existing trials in the same study."""
@@ -727,6 +725,9 @@ class TestObjectiveFunction:
                 trial = study.ask()
 
                 score = optimizer.objective(trial)
+
+                # Register study for cleanup
+                ctx.register_study(study)
                 assert score == 0.85
                 assert trial.user_attrs.get("seed") == optimizer.seed_base
                 assert trial.user_attrs.get("all_results") == mock_result
@@ -781,6 +782,9 @@ class TestObjectiveFunction:
                 trial = study.ask()
 
                 score = optimizer.objective(trial)
+
+                # Register study for cleanup
+                ctx.register_study(study)
                 assert score == 0.90
 
                 # Check that our parameter overrides were applied
@@ -817,6 +821,9 @@ class TestObjectiveFunction:
                 trial = study.ask()
 
                 # NaN score should be handled and return -inf, not raise exception
+
+                # Register study for cleanup
+                ctx.register_study(study)
                 score = optimizer.objective(trial)
                 assert score == -float("inf")
                 # Check that the error was recorded in trial attributes
@@ -849,6 +856,9 @@ class TestObjectiveFunction:
                 score = optimizer.objective(trial)
                 assert score == -float("inf")
                 assert "Training failed" in trial.user_attrs.get("error", "")
+
+                # Register study for cleanup
+                ctx.register_study(study)
 
     def test_objective_function_fail_fast_mode(self, dummy_adata):
         """Test that fail_fast mode re-raises exceptions immediately."""
@@ -927,6 +937,9 @@ class TestObjectiveFunction:
                 with pytest.raises(optuna.TrialPruned):
                     optimizer.objective(trial)
 
+                # Register study for cleanup
+                ctx.register_study(study)
+
     def test_objective_function_creates_trial_directory(self, dummy_adata):
         """Test that objective function creates trial directories."""
         with (
@@ -952,6 +965,9 @@ class TestObjectiveFunction:
                 study = optimizer.create_study()
                 trial = study.ask()
                 trial_number = trial.number
+
+                # Register study for cleanup
+                ctx.register_study(study)
 
                 optimizer.objective(trial)
 
@@ -998,6 +1014,9 @@ class TestRunOptimization:
                     info = json.load(f)
                 assert info["total_trials"] == 3
                 assert info["completed_trials"] == 3
+
+                # Register study for cleanup
+                ctx.register_study(study)
 
     def test_run_optimization_with_resume(self, dummy_adata):
         """Test optimization with resume functionality."""
@@ -1064,6 +1083,9 @@ class TestRunOptimization:
                 # (The actual callback calls are handled by Optuna internally)
                 assert len(study.trials) == 2
 
+                # Register study for cleanup
+                ctx.register_study(study)
+
 
 class TestPrintResults:
     """Test the print_results functionality."""
@@ -1089,6 +1111,9 @@ class TestPrintResults:
                 # Test print_results
                 optimizer.print_results(study)
 
+                # Register study for cleanup
+                ctx.register_study(study)
+
                 captured = capsys.readouterr()
                 assert "Best trial:" in captured.out
                 assert "Best params:" in captured.out
@@ -1112,7 +1137,8 @@ class TestPrintResults:
             )
 
             # Create study with no completed trials
-            optimizer.create_study()
+            study = optimizer.create_study()
+            ctx.register_study(study)
 
             optimizer.print_results()
 
@@ -1136,7 +1162,8 @@ class TestPrintResults:
 
             # Create study with trials
             with patch.object(optimizer, "objective", return_value=0.85):
-                optimizer.run_optimization(n_trials=1)
+                study = optimizer.run_optimization(n_trials=1)
+                ctx.register_study(study)
 
             # Test print_results without providing study
             optimizer.print_results()
@@ -1181,6 +1208,10 @@ class TestOptimizerEdgeCases:
 
             assert mlp_study.study_name == "mlp_opt"
             assert svm_study.study_name == "svm_opt"
+
+            # Register studies for cleanup
+            ctx.register_study(mlp_study)
+            ctx.register_study(svm_study)
             assert mlp_study._storage != svm_study._storage
 
     def test_custom_config_path_integration(self, dummy_adata):
@@ -1220,6 +1251,9 @@ class TestOptimizerEdgeCases:
                 trial = study.ask()
 
                 optimizer.objective(trial)
+
+                # Register study for cleanup
+                ctx.register_study(study)
 
                 # Verify that load_and_override_params was called with config_path
                 mock_load.assert_called_once()
@@ -1269,6 +1303,9 @@ class TestOptimizerEdgeCases:
 
             # Check that sampler is TPESampler with correct seed
             assert isinstance(study.sampler, optuna.samplers.TPESampler)
+
+            # Register study for cleanup
+            ctx.register_study(study)
             # Note: TPESampler seed is not directly accessible, but we can verify
             # that it's deterministic by running trials
 
@@ -1297,6 +1334,9 @@ class TestTrialResumeAndCleanup:
             trial = study.ask()
 
             # First report should succeed
+
+            # Register study for cleanup
+            ctx.register_study(study)
             report_to_optuna_and_handle_pruning(
                 trial=trial, current_score=0.85, epoch=0
             )
@@ -1394,6 +1434,9 @@ class TestTrialResumeAndCleanup:
             trial = study.ask()
 
             # Simulate a trial that already has some epoch reports (from previous run)
+
+            # Register study for cleanup
+            ctx.register_study(study)
             trial.set_user_attr("reported_epochs", [0, 1, 2])
 
             # Try to report epoch 2 again (should be skipped, no logging test)
@@ -1480,6 +1523,7 @@ class TestTrialResumeAndCleanup:
             with patch.object(mlp_optimizer, "objective", return_value=0.85):
                 mlp_study = mlp_optimizer.run_optimization(n_trials=2)
                 assert len(mlp_study.trials) == 2
+                ctx.register_study(mlp_study)
 
             # Test SVM (should be independent)
             svm_optimizer = HyperparameterOptimizer(
@@ -1492,11 +1536,13 @@ class TestTrialResumeAndCleanup:
             with patch.object(svm_optimizer, "objective", return_value=0.80):
                 svm_study = svm_optimizer.run_optimization(n_trials=1)
                 assert len(svm_study.trials) == 1
+                ctx.register_study(svm_study)
 
             # Resume MLP should still have its trials
             with patch.object(mlp_optimizer, "objective", return_value=0.90):
                 mlp_study_resumed = mlp_optimizer.run_optimization(n_trials=1)
                 assert len(mlp_study_resumed.trials) == 3  # 2 original + 1 new
+                ctx.register_study(mlp_study_resumed)
 
     def test_trial_callback_handles_failed_trials(self, dummy_adata):
         """Test that trial callback properly handles and cleans up failed trials."""
@@ -1557,6 +1603,9 @@ class TestHappyPathFunctionality:
             trial = study.ask()
 
             # Simulate normal training progression
+
+            # Register study for cleanup
+            ctx.register_study(study)
             epochs = [0, 1, 2, 3, 4]
             scores = [0.60, 0.65, 0.70, 0.75, 0.80]
 
@@ -1603,6 +1652,9 @@ class TestHappyPathFunctionality:
 
                 # Verify all trials completed successfully
                 assert len(study.trials) == 4
+
+                # Register study for cleanup
+                ctx.register_study(study)
                 completed_trials = [
                     t
                     for t in study.trials
@@ -1647,6 +1699,9 @@ class TestHappyPathFunctionality:
                 db_file = study_dir / "optuna.db"
                 assert db_file.exists()
 
+                # Register study for cleanup
+                ctx.register_study(study)
+
     def test_multiple_model_types_normal_operation(self, dummy_adata):
         """Test that multiple model types work normally without interference."""
         with (
@@ -1676,6 +1731,9 @@ class TestHappyPathFunctionality:
                     assert len(study.trials) == 1
                     assert study.study_name == f"{model_type.value}_opt"
 
+                    # Register study for cleanup
+                    ctx.register_study(study)
+
                     # Verify study directory exists
                     assert optimizer.study_dir.exists()
 
@@ -1700,6 +1758,9 @@ class TestHappyPathFunctionality:
             trial = study.ask()
 
             # Mock trial.should_prune() to return True after first report
+
+            # Register study for cleanup
+            ctx.register_study(study)
             with patch.object(trial, "should_prune", side_effect=[False, True]):
                 # First report should succeed
                 report_to_optuna_and_handle_pruning(
@@ -1733,6 +1794,9 @@ class TestHappyPathFunctionality:
             trial = study.ask()
 
             # Set some custom user attributes
+
+            # Register study for cleanup
+            ctx.register_study(study)
             trial.set_user_attr("custom_metric", 0.90)
             trial.set_user_attr("custom_info", {"model": "test", "version": "1.0"})
 
@@ -1851,3 +1915,6 @@ class TestHappyPathFunctionality:
                 assert hasattr(params, "train_batch_size")
                 assert params.n_epochs == 5
                 assert params.train_batch_size == 32
+
+                # Register study for cleanup
+                ctx.register_study(study)

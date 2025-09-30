@@ -129,11 +129,16 @@ class WindowsSafeTestContext:
     def __init__(self):
         self.adatas_to_close = []
         self.files_to_cleanup = []
+        self.studies_to_close = []
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        # Close all Optuna studies first
+        for study in self.studies_to_close:
+            close_optuna_storage(study)
+
         # Close all AnnData handles
         for adata in self.adatas_to_close:
             close_adata_safely(adata)
@@ -159,3 +164,9 @@ class WindowsSafeTestContext:
         """Register a file for cleanup."""
         self.files_to_cleanup.append(str(file_path))
         return file_path
+
+    def register_study(self, study):
+        """Register an Optuna study for cleanup."""
+        if study is not None:
+            self.studies_to_close.append(study)
+        return study
