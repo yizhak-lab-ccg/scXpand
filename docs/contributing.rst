@@ -30,8 +30,8 @@ Contributing Process
 
    .. code-block:: bash
 
-      # Run tests with coverage
-      pytest --cov=src/scxpand --cov-report=term-missing -n auto
+      # Install in editable mode and run tests with coverage
+      pip install -e ".[dev]" && pytest --cov=src/scxpand -n auto
 
 5. **Add tests** for new functionality
 6. **Update documentation** if your changes affect the API or user-facing functionality
@@ -86,20 +86,20 @@ The project uses pytest with coverage reporting and parallel execution for effic
 
 .. code-block:: bash
 
-    # Run all tests with coverage and parallel execution (recommended)
-    pytest --cov=src/scxpand --cov-report=term-missing -n auto
+    # Install in editable mode and run all tests with coverage (recommended)
+    pip install -e ".[dev]" && pytest --cov=src/scxpand -n auto
 
     # Run tests without parallel execution (if you encounter issues)
-    pytest --cov=src/scxpand --cov-report=term-missing
+    pip install -e ".[dev]" && pytest --cov=src/scxpand
 
     # Run specific test files or modules
     pytest tests/data_util/test_data_format.py
 
     # Run tests with verbose output
-    pytest --cov=src/scxpand --cov-report=term-missing -n auto -v
+    pip install -e ".[dev]" && pytest --cov=src/scxpand -n auto -v
 
     # Run tests and generate HTML coverage report
-    pytest --cov=src/scxpand --cov-report=html --cov-report=term-missing -n auto
+    pip install -e ".[dev]" && pytest --cov=src/scxpand --cov-report=html -n auto
 
 **Test Coverage:**
 
