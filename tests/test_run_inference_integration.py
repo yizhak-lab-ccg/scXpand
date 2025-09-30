@@ -434,6 +434,43 @@ class TestRunInferenceIntegration:
                 call_kwargs = mock_pipeline.call_args[1]
                 assert call_kwargs["num_workers"] == num_workers
 
+    def test_run_inference_with_real_dummy_local_model(
+        self, sample_adata, tmp_path, mock_data_format
+    ):
+        """Integration test: run_inference with a real dummy local model directory (no mocks)."""
+        import torch
+
+        from scxpand.core.inference_results import InferenceResults
+        from scxpand.util.model_type import save_model_type
+
+        # Create dummy model directory
+        model_dir = tmp_path / "dummy_model"
+        model_dir.mkdir()
+        # Save model_type.txt
+        save_model_type("mlp", model_dir)
+        # Save data_format.json
+        mock_data_format.save(model_dir / "data_format.json")
+        # Save a minimal dummy model checkpoint with the required structure
+        dummy_model_path = model_dir / "best_ckpt.pt"
+        torch.save({"model_state_dict": {}}, dummy_model_path)
+        # Save a minimal parameters.json file (required by MLP loader)
+        parameters_path = model_dir / "parameters.json"
+        with open(parameters_path, "w") as f:
+            f.write("{}\n")
+
+        # Run the real pipeline (should not raise, but will not produce meaningful predictions)
+        results = run_inference(
+            adata=sample_adata,
+            model_path=str(model_dir),
+            batch_size=8,
+            num_workers=0,
+        )
+        assert isinstance(results, InferenceResults)
+        assert hasattr(results, "predictions")
+        assert hasattr(results, "metrics")
+        # The length of predictions should match the number of cells
+        assert len(results.predictions) == sample_adata.shape[0]
+
 
 if __name__ == "__main__":
     pytest.main([__file__])
