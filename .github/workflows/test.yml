@@ -73,8 +73,6 @@ jobs:
           cache-dependency-glob: pyproject.toml
       - name: create hatch environment
         run: uvx hatch env create ${{ matrix.env.name }}
-      - name: Ensure data directory exists
-        run: mkdir -p data
       - name: run tests using hatch
         env:
           MPLBACKEND: agg
