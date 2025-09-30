@@ -1,5 +1,6 @@
 """Tests for the inference and list_pretrained_models functions in main.py."""
 
+import os
 from unittest.mock import Mock, patch
 
 import pytest
@@ -7,6 +8,11 @@ import pytest
 from scxpand.core.inference import DEFAULT_MODEL_NAME
 from scxpand.main import inference
 from scxpand.util.model_registry import list_pretrained_models
+
+
+@pytest.fixture(autouse=True, scope="module")
+def ensure_data_dir():
+    os.makedirs("data", exist_ok=True)
 
 
 class TestInferenceCommand:

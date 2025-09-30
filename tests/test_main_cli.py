@@ -19,6 +19,11 @@ from scxpand.main import fire, inference, list_pretrained_models, main, optimize
 from scxpand.util.classes import ModelType
 
 
+@pytest.fixture(autouse=True, scope="module")
+def ensure_data_dir():
+    os.makedirs("data", exist_ok=True)
+
+
 class TestCLIUnit:
     """Fast unit tests with proper mocking - no subprocess calls."""
 
