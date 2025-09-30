@@ -1042,6 +1042,7 @@ class TestRunOptimization:
             with patch.object(optimizer1, "objective", return_value=0.85):
                 study1 = optimizer1.run_optimization(n_trials=2)
                 assert len(study1.trials) == 2
+                ctx.register_study(study1)
 
             # Second optimization run (resume)
             optimizer2 = HyperparameterOptimizer(
@@ -1055,6 +1056,7 @@ class TestRunOptimization:
             with patch.object(optimizer2, "objective", return_value=0.90):
                 study2 = optimizer2.run_optimization(n_trials=2)
                 assert len(study2.trials) == 4  # 2 original + 2 new
+                ctx.register_study(study2)
 
     def test_run_optimization_with_callbacks(self, dummy_adata):
         """Test that optimization uses callbacks correctly."""
@@ -1475,6 +1477,7 @@ class TestTrialResumeAndCleanup:
             with patch.object(optimizer1, "objective", return_value=0.85):
                 study1 = optimizer1.run_optimization(n_trials=1)
                 assert len(study1.trials) == 1
+                ctx.register_study(study1)
 
             # Create a fake incomplete trial directory
             incomplete_trial_dir = optimizer1.study_dir / "trial_999"
@@ -1495,6 +1498,7 @@ class TestTrialResumeAndCleanup:
                     "scxpand.hyperopt.hyperopt_optimizer.cleanup_incomplete_trials"
                 ) as mock_cleanup:
                     study2 = optimizer2.run_optimization(n_trials=1)
+                    ctx.register_study(study2)
 
                     # Cleanup should have been called
                     mock_cleanup.assert_called_once_with(
@@ -1847,6 +1851,7 @@ class TestHappyPathFunctionality:
                 study=empty_study, study_dir=study_dir, max_age_hours=0
             )
             assert cleaned_count == 0  # No trials to clean
+            ctx.register_study(empty_study)
             try:
                 engine = empty_study._storage._engine
                 engine.dispose()
