@@ -39,6 +39,9 @@ repos:
       - id: check-merge-conflict
         args: [--assume-in-merge]
         exclude: \.rst$
+      - id: no-commit-to-branch
+        name: Prevent commit to main branch
+        args: [--branch=main]
   - repo: local
     hooks:
       - id: pytest
