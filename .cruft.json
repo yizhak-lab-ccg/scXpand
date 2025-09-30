@@ -1,6 +1,6 @@
 {
   "template": "https://github.com/scverse/cookiecutter-scverse",
-  "commit": "8dc961946ab268e260056c96c7c217b6bd6f7eb4",
+  "commit": "d383d94fadff9e4e6fdb59d77c68cb900d7cedec",
   "checkout": null,
   "context": {
     "cookiecutter": {
@@ -28,50 +28,15 @@
         "docs/references.bib",
         "docs/references.md",
         "src/**",
-        "tests/**",
-        "scripts/**",
-        "pyproject.toml",
-        ".cruft.json",
-        "**/__pycache__/**",
-        "**/*.pyc",
-        "**/.pytest_cache/**",
-        "**/.ruff_cache/**",
-        "**/.coverage",
-        "**/coverage.xml",
-        "**/htmlcov/**",
-        "**/temp/**",
-        "**/results/**",
-        "**/.venv/**",
-        "**/node_modules/**",
-        "**/*.png",
-        "**/*.jpg",
-        "**/*.jpeg",
-        "**/*.gif",
-        "**/*.ico",
-        "**/*.pdf",
-        "**/*.zip",
-        "**/*.tar.gz",
-        "**/*.sqlite",
-        "**/*.db",
-        "**/data/**",
-        "**/wandb/**",
-        "**/dummy_save_dir/**",
-        "**/_notebooks/**",
-        "**/norm_bug/**",
-        "**/.scxpand_cache/**",
-        "**/docs/_build/**",
-        "**/docs/.doctrees/**",
-        "**/_build/**",
-        "**/.DS_Store",
-        "**/*.code-workspace"
+        "tests/**"
       ],
-      "_render_devdocs": true,
+      "_render_devdocs": false,
       "_jinja2_env_vars": {
         "lstrip_blocks": true,
         "trim_blocks": true
       },
       "_template": "https://github.com/scverse/cookiecutter-scverse",
-      "_commit": "8dc961946ab268e260056c96c7c217b6bd6f7eb4"
+      "_commit": "d383d94fadff9e4e6fdb59d77c68cb900d7cedec"
     }
   },
   "directory": null
