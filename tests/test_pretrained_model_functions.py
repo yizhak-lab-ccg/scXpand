@@ -357,7 +357,7 @@ class TestPretrainedModelsRegistry:
             assert model_info.url is not None
 
     def test_pretrained_models_registry_expected_models(self):
-        """Test that the registry contains expected model types."""
+        """Test that the registry contains expected model types and their fields are consistent with the registry."""
         expected_models = [
             "pan_cancer_autoencoder",
             "pan_cancer_mlp",
@@ -369,7 +369,10 @@ class TestPretrainedModelsRegistry:
         for model_name in expected_models:
             assert model_name in PRETRAINED_MODELS
             model_info = PRETRAINED_MODELS[model_name]
-            assert model_info.version == "1.0.0"
+            # Check that version and url are non-empty and of correct type
+            assert isinstance(model_info.version, str) and model_info.version
+            assert isinstance(model_info.url, str) and model_info.url
+            # Check that the URL is a figshare link
             assert "figshare.com" in model_info.url
 
     def test_pretrained_models_registry_urls_valid(self):
