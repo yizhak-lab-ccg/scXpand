@@ -54,7 +54,7 @@ Optimize a single model with default settings:
        --num_workers 4
 
 Optimization of Multiple Models
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Compare all available architectures:
 

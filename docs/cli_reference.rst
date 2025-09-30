@@ -12,23 +12,28 @@ Train a Model
 ~~~~~~~~~~~~~
 
 .. autofunction:: scxpand.main.train
+   :no-index:
 
 Run Hyperparameter Optimization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: scxpand.main.optimize
+   :no-index:
 
 Run Optimization for All Models
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: scxpand.main.optimize_all
+   :no-index:
 
 Run Inference
 ~~~~~~~~~~~~~
 
 .. autofunction:: scxpand.main.inference
+   :no-index:
 
 List Pre-trained Models
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: scxpand.util.model_registry.list_pretrained_models
+   :no-index:

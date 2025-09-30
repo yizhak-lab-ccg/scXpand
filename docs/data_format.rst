@@ -86,7 +86,7 @@ Required for Training
    ``tissue_type`` and ``imputed_labels`` can also be used as auxiliary labels in some training configurations, in addition to their use for computing stratified evaluation metrics. They are not required for the actual inference/prediction process.
 
 Expansion Definition
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 The ``expansion`` field should contain string values:
 
@@ -96,7 +96,7 @@ The ``expansion`` field should contain string values:
 The framework uses a 1.5× median clone size threshold: a cell is considered expanded if its ``clone_id_size`` > 1.5 × ``median_clone_size`` for that sample.
 
 Required for Inference
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 Applying our pre-trained models only for inference purposes requires:
 
 * Filtration of the gene expression matrix to include only T cells

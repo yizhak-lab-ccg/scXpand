@@ -193,7 +193,7 @@ class ForkAutoencoder(BaseAutoencoder):
         """Decode latent representation.
 
         Returns:
-        -------
+        --------
         DecoderOutput
             Contains:
             - mu: Mean parameter after inverse normalization to match row-normalized target scale
