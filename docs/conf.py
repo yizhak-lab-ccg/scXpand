@@ -112,8 +112,13 @@ nb_execution_mode = "off"  # Use existing outputs, don't execute notebooks
 nb_merge_streams = True
 nb_execution_timeout = 60
 
-# Suppress unknown MIME type warnings
-suppress_warnings = ["mystnb.unknown_mime_type"]
+# Suppress warnings
+suppress_warnings = [
+    "mystnb.unknown_mime_type",
+    "autosummary.import_object",
+    "duplicate_object",
+    "ref.doc",
+]
 
 # ReadTheDocs-specific notebook settings
 if os.environ.get("READTHEDOCS") == "True":
