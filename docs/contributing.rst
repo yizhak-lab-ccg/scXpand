@@ -93,7 +93,7 @@ The project uses pytest with coverage reporting and parallel execution for effic
     pip install -e ".[dev]" && pytest --cov=src/scxpand
 
     # Run specific test files or modules
-    pytest tests/data_util/test_data_format.py
+    pip install -e ".[dev]" && pytest tests/data_util/test_data_format.py
 
     # Run tests with verbose output
     pip install -e ".[dev]" && pytest --cov=src/scxpand -n auto -v
@@ -122,7 +122,7 @@ Release Process
 **For Maintainers Only**
 
 We use an automated release script that handles the entire publishing process to PyPI.
-For detailed instructions, see :doc:`../scripts/PUBLISHING`.
+For detailed instructions, see :doc:`scripts/PUBLISHING`.
 
 Dev Releases
 ------------
