@@ -41,12 +41,6 @@ repos:
         exclude: \.rst$
   - repo: local
     hooks:
-      - id: cruft-check
-        name: cruft-check
-        entry: cruft check
-        language: system
-        pass_filenames: false
-        stages: [pre-push]
       - id: pytest
         name: pytest
         entry: pytest
