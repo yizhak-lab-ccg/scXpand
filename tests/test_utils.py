@@ -146,9 +146,10 @@ class WindowsSafeTestContext:
         # Force garbage collection
         gc.collect()
 
-        # Wait a bit on Windows
+        # Wait longer on Windows to ensure all file handles are released
         if platform.system() == "Windows":
-            time.sleep(0.5)
+            time.sleep(1.5)
+            gc.collect()  # Extra GC after wait
 
         # Clean up files
         for file_path in self.files_to_cleanup:
