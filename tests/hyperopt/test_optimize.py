@@ -600,7 +600,9 @@ class TestTrialSpecificResumeLogic:
             )
 
             # Create study directory structure
-            study_dir = Path(temp_dir) / "studies" / "mlp_opt"
+            study_dir = (
+                Path(temp_dir) / "studies" / "test_study_attributes_set_correctly"
+            )
             study_dir.mkdir(parents=True, exist_ok=True)
 
             # Scenario 1: Trial 0 - New trial (no checkpoints)
@@ -665,7 +667,7 @@ class TestTrialSpecificResumeLogic:
             ctx.register_file(test_file_path)
 
             # Create study directory
-            study_dir = Path(temp_dir) / "studies" / "mlp_opt"
+            study_dir = Path(temp_dir) / "studies" / "test_study_dir_attribute"
             study_dir.mkdir(parents=True, exist_ok=True)
 
             # Test 1: New trial directory (no result indicators)
@@ -1541,6 +1543,7 @@ class TestTrialResumeAndCleanup:
             mlp_optimizer = HyperparameterOptimizer(
                 model_type=ModelType.MLP,
                 data_path=test_file_path,
+                study_name="test_different_model_types_resume_mlp",
                 storage_path=storage_path,
                 num_workers=0,
             )
@@ -1554,6 +1557,7 @@ class TestTrialResumeAndCleanup:
             svm_optimizer = HyperparameterOptimizer(
                 model_type=ModelType.SVM,
                 data_path=test_file_path,
+                study_name="test_different_model_types_resume_svm",
                 storage_path=storage_path,
                 num_workers=0,
             )

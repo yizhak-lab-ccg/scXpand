@@ -84,22 +84,40 @@ def close_optuna_storage(study):
     if study is None:
         return
 
-    # Get the underlying storage object
-    storage = study._storage
-    if storage is None:
-        return
+    try:
+        # Get the underlying storage object
+        storage = study._storage
+        if storage is None:
+            return
 
-    # For RDBStorage (like SQLite), we can access the engine and dispose of it
-    if hasattr(storage, "_engine"):
-        # This is an internal API, but necessary for reliable cleanup on Windows
+        # For RDBStorage (like SQLite), we need to close all connections
+        if hasattr(storage, "_engine"):
+            engine = storage._engine
+            try:
+                # Dispose all connections in the pool
+                engine.dispose()
+            except Exception:
+                pass
+
+            # Also try to close the engine completely
+            try:
+                if hasattr(engine, "pool"):
+                    engine.pool.dispose()
+            except Exception:
+                pass
+
+        # Clear the storage reference
         try:
-            storage._engine.dispose()
+            del study._storage
         except Exception:
-            # Ignore errors during cleanup
             pass
 
-    # Force garbage collection
-    del study
+    except Exception:
+        # Ignore all errors during cleanup
+        pass
+
+    # Force garbage collection multiple times
+    gc.collect()
     gc.collect()
 
 
@@ -139,17 +157,29 @@ class WindowsSafeTestContext:
         for study in self.studies_to_close:
             close_optuna_storage(study)
 
+        # Clear the list to free references
+        self.studies_to_close.clear()
+
+        # Force garbage collection after closing studies
+        gc.collect()
+        gc.collect()
+
         # Close all AnnData handles
         for adata in self.adatas_to_close:
             close_adata_safely(adata)
 
-        # Force garbage collection
+        # Clear the list to free references
+        self.adatas_to_close.clear()
+
+        # Force garbage collection again
+        gc.collect()
         gc.collect()
 
         # Wait longer on Windows to ensure all file handles are released
         if platform.system() == "Windows":
-            time.sleep(1.5)
-            gc.collect()  # Extra GC after wait
+            time.sleep(2.5)  # Increased from 1.5 to 2.5 seconds
+            gc.collect()
+            gc.collect()
 
         # Clean up files
         for file_path in self.files_to_cleanup:
