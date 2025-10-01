@@ -9,7 +9,7 @@ class TestMSELoss:
     """Test the MSE loss implementation."""
 
     @pytest.fixture
-    def mock_data(self):
+    def mock_data(self) -> tuple[torch.Tensor, torch.Tensor]:
         """Create mock data for testing MSE loss."""
         torch.manual_seed(42)
         batch_size, n_genes = 10, 5
@@ -17,7 +17,7 @@ class TestMSELoss:
         x_pred = torch.rand(batch_size, n_genes) * 100
         return x_true, x_pred
 
-    def test_mse_loss_basic(self, mock_data):
+    def test_mse_loss_basic(self, mock_data: tuple[torch.Tensor, torch.Tensor]) -> None:
         """Test basic MSE loss computation."""
         x_true, x_pred = mock_data
 
@@ -28,7 +28,7 @@ class TestMSELoss:
         assert torch.isfinite(loss), "MSE loss should be finite"
         assert loss.item() >= 0, "MSE loss should be non-negative"
 
-    def test_mse_loss_with_nans(self):
+    def test_mse_loss_with_nans(self) -> None:
         """Test MSE loss with NaN values in input."""
         x_true = torch.tensor([[1.0, 2.0, float("nan")], [4.0, float("nan"), 6.0]])
         x_pred = torch.tensor([[1.1, 2.1, 3.1], [4.1, 5.1, 6.1]])
@@ -39,7 +39,7 @@ class TestMSELoss:
         # Should handle NaNs gracefully
         assert torch.isfinite(loss), "MSE loss should handle NaNs"
 
-    def test_mse_loss_identical_inputs(self):
+    def test_mse_loss_identical_inputs(self) -> None:
         """Test MSE loss when inputs are identical."""
         x = torch.rand(5, 3)
 
@@ -49,7 +49,7 @@ class TestMSELoss:
         # Loss should be zero (or very close to zero) for identical inputs
         assert loss.item() < 1e-6, "MSE loss should be ~0 for identical inputs"
 
-    def test_mse_better_reconstruction_lower_loss(self):
+    def test_mse_better_reconstruction_lower_loss(self) -> None:
         """Test that better reconstruction gives lower MSE loss."""
         torch.manual_seed(42)
         x_true = torch.tensor([[10.0, 20.0, 30.0], [5.0, 15.0, 25.0]])
@@ -73,7 +73,7 @@ class TestNBLoss:
     """Test the Negative Binomial loss implementation."""
 
     @pytest.fixture
-    def mock_data(self):
+    def mock_data(self) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Create mock data for testing NB loss."""
         torch.manual_seed(42)
         batch_size, n_genes = 10, 5
@@ -84,7 +84,9 @@ class TestNBLoss:
         )  # dispersion between 0.1-10.1
         return x_true, x_pred, theta
 
-    def test_nb_loss_basic(self, mock_data):
+    def test_nb_loss_basic(
+        self, mock_data: tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+    ) -> None:
         """Test basic NB loss computation."""
         x_true, mu, theta = mock_data
 
@@ -94,7 +96,9 @@ class TestNBLoss:
         assert torch.isfinite(loss), "NB loss should be finite"
         assert loss.item() > 0, "NB loss should be positive"
 
-    def test_nb_loss_with_masking(self, mock_data):
+    def test_nb_loss_with_masking(
+        self, mock_data: tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+    ) -> None:
         """Test NB loss with masking enabled."""
         x_true, mu, theta = mock_data
         # Add some NaN values
@@ -106,7 +110,7 @@ class TestNBLoss:
 
         assert torch.isfinite(loss), "NB loss should handle NaNs with masking"
 
-    def test_nb_loss_theta_required(self):
+    def test_nb_loss_theta_required(self) -> None:
         """Test that NB loss requires theta parameter."""
         x_true = torch.rand(5, 3)
         mu = torch.rand(5, 3)
@@ -116,7 +120,7 @@ class TestNBLoss:
         with pytest.raises(TypeError):  # theta is now required parameter
             nb_loss_fn(x_genes_true=x_true, mu=mu)
 
-    def test_nb_better_reconstruction_lower_loss(self):
+    def test_nb_better_reconstruction_lower_loss(self) -> None:
         """Test that better reconstruction gives lower NB loss."""
         torch.manual_seed(42)
         # True counts (integers)
@@ -139,7 +143,7 @@ class TestNBLoss:
             "Better reconstruction should have lower NB loss"
         )
 
-    def test_nb_loss_against_scipy(self):
+    def test_nb_loss_against_scipy(self) -> None:
         """Test NB loss against scipy implementation if available."""
         try:
             # Single value test
@@ -175,7 +179,9 @@ class TestZINBLoss:
     """Test the Zero-Inflated Negative Binomial loss implementation."""
 
     @pytest.fixture
-    def mock_data(self):
+    def mock_data(
+        self,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """Create mock data for testing ZINB loss."""
         torch.manual_seed(42)
         batch_size, n_genes = 10, 5
@@ -190,7 +196,9 @@ class TestZINBLoss:
         pi = torch.rand(batch_size, n_genes) * 0.5  # zero-inflation probability 0-0.5
         return x_true, x_pred, theta, pi
 
-    def test_zinb_loss_basic(self, mock_data):
+    def test_zinb_loss_basic(
+        self, mock_data: tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
+    ) -> None:
         """Test basic ZINB loss computation."""
         x_true, mu, theta, pi = mock_data
 
@@ -200,7 +208,7 @@ class TestZINBLoss:
         assert torch.isfinite(loss), "ZINB loss should be finite"
         assert loss.item() > 0, "ZINB loss should be positive"
 
-    def test_zinb_loss_all_zeros(self):
+    def test_zinb_loss_all_zeros(self) -> None:
         """Test ZINB loss with all zero observations."""
         batch_size, n_genes = 5, 3
         x_true_zeros = torch.zeros(batch_size, n_genes)
@@ -213,7 +221,7 @@ class TestZINBLoss:
 
         assert torch.isfinite(loss), "ZINB loss with all zeros should be finite"
 
-    def test_zinb_loss_high_counts(self):
+    def test_zinb_loss_high_counts(self) -> None:
         """Test ZINB loss with high count observations."""
         batch_size, n_genes = 5, 3
         x_true_high = torch.ones(batch_size, n_genes) * 1000
@@ -226,7 +234,9 @@ class TestZINBLoss:
 
         assert torch.isfinite(loss), "ZINB loss with high counts should be finite"
 
-    def test_zinb_loss_parameter_clamping(self, mock_data):
+    def test_zinb_loss_parameter_clamping(
+        self, mock_data: tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
+    ) -> None:
         """Test that ZINB loss properly clamps parameters."""
         x_true, x_pred, theta, pi = mock_data
 
@@ -243,7 +253,7 @@ class TestZINBLoss:
 
         assert torch.isfinite(loss), "ZINB loss should handle extreme parameter values"
 
-    def test_zinb_loss_with_nans(self):
+    def test_zinb_loss_with_nans(self) -> None:
         """Test ZINB loss with NaN values in observations."""
         x_true = torch.tensor([[1.0, float("nan"), 3.0], [0.0, 5.0, float("nan")]])
         mu = torch.tensor([[1.1, 2.1, 3.1], [0.1, 5.1, 6.1]])
@@ -255,7 +265,9 @@ class TestZINBLoss:
 
         assert torch.isfinite(loss), "ZINB loss should handle NaNs gracefully"
 
-    def test_zinb_loss_reduces_to_nb_when_pi_zero(self, mock_data):
+    def test_zinb_loss_reduces_to_nb_when_pi_zero(
+        self, mock_data: tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
+    ) -> None:
         """Test that ZINB loss reduces to NB loss when pi=0."""
         x_true, x_pred, theta, _ = mock_data
         pi_zero = torch.zeros_like(theta)
@@ -275,7 +287,7 @@ class TestZINBLoss:
             "ZINB with pi=0 should equal NB loss"
         )
 
-    def test_zinb_better_reconstruction_lower_loss(self):
+    def test_zinb_better_reconstruction_lower_loss(self) -> None:
         """Test that better reconstruction gives lower ZINB loss."""
         torch.manual_seed(42)
         # True counts with zeros and non-zeros
@@ -301,7 +313,7 @@ class TestZINBLoss:
             "Better reconstruction should have lower ZINB loss"
         )
 
-    def test_zinb_better_zero_inflation_parameter_lower_loss(self):
+    def test_zinb_better_zero_inflation_parameter_lower_loss(self) -> None:
         """Test that better zero-inflation parameter gives lower ZINB loss."""
         torch.manual_seed(42)
         # True counts with many zeros
@@ -331,7 +343,7 @@ class TestZINBLoss:
 class TestLossComparisonEdgeCases:
     """Test edge cases and comparisons between different loss functions."""
 
-    def test_loss_functions_handle_zero_predictions(self):
+    def test_loss_functions_handle_zero_predictions(self) -> None:
         """Test that all loss functions handle zero predictions gracefully."""
         x_true = torch.tensor([[0, 1, 5]])
         x_pred_zero = torch.tensor([[0.0, 0.0, 0.0]])  # Zero predictions
@@ -356,7 +368,7 @@ class TestLossComparisonEdgeCases:
         )
         assert torch.isfinite(zinb_loss)
 
-    def test_loss_functions_numerical_stability(self):
+    def test_loss_functions_numerical_stability(self) -> None:
         """Test numerical stability with extreme values."""
         # Create data with extreme count values
         x_true = torch.tensor([[0, 1, 10000]])  # Including very high count
@@ -377,7 +389,7 @@ class TestLossComparisonEdgeCases:
         zinb_loss = zinb_loss_fn(x_genes_true=x_true, mu=mu, pi=pi, theta=theta)
         assert torch.isfinite(zinb_loss), "ZINB should handle extreme values"
 
-    def test_loss_functions_gradient_flow(self):
+    def test_loss_functions_gradient_flow(self) -> None:
         """Test that loss functions allow gradient flow."""
         torch.manual_seed(42)
         x_true = torch.randint(0, 10, (5, 3)).float()
@@ -420,7 +432,7 @@ class TestLossComparisonEdgeCases:
         assert theta_zinb.grad is not None, "ZINB should compute gradients for theta"
         assert pi_zinb.grad is not None, "ZINB should compute gradients for pi"
 
-    def test_all_losses_monotonic_in_reconstruction_quality(self):
+    def test_all_losses_monotonic_in_reconstruction_quality(self) -> None:
         """Test that all loss functions are monotonic in reconstruction quality."""
         torch.manual_seed(42)
 

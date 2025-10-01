@@ -12,7 +12,7 @@ class TestDecoderFunctionality:
     """Test decoder functionality for autoencoder models."""
 
     @pytest.fixture
-    def data_format(self):
+    def data_format(self) -> DataFormat:
         """Create a simple DataFormat for testing."""
         return DataFormat(
             n_genes=100,
@@ -23,7 +23,7 @@ class TestDecoderFunctionality:
             target_sum=1e4,
         )
 
-    def test_autoencoder_model_decode_output(self, data_format):
+    def test_autoencoder_model_decode_output(self, data_format: DataFormat) -> None:
         """Test AutoencoderModel decode output type and structure."""
         model = AutoencoderModel(
             data_format=data_format,
@@ -45,7 +45,7 @@ class TestDecoderFunctionality:
         assert output.pi is not None, "Output pi should not be None"
         assert output.theta is not None, "Output theta should not be None"
 
-    def test_fork_autoencoder_decode_output(self, data_format):
+    def test_fork_autoencoder_decode_output(self, data_format: DataFormat) -> None:
         """Test ForkAutoencoder decode output type and structure."""
         model = ForkAutoencoder(
             data_format=data_format,

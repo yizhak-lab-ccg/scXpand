@@ -6,7 +6,7 @@ from scxpand.autoencoders.ae_params import AutoEncoderParams
 class TestAutoEncoderTrainer:
     """Test autoencoder trainer functionality."""
 
-    def test_autoencoder_params_initialization(self):
+    def test_autoencoder_params_initialization(self) -> None:
         """Test that AutoEncoderParams can be initialized."""
         params = AutoEncoderParams()
 
@@ -19,7 +19,7 @@ class TestAutoEncoderTrainer:
         assert hasattr(params, "n_epochs")
         assert hasattr(params, "early_stopping_patience")
 
-    def test_autoencoder_params_default_values(self):
+    def test_autoencoder_params_default_values(self) -> None:
         """Test default values for AutoEncoderParams."""
         params = AutoEncoderParams()
 
@@ -40,7 +40,7 @@ class TestAutoEncoderTrainer:
             "early_stopping_patience should be positive"
         )
 
-    def test_autoencoder_params_custom_values(self):
+    def test_autoencoder_params_custom_values(self) -> None:
         """Test custom values for AutoEncoderParams."""
         custom_params = AutoEncoderParams(
             latent_dim=32,

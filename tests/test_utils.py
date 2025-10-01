@@ -6,14 +6,20 @@ import platform
 import shutil
 import tempfile
 import time
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Any
 
+import anndata as ad
 import pytest
+from optuna import Study
 from optuna.storages import RDBStorage
 
 
-def robust_remove(file_path, max_retries=10, delay=0.2):
+def robust_remove(
+    file_path: str | Path, max_retries: int = 10, delay: float = 0.2
+) -> None:
     """Try to remove a file with retries to avoid Windows file lock issues."""
     for _ in range(max_retries):
         try:
@@ -37,7 +43,7 @@ def robust_remove(file_path, max_retries=10, delay=0.2):
     pytest.skip(f"Could not remove file after retries: {file_path}")
 
 
-def create_temp_h5ad_file(adata, temp_dir: str) -> str:
+def create_temp_h5ad_file(adata: ad.AnnData, temp_dir: str) -> str:
     """Create a temporary H5AD file with proper error handling and Windows-safe cleanup."""
     temp_path = Path(temp_dir)
     test_file_path = temp_path / "test_data.h5ad"
@@ -65,7 +71,7 @@ def create_temp_h5ad_file(adata, temp_dir: str) -> str:
 
 
 @contextmanager
-def safe_context_manager():
+def safe_context_manager() -> Generator[Any, None, None]:
     """
     A context manager that creates and safely cleans up a temporary directory,
     handling file-locking issues on Windows with AnnData and Optuna.
@@ -77,10 +83,10 @@ def safe_context_manager():
     storage_urls = set()
 
     class Context:
-        def __init__(self, temp_dir_path):
+        def __init__(self, temp_dir_path: str) -> None:
             self.temp_dir = temp_dir_path
 
-        def register_study(self, study):
+        def register_study(self, study: Study | None) -> None:
             """Register a study to be closed."""
             if study is not None:
                 studies_to_close.append(study)
@@ -90,7 +96,7 @@ def safe_context_manager():
                 except (AttributeError, Exception):
                     pass
 
-        def register_adata(self, adata):
+        def register_adata(self, adata: ad.AnnData | None) -> None:
             """Register an AnnData object to be closed."""
             if adata is not None:
                 adatas_to_close.append(adata)
@@ -140,7 +146,7 @@ def safe_context_manager():
             pass
 
 
-def close_adata_safely(adata):
+def close_adata_safely(adata: ad.AnnData | None) -> None:
     """Safely close an AnnData file to avoid Windows file lock issues."""
     if adata is None or not hasattr(adata, "file") or not hasattr(adata.file, "close"):
         return
@@ -151,14 +157,22 @@ def close_adata_safely(adata):
     del adata
 
 
-def close_optuna_storage(study):
+def close_optuna_storage(study: Study | None) -> None:
     """Safely close Optuna storage to avoid Windows file lock issues."""
     if study is None:
         return
 
-    # Nullify references to help the garbage collector
+    # Close the storage connection if it exists
     try:
-        study._storage = None
+        if hasattr(study, "_storage") and study._storage is not None:
+            # For RDBStorage, try to close the underlying connection
+            if hasattr(study._storage, "_backend") and hasattr(
+                study._storage._backend, "close"
+            ):
+                study._storage._backend.close()
+            elif hasattr(study._storage, "close"):
+                study._storage.close()
+            study._storage = None
         study._study_id = -1  # Invalidate study
     except (AttributeError, Exception):
         pass  # Ignore all errors

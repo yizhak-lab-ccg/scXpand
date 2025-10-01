@@ -9,7 +9,7 @@ from scxpand.util.train_util import check_early_stopping
 class TestAutoEncoderTrainerEarlyStopping:
     """Test early stopping functionality in autoencoder trainer."""
 
-    def test_early_stopping_check_function_improving_scores(self):
+    def test_early_stopping_check_function_improving_scores(self) -> None:
         """Test that check_early_stopping function works correctly with improving scores."""
         # Mock logger with improving scores
         mock_logger = MagicMock()
@@ -40,7 +40,7 @@ class TestAutoEncoderTrainerEarlyStopping:
         assert patience_counter == 0
         assert should_stop is False
 
-    def test_early_stopping_check_function_no_improvement(self):
+    def test_early_stopping_check_function_no_improvement(self) -> None:
         """Test that check_early_stopping function works correctly with no improvement."""
         # Mock logger with a previous best score
         mock_logger = MagicMock()
@@ -82,7 +82,7 @@ class TestAutoEncoderTrainerEarlyStopping:
         assert patience_counter == 3
         assert should_stop is True
 
-    def test_early_stopping_check_function_mixed_scores(self):
+    def test_early_stopping_check_function_mixed_scores(self) -> None:
         """Test early stopping with mixed scores (improvement then decline)."""
         # Mock logger
         mock_logger = MagicMock()
@@ -115,7 +115,7 @@ class TestAutoEncoderTrainerEarlyStopping:
         assert patience_counter == 1
         assert should_stop is False
 
-    def test_autoencoder_param_early_stopping_config(self):
+    def test_autoencoder_param_early_stopping_config(self) -> None:
         """Test that AutoEncoderParams correctly configures early stopping parameters."""
         # Test default early stopping patience
         prm = AutoEncoderParams()
@@ -128,7 +128,7 @@ class TestAutoEncoderTrainerEarlyStopping:
         prm_custom = AutoEncoderParams(early_stopping_patience=custom_patience)
         assert prm_custom.early_stopping_patience == custom_patience
 
-    def test_autoencoder_param_training_config(self):
+    def test_autoencoder_param_training_config(self) -> None:
         """Test that AutoEncoderParams correctly configures training parameters."""
         # Test default training parameters
         prm = AutoEncoderParams()

@@ -29,9 +29,6 @@ if errorlevel 1 (
     echo Please install uv !REQUIRED_UV_VERSION! or newer by following the official installation guide:
     echo https://docs.astral.sh/uv/getting-started/installation/
     echo.
-    echo Quick install options:
-    echo   Standalone installer: powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-    echo   Scoop:               scoop install main/uv
     pause
     exit /b 1
 )
@@ -57,10 +54,6 @@ goto :uv_ok
     echo Please update uv by following the official installation guide:
     echo https://docs.astral.sh/uv/getting-started/installation/
     echo.
-    echo Quick update options:
-    echo   Standalone installer: powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-    echo   WinGet:              winget install --id=astral-sh.uv -e
-    echo   Scoop:               scoop update uv
     pause
     exit /b 1
 

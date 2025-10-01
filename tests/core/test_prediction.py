@@ -16,7 +16,7 @@ class TestRunPredictionPipeline:
     """Test suite for run_prediction_pipeline function."""
 
     @pytest.fixture
-    def mock_adata(self):
+    def mock_adata(self) -> ad.AnnData:
         """Create a mock AnnData object for testing."""
         obs_data = pd.DataFrame(
             {
@@ -30,12 +30,12 @@ class TestRunPredictionPipeline:
         return ad.AnnData(X=X, obs=obs_data)
 
     @pytest.fixture
-    def mock_predictions(self):
+    def mock_predictions(self) -> np.ndarray:
         """Mock prediction probabilities."""
         return np.array([0.8, 0.2, 0.9])
 
     @pytest.fixture
-    def mock_model(self):
+    def mock_model(self) -> Mock:
         """Mock trained model."""
         model = Mock()
         model.predict_proba = Mock(
@@ -44,15 +44,20 @@ class TestRunPredictionPipeline:
         return model
 
     @pytest.fixture
-    def mock_data_format(self):
+    def mock_data_format(self) -> Mock:
         """Mock data format object."""
         data_format = Mock()
         data_format.gene_names = [f"gene_{i}" for i in range(100)]
         return data_format
 
     def test_run_prediction_pipeline_with_data_path_success(
-        self, tmp_path, mock_adata, mock_model, mock_data_format, mock_predictions
-    ):
+        self,
+        tmp_path,
+        mock_adata: ad.AnnData,
+        mock_model: Mock,
+        mock_data_format: Mock,
+        mock_predictions: np.ndarray,
+    ) -> None:
         """Test successful prediction pipeline with data_path."""
         model_path = tmp_path / "model"
         model_path.mkdir()
@@ -112,8 +117,13 @@ class TestRunPredictionPipeline:
             assert result.model_info is None  # Local models don't have model_info
 
     def test_run_prediction_pipeline_with_adata_success(
-        self, tmp_path, mock_adata, mock_model, mock_data_format, mock_predictions
-    ):
+        self,
+        tmp_path,
+        mock_adata: ad.AnnData,
+        mock_model: Mock,
+        mock_data_format: Mock,
+        mock_predictions: np.ndarray,
+    ) -> None:
         """Test successful prediction pipeline with in-memory adata."""
         model_path = tmp_path / "model"
         model_path.mkdir()
@@ -165,8 +175,12 @@ class TestRunPredictionPipeline:
             assert result.model_info is None  # Local models don't have model_info
 
     def test_run_prediction_pipeline_without_ground_truth(
-        self, tmp_path, mock_model, mock_data_format, mock_predictions
-    ):
+        self,
+        tmp_path,
+        mock_model: Mock,
+        mock_data_format: Mock,
+        mock_predictions: np.ndarray,
+    ) -> None:
         """Test prediction pipeline when ground truth is not available."""
         model_path = tmp_path / "model"
         model_path.mkdir()
@@ -212,8 +226,8 @@ class TestRunPredictionPipeline:
             assert result.model_info is None
 
     def test_run_prediction_pipeline_with_eval_indices(
-        self, tmp_path, mock_adata, mock_model, mock_data_format
-    ):
+        self, tmp_path, mock_adata: ad.AnnData, mock_model: Mock, mock_data_format: Mock
+    ) -> None:
         """Test prediction pipeline with specific evaluation indices."""
         model_path = tmp_path / "model"
         model_path.mkdir()
@@ -260,7 +274,7 @@ class TestRunPredictionPipeline:
         expected_obs_df = mock_adata.obs.iloc[eval_indices]
         pd.testing.assert_frame_equal(eval_call_kwargs["obs_df"], expected_obs_df)
 
-    def test_run_prediction_pipeline_validation_errors(self, tmp_path):
+    def test_run_prediction_pipeline_validation_errors(self, tmp_path) -> None:
         """Test validation errors in prediction pipeline."""
         model_path = tmp_path / "model"
 
@@ -284,8 +298,13 @@ class TestRunPredictionPipeline:
             )
 
     def test_run_prediction_pipeline_default_save_path(
-        self, tmp_path, mock_adata, mock_model, mock_data_format, mock_predictions
-    ):
+        self,
+        tmp_path,
+        mock_adata: ad.AnnData,
+        mock_model: Mock,
+        mock_data_format: Mock,
+        mock_predictions: np.ndarray,
+    ) -> None:
         """Test prediction pipeline with default save path."""
         model_path = tmp_path / "model"
         model_path.mkdir()
@@ -319,8 +338,13 @@ class TestRunPredictionPipeline:
             assert result.model_info is None
 
     def test_run_prediction_pipeline_model_type_conversion(
-        self, tmp_path, mock_adata, mock_model, mock_data_format, mock_predictions
-    ):
+        self,
+        tmp_path,
+        mock_adata: ad.AnnData,
+        mock_model: Mock,
+        mock_data_format: Mock,
+        mock_predictions: np.ndarray,
+    ) -> None:
         """Test that string model_type is properly handled."""
         model_path = tmp_path / "model"
         model_path.mkdir()
@@ -349,8 +373,13 @@ class TestRunPredictionPipeline:
             assert result.model_info is None
 
     def test_run_prediction_pipeline_integration(
-        self, tmp_path, mock_adata, mock_model, mock_data_format, mock_predictions
-    ):
+        self,
+        tmp_path,
+        mock_adata: ad.AnnData,
+        mock_model: Mock,
+        mock_data_format: Mock,
+        mock_predictions: np.ndarray,
+    ) -> None:
         """Test basic integration of prediction pipeline components."""
         model_path = tmp_path / "model"
         model_path.mkdir()
@@ -383,8 +412,8 @@ class TestRunPredictionPipeline:
     @patch("scxpand.util.inference_utils.setup_inference_environment")
     @patch("scxpand.util.inference_utils.run_model_inference")
     def test_run_prediction_pipeline_exception_handling(
-        self, mock_inference, mock_setup, tmp_path, mock_adata
-    ):
+        self, mock_inference: Mock, mock_setup: Mock, tmp_path, mock_adata: ad.AnnData
+    ) -> None:
         """Test exception handling in prediction pipeline."""
         model_path = tmp_path / "model"
         model_path.mkdir()
