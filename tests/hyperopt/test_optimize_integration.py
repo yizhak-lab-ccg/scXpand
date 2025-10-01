@@ -1,28 +1,23 @@
 """Integration tests for hyperparameter optimization functionality."""
 
-import tempfile
-from pathlib import Path
 from unittest.mock import patch
 
 from scxpand.main import optimize, optimize_all
 from tests.test_utils import create_temp_h5ad_file, safe_context_manager
 
 
-def test_optimize_single_model(dummy_adata):
+def test_optimize_single_model(dummy_adata, tmp_path):
     """Test hyperparameter optimization for a single model type."""
-    with (
-        tempfile.TemporaryDirectory() as temp_dir,
-        safe_context_manager() as ctx,
-    ):
+    with safe_context_manager() as ctx:
         # Create test file
-        test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
+        test_file_path = create_temp_h5ad_file(dummy_adata, tmp_path)
         ctx.register_adata(dummy_adata)
 
         results = optimize(
             model_type="mlp",
             data_path=test_file_path,
             n_trials=2,  # Small number for testing
-            storage_path=Path(temp_dir) / "optuna_studies",
+            storage_path=tmp_path / "optuna_studies",
             num_workers=0,
             fail_fast=True,  # Fail immediately on bugs for integration tests
             n_epochs=1,  # Quick training for testing
@@ -33,18 +28,15 @@ def test_optimize_single_model(dummy_adata):
         assert results is None  # optimize doesn't return anything
 
         # Check that study files were created
-        study_path = Path(temp_dir) / "optuna_studies"
+        study_path = tmp_path / "optuna_studies"
         assert study_path.exists(), "Study directory should be created"
 
 
-def test_optimize_all_models(dummy_adata):
+def test_optimize_all_models(dummy_adata, tmp_path):
     """Test hyperparameter optimization for all model types."""
-    with (
-        tempfile.TemporaryDirectory() as temp_dir,
-        safe_context_manager() as ctx,
-    ):
+    with safe_context_manager() as ctx:
         # Create test file
-        test_file_path = create_temp_h5ad_file(dummy_adata, temp_dir)
+        test_file_path = create_temp_h5ad_file(dummy_adata, tmp_path)
         ctx.register_adata(dummy_adata)
 
         # Mock optimize to track calls
@@ -52,7 +44,7 @@ def test_optimize_all_models(dummy_adata):
             optimize_all(
                 data_path=test_file_path,
                 n_trials=2,  # Small number for testing
-                storage_path=Path(temp_dir) / "optuna_studies",
+                storage_path=tmp_path / "optuna_studies",
                 num_workers=0,
                 fail_fast=True,  # Fail immediately on bugs for integration tests
             )

@@ -1,0 +1,11 @@
+[run]
+source = src/scxpand
+omit = */tests/*,*/docs/*,*/build/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    pass
