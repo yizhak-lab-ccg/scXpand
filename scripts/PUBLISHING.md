@@ -115,6 +115,36 @@ scXpand uses **VCS-based versioning** with `hatch-vcs`:
 - Fixed CUDA memory leak in autoencoder training
 ```
 
+## Working with Branch Protection Rules
+
+**Great news!** The CI is now configured to skip all checks for changelog-only changes:
+
+- ✅ **Tests skipped** for CHANGELOG.md-only changes
+- ✅ **Linting skipped** for CHANGELOG.md-only changes
+- ✅ **Build checks skipped** for CHANGELOG.md-only changes
+- ✅ **Documentation build skipped** for CHANGELOG.md-only changes
+
+This means you can now easily update changelogs without waiting for CI!
+
+### Recommended Workflow:
+```bash
+# 1. Run release script to create changelog template
+./scripts/release.sh
+
+# 2. Edit CHANGELOG.md with your changes
+# (The script will show you exactly where to edit)
+
+# 3. Commit and push changelog changes
+git add CHANGELOG.md
+git commit -m "Update changelog for version 0.4.5"
+git push origin update-changelog
+
+# 4. Create PR - CI will be SKIPPED automatically!
+# 5. Merge PR
+# 6. Run release script again to complete the release
+./scripts/release.sh
+```
+
 ## Dev Release Automation
 
 Dev releases are **fully automated**:
