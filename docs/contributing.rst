@@ -121,36 +121,75 @@ Release Process
 
 **For Maintainers Only**
 
-We use an automated release script that handles the entire publishing process to PyPI.
-For detailed instructions, see scripts/PUBLISHING.md
+We use GitHub Actions for automated dual package releases (standard and CUDA versions).
+The release process is fully integrated with CI/CD and includes changelog validation.
 
-Dev Releases
-------------
+Creating Releases
+-----------------
 
-For testing releases before official announcement, use dev releases:
+**Method 1: GitHub Actions UI (Recommended)**
+
+1. Go to the `Actions tab <https://github.com/yizhak-lab-ccg/scXpand/actions/workflows/release.yml>`_ in GitHub
+2. Click "Run workflow"
+3. Select the version bump type (patch/minor/major)
+4. Optionally check "Create dev release" for testing
+5. Click "Run workflow"
+
+**Method 2: Manual Tag Push**
 
 .. code-block:: bash
 
-    # Create a dev release (no GitHub announcement)
-    ./scripts/release.sh --dev
+    # Create and push a version tag
+    git tag v0.4.6
+    git push origin v0.4.6
 
-    # Dry run for dev release
-    ./scripts/release.sh --dev --dry-run
+Release Types
+-------------
 
-Dev releases:
-- Publish packages to PyPI with dev version suffix (e.g., 0.3.6.dev1)
-- Skip GitHub release creation and announcement
-- Skip ReadTheDocs documentation build
-- Useful for testing releases on other machines before official release
+**Regular Releases:**
+- Require changelog entry validation
+- Create GitHub releases with auto-generated notes
+- Publish both ``scxpand`` (CPU/MPS) and ``scxpand-cuda`` (CUDA) packages
+- Trigger ReadTheDocs documentation builds
+
+**Dev Releases:**
+- Skip changelog validation
+- No GitHub release creation
+- Publish packages with ``.dev0`` suffix (e.g., ``0.4.6.dev0``)
+- Useful for testing before official releases
+
+Changelog Requirements
+----------------------
+
+Before creating a regular release, you **must** add a changelog entry:
+
+1. **Add your changes to CHANGELOG.md:**
+
+   .. code-block:: markdown
+
+      ## [0.4.6] - 2025-01-15
+
+      - New hyperparameter optimization for MLP models
+      - Support for custom loss functions
+      - Improved memory efficiency in data loading
+      - Fixed CUDA memory leak in autoencoder training
+
+2. **Changelog validation** runs automatically and will fail if:
+   - No entry exists for the version
+   - Entry has no bullet points
+   - Entry contains only placeholder dashes
+   - Date format is incorrect
 
 Version Management
 ------------------
 
-We use `Semantic Versioning <https://semver.org/>`_:
+We use `Semantic Versioning <https://semver.org/>`_ with VCS-based versioning:
 
 - **MAJOR**: Incompatible API changes (1.0.0 → 2.0.0)
 - **MINOR**: Backward-compatible functionality additions (1.0.0 → 1.1.0)
 - **PATCH**: Backward-compatible bug fixes (1.0.0 → 1.0.1)
+- **Version source**: Git tags (e.g., ``v0.4.6``, ``v0.4.7.dev0``)
+- **No manual version bumping** required in ``pyproject.toml``
 
 Documentation
 -------------
