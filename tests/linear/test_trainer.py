@@ -1,6 +1,5 @@
 """Tests for linear trainer components."""
 
-import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -12,6 +11,7 @@ from torch.utils.data import DataLoader
 from scxpand.data_util.dataset import CellsDataset
 from scxpand.linear.linear_params import LinearClassifierParam
 from scxpand.linear.linear_trainer import LinearTrainer, TrainingSession
+from tests.test_utils import safe_context_manager
 
 
 class TestTrainingSession:
@@ -281,16 +281,15 @@ class TestLinearTrainer:
     ):
         """Test training finalization."""
         prm = LinearClassifierParam()
-        base_save_dir = Path("test_dir")
-        trainer = LinearTrainer(prm=prm, base_save_dir=base_save_dir)
 
-        mock_train_logger = MagicMock()
+        with safe_context_manager() as ctx:
+            base_save_dir = Path(ctx.temp_dir)
+            trainer = LinearTrainer(prm=prm, base_save_dir=base_save_dir)
 
-        # Setup mock data
-        model = MagicMock()
+            mock_train_logger = MagicMock()
 
-        with tempfile.TemporaryDirectory() as temp_dir:
-            base_save_dir = Path(temp_dir)
+            # Setup mock data
+            model = MagicMock()
 
             # Setup mocks
             mock_eval_save.return_value = {"AUROC": 0.8, "accuracy": 0.75}

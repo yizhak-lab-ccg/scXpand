@@ -136,5 +136,5 @@ uv run pre-commit install
 uv run pre-commit install --hook-type pre-push
 
 echo Installation complete!
-echo To activate the environment later, run in Powershell: .\.venv\Scripts\activate
+echo To activate the environment later, run in the Command Prompt: .\.venv\Scripts\activate
 pause

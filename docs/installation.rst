@@ -62,7 +62,7 @@ scXpand uses `uv <https://docs.astral.sh/uv/>`_ for fast, reliable dependency ma
 
     ./install.sh
 
-**Windows PowerShell:**
+**Windows Command Prompt:**
 
 .. code-block:: bash
 
@@ -81,8 +81,8 @@ Then activate the environment:
 
 .. code-block:: bash
 
-    # macOS/Linux
+    # macOS/Linux:
     source .venv/bin/activate
 
-    # Windows PowerShell
+    # Window Command Prompt:
     .\.venv\Scripts\activate

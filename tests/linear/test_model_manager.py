@@ -1,6 +1,5 @@
 """Tests for linear model manager."""
 
-import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -11,6 +10,7 @@ from sklearn.linear_model import SGDClassifier
 from scxpand.linear.linear_params import LinearClassifierParam
 from scxpand.linear.model_manager import ModelManager
 from scxpand.util.model_constants import BEST_MODEL_INFO_FILE
+from tests.test_utils import safe_context_manager
 
 
 class TestModelManager:
@@ -91,8 +91,8 @@ class TestModelManager:
 
     def test_load_model_state(self, mock_model):
         """Test loading model state."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            base_save_dir = Path(temp_dir)
+        with safe_context_manager() as ctx:
+            base_save_dir = Path(ctx.temp_dir)
 
             best_model_state = {
                 "coef_": np.array([[4.0, 5.0, 6.0]]),

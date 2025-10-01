@@ -19,7 +19,7 @@ from scxpand.data_util.prepare_data_for_train import prepare_data_for_training
 from scxpand.data_util.transforms import preprocess_expression_data
 from scxpand.hyperopt.param_grids import configure_lightgbm_trial_params
 from scxpand.lightgbm.lightgbm_params import LightGBMParams
-from tests.test_utils import windows_safe_context_manager
+from tests.test_utils import safe_context_manager
 
 
 @pytest.fixture
@@ -183,14 +183,15 @@ class TestPrepareDataForTraining:
         """Test that gene statistics are computed when z-score is enabled."""
         with (
             tempfile.TemporaryDirectory() as temp_dir,
-            windows_safe_context_manager() as ctx,
+            safe_context_manager() as ctx,
         ):
             data_path = Path(temp_dir) / "test_data.h5ad"
             save_dir = Path(temp_dir) / "results"
 
             dummy_adata.write_h5ad(data_path)
-            ctx.register_file(data_path)
+            ctx.register_adata(dummy_adata)
 
+            # Act
             bundle = prepare_data_for_training(
                 data_path=data_path,
                 use_zscore_norm=True,
@@ -209,14 +210,15 @@ class TestPrepareDataForTraining:
         """Test that gene statistics computation is skipped when z-score is disabled."""
         with (
             tempfile.TemporaryDirectory() as temp_dir,
-            windows_safe_context_manager() as ctx,
+            safe_context_manager() as ctx,
         ):
             data_path = Path(temp_dir) / "test_data.h5ad"
             save_dir = Path(temp_dir) / "results"
 
             dummy_adata.write_h5ad(data_path)
-            ctx.register_file(data_path)
+            ctx.register_adata(dummy_adata)
 
+            # Act
             bundle = prepare_data_for_training(
                 data_path=data_path,
                 use_zscore_norm=False,
@@ -239,11 +241,11 @@ class TestCellsDataset:
         """Test CellsDataset when z-score normalization is enabled."""
         with (
             tempfile.TemporaryDirectory() as temp_dir,
-            windows_safe_context_manager() as ctx,
+            safe_context_manager() as ctx,
         ):
             data_path = Path(temp_dir) / "test_data.h5ad"
             dummy_adata.write_h5ad(data_path)
-            ctx.register_file(data_path)
+            ctx.register_adata(dummy_adata)
 
             data_format = DataFormat(
                 use_zscore_norm=True,
@@ -266,11 +268,11 @@ class TestCellsDataset:
         """Test CellsDataset when z-score normalization is disabled."""
         with (
             tempfile.TemporaryDirectory() as temp_dir,
-            windows_safe_context_manager() as ctx,
+            safe_context_manager() as ctx,
         ):
             data_path = Path(temp_dir) / "test_data.h5ad"
             dummy_adata.write_h5ad(data_path)
-            ctx.register_file(data_path)
+            ctx.register_adata(dummy_adata)
 
             data_format = DataFormat(
                 use_zscore_norm=False,
@@ -331,13 +333,15 @@ class TestPerformanceOptimization:
 
         with (
             tempfile.TemporaryDirectory() as temp_dir,
-            windows_safe_context_manager() as ctx,
+            safe_context_manager() as ctx,
         ):
             data_path = Path(temp_dir) / "test_data.h5ad"
             large_adata.write_h5ad(data_path)
-            ctx.register_file(data_path)
+            ctx.register_adata(large_adata)
 
-            # Time with z-score normalization enabled
+            save_dir = Path(temp_dir) / "results"
+
+            # Time with z-score enabled
             bundle_zscore = prepare_data_for_training(
                 data_path=data_path,
                 use_zscore_norm=True,
@@ -374,11 +378,12 @@ class TestIntegration:
         """Test the complete workflow with z-score normalization enabled/disabled."""
         with (
             tempfile.TemporaryDirectory() as temp_dir,
-            windows_safe_context_manager() as ctx,
+            safe_context_manager() as ctx,
         ):
             data_path = Path(temp_dir) / "test_data.h5ad"
             dummy_adata.write_h5ad(data_path)
-            ctx.register_file(data_path)
+            ctx.register_adata(dummy_adata)
+            save_dir = Path(temp_dir) / "results"
 
             # Test with LightGBMParams
             params_zscore = LightGBMParams(use_zscore_norm=True)

@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 import gc
 import os
 import platform
+import shutil
+import tempfile
 import time
+from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
+from optuna.storages import RDBStorage
 
 
 def robust_remove(file_path, max_retries=10, delay=0.2):
@@ -58,25 +64,91 @@ def create_temp_h5ad_file(adata, temp_dir: str) -> str:
         pytest.skip(f"Could not create H5AD file: {e}")
 
 
-def close_adata_safely(adata):
-    """Safely close AnnData file handle to avoid Windows file locks."""
+@contextmanager
+def safe_context_manager():
+    """
+    A context manager that creates and safely cleans up a temporary directory,
+    handling file-locking issues on Windows with AnnData and Optuna.
+    """
+    temp_dir = tempfile.mkdtemp()
+    # Track objects that need to be manually closed to avoid file locking issues on Windows
+    studies_to_close = []
+    adatas_to_close = []
+    storage_urls = set()
+
+    class Context:
+        def __init__(self, temp_dir_path):
+            self.temp_dir = temp_dir_path
+
+        def register_study(self, study):
+            """Register a study to be closed."""
+            if study is not None:
+                studies_to_close.append(study)
+                try:
+                    if hasattr(study._storage, "url"):
+                        storage_urls.add(study._storage.url)
+                except (AttributeError, Exception):
+                    pass
+
+        def register_adata(self, adata):
+            """Register an AnnData object to be closed."""
+            if adata is not None:
+                adatas_to_close.append(adata)
+
     try:
-        if hasattr(adata, "file") and adata.file is not None:
-            adata.file.close()
-        # Force garbage collection
-        del adata
-        gc.collect()
-    except (AttributeError, OSError):
-        # File might already be closed or not backed
-        pass
-
-
-def ensure_h5ad_handles_closed(*adatas):
-    """Ensure all H5AD file handles are closed for Windows compatibility."""
-    for adata in adatas:
-        if adata is not None:
+        yield Context(temp_dir)
+    finally:
+        # --- Cleanup Phase ---
+        for adata in adatas_to_close:
             close_adata_safely(adata)
-    gc.collect()  # Force cleanup
+        for study in studies_to_close:
+            close_optuna_storage(study)
+
+        if platform.system() == "Windows":
+            for url in storage_urls:
+                try:
+                    RDBStorage.clear_instance_cache(url)
+                except Exception:
+                    pass
+
+        studies_to_close.clear()
+        adatas_to_close.clear()
+        storage_urls.clear()
+
+        gc.collect()
+        gc.collect()
+        time.sleep(0.2)
+
+        # Now, safely remove the temporary directory
+        try:
+            shutil.rmtree(temp_dir, ignore_errors=platform.system() != "Windows")
+        except PermissionError:
+            # Fallback to robust remove for stubborn files on Windows
+            for root, dirs, files in os.walk(temp_dir, topdown=False):
+                for name in files:
+                    robust_remove(os.path.join(root, name))
+                for name in dirs:
+                    try:
+                        os.rmdir(os.path.join(root, name))
+                    except OSError:
+                        pass
+            try:
+                os.rmdir(temp_dir)
+            except OSError:
+                pass
+        except Exception:
+            pass
+
+
+def close_adata_safely(adata):
+    """Safely close an AnnData file to avoid Windows file lock issues."""
+    if adata is None or not hasattr(adata, "file") or not hasattr(adata.file, "close"):
+        return
+    try:
+        adata.file.close()
+    except Exception:
+        pass  # Ignore errors during cleanup
+    del adata
 
 
 def close_optuna_storage(study):
@@ -84,120 +156,16 @@ def close_optuna_storage(study):
     if study is None:
         return
 
+    # Nullify references to help the garbage collector
     try:
-        # Get the underlying storage object
-        storage = study._storage
-        if storage is None:
-            return
+        study._storage = None
+        study._study_id = -1  # Invalidate study
+    except (AttributeError, Exception):
+        pass  # Ignore all errors
 
-        # For RDBStorage (like SQLite), we need to close all connections
-        if hasattr(storage, "_engine"):
-            engine = storage._engine
-            try:
-                # Dispose all connections in the pool
-                engine.dispose()
-            except Exception:
-                pass
-
-            # Also try to close the engine completely
-            try:
-                if hasattr(engine, "pool"):
-                    engine.pool.dispose()
-            except Exception:
-                pass
-
-        # Clear the storage reference
-        try:
-            del study._storage
-        except Exception:
-            pass
-
-    except Exception:
-        # Ignore all errors during cleanup
-        pass
-
-    # Force garbage collection multiple times
+    # Aggressive garbage collection and a delay
     gc.collect()
     gc.collect()
-
-
-def windows_safe_tempfile_cleanup(temp_dir, *file_patterns):
-    """Clean up temporary files in a Windows-safe manner."""
-    if platform.system() == "Windows":
-        # Extra wait for Windows
-        time.sleep(0.5)
-        gc.collect()
-
-    # Remove specific files if patterns provided
-    temp_path = Path(temp_dir)
-    for pattern in file_patterns:
-        for file_path in temp_path.glob(pattern):
-            if file_path.exists():
-                robust_remove(str(file_path))
-
-
-def windows_safe_context_manager():
-    """Context manager for Windows-safe test execution."""
-    return WindowsSafeTestContext()
-
-
-class WindowsSafeTestContext:
-    """Context manager to handle Windows file lock issues in tests."""
-
-    def __init__(self):
-        self.adatas_to_close = []
-        self.files_to_cleanup = []
-        self.studies_to_close = []
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        # Close all Optuna studies first
-        for study in self.studies_to_close:
-            close_optuna_storage(study)
-
-        # Clear the list to free references
-        self.studies_to_close.clear()
-
-        # Force garbage collection after closing studies
-        gc.collect()
-        gc.collect()
-
-        # Close all AnnData handles
-        for adata in self.adatas_to_close:
-            close_adata_safely(adata)
-
-        # Clear the list to free references
-        self.adatas_to_close.clear()
-
-        # Force garbage collection again
-        gc.collect()
-        gc.collect()
-
-        # Wait longer on Windows to ensure all file handles are released
-        if platform.system() == "Windows":
-            time.sleep(2.5)  # Increased from 1.5 to 2.5 seconds
-            gc.collect()
-            gc.collect()
-
-        # Clean up files
-        for file_path in self.files_to_cleanup:
-            robust_remove(file_path)
-
-    def register_adata(self, adata):
-        """Register an AnnData object for cleanup."""
-        if adata is not None:
-            self.adatas_to_close.append(adata)
-        return adata
-
-    def register_file(self, file_path):
-        """Register a file for cleanup."""
-        self.files_to_cleanup.append(str(file_path))
-        return file_path
-
-    def register_study(self, study):
-        """Register an Optuna study for cleanup."""
-        if study is not None:
-            self.studies_to_close.append(study)
-        return study
+    time.sleep(0.1)
+    del study
+    gc.collect()

@@ -1,4 +1,3 @@
-import tempfile
 from pathlib import Path
 
 import anndata as ad
@@ -11,7 +10,7 @@ from scipy.sparse import csr_matrix
 from scxpand.data_util.data_format import DataFormat
 from scxpand.data_util.data_splitter import split_data
 from scxpand.data_util.prepare_data_for_train import prepare_data_for_training
-from tests.test_utils import windows_safe_context_manager
+from tests.test_utils import safe_context_manager
 
 
 @pytest.fixture
@@ -58,20 +57,16 @@ class TestPrepareDataForTraining:
         self, mock_adata_with_required_columns: AnnData
     ) -> None:
         """Test prepare_data_for_training with adata input."""
-        with (
-            tempfile.TemporaryDirectory() as tmp_dir,
-            windows_safe_context_manager() as ctx,
-        ):
+        with safe_context_manager() as ctx:
             # Save adata to file since data_path is now mandatory
-            data_file = Path(tmp_dir) / "test_data.h5ad"
+            data_file = Path(ctx.temp_dir) / "test_data.h5ad"
             mock_adata_with_required_columns.write_h5ad(data_file)
-            ctx.register_file(data_file)
 
             result = prepare_data_for_training(
                 data_path=data_file,
                 aux_categorical_types=("tissue_type", "imputed_labels"),
                 use_log_transform=True,
-                save_dir=tmp_dir,
+                save_dir=ctx.temp_dir,
                 dev_ratio=0.2,
                 rand_seed=42,
                 resume=False,
@@ -104,20 +99,16 @@ class TestPrepareDataForTraining:
         self, mock_adata_with_required_columns: AnnData
     ) -> None:
         """Test prepare_data_for_training with data_path input (no adata)."""
-        with (
-            tempfile.TemporaryDirectory() as tmp_dir,
-            windows_safe_context_manager() as ctx,
-        ):
+        with safe_context_manager() as ctx:
             # Save the adata to a file
-            data_file = Path(tmp_dir) / "test_data.h5ad"
+            data_file = Path(ctx.temp_dir) / "test_data.h5ad"
             mock_adata_with_required_columns.write_h5ad(data_file)
-            ctx.register_file(data_file)
 
             result = prepare_data_for_training(
                 data_path=data_file,
                 aux_categorical_types=("tissue_type", "imputed_labels"),
                 use_log_transform=False,
-                save_dir=tmp_dir,
+                save_dir=ctx.temp_dir,
                 dev_ratio=0.2,
                 rand_seed=42,
                 resume=False,
@@ -137,15 +128,11 @@ class TestPrepareDataForTraining:
         self, mock_adata_with_required_columns: AnnData
     ) -> None:
         """Test that using separated methods produces the same result as the integrated function."""
-        with (
-            tempfile.TemporaryDirectory() as tmp_dir,
-            windows_safe_context_manager() as ctx,
-        ):
-            tmp_path = Path(tmp_dir)
+        with safe_context_manager() as ctx:
+            tmp_path = Path(ctx.temp_dir)
             # Save the adata to a file
             data_file = tmp_path / "test_data.h5ad"
             mock_adata_with_required_columns.write_h5ad(data_file)
-            ctx.register_file(data_file)
 
             # Create subdirectories
             integrated_dir = tmp_path / "integrated"
@@ -249,21 +236,17 @@ class TestPrepareDataForTraining:
         self, mock_adata_with_required_columns: AnnData
     ) -> None:
         """Test the resume functionality."""
-        with (
-            tempfile.TemporaryDirectory() as tmp_dir,
-            windows_safe_context_manager() as ctx,
-        ):
+        with safe_context_manager() as ctx:
             # Save the adata to a file
-            data_file = Path(tmp_dir) / "test_data.h5ad"
+            data_file = Path(ctx.temp_dir) / "test_data.h5ad"
             mock_adata_with_required_columns.write_h5ad(data_file)
-            ctx.register_file(data_file)
 
             # First run: create data format and splits
             result1 = prepare_data_for_training(
                 data_path=data_file,
                 aux_categorical_types=("tissue_type", "imputed_labels"),
                 use_log_transform=True,
-                save_dir=tmp_dir,
+                save_dir=ctx.temp_dir,
                 dev_ratio=0.2,
                 rand_seed=42,
                 resume=False,
@@ -275,7 +258,7 @@ class TestPrepareDataForTraining:
                 data_path=data_file,
                 aux_categorical_types=("tissue_type", "imputed_labels"),
                 use_log_transform=True,
-                save_dir=tmp_dir,
+                save_dir=ctx.temp_dir,
                 dev_ratio=0.2,
                 rand_seed=42,
                 resume=True,
@@ -290,14 +273,14 @@ class TestPrepareDataForTraining:
 
     def test_error_when_data_path_not_exists(self) -> None:
         """Test that appropriate error is raised when data_path doesn't exist."""
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            non_existent_file = Path(tmp_dir) / "non_existent.h5ad"
+        with safe_context_manager() as ctx:
+            non_existent_file = Path(ctx.temp_dir) / "non_existent.h5ad"
             with pytest.raises(FileNotFoundError):
                 prepare_data_for_training(
                     data_path=non_existent_file,
                     aux_categorical_types=(),
                     use_log_transform=False,
-                    save_dir=tmp_dir,
+                    save_dir=ctx.temp_dir,
                     dev_ratio=0.2,
                     rand_seed=42,
                     resume=False,

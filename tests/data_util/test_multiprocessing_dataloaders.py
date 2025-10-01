@@ -41,7 +41,7 @@ from scxpand.data_util.dataset import (
 )
 from scxpand.data_util.transforms import apply_zscore_normalization
 from scxpand.util.classes import DataAugmentParams, DataLoaderParams
-from tests.test_utils import windows_safe_context_manager
+from tests.test_utils import safe_context_manager
 
 
 @pytest.fixture
@@ -460,7 +460,7 @@ class TestDataLoaderMultiprocessing:
         assert mp.get_start_method() == "spawn"
 
         # Windows file locking issues mean we need special handling
-        with windows_safe_context_manager():
+        with safe_context_manager():
             loader_params = DataLoaderParams(
                 batch_size=4, shuffle=False, sampler_type="random"
             )
