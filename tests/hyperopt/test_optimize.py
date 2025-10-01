@@ -1320,9 +1320,9 @@ class TestTrialResumeAndCleanup:
 
             mock_study.trials = [mock_trial_0, mock_trial_1]
 
-            # Run cleanup with immediate cleanup (max_age_hours=0)
+            # Run cleanup
             cleaned_count = cleanup_incomplete_trials(
-                study=mock_study, study_dir=study_dir, max_age_hours=0
+                study=mock_study, study_dir=study_dir
             )
 
             # Should have cleaned up the trial without valid checkpoint
@@ -1734,7 +1734,7 @@ class TestHappyPathFunctionality:
 
             # Cleanup should work safely on empty study
             cleaned_count = cleanup_incomplete_trials(
-                study=empty_study, study_dir=study_dir, max_age_hours=0
+                study=empty_study, study_dir=study_dir
             )
             assert cleaned_count == 0  # No trials to clean
             ctx.register_study(empty_study)

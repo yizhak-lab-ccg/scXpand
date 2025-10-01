@@ -2,7 +2,7 @@
 
 import json
 import shutil
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 import optuna
@@ -29,8 +29,6 @@ RESULTS_INDICATORS = [
     RESULTS_DEV_FILE,  # Evaluation results
     RESULTS_TABLE_DEV_FILE,  # Detailed results table
 ]
-
-DEFAULT_CLEANUP_AGE_HOURS = 0  # Immediate cleanup of incomplete trials
 
 
 def save_study_info(study: optuna.Study, study_dir: Path, score_metric: str) -> None:
@@ -218,9 +216,7 @@ def cleanup_failed_trial(study_dir: Path, trial_number: int) -> None:
         logger.warning(f"Failed to clean up trial directory {trial_dir}: {e}")
 
 
-def cleanup_incomplete_trials(
-    study: optuna.Study, study_dir: Path, max_age_hours: int = DEFAULT_CLEANUP_AGE_HOURS
-) -> int:
+def cleanup_incomplete_trials(study: optuna.Study, study_dir: Path) -> int:
     """Clean up trial directories for RUNNING trials without results.
 
     Any RUNNING trial without results can be safely cleaned up since there are
@@ -235,13 +231,11 @@ def cleanup_incomplete_trials(
     Args:
         study: The Optuna study object.
         study_dir: The study directory path.
-        max_age_hours: Minimum age in hours before cleanup (0 = immediate cleanup).
 
     Returns:
         Number of trial directories cleaned up.
     """
     running_trials = _get_trials_by_state(study, optuna.trial.TrialState.RUNNING)
-    cutoff_time = datetime.now() - timedelta(hours=max_age_hours)
 
     cleaned_count = 0
 
@@ -249,7 +243,7 @@ def cleanup_incomplete_trials(
         trial_dir = study_dir / f"trial_{trial.number}"
 
         if _should_cleanup_trial_directory(
-            trial_dir, cutoff_time, max_age_hours
+            trial_dir
         ) and _cleanup_single_trial_directory(study_dir, trial.number, trial_dir):
             cleaned_count += 1
 
@@ -261,22 +255,11 @@ def cleanup_incomplete_trials(
     return cleaned_count
 
 
-def _should_cleanup_trial_directory(
-    trial_dir: Path, cutoff_time: datetime, max_age_hours: int
-) -> bool:
+def _should_cleanup_trial_directory(trial_dir: Path) -> bool:
     """Check if a trial directory should be cleaned up."""
     # Only consider directories that exist
     if not trial_dir.exists():
         return False
-
-    # Check minimum age if specified (0 = no age requirement)
-    if max_age_hours > 0:  # Only check age if max_age_hours > 0
-        try:
-            dir_mtime = datetime.fromtimestamp(trial_dir.stat().st_mtime)
-            if dir_mtime > cutoff_time:
-                return False  # Directory is too recent (respects min age)
-        except OSError:
-            return False  # Can't get directory stats, skip for safety
 
     # Clean up any RUNNING trial without results
     return not _has_results_indicators(trial_dir)
