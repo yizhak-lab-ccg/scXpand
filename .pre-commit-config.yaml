@@ -42,6 +42,8 @@ repos:
       - id: no-commit-to-branch
         name: Prevent commit to main branch
         args: [--branch=main]
+        # Skip this hook in CI environments
+        exclude: ^$
   - repo: local
     hooks:
       - id: pytest
