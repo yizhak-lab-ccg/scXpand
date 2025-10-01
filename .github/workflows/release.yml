@@ -21,6 +21,10 @@ on:
         default: false
         type: boolean
 
+permissions:
+  contents: write
+  actions: write
+
 defaults:
   run:
     # to fail on error in multiline statements (-e), in pipes (-o pipefail), and on unset variables (-u).

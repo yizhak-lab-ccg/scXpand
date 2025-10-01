@@ -8,11 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.1.0
 ## [0.4.5] - 2025-01-15
 
 - Enabled GitHub Actions CI/CD for automated releases
-- Added dual package release support (standard and CUDA versions)
-- Implemented automated PyPI publishing workflow
-- Simplified workflow configuration following scverse template best practices
-- Updated contributing documentation with clear release instructions
-- Fixed required status checks by removing paths-ignore from workflows
 
 ## [0.4.4] - 2025-10-01
 
