@@ -1,5 +1,6 @@
 """Tests for the main CLI entry points."""
 
+import os
 from unittest.mock import patch
 
 import pytest
@@ -11,6 +12,11 @@ from scxpand.linear.linear_params import LinearClassifierParam
 from scxpand.main import optimize, optimize_all, train
 from scxpand.mlp.mlp_params import MLPParam
 from scxpand.util.classes import ModelType
+
+
+@pytest.fixture(autouse=True, scope="module")
+def ensure_data_dir():
+    os.makedirs("data", exist_ok=True)
 
 
 class TestTrainCommand:

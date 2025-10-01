@@ -6,7 +6,6 @@ This module tests the run_inference function with different combinations of:
 - Different model sources (local, registry, URL)
 """
 
-import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -19,6 +18,7 @@ from scxpand.core.inference import DEFAULT_MODEL_NAME, run_inference
 from scxpand.core.inference_results import InferenceResults
 from scxpand.data_util.transforms import extract_is_expanded
 from scxpand.util.metrics import calculate_metrics
+from tests.test_utils import safe_context_manager
 
 
 class TestRunInferenceEdgeCases:
@@ -266,8 +266,8 @@ class TestRunInferenceEdgeCases:
             predictions=np.random.random(len(adata)), metrics={"AUROC": 0.85}
         )
 
-        with tempfile.TemporaryDirectory() as temp_dir:
-            save_path = Path(temp_dir) / "test_results"
+        with safe_context_manager() as ctx:
+            save_path = Path(ctx.temp_dir) / "test_results"
 
             # Run inference
             _results = run_inference(

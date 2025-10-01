@@ -18,7 +18,7 @@ from scxpand.data_util.dataloaders import create_eval_dataloader
 from scxpand.data_util.dataset import CellsDataset
 from scxpand.data_util.transforms import load_and_preprocess_data_numpy
 from scxpand.util.general_util import compute_row_sums, compute_scaling_factors
-from tests.test_utils import windows_safe_context_manager
+from tests.test_utils import safe_context_manager
 
 
 @pytest.fixture
@@ -84,11 +84,11 @@ class TestDatasetVsTransformsConsistency:
 
         with (
             tempfile.TemporaryDirectory() as temp_dir,
-            windows_safe_context_manager() as ctx,
+            safe_context_manager() as ctx,
         ):
             temp_path = Path(temp_dir) / "test_data.h5ad"
             adata.write_h5ad(temp_path)
-            ctx.register_file(temp_path)
+            ctx.register_adata(adata)
 
             # Method 1: CellsDataset approach
             dataset = CellsDataset(

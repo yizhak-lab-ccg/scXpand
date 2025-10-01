@@ -10,7 +10,7 @@ from scxpand.data_util.data_format import DataFormat
 class TestDecoderOutput:
     """Test cases for DecoderOutput class."""
 
-    def test_decoder_output_creation(self):
+    def test_decoder_output_creation(self) -> None:
         """Test creating DecoderOutput with all fields."""
         mu = torch.randn(5, 100).abs() + 1e-5  # Ensure positive
         pi = torch.sigmoid(torch.randn(5, 100))
@@ -22,7 +22,7 @@ class TestDecoderOutput:
         assert torch.equal(output.pi, pi)
         assert torch.equal(output.theta, theta)
 
-    def test_decoder_output_optional_fields(self):
+    def test_decoder_output_optional_fields(self) -> None:
         """Test creating DecoderOutput with optional fields as None."""
         mu = torch.randn(5, 100).abs() + 1e-5  # Ensure positive
 
@@ -32,14 +32,14 @@ class TestDecoderOutput:
         assert output.pi is None
         assert output.theta is None
 
-    def test_decoder_output_device_property(self):
+    def test_decoder_output_device_property(self) -> None:
         """Test device property returns correct device."""
         mu = torch.randn(5, 100).abs() + 1e-5
         output = DecoderOutput(mu=mu)
 
         assert output.device == mu.device
 
-    def test_decoder_output_to_device(self):
+    def test_decoder_output_to_device(self) -> None:
         """Test moving DecoderOutput to different device."""
         mu = torch.randn(5, 100).abs() + 1e-5
         pi = torch.sigmoid(torch.randn(5, 100))
@@ -51,7 +51,7 @@ class TestDecoderOutput:
         output_same = output.to("cpu")
         assert output_same.device.type == "cpu"
 
-    def test_decoder_output_detach(self):
+    def test_decoder_output_detach(self) -> None:
         """Test detaching DecoderOutput from computation graph."""
         mu = torch.randn(5, 100, requires_grad=True).abs() + 1e-5
         pi = torch.sigmoid(torch.randn(5, 100, requires_grad=True))
@@ -69,7 +69,7 @@ class TestAutoencoderModelOutput:
     """Test cases for autoencoder models returning DecoderOutput."""
 
     @pytest.fixture
-    def data_format(self):
+    def data_format(self) -> DataFormat:
         """Create a simple DataFormat for testing."""
         return DataFormat(
             n_genes=100,
@@ -81,11 +81,13 @@ class TestAutoencoderModelOutput:
         )
 
     @pytest.fixture
-    def sample_input(self):
+    def sample_input(self) -> torch.Tensor:
         """Create sample input data."""
         return torch.randn(5, 100)
 
-    def test_autoencoder_model_decode_output_type(self, data_format, sample_input):
+    def test_autoencoder_model_decode_output_type(
+        self, data_format: DataFormat, sample_input: torch.Tensor
+    ) -> None:
         """Test AutoencoderModel.decode returns DecoderOutput."""
         model = AutoencoderModel(
             data_format=data_format,
@@ -112,7 +114,9 @@ class TestAutoencoderModelOutput:
             "pi should be in [0,1]"
         )
 
-    def test_fork_autoencoder_decode_output_type(self, data_format, sample_input):
+    def test_fork_autoencoder_decode_output_type(
+        self, data_format: DataFormat, sample_input: torch.Tensor
+    ) -> None:
         """Test ForkAutoencoder.decode returns DecoderOutput."""
         model = ForkAutoencoder(
             data_format=data_format,
@@ -139,7 +143,9 @@ class TestAutoencoderModelOutput:
             "pi should be in [0,1]"
         )
 
-    def test_autoencoder_model_without_pi_theta(self, data_format, sample_input):
+    def test_autoencoder_model_without_pi_theta(
+        self, data_format: DataFormat, sample_input: torch.Tensor
+    ) -> None:
         """Test AutoencoderModel.decode with pi and theta disabled."""
         model = AutoencoderModel(
             data_format=data_format,
@@ -162,7 +168,9 @@ class TestAutoencoderModelOutput:
         # Test that mu is non-negative
         assert torch.all(output.mu >= 0), "mu should be non-negative"
 
-    def test_fork_autoencoder_without_pi_theta(self, data_format, sample_input):
+    def test_fork_autoencoder_without_pi_theta(
+        self, data_format: DataFormat, sample_input: torch.Tensor
+    ) -> None:
         """Test ForkAutoencoder.decode with pi and theta disabled."""
         model = ForkAutoencoder(
             data_format=data_format,
@@ -185,7 +193,9 @@ class TestAutoencoderModelOutput:
         # Test that mu is non-negative
         assert torch.all(output.mu >= 0), "mu should be non-negative"
 
-    def test_model_forward_integration(self, data_format, sample_input):
+    def test_model_forward_integration(
+        self, data_format: DataFormat, sample_input: torch.Tensor
+    ) -> None:
         """Test that the full forward pass works with DecoderOutput."""
         model = AutoencoderModel(
             data_format=data_format,

@@ -14,12 +14,12 @@ class TestEvaluatePredictionsAndSave:
     """Test suite for evaluate_predictions_and_save function."""
 
     @pytest.fixture
-    def mock_predictions(self):
+    def mock_predictions(self) -> np.ndarray:
         """Mock prediction probabilities."""
         return np.array([0.8, 0.2, 0.9, 0.1, 0.7])
 
     @pytest.fixture
-    def mock_obs_df(self):
+    def mock_obs_df(self) -> pd.DataFrame:
         """Mock observation DataFrame with ground truth labels."""
         return pd.DataFrame(
             {
@@ -39,12 +39,12 @@ class TestEvaluatePredictionsAndSave:
         )
 
     @pytest.fixture
-    def mock_ground_truth(self):
+    def mock_ground_truth(self) -> np.ndarray:
         """Mock ground truth labels."""
         return np.array([1, 0, 1, 0, 1])  # Binary labels
 
     @pytest.fixture
-    def mock_evaluation_results(self):
+    def mock_evaluation_results(self) -> dict[str, float]:
         """Mock evaluation results."""
         return {
             "AUROC": 0.85,
@@ -59,11 +59,11 @@ class TestEvaluatePredictionsAndSave:
     def test_evaluate_predictions_and_save_success(
         self,
         tmp_path,
-        mock_predictions,
-        mock_obs_df,
-        mock_ground_truth,
-        mock_evaluation_results,
-    ):
+        mock_predictions: np.ndarray,
+        mock_obs_df: pd.DataFrame,
+        mock_ground_truth: np.ndarray,
+        mock_evaluation_results: dict[str, float],
+    ) -> None:
         """Test successful evaluation and saving."""
         save_path = tmp_path / "results"
         save_path.mkdir()
@@ -117,11 +117,11 @@ class TestEvaluatePredictionsAndSave:
     def test_evaluate_predictions_and_save_with_trial(
         self,
         tmp_path,
-        mock_predictions,
-        mock_obs_df,
-        mock_ground_truth,
-        mock_evaluation_results,
-    ):
+        mock_predictions: np.ndarray,
+        mock_obs_df: pd.DataFrame,
+        mock_ground_truth: np.ndarray,
+        mock_evaluation_results: dict[str, float],
+    ) -> None:
         """Test evaluation with Optuna trial object."""
         save_path = tmp_path / "results"
         save_path.mkdir()
@@ -160,11 +160,11 @@ class TestEvaluatePredictionsAndSave:
     def test_evaluate_predictions_and_save_default_parameters(
         self,
         tmp_path,
-        mock_predictions,
-        mock_obs_df,
-        mock_ground_truth,
-        mock_evaluation_results,
-    ):
+        mock_predictions: np.ndarray,
+        mock_obs_df: pd.DataFrame,
+        mock_ground_truth: np.ndarray,
+        mock_evaluation_results: dict[str, float],
+    ) -> None:
         """Test evaluation with default parameters."""
         save_path = tmp_path / "results"
         save_path.mkdir()
@@ -197,8 +197,8 @@ class TestEvaluatePredictionsAndSave:
             assert result == mock_evaluation_results
 
     def test_evaluate_predictions_and_save_array_shapes_mismatch(
-        self, tmp_path, mock_obs_df
-    ):
+        self, tmp_path, mock_obs_df: pd.DataFrame
+    ) -> None:
         """Test handling of mismatched array shapes."""
         save_path = tmp_path / "results"
         save_path.mkdir()
@@ -232,11 +232,11 @@ class TestEvaluatePredictionsAndSave:
     def test_evaluate_predictions_and_save_logging(
         self,
         tmp_path,
-        mock_predictions,
-        mock_obs_df,
-        mock_ground_truth,
-        mock_evaluation_results,
-    ):
+        mock_predictions: np.ndarray,
+        mock_obs_df: pd.DataFrame,
+        mock_ground_truth: np.ndarray,
+        mock_evaluation_results: dict[str, float],
+    ) -> None:
         """Test that the function completes successfully (basic integration test)."""
         save_path = tmp_path / "results"
         save_path.mkdir()
@@ -265,8 +265,12 @@ class TestEvaluatePredictionsAndSave:
             mock_evaluate.assert_called_once()
 
     def test_evaluate_predictions_and_save_missing_auroc(
-        self, tmp_path, mock_predictions, mock_obs_df, mock_ground_truth
-    ):
+        self,
+        tmp_path,
+        mock_predictions: np.ndarray,
+        mock_obs_df: pd.DataFrame,
+        mock_ground_truth: np.ndarray,
+    ) -> None:
         """Test handling when AUROC is missing from results."""
         save_path = tmp_path / "results"
         save_path.mkdir()
@@ -298,11 +302,11 @@ class TestEvaluatePredictionsAndSave:
     def test_evaluate_predictions_and_save_path_handling(
         self,
         tmp_path,
-        mock_predictions,
-        mock_obs_df,
-        mock_ground_truth,
-        mock_evaluation_results,
-    ):
+        mock_predictions: np.ndarray,
+        mock_obs_df: pd.DataFrame,
+        mock_ground_truth: np.ndarray,
+        mock_evaluation_results: dict[str, float],
+    ) -> None:
         """Test that Path objects are handled correctly."""
         save_path = tmp_path / "results"
         save_path.mkdir()
@@ -333,7 +337,7 @@ class TestEvaluatePredictionsAndSave:
             # Verify result is returned
             assert result == mock_evaluation_results
 
-    def test_evaluate_predictions_and_save_empty_predictions(self, tmp_path):
+    def test_evaluate_predictions_and_save_empty_predictions(self, tmp_path) -> None:
         """Test handling of empty predictions array."""
         save_path = tmp_path / "results"
         save_path.mkdir()

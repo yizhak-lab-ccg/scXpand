@@ -11,7 +11,7 @@ class TestDecoderTransforms:
     """Test cases for decoder's inverse transform functionality."""
 
     @pytest.fixture
-    def simple_data_format(self):
+    def simple_data_format(self) -> DataFormat:
         """Create a simple DataFormat for testing."""
         return DataFormat(
             n_genes=50,
@@ -23,7 +23,7 @@ class TestDecoderTransforms:
         )
 
     @pytest.fixture
-    def log_transform_data_format(self):
+    def log_transform_data_format(self) -> DataFormat:
         """Create a DataFormat with log transform enabled."""
         return DataFormat(
             n_genes=50,
@@ -35,11 +35,13 @@ class TestDecoderTransforms:
         )
 
     @pytest.fixture
-    def sample_latent(self):
+    def sample_latent(self) -> torch.Tensor:
         """Create sample latent vectors."""
         return torch.randn(3, 16)
 
-    def test_decoder_applies_mean_activation(self, simple_data_format, sample_latent):
+    def test_decoder_applies_mean_activation(
+        self, simple_data_format: DataFormat, sample_latent: torch.Tensor
+    ) -> None:
         """Test that decoder applies mean_activation and inverse transforms."""
         decoder = Decoder(
             latent_dim=16,
@@ -58,7 +60,9 @@ class TestDecoderTransforms:
         )
         assert torch.all(torch.isfinite(output.mu)), "mu should be finite"
 
-    def test_decoder_applies_theta_activation(self, simple_data_format, sample_latent):
+    def test_decoder_applies_theta_activation(
+        self, simple_data_format: DataFormat, sample_latent: torch.Tensor
+    ) -> None:
         """Test that decoder applies theta_activation for positive dispersion."""
         decoder = Decoder(
             latent_dim=16,
@@ -80,8 +84,8 @@ class TestDecoderTransforms:
         assert torch.all(output.theta <= 1e4), "theta should respect maximum bound"
 
     def test_decoder_applies_dropout_activation(
-        self, simple_data_format, sample_latent
-    ):
+        self, simple_data_format: DataFormat, sample_latent: torch.Tensor
+    ) -> None:
         """Test that decoder applies dropout_activation for pi probabilities."""
         decoder = Decoder(
             latent_dim=16,
@@ -100,8 +104,8 @@ class TestDecoderTransforms:
         assert torch.all(output.pi <= 1), "pi should be <= 1"
 
     def test_decoder_inverse_transforms_applied(
-        self, simple_data_format, sample_latent
-    ):
+        self, simple_data_format: DataFormat, sample_latent: torch.Tensor
+    ) -> None:
         """Test that decoder applies inverse transforms."""
         decoder = Decoder(
             latent_dim=16,
@@ -120,7 +124,9 @@ class TestDecoderTransforms:
             "mu should be non-negative after inverse transforms"
         )
 
-    def test_decoder_with_log_transform(self, log_transform_data_format, sample_latent):
+    def test_decoder_with_log_transform(
+        self, log_transform_data_format: DataFormat, sample_latent: torch.Tensor
+    ) -> None:
         """Test decoder with log transform in data format."""
         decoder = Decoder(
             latent_dim=16,
@@ -138,7 +144,9 @@ class TestDecoderTransforms:
             "mu should be non-negative after inverse transforms"
         )
 
-    def test_decoder_conditional_heads(self, simple_data_format, sample_latent):
+    def test_decoder_conditional_heads(
+        self, simple_data_format: DataFormat, sample_latent: torch.Tensor
+    ) -> None:
         """Test decoder with different combinations of pi and theta heads."""
         test_cases = [
             (True, True),  # Both pi and theta
@@ -176,7 +184,9 @@ class TestDecoderTransforms:
             else:
                 assert output.theta is None
 
-    def test_autoencoder_model_integration(self, simple_data_format):
+    def test_autoencoder_model_integration(
+        self, simple_data_format: DataFormat
+    ) -> None:
         """Test that AutoencoderModel properly integrates decoder transforms."""
         model = AutoencoderModel(
             data_format=simple_data_format,
@@ -199,7 +209,7 @@ class TestDecoderTransforms:
             "pi should be in [0,1]"
         )
 
-    def test_fork_autoencoder_integration(self, simple_data_format):
+    def test_fork_autoencoder_integration(self, simple_data_format: DataFormat) -> None:
         """Test that ForkAutoencoder properly integrates decoder transforms."""
         model = ForkAutoencoder(
             data_format=simple_data_format,
@@ -222,7 +232,9 @@ class TestDecoderTransforms:
             "pi should be in [0,1]"
         )
 
-    def test_transforms_preserve_batch_and_gene_dimensions(self, simple_data_format):
+    def test_transforms_preserve_batch_and_gene_dimensions(
+        self, simple_data_format: DataFormat
+    ) -> None:
         """Test that transforms preserve tensor dimensions."""
         batch_size, n_genes = 4, 50
         sample_latent = torch.randn(batch_size, 16)
@@ -244,7 +256,9 @@ class TestDecoderTransforms:
         assert output.pi.shape == expected_shape
         assert output.theta.shape == expected_shape
 
-    def test_gradient_flow_through_transforms(self, simple_data_format):
+    def test_gradient_flow_through_transforms(
+        self, simple_data_format: DataFormat
+    ) -> None:
         """Test that gradients flow through decoder transforms."""
         decoder = Decoder(
             latent_dim=16,
@@ -269,7 +283,9 @@ class TestDecoderTransforms:
             sample_latent.grad, torch.zeros_like(sample_latent.grad)
         )
 
-    def test_numerical_stability_with_extreme_inputs(self, simple_data_format):
+    def test_numerical_stability_with_extreme_inputs(
+        self, simple_data_format: DataFormat
+    ) -> None:
         """Test decoder stability with extreme input values."""
         extreme_inputs = [
             torch.ones(2, 16) * 100,  # Large positive

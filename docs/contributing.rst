@@ -122,7 +122,7 @@ Release Process
 **For Maintainers Only**
 
 We use an automated release script that handles the entire publishing process to PyPI.
-For detailed instructions, see :doc:`scripts/PUBLISHING`.
+For detailed instructions, see scripts/PUBLISHING.md
 
 Dev Releases
 ------------

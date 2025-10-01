@@ -4,7 +4,7 @@ import torch
 from scxpand.data_util.dataloaders import BalancedLabelsBatchSampler
 
 
-def test_balanced_batch_sampler_initialization():
+def test_balanced_batch_sampler_initialization() -> None:
     # Create dummy data
     X = torch.randn(100, 10)
     y = torch.tensor([0, 1] * 50)
@@ -17,7 +17,7 @@ def test_balanced_batch_sampler_initialization():
     assert sampler.neg_per_batch == 5  # Half of batch_size
 
 
-def test_balanced_batch_sampler_length():
+def test_balanced_batch_sampler_length() -> None:
     X = torch.randn(100, 10)
     y = torch.tensor([0, 1] * 50)
     dataset = MockCellsDataset(X, y)
@@ -27,7 +27,7 @@ def test_balanced_batch_sampler_length():
     assert len(sampler) == 10
 
 
-def test_batch_generation():
+def test_batch_generation() -> None:
     X = torch.randn(100, 10)
     y = torch.tensor([0, 1] * 50)
     dataset = MockCellsDataset(X, y)
@@ -43,7 +43,7 @@ def test_batch_generation():
     assert all(count == 5 for count in counts)
 
 
-def test_invalid_batch_size():
+def test_invalid_batch_size() -> None:
     X = torch.randn(100, 10)
     y = torch.tensor([0, 1] * 50)
     dataset = MockCellsDataset(X, y)
@@ -58,7 +58,7 @@ def test_invalid_batch_size():
     assert max(counts) - min(counts) <= 1
 
 
-def test_insufficient_samples():
+def test_insufficient_samples() -> None:
     X = torch.randn(10, 10)
     y = torch.tensor([0] * 9 + [1])  # Imbalanced dataset: 9 negative, 1 positive
     dataset = MockCellsDataset(X, y)
@@ -83,7 +83,7 @@ def test_insufficient_samples():
         assert all(count == 2 for count in counts)
 
 
-def test_labels_consistency():
+def test_labels_consistency() -> None:
     X = torch.randn(100, 10)
     y = torch.tensor([0, 1] * 50)  # Binary labels instead of 3 classes
     dataset = MockCellsDataset(X, y)
@@ -98,7 +98,7 @@ def test_labels_consistency():
         assert max(counts) - min(counts) <= 1
 
 
-def test_no_positive_samples_error():
+def test_no_positive_samples_error() -> None:
     """Test that sampler raises error when no positive samples exist."""
     X = torch.randn(10, 10)
     y = torch.tensor([0] * 10)  # All negative samples
@@ -108,7 +108,7 @@ def test_no_positive_samples_error():
         BalancedLabelsBatchSampler(dataset, batch_size=4)
 
 
-def test_no_negative_samples_error():
+def test_no_negative_samples_error() -> None:
     """Test that sampler raises error when no negative samples exist."""
     X = torch.randn(10, 10)
     y = torch.tensor([1] * 10)  # All positive samples
@@ -120,11 +120,11 @@ def test_no_negative_samples_error():
 
 # Add this mock class at the top of the file
 class MockCellsDataset:
-    def __init__(self, X, y):
+    def __init__(self, X: torch.Tensor, y: torch.Tensor) -> None:
         self.X = X
         self.y = y
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.y)
 
 

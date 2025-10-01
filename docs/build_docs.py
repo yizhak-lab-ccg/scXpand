@@ -89,22 +89,25 @@ def build_docs():
 
         print("Building documentation with sphinx-build...")
         result = subprocess.run(
-            ["uv", "run", "sphinx-build", "-q", "-b", "html", ".", "_build/html"],
+            ["uv", "run", "sphinx-build", "-W", "-b", "html", ".", "_build/html"],
             check=True,
             capture_output=True,
             text=True,
         )
         print("✅ Documentation built successfully!")
 
-        # Show only important warnings if any
+        # Show all warnings and errors since we're using -W
         if result.stderr:
             stderr_lines = result.stderr.split("\n")
-            important_warnings = [
-                line for line in stderr_lines if "ERROR" in line or "CRITICAL" in line
+            warnings_and_errors = [
+                line
+                for line in stderr_lines
+                if line.strip()
+                and ("WARNING" in line or "ERROR" in line or "CRITICAL" in line)
             ]
-            if important_warnings:
-                print("⚠️  Important warnings:")
-                for warning in important_warnings[:5]:  # Show max 5
+            if warnings_and_errors:
+                print("⚠️  Warnings and errors:")
+                for warning in warnings_and_errors:
                     print(f"   {warning}")
 
         return True

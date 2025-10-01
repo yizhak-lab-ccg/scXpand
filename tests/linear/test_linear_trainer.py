@@ -1,6 +1,5 @@
 """Tests for linear model trainer."""
 
-import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -11,6 +10,7 @@ import pytest
 
 from scxpand.linear.linear_params import LinearClassifierParam
 from scxpand.linear.linear_trainer import LinearTrainer, run_linear_training
+from tests.test_utils import create_temp_h5ad_file, safe_context_manager
 
 
 class TestLinearTrainer:
@@ -36,15 +36,16 @@ class TestLinearTrainer:
     @pytest.fixture
     def mock_h5ad_file(self, mock_adata):
         """Create a temporary H5AD file for testing."""
-        with tempfile.NamedTemporaryFile(suffix=".h5ad", delete=False) as tmp_file:
-            mock_adata.write(tmp_file.name)
-            yield tmp_file.name
+        with safe_context_manager() as ctx:
+            file_path = create_temp_h5ad_file(mock_adata, ctx.temp_dir)
+            ctx.register_adata(file_path)
+            yield file_path
 
     @patch("scxpand.linear.linear_trainer.prepare_data_for_training")
     def test_prepare_data_and_model(self, mock_prepare, mock_h5ad_file):
         """Test data preparation and model initialization."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            base_save_dir = Path(temp_dir)
+        with safe_context_manager() as ctx:
+            base_save_dir = Path(ctx.temp_dir)
             prm = LinearClassifierParam()
             trainer = LinearTrainer(prm=prm, base_save_dir=base_save_dir)
 
@@ -113,8 +114,8 @@ class TestLinearTrainer:
     @patch("scxpand.linear.linear_trainer.report_to_optuna_and_handle_pruning")
     def test_run_training_basic(self, mock_optuna, mock_prepare, mock_h5ad_file):  # noqa: ARG002
         """Test basic training run."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            base_save_dir = Path(temp_dir)
+        with safe_context_manager() as ctx:
+            base_save_dir = Path(ctx.temp_dir)
             prm = LinearClassifierParam(n_epochs=2, eval_interval=1)
             trainer = LinearTrainer(prm=prm, base_save_dir=base_save_dir)
 
@@ -198,8 +199,8 @@ class TestLinearTrainer:
     @patch("scxpand.linear.linear_trainer.prepare_data_for_training")
     def test_run_training_early_stopping(self, mock_prepare, mock_h5ad_file):
         """Test training with early stopping."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            base_save_dir = Path(temp_dir)
+        with safe_context_manager() as ctx:
+            base_save_dir = Path(ctx.temp_dir)
             prm = LinearClassifierParam(
                 n_epochs=10, early_stopping_patience=2, eval_interval=1
             )
@@ -290,8 +291,8 @@ class TestRunLinearTraining:
     @patch("scxpand.linear.linear_trainer.LinearTrainer")
     def test_run_linear_training_function(self, mock_trainer_class):
         """Test the run_linear_training function."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            base_save_dir = Path(temp_dir)
+        with safe_context_manager() as ctx:
+            base_save_dir = Path(ctx.temp_dir)
             prm = LinearClassifierParam()
 
             # Mock the trainer instance
@@ -335,15 +336,16 @@ class TestLinearTrainerEarlyStopping:
     @pytest.fixture
     def mock_h5ad_file(self, mock_adata):
         """Create a temporary H5AD file for testing."""
-        with tempfile.NamedTemporaryFile(suffix=".h5ad", delete=False) as tmp_file:
-            mock_adata.write(tmp_file.name)
-            yield tmp_file.name
+        with safe_context_manager() as ctx:
+            file_path = create_temp_h5ad_file(mock_adata, ctx.temp_dir)
+            ctx.register_adata(file_path)
+            yield file_path
 
     @patch("scxpand.linear.linear_trainer.prepare_data_for_training")
     def test_early_stopping_with_improving_scores(self, mock_prepare, mock_h5ad_file):
         """Test that early stopping is NOT triggered when scores are improving."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            base_save_dir = Path(temp_dir)
+        with safe_context_manager() as ctx:
+            base_save_dir = Path(ctx.temp_dir)
             prm = LinearClassifierParam(
                 n_epochs=10, early_stopping_patience=3, eval_interval=1
             )
@@ -393,8 +395,8 @@ class TestLinearTrainerEarlyStopping:
     @patch("scxpand.linear.linear_trainer.prepare_data_for_training")
     def test_early_stopping_with_no_improvement(self, mock_prepare, mock_h5ad_file):
         """Test that early stopping IS triggered when scores stop improving."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            base_save_dir = Path(temp_dir)
+        with safe_context_manager() as ctx:
+            base_save_dir = Path(ctx.temp_dir)
             prm = LinearClassifierParam(
                 n_epochs=10, early_stopping_patience=2, eval_interval=1
             )
@@ -439,8 +441,8 @@ class TestLinearTrainerEarlyStopping:
     @patch("scxpand.linear.linear_trainer.prepare_data_for_training")
     def test_early_stopping_with_mixed_scores(self, mock_prepare, mock_h5ad_file):
         """Test early stopping with scores that improve then worsen."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            base_save_dir = Path(temp_dir)
+        with safe_context_manager() as ctx:
+            base_save_dir = Path(ctx.temp_dir)
             prm = LinearClassifierParam(
                 n_epochs=15, early_stopping_patience=3, eval_interval=1
             )
@@ -487,8 +489,8 @@ class TestLinearTrainerEarlyStopping:
     @patch("scxpand.linear.linear_trainer.prepare_data_for_training")
     def test_early_stopping_respects_eval_interval(self, mock_prepare, mock_h5ad_file):
         """Test that early stopping respects eval_interval setting."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            base_save_dir = Path(temp_dir)
+        with safe_context_manager() as ctx:
+            base_save_dir = Path(ctx.temp_dir)
             # Set eval_interval=2 so evaluation happens every 2 epochs
             prm = LinearClassifierParam(
                 n_epochs=10, early_stopping_patience=2, eval_interval=2
@@ -550,21 +552,10 @@ class TestLinearTrainerEarlyStopping:
         mock_dev_dataset = MagicMock()
         mock_dev_dataloader = MagicMock()
 
-        # Mock the dataloader length for training progress
         mock_train_dataloader.__len__ = MagicMock(return_value=3)
-
-        # Mock the dev dataloader to return batches
         mock_dev_dataloader.__iter__ = MagicMock(
             return_value=iter(
                 [
-                    {
-                        "x": MagicMock(
-                            numpy=MagicMock(return_value=np.random.rand(10, 20))
-                        ),
-                        "y": MagicMock(
-                            numpy=MagicMock(return_value=np.random.randint(0, 2, 10))
-                        ),
-                    },
                     {
                         "x": MagicMock(
                             numpy=MagicMock(return_value=np.random.rand(10, 20))

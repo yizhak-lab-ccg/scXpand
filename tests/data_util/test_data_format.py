@@ -24,7 +24,7 @@ class TestDataFormatGeneConversion:
         data_format.genes_sigma = np.array([1.0, 1.0, 1.0])
         return data_format
 
-    def test_exact_match(self, data_format: DataFormat):
+    def test_exact_match(self, data_format: DataFormat) -> None:
         """Test when AnnData has exactly the same genes in the same order."""
         # Create test data with exact gene match
         X = csr_matrix(np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]), dtype=np.float32)
@@ -39,7 +39,7 @@ class TestDataFormatGeneConversion:
         # Verify data is unchanged
         np.testing.assert_array_equal(result.X.toarray(), X.toarray())
 
-    def test_reordering_needed(self, data_format: DataFormat):
+    def test_reordering_needed(self, data_format: DataFormat) -> None:
         """Test when AnnData has the same genes but in different order."""
         # Create test data with genes in different order
         X = csr_matrix(np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]), dtype=np.float32)
@@ -57,7 +57,7 @@ class TestDataFormatGeneConversion:
         expected_data = np.array([[2.0, 3.0, 1.0], [5.0, 6.0, 4.0]])
         np.testing.assert_array_equal(result.X.toarray(), expected_data)
 
-    def test_missing_genes(self, data_format: DataFormat):
+    def test_missing_genes(self, data_format: DataFormat) -> None:
         """Test when AnnData is missing some genes from data_format."""
         # Create test data with missing gene2
         X = csr_matrix(np.array([[1.0, 3.0], [4.0, 6.0]]), dtype=np.float32)
@@ -76,7 +76,7 @@ class TestDataFormatGeneConversion:
         expected_data = np.array([[1.0, 0.0, 3.0], [4.0, 0.0, 6.0]])
         np.testing.assert_array_equal(result.X.toarray(), expected_data)
 
-    def test_superfluous_genes(self, data_format: DataFormat):
+    def test_superfluous_genes(self, data_format: DataFormat) -> None:
         """Test when AnnData has extra genes not in data_format."""
         # Create test data with extra gene4 and gene5
         X = csr_matrix(
@@ -96,7 +96,7 @@ class TestDataFormatGeneConversion:
         expected_data = np.array([[1.0, 2.0, 3.0], [6.0, 7.0, 8.0]])
         np.testing.assert_array_equal(result.X.toarray(), expected_data)
 
-    def test_missing_and_superfluous_genes(self, data_format: DataFormat):
+    def test_missing_and_superfluous_genes(self, data_format: DataFormat) -> None:
         """Test when AnnData is missing some genes and has extra genes."""
         # Create test data with missing gene2 and extra gene4
         X = csr_matrix(np.array([[1.0, 3.0, 4.0], [5.0, 6.0, 7.0]]), dtype=np.float32)
@@ -115,7 +115,7 @@ class TestDataFormatGeneConversion:
         expected_data = np.array([[1.0, 0.0, 3.0], [5.0, 0.0, 6.0]])
         np.testing.assert_array_equal(result.X.toarray(), expected_data)
 
-    def test_completely_different_genes(self, data_format: DataFormat):
+    def test_completely_different_genes(self, data_format: DataFormat) -> None:
         """Test when AnnData has completely different genes."""
         # Create test data with completely different genes
         X = csr_matrix(np.array([[1.0, 2.0], [3.0, 4.0]]), dtype=np.float32)

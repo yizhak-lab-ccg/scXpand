@@ -762,8 +762,10 @@ def metrics_dict_to_dataframes(
 
     Returns:
         Tuple of (overall_df, category_df) where:
+
         - overall_df: DataFrame with overall metrics (Metric, Value columns)
         - category_df: DataFrame with category-specific metrics (categories as rows, metrics as columns)
+
         Either DataFrame can be None if no data exists for that category
     """
     if not metrics:

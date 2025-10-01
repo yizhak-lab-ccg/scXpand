@@ -8,7 +8,7 @@ from scxpand.autoencoders.ae_modules import theta_activation
 class TestNegativeBinomialParameterization:
     """Test cases for negative binomial distribution parameterization."""
 
-    def test_theta_activation_produces_positive_dispersion(self):
+    def test_theta_activation_produces_positive_dispersion(self) -> None:
         """Test that theta_activation produces positive dispersion parameters."""
         # Test various input ranges
         test_inputs = [
@@ -30,7 +30,7 @@ class TestNegativeBinomialParameterization:
             # Should be finite
             assert torch.all(torch.isfinite(theta)), "All theta values should be finite"
 
-    def test_negative_binomial_distribution_compatibility(self):
+    def test_negative_binomial_distribution_compatibility(self) -> None:
         """Test that our theta values work with PyTorch's NegativeBinomial distribution."""
         # Create sample mean and theta values
         mean_vals = torch.rand(5, 10) * 100 + 1  # Positive means
@@ -56,7 +56,7 @@ class TestNegativeBinomialParameterization:
         except Exception as e:
             pytest.fail(f"NegativeBinomial distribution creation failed: {e}")
 
-    def test_negative_binomial_variance_formula(self):
+    def test_negative_binomial_variance_formula(self) -> None:
         """Test that variance follows negative binomial formula."""
         mean_vals = torch.rand(3, 5) * 50 + 5  # Positive means
         raw_theta = torch.randn(3, 5)
@@ -77,7 +77,7 @@ class TestNegativeBinomialParameterization:
             "Variance should follow negative binomial formula"
         )
 
-    def test_overdispersion_behavior(self):
+    def test_overdispersion_behavior(self) -> None:
         """Test that smaller theta leads to higher overdispersion."""
         mean_val = 10.0
 
@@ -98,7 +98,7 @@ class TestNegativeBinomialParameterization:
         assert var_small > mean_val, "NB variance should exceed Poisson variance"
         assert var_large > mean_val, "NB variance should exceed Poisson variance"
 
-    def test_theta_activation_monotonicity(self):
+    def test_theta_activation_monotonicity(self) -> None:
         """Test that theta_activation is monotonically increasing."""
         x_vals = torch.linspace(-10, 10, 1000)
         theta_vals = theta_activation(x_vals)
@@ -109,7 +109,7 @@ class TestNegativeBinomialParameterization:
             "theta_activation should be monotonically increasing"
         )
 
-    def test_theta_activation_asymptotic_behavior(self):
+    def test_theta_activation_asymptotic_behavior(self) -> None:
         """Test asymptotic behavior of theta_activation."""
         # For large positive x, softplus(x) ≈ x (but we clamp to max 1e4)
         large_x = torch.tensor([5.0, 8.0, 10.0])  # Use smaller values due to clamping
@@ -132,7 +132,7 @@ class TestNegativeBinomialParameterization:
             "theta_activation should respect minimum bound"
         )
 
-    def test_realistic_parameter_ranges(self):
+    def test_realistic_parameter_ranges(self) -> None:
         """Test with realistic parameter ranges for single-cell data."""
         # Realistic mean expression ranges (log-scale normalized counts)
         mean_ranges = [
@@ -173,7 +173,7 @@ class TestNegativeBinomialParameterization:
             except Exception as e:
                 pytest.fail(f"Failed with realistic parameters: {e}")
 
-    def test_gradient_computation_through_theta(self):
+    def test_gradient_computation_through_theta(self) -> None:
         """Test that gradients can flow through theta_activation."""
         # Create input that requires gradients
         raw_theta = torch.randn(5, 10, requires_grad=True)
@@ -202,7 +202,7 @@ class TestNegativeBinomialParameterization:
             "Gradients should be non-zero"
         )
 
-    def test_comparison_with_poisson_baseline(self):
+    def test_comparison_with_poisson_baseline(self) -> None:
         """Test that NB reduces to Poisson as theta approaches large values."""
         mean_val = 5.0
 

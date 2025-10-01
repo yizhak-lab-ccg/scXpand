@@ -86,7 +86,7 @@ PyTorch models (autoencoder and mlp) use the TrainLogger and create additional t
      - Configuration and metrics of best performing model
 
 Autoencoder and MLP-Specific Files
---------------------------
+----------------------------------
 
 Only the autoencoder and the MLP models create checkpoint files for training resumption:
 

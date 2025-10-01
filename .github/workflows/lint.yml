@@ -33,5 +33,7 @@ jobs:
     - name: Install dependencies
       run: uv sync --frozen --extra dev
 
+    - name: Install pre-commit
+      run: uv pip install pre-commit
     - name: Run pre-commit
-      uses: pre-commit/action@v3.0.1
+      run: pre-commit run --all-files

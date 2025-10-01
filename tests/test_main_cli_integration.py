@@ -7,10 +7,11 @@ They should be run separately from unit tests.
 import os
 import subprocess
 import sys
-import tempfile
 import time
 
 import pytest
+
+from tests.test_utils import safe_context_manager
 
 
 class TestCLIIntegration:
@@ -285,10 +286,10 @@ class TestCLIEnvironment:
     def test_cli_with_different_working_directories(self):
         """Test CLI works from different working directories."""
         # Test from temporary directory
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with safe_context_manager() as ctx:
             original_cwd = os.getcwd()
             try:
-                os.chdir(temp_dir)
+                os.chdir(ctx.temp_dir)
 
                 result = subprocess.run(
                     [sys.executable, "-m", "scxpand.main", "--help"],

@@ -1,5 +1,6 @@
 """Tests for training utility functions."""
 
+import os
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -9,6 +10,11 @@ from scxpand.util.training_utils import (
     call_training_function,
     validate_and_setup_common,
 )
+
+
+@pytest.fixture(autouse=True, scope="module")
+def ensure_data_dir():
+    os.makedirs("data", exist_ok=True)
 
 
 class TestValidateAndSetupCommon:
