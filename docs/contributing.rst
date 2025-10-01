@@ -147,38 +147,18 @@ Release Types
 -------------
 
 **Regular Releases:**
-- Require changelog entry validation
 - Create GitHub releases with auto-generated notes
 - Publish both ``scxpand`` (CPU/MPS) and ``scxpand-cuda`` (CUDA) packages
 - Trigger ReadTheDocs documentation builds
+- add changelog entries to CHANGELOG.md
 
 **Dev Releases:**
-- Skip changelog validation
 - No GitHub release creation
 - Publish packages with ``.dev0`` suffix (e.g., ``0.4.6.dev0``)
 - Useful for testing before official releases
 
-Changelog Requirements
-----------------------
 
-Before creating a regular release, you **must** add a changelog entry:
 
-1. **Add your changes to CHANGELOG.md:**
-
-   .. code-block:: markdown
-
-      ## [0.4.6] - 2025-01-15
-
-      - New hyperparameter optimization for MLP models
-      - Support for custom loss functions
-      - Improved memory efficiency in data loading
-      - Fixed CUDA memory leak in autoencoder training
-
-2. **Changelog validation** runs automatically and will fail if:
-   - No entry exists for the version
-   - Entry has no bullet points
-   - Entry contains only placeholder dashes
-   - Date format is incorrect
 
 Version Management
 ------------------
