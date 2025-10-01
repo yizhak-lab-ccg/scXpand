@@ -249,7 +249,7 @@ def cleanup_incomplete_trials(
         trial_dir = study_dir / f"trial_{trial.number}"
 
         if _should_cleanup_trial_directory(
-            trial_dir, cutoff_time
+            trial_dir, cutoff_time, max_age_hours
         ) and _cleanup_single_trial_directory(study_dir, trial.number, trial_dir):
             cleaned_count += 1
 
@@ -261,19 +261,22 @@ def cleanup_incomplete_trials(
     return cleaned_count
 
 
-def _should_cleanup_trial_directory(trial_dir: Path, cutoff_time: datetime) -> bool:
+def _should_cleanup_trial_directory(
+    trial_dir: Path, cutoff_time: datetime, max_age_hours: int
+) -> bool:
     """Check if a trial directory should be cleaned up."""
     # Only consider directories that exist
     if not trial_dir.exists():
         return False
 
     # Check minimum age if specified (0 = no age requirement)
-    try:
-        dir_mtime = datetime.fromtimestamp(trial_dir.stat().st_mtime)
-        if dir_mtime > cutoff_time:
-            return False  # Directory is too recent (respects min age)
-    except OSError:
-        return False  # Can't get directory stats, skip for safety
+    if max_age_hours > 0:  # Only check age if max_age_hours > 0
+        try:
+            dir_mtime = datetime.fromtimestamp(trial_dir.stat().st_mtime)
+            if dir_mtime > cutoff_time:
+                return False  # Directory is too recent (respects min age)
+        except OSError:
+            return False  # Can't get directory stats, skip for safety
 
     # Clean up any RUNNING trial without results
     return not _has_results_indicators(trial_dir)
