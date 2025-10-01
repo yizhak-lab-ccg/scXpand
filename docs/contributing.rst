@@ -127,21 +127,51 @@ The release process is fully integrated with CI/CD and includes changelog valida
 Creating Releases
 -----------------
 
+**Prerequisites:**
+- Ensure you have a changelog entry for the target version in CHANGELOG.md
+- All tests and checks must be passing on the main branch
+- You must have maintainer permissions on the repository
+
 **Method 1: GitHub Actions UI (Recommended)**
 
-1. Go to the `Actions tab <https://github.com/yizhak-lab-ccg/scXpand/actions/workflows/release.yml>`_ in GitHub
-2. Click "Run workflow"
-3. Select the version bump type (patch/minor/major)
-4. Optionally check "Create dev release" for testing
-5. Click "Run workflow"
+This is the easiest and most reliable method:
+
+1. **Navigate to the Release workflow:**
+   - Go to `Actions tab <https://github.com/yizhak-lab-ccg/scXpand/actions/workflows/release.yml>`_
+   - Click on the "Release" workflow in the left sidebar
+
+2. **Trigger the release:**
+   - Click the "Run workflow" button (top right)
+   - Select the version bump type:
+     - **patch**: Bug fixes (0.4.4 → 0.4.5)
+     - **minor**: New features (0.4.4 → 0.5.0)
+     - **major**: Breaking changes (0.4.4 → 1.0.0)
+   - Optionally check "Create dev release" for testing (skips changelog validation)
+   - Click "Run workflow"
+
+3. **Monitor the release:**
+   - The workflow will automatically:
+     - Validate the changelog entry
+     - Create and push a git tag
+     - Build both standard and CUDA packages
+     - Publish to PyPI
+     - Create a GitHub release
 
 **Method 2: Manual Tag Push**
 
+For advanced users who prefer manual control:
+
 .. code-block:: bash
 
-    # Create and push a version tag
+    # Ensure you're on the main branch with latest changes
+    git checkout main
+    git pull origin main
+
+    # Create and push a version tag (replace with actual version)
     git tag v0.4.6
     git push origin v0.4.6
+
+    # This will automatically trigger the release workflow
 
 Release Types
 -------------
@@ -161,7 +191,7 @@ Release Types
 Changelog Requirements
 ----------------------
 
-Before creating a regular release, you **must** add a changelog entry:
+**IMPORTANT:** Before creating a regular release, you **must** add a changelog entry.
 
 1. **Add your changes to CHANGELOG.md:**
 
@@ -179,6 +209,22 @@ Before creating a regular release, you **must** add a changelog entry:
    - Entry has no bullet points
    - Entry contains only placeholder dashes
    - Date format is incorrect
+
+3. **Best practices:**
+   - Use descriptive bullet points for each change
+   - Group related changes together
+   - Use present tense ("Add feature" not "Added feature")
+   - Include breaking changes prominently
+   - Reference issue numbers when relevant
+
+**Example of a complete release process:**
+
+1. Make your code changes and tests
+2. Add changelog entry for the next version
+3. Create and merge a pull request
+4. Go to GitHub Actions → Release workflow
+5. Click "Run workflow" → Select version type → Run
+6. Monitor the automated release process
 
 Version Management
 ------------------
