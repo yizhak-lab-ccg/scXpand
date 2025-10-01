@@ -38,4 +38,4 @@ jobs:
     - name: Install pre-commit
       run: uv pip install pre-commit
     - name: Run pre-commit
-      run: pre-commit run --all-files --skip no-commit-to-branch
+      run: pre-commit run --all-files
