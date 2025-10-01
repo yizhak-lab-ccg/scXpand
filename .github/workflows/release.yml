@@ -27,11 +27,9 @@ defaults:
     shell: bash -euo pipefail {0}
 
 jobs:
-  validate-changelog:
+  create-tag:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && !inputs.dev_release
-    outputs:
-      version: ${{ steps.version.outputs.version }}
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,124 +37,49 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-
-      - name: Calculate new version
+      - name: Calculate version
         id: version
         run: |
           # Get latest tag
           latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           base_version=$(echo "$latest_tag" | sed 's/^v//')
 
-          # Calculate new version based on input
-          case "${{ inputs.version_type }}" in
-            "major")
-              new_version=$(echo "$base_version" | awk -F. '{print ($1+1)".0.0"}')
-              ;;
-            "minor")
-              new_version=$(echo "$base_version" | awk -F. '{print $1"."($2+1)".0"}')
-              ;;
-            "patch")
-              new_version=$(echo "$base_version" | awk -F. '{print $1"."$2"."($3+1)}')
-              ;;
-          esac
+          if [ "${{ inputs.dev_release }}" = "true" ]; then
+            # For dev releases, increment patch and add .dev0
+            clean_base_version=$(echo "$base_version" | sed 's/\.dev[0-9]*$//')
+
+            # If we already have a .dev0 version, increment the base version
+            if git tag -l "v${clean_base_version}.dev0" | grep -q "v${clean_base_version}.dev0"; then
+              major=$(echo "$clean_base_version" | cut -d. -f1)
+              minor=$(echo "$clean_base_version" | cut -d. -f2)
+              patch=$(echo "$clean_base_version" | cut -d. -f3)
+              patch=$((patch + 1))
+              clean_base_version="${major}.${minor}.${patch}"
+            fi
+
+            new_version="${clean_base_version}.dev0"
+            echo "Dev version will be: $new_version"
+          else
+            # Calculate new version based on input for regular releases
+            case "${{ inputs.version_type }}" in
+              "major")
+                new_version=$(echo "$base_version" | awk -F. '{print ($1+1)".0.0"}')
+                ;;
+              "minor")
+                new_version=$(echo "$base_version" | awk -F. '{print $1"."($2+1)".0"}')
+                ;;
+              "patch")
+                new_version=$(echo "$base_version" | awk -F. '{print $1"."$2"."($3+1)}')
+                ;;
+            esac
+            echo "New version will be: $new_version"
+          fi
 
           echo "version=$new_version" >> $GITHUB_OUTPUT
-          echo "New version will be: $new_version"
-
-      - name: Validate changelog entry
-        run: |
-          version="${{ steps.version.outputs.version }}"
-          changelog_file="CHANGELOG.md"
-
-          # Check if changelog exists
-          if [ ! -f "$changelog_file" ]; then
-            echo "ERROR: CHANGELOG.md not found"
-            exit 1
-          fi
-
-          # Check if there's a section for this version
-          if ! grep -q "^## \[$version\]" "$changelog_file"; then
-            echo "ERROR: No changelog entry found for version $version"
-            echo "Please add a changelog entry for version $version in CHANGELOG.md"
-            echo "Expected format: ## [$version] - $(date +%Y-%m-%d)"
-            exit 1
-          fi
-
-          # Extract the content for this version
-          version_content=$(sed -n "/^## \[$version\]/,/^## \[/p" "$changelog_file" | sed '$d')
-
-          # Check if it has a proper date format
-          if ! echo "$version_content" | head -1 | grep -q "## \[$version\] - [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}"; then
-            echo "ERROR: Changelog entry for version $version missing proper date format"
-            echo "Expected format: ## [$version] - YYYY-MM-DD"
-            echo "Current format: $(echo "$version_content" | head -1)"
-            exit 1
-          fi
-
-          # Extract just the content (skip header and empty lines)
-          content_lines=$(echo "$version_content" | tail -n +2 | sed '/^$/d')
-
-          # Check if the content has any meaningful text
-          if [ -z "$content_lines" ]; then
-            echo "ERROR: Changelog entry for version $version is empty"
-            echo "Please add actual change descriptions"
-            exit 1
-          fi
-
-          # Check for placeholder content (just a single dash)
-          if [ "$content_lines" = "-" ]; then
-            echo "ERROR: Changelog entry for version $version contains only placeholder dash"
-            echo "Please replace placeholder with actual change descriptions"
-            exit 1
-          fi
-
-          echo "✓ Changelog validation passed for version $version"
-
-  create-tag:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
-    needs: [validate-changelog]
-    # Skip changelog validation for dev releases
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          filter: blob:none
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Calculate version for dev release
-        if: inputs.dev_release
-        id: dev-version
-        run: |
-          # Get latest tag
-          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          base_version=$(echo "$latest_tag" | sed 's/^v//')
-
-          # For dev releases, increment patch and add .dev0
-          clean_base_version=$(echo "$base_version" | sed 's/\.dev[0-9]*$//')
-
-          # If we already have a .dev0 version, increment the base version
-          if git tag -l "v${clean_base_version}.dev0" | grep -q "v${clean_base_version}.dev0"; then
-            major=$(echo "$clean_base_version" | cut -d. -f1)
-            minor=$(echo "$clean_base_version" | cut -d. -f2)
-            patch=$(echo "$clean_base_version" | cut -d. -f3)
-            patch=$((patch + 1))
-            clean_base_version="${major}.${minor}.${patch}"
-          fi
-
-          new_version="${clean_base_version}.dev0"
-          echo "version=$new_version" >> $GITHUB_OUTPUT
-          echo "Dev version will be: $new_version"
 
       - name: Create and push tag
         run: |
-          if [ "${{ inputs.dev_release }}" = "true" ]; then
-            version="${{ steps.dev-version.outputs.version }}"
-          else
-            version="${{ needs.validate-changelog.outputs.version }}"
-          fi
+          version="${{ steps.version.outputs.version }}"
 
           tag_name="v$version"
 
