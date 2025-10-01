@@ -4,6 +4,22 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      dev_release:
+        description: 'Create dev release (no GitHub release)'
+        required: false
+        default: false
+        type: boolean
 
 defaults:
   run:
@@ -11,27 +27,296 @@ defaults:
     shell: bash -euo pipefail {0}
 
 jobs:
+  validate-changelog:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && !inputs.dev_release
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Calculate new version
+        id: version
+        run: |
+          # Get latest tag
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          base_version=$(echo "$latest_tag" | sed 's/^v//')
+
+          # Calculate new version based on input
+          case "${{ inputs.version_type }}" in
+            "major")
+              new_version=$(echo "$base_version" | awk -F. '{print ($1+1)".0.0"}')
+              ;;
+            "minor")
+              new_version=$(echo "$base_version" | awk -F. '{print $1"."($2+1)".0"}')
+              ;;
+            "patch")
+              new_version=$(echo "$base_version" | awk -F. '{print $1"."$2"."($3+1)}')
+              ;;
+          esac
+
+          echo "version=$new_version" >> $GITHUB_OUTPUT
+          echo "New version will be: $new_version"
+
+      - name: Validate changelog entry
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          changelog_file="CHANGELOG.md"
+
+          # Check if changelog exists
+          if [ ! -f "$changelog_file" ]; then
+            echo "ERROR: CHANGELOG.md not found"
+            exit 1
+          fi
+
+          # Check if there's a section for this version
+          if ! grep -q "^## \[$version\]" "$changelog_file"; then
+            echo "ERROR: No changelog entry found for version $version"
+            echo "Please add a changelog entry for version $version in CHANGELOG.md"
+            echo "Expected format: ## [$version] - $(date +%Y-%m-%d)"
+            exit 1
+          fi
+
+          # Extract the content for this version
+          version_content=$(sed -n "/^## \[$version\]/,/^## \[/p" "$changelog_file" | sed '$d')
+
+          # Check if it has a proper date format
+          if ! echo "$version_content" | head -1 | grep -q "## \[$version\] - [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}"; then
+            echo "ERROR: Changelog entry for version $version missing proper date format"
+            echo "Expected format: ## [$version] - YYYY-MM-DD"
+            echo "Current format: $(echo "$version_content" | head -1)"
+            exit 1
+          fi
+
+          # Extract just the content (skip header and empty lines)
+          content_lines=$(echo "$version_content" | tail -n +2 | sed '/^$/d')
+
+          # Check if the content has any meaningful text
+          if [ -z "$content_lines" ]; then
+            echo "ERROR: Changelog entry for version $version is empty"
+            echo "Please add actual change descriptions"
+            exit 1
+          fi
+
+          # Check for placeholder content (just a single dash)
+          if [ "$content_lines" = "-" ]; then
+            echo "ERROR: Changelog entry for version $version contains only placeholder dash"
+            echo "Please replace placeholder with actual change descriptions"
+            exit 1
+          fi
+
+          echo "✓ Changelog validation passed for version $version"
+
+  create-tag:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    needs: [validate-changelog]
+    # Skip changelog validation for dev releases
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Calculate version for dev release
+        if: inputs.dev_release
+        id: dev-version
+        run: |
+          # Get latest tag
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          base_version=$(echo "$latest_tag" | sed 's/^v//')
+
+          # For dev releases, increment patch and add .dev0
+          clean_base_version=$(echo "$base_version" | sed 's/\.dev[0-9]*$//')
+
+          # If we already have a .dev0 version, increment the base version
+          if git tag -l "v${clean_base_version}.dev0" | grep -q "v${clean_base_version}.dev0"; then
+            major=$(echo "$clean_base_version" | cut -d. -f1)
+            minor=$(echo "$clean_base_version" | cut -d. -f2)
+            patch=$(echo "$clean_base_version" | cut -d. -f3)
+            patch=$((patch + 1))
+            clean_base_version="${major}.${minor}.${patch}"
+          fi
+
+          new_version="${clean_base_version}.dev0"
+          echo "version=$new_version" >> $GITHUB_OUTPUT
+          echo "Dev version will be: $new_version"
+
+      - name: Create and push tag
+        run: |
+          if [ "${{ inputs.dev_release }}" = "true" ]; then
+            version="${{ steps.dev-version.outputs.version }}"
+          else
+            version="${{ needs.validate-changelog.outputs.version }}"
+          fi
+
+          tag_name="v$version"
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Check if tag already exists and delete if it's a dev release
+          if git tag -l "$tag_name" | grep -q "$tag_name"; then
+            if [ "${{ inputs.dev_release }}" = "true" ]; then
+              echo "Deleting existing dev tag $tag_name"
+              git tag -d "$tag_name"
+              git push origin --delete "$tag_name" || true
+            else
+              echo "ERROR: Tag $tag_name already exists"
+              exit 1
+            fi
+          fi
+
+          # Create and push tag
+          git tag "$tag_name"
+          git push origin "$tag_name"
+          echo "Created and pushed tag: $tag_name"
+
   release:
     runs-on: ubuntu-latest
+    if: always() && (github.event_name == 'push' || needs.create-tag.result == 'success')
+    needs: [create-tag]
     steps:
-    - uses: actions/checkout@v4
-      with:
-        filter: blob:none
-        fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          fetch-depth: 0
 
-    - name: Install uv
-      uses: astral-sh/setup-uv@v5
-      with:
-        cache-dependency-glob: pyproject.toml
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          cache-dependency-glob: pyproject.toml
 
-    - name: Build package
-      run: uv build
+      - name: Get version from tag
+        id: version
+        run: |
+          # Get the current tag
+          if [ "${{ github.event_name }}" = "push" ]; then
+            tag_name="${{ github.ref_name }}"
+          else
+            tag_name=$(git describe --tags --exact-match HEAD)
+          fi
+          version=$(echo "$tag_name" | sed 's/^v//')
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "Building version: $version"
 
-    - name: Check package
-      run: uvx twine check --strict dist/*
+      - name: Create temp directory
+        run: mkdir -p temp
 
-    - name: Upload to PyPI
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-      run: uvx twine upload dist/*
+      - name: Build standard package (scxpand)
+        run: |
+          echo "Building standard package (scxpand - CPU/MPS support)..."
+          uv build
+          echo "✓ Standard package built successfully"
+
+      - name: Build CUDA package (scxpand-cuda)
+        run: |
+          echo "Building CUDA package (scxpand-cuda - CUDA support)..."
+
+          # Create CUDA variant configuration
+          python3 scripts/create_cuda_pyproject.py \
+            --input pyproject.toml \
+            --output temp/pyproject-cuda.toml \
+            --verbose
+
+          # Create isolated worktree for CUDA build
+          worktree_dir="temp/cuda_worktree"
+          current_commit=$(git rev-parse HEAD)
+
+          # Clean up any existing worktree
+          rm -rf "$worktree_dir"
+          git worktree remove "$worktree_dir" 2>/dev/null || true
+
+          # Create clean worktree
+          git worktree add "$worktree_dir" "$current_commit"
+
+          # Copy CUDA variant and commit it
+          cp temp/pyproject-cuda.toml "$worktree_dir/pyproject.toml"
+
+          # Configure git in worktree
+          cd "$worktree_dir"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml
+          git commit -m "CUDA build configuration" --no-verify --quiet
+
+          # Build CUDA package with version override
+          SETUPTOOLS_SCM_PRETEND_VERSION="${{ steps.version.outputs.version }}" uv build --out-dir "../../dist"
+
+          # Clean up worktree
+          cd ../..
+          git worktree remove "$worktree_dir" --force 2>/dev/null || true
+          rm -rf "$worktree_dir"
+
+          echo "✓ CUDA package built successfully"
+
+      - name: Verify packages
+        run: |
+          echo "Verifying built packages..."
+          ls -la dist/
+
+          # Check that we have both packages
+          if ! ls dist/*scxpand-*.whl >/dev/null 2>&1; then
+            echo "ERROR: Standard scxpand package not found"
+            exit 1
+          fi
+
+          if ! ls dist/*scxpand_cuda-*.whl >/dev/null 2>&1; then
+            echo "ERROR: CUDA scxpand-cuda package not found"
+            exit 1
+          fi
+
+          # Verify package integrity
+          uvx twine check --strict dist/*
+          echo "✓ Package verification passed"
+
+      - name: Upload to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          echo "Publishing both packages to PyPI..."
+          uvx twine upload dist/*
+          echo "✓ Both packages published successfully"
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.dev_release)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: scXpand v${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          body: |
+            ## scXpand v${{ steps.version.outputs.version }}
+
+            This release includes both standard and CUDA-enabled packages:
+
+            ### Packages Released
+            - **scxpand** (CPU/MPS support): Standard version for CPU and Apple Silicon
+            - **scxpand-cuda** (CUDA support): GPU-accelerated version with CUDA support
+
+            ### Installation
+            ```bash
+            # Standard version (CPU/MPS)
+            pip install scxpand==${{ steps.version.outputs.version }}
+
+            # CUDA version (GPU)
+            pip install scxpand-cuda==${{ steps.version.outputs.version }} --extra-index-url https://download.pytorch.org/whl/cu128
+            ```
+
+            For more details, see the [documentation](https://scxpand.readthedocs.io/en/latest/).
+
+      - name: Clean up
+        if: always()
+        run: |
+          rm -rf temp/
+          git worktree prune

@@ -57,7 +57,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
         env: ${{ fromJSON(needs.get-environments.outputs.envs) }}
 
     name: ${{ matrix.env.label }} on ${{ matrix.os }}
