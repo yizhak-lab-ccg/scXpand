@@ -7,11 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.1.0
 
 ## [Unreleased]
 
-## [0.4.5] - 2025-10-01
-
-Fixed Windows test failures
+- Fixed Windows test failures
 Improved error handling
-
 
 ## [0.4.4] - 2025-10-01
 
