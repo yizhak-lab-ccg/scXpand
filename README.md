@@ -55,13 +55,27 @@ For detailed installation instructions, please refer to our **[Installation Guid
 ### Published Version Install
 
 **CUDA version (NVIDIA GPU):**
+
+With pip:
 ```bash
 pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
 ```
 
+With uv:
+```bash
+uv pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
+```
+
 **CPU/Apple Silicon/Other GPUs:**
+
+With pip:
 ```bash
 pip install --upgrade scxpand
+```
+
+With uv:
+```bash
+uv pip install --upgrade scxpand
 ```
 
 ### Development Setup (Install from Source)
