@@ -173,7 +173,7 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
                 if not injected_cuda_deps:
                     modified_lines.extend(
                         [
-                            f'    "torch=={TORCH_VERSION}+{cuda_version}",\n',
+                            f'    "torch>={TORCH_VERSION}",\n',
                         ]
                     )
                     injected_cuda_deps = True
@@ -191,17 +191,33 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
         # Keep all other lines unchanged
         modified_lines.append(line)
 
-    # If no sources section was found, add it at the end
-    if not sources_section_found:
-        print("  ✓ No [tool.uv.sources] section found, adding CUDA config at end")
-        modified_lines.append("\n")
-        modified_lines.append("[tool.uv.sources]\n")
-        modified_lines.append(f'torch = {{ index = "{pytorch_cuda_index_name}" }}\n')
-        modified_lines.append("\n")
-        modified_lines.append("[[tool.uv.index]]\n")
-        modified_lines.append(f'name = "{pytorch_cuda_index_name}"\n')
-        modified_lines.append(f'url = "{pytorch_cuda_index_url}"\n')
-        modified_lines.append("explicit = true\n")
+    # Add PyTorch CUDA configuration for both uv and pip compatibility
+    print("  ✓ Adding PyTorch CUDA configuration for pip compatibility")
+    modified_lines.append("\n")
+
+    # Add uv sources configuration (for uv users)
+    modified_lines.append("[tool.uv.sources]\n")
+    modified_lines.append(f'torch = {{ index = "{pytorch_cuda_index_name}" }}\n')
+    modified_lines.append("\n")
+
+    # Add uv index configuration
+    modified_lines.append("[[tool.uv.index]]\n")
+    modified_lines.append(f'name = "{pytorch_cuda_index_name}"\n')
+    modified_lines.append(f'url = "{pytorch_cuda_index_url}"\n')
+    modified_lines.append("explicit = true\n")
+
+    # Add installation instructions and metadata
+    modified_lines.append("\n")
+    modified_lines.append("# CUDA Package Installation Instructions:\n")
+    modified_lines.append(
+        "# For pip users: pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128\n"
+    )
+    modified_lines.append(
+        "# For uv users: uv pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128\n"
+    )
+    modified_lines.append(
+        "# This package requires PyTorch with CUDA support for optimal performance.\n"
+    )
 
     # Save CUDA variant
     print(f"Saving CUDA variant to {output_path}")
