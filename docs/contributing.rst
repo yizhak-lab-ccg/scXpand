@@ -21,7 +21,7 @@ Contributing Process
 
 1. **Fork and clone the repository**
 2. **Set up development environment:**
-   Follow the development setup instructions in :doc:`installation`
+   Follow the "Development Setup (from Source)" instructions in :doc:`installation`
 3. **Create a feature branch and make your changes**
 
 **Before submitting your pull request:**
@@ -31,7 +31,7 @@ Contributing Process
    .. code-block:: bash
 
       # Install in editable mode and run tests with coverage
-      pip install -e ".[dev]" && pytest --cov=src/scxpand -n auto
+      pytest --cov=scxpand -n auto
 
 5. **Add tests** for new functionality
 6. **Update documentation** if your changes affect the API or user-facing functionality
@@ -80,41 +80,31 @@ To update the project with the latest template changes:
 Testing
 -------
 
-**Running Tests:**
-
-The project uses pytest with coverage reporting and parallel execution for efficient testing:
+The project uses pytest with coverage reporting and parallel execution. After following the development setup in :doc:`installation`.
+Tests also run automatically via pre-commit hooks before push, but you can run them manually with the following commands:
 
 .. code-block:: bash
 
     # Install in editable mode and run all tests with coverage (recommended)
-    pip install -e ".[dev]" && pytest --cov=src/scxpand -n auto
+   pytest --cov=scxpand -n auto
 
     # Run tests without parallel execution (if you encounter issues)
-    pip install -e ".[dev]" && pytest --cov=src/scxpand
+    pytest --cov=scxpand
 
-    # Run specific test files or modules
-    pip install -e ".[dev]" && pytest tests/data_util/test_data_format.py
+    # Run specific test files
+    pytest tests/data_util/test_data_format.py
 
-    # Run tests with verbose output
-    pip install -e ".[dev]" && pytest --cov=src/scxpand -n auto -v
-
-    # Run tests and generate HTML coverage report
-    pip install -e ".[dev]" && pytest --cov=src/scxpand --cov-report=html -n auto
+    # Generate HTML coverage report
+    pytest --cov=scxpand --cov-report=html -n auto
 
 **Test Coverage:**
 
-The project maintains a minimum test coverage of 80%. Coverage reports are generated in multiple formats:
+The project maintains a minimum test coverage of 80%. Coverage reports are generated in:
 - Terminal output with missing lines
 - HTML report in the `htmlcov/` directory
 - XML report for CI/CD integration
 
-**Parallel Execution:**
-
-The `-n auto` flag automatically detects the optimal number of parallel workers based on your CPU cores.
-
-**Pre-commit Integration:**
-
-Tests are also run automatically via pre-commit hooks to ensure code quality before commits.
+**Note:** The `-n auto` flag automatically detects the optimal number of parallel workers.
 
 Release Process
 ===============
