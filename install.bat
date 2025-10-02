@@ -1,4 +1,26 @@
 @echo off
+REM scXpand Development Environment Setup Script
+REM
+REM
+REM Usage (in Command Prompt)
+REM   .\install.bat
+REM
+REM Requirements:
+REM   - Windows Command Prompt
+REM   - uv package manager (version 0.8.14 or newer)
+REM   - Internet connection for downloading dependencies
+REM
+REM The script will:
+REM   1. Check uv installation and version
+REM   2. Install Python (version from .python-version or default 3.13)
+REM   3. Create virtual environment and install dependencies
+REM   4. Configure PyTorch backend automatically
+REM   5. Register Jupyter kernel
+REM   6. Install pre-commit hooks
+REM
+REM After installation, activate the environment with:
+REM   .\.venv\Scripts\activate
+
 setlocal EnableDelayedExpansion
 
 set REQUIRED_UV_VERSION=0.8.14

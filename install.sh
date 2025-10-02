@@ -1,4 +1,25 @@
 #!/bin/bash
+# scXpand Development Environment Setup Script
+#
+# Usage (in Terminal)
+#   ./install.sh
+#
+# Requirements:
+#   - POSIX compatible shell (e.g. bash) (MacOS and Linux)
+#   - uv package manager (version 0.8.14 or newer)
+#   - Internet connection for downloading dependencies
+#
+# The script will:
+#   1. Check uv installation and version
+#   2. Install Python (version from .python-version or default 3.13)
+#   3. Create virtual environment and install dependencies
+#   4. Configure PyTorch backend automatically
+#   5. Register Jupyter kernel
+#   6. Install pre-commit hooks
+#
+# After installation, activate the environment with:
+#   source .venv/bin/activate
+
 set -e
 
 REQUIRED_UV_VERSION="0.8.14"
