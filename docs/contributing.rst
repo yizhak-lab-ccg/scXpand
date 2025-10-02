@@ -35,8 +35,7 @@ Contributing Process
 
 5. **Add tests** for new functionality
 6. **Update documentation** if your changes affect the API or user-facing functionality
-7. **Update CHANGELOG.md** with your changes
-8. **Run pre-commit hooks** to ensure code quality:
+7. **Run pre-commit hooks** to ensure code quality:
 
    .. code-block:: bash
 
@@ -112,7 +111,7 @@ Release Process
 **For Maintainers Only**
 
 We use GitHub Actions for automated dual package releases (standard and CUDA versions).
-The release process is fully integrated with CI/CD and includes changelog validation.
+The release process is fully integrated with CI/CD and includes tests.
 
 Creating Releases
 -----------------
@@ -140,7 +139,6 @@ Release Types
 - Create GitHub releases with auto-generated notes
 - Publish both ``scxpand`` (CPU/MPS) and ``scxpand-cuda`` (CUDA) packages
 - Trigger ReadTheDocs documentation builds
-- add changelog entries to CHANGELOG.md
 
 **Dev Releases:**
 - No GitHub release creation
