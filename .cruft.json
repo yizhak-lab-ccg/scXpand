@@ -19,7 +19,6 @@
         "docs/_templates/autosummary/**.rst"
       ],
       "_exclude_on_template_update": [
-        "CHANGELOG.md",
         "LICENSE",
         "README.md",
         "docs/api.md",
