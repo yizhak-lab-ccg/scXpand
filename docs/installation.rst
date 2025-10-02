@@ -27,7 +27,7 @@ With **uv**:
 
 .. code-block:: bash
 
-   uv pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
+   uv pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
 
 Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):
 
