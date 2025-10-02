@@ -48,7 +48,6 @@ dependencies = [
   "plotly>=6.0.1",
   "pooch>=1.8",
   "pydantic>=2.10.6",
-  "requests>=2.31",
   "scanpy>=1.11.1",
   "scikit-learn>=1.7.1",
   "scirpy>=0.9.3",
