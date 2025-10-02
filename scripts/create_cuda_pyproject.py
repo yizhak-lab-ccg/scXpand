@@ -209,9 +209,15 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
     # Add installation instructions and metadata
     modified_lines.append("\n")
     modified_lines.append("# CUDA Package Installation Instructions:\n")
-    modified_lines.append("# For pip users: pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128\n")
-    modified_lines.append("# For uv users: uv pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128\n")
-    modified_lines.append("# This package requires PyTorch with CUDA support for optimal performance.\n")
+    modified_lines.append(
+        "# For pip users: pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128\n"
+    )
+    modified_lines.append(
+        "# For uv users: uv pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128\n"
+    )
+    modified_lines.append(
+        "# This package requires PyTorch with CUDA support for optimal performance.\n"
+    )
 
     # Save CUDA variant
     print(f"Saving CUDA variant to {output_path}")
