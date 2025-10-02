@@ -235,9 +235,13 @@ jobs:
             ```bash
             # Standard version (CPU/MPS)
             pip install scxpand==${{ steps.version.outputs.version }}
+            # Or with uv:
+            # uv pip install scxpand==${{ steps.version.outputs.version }}
 
             # CUDA version (GPU)
             pip install scxpand-cuda==${{ steps.version.outputs.version }} --extra-index-url https://download.pytorch.org/whl/cu128
+            # Or with uv:
+            # uv pip install scxpand-cuda==${{ steps.version.outputs.version }} --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
             ```
 
             For more details, see the [documentation](https://scxpand.readthedocs.io/en/latest/).
