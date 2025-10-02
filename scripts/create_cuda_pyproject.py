@@ -213,7 +213,7 @@ def create_cuda_variant(input_path: Path, output_path: Path, cuda_version: str) 
         "# For pip users: pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128\n"
     )
     modified_lines.append(
-        "# For uv users: uv pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128\n"
+        "# For uv users: uv pip install scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match\n"
     )
     modified_lines.append(
         "# This package requires PyTorch with CUDA support for optimal performance.\n"
