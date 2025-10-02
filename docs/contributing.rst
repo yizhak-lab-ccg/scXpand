@@ -111,7 +111,7 @@ Release Process
 **For Maintainers Only**
 
 We use GitHub Actions for automated dual package releases (standard and CUDA versions).
-The release process is fully integrated with CI/CD and includes changelog validation.
+The release process is fully integrated with CI/CD and includes tests.
 
 Creating Releases
 -----------------
