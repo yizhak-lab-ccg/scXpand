@@ -291,7 +291,8 @@ class TestCompletePreprocessingPipeline:
             X=X_torch.clone(), data_format=mock_data_format
         )
 
-        assert np.allclose(result_np, result_torch.numpy(), rtol=1e-5)
+        # Use slightly relaxed tolerance for cross-platform/implementation differences
+        assert np.allclose(result_np, result_torch.numpy(), rtol=1e-6, atol=1e-7)
 
     def test_preprocessing_with_log_transform_disabled(self, mock_data_format):
         """Test preprocessing with log transform disabled."""
@@ -312,7 +313,7 @@ class TestCompletePreprocessingPipeline:
         result_np = preprocess_expression_data(X_np.copy(), data_format_no_log)
         result_torch = preprocess_expression_data(X_torch.clone(), data_format_no_log)
 
-        assert np.allclose(result_np, result_torch.numpy(), rtol=1e-5)
+        assert np.allclose(result_np, result_torch.numpy(), rtol=1e-6)
 
 
 class TestLoadAndPreprocessData:
