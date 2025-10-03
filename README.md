@@ -1,4 +1,4 @@
-<div align="center">
+<div align="left">
   <p style="margin: 0 0 20px 0;">
     <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/v/scxpand" alt="PyPI version" /></a>
     <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/pyversions/scxpand" alt="Python versions" /></a>
@@ -6,6 +6,9 @@
     <a href="https://scxpand.readthedocs.io/en/latest/"><img src="https://img.shields.io/readthedocs/scxpand?branch=main" alt="Documentation" /></a>
     <a href="https://pepy.tech/project/scxpand"><img src="https://static.pepy.tech/badge/scxpand" alt="Downloads" /></a>
   </p>
+</div>
+
+<div align="center">
   <img src="https://raw.githubusercontent.com/yizhak-lab-ccg/scXpand/main/docs/images/scXpand_logo_gray.png" alt="scXpand Logo" width="280"/>
 
   <h1 style="margin: 10px 0 5px 0;">scXpand: Pan-cancer Detection of T-cell Clonal Expansion</h1>
