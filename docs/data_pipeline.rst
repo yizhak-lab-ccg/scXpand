@@ -159,21 +159,25 @@ Data augmentation is used **only during training** for neural network models (ML
 **Augmentation Types:**
 
 1. **Gene Masking** (Pre-normalization):
+
    - Randomly sets genes to zero before any normalization steps
    - Simulates technical dropouts in single-cell data
 
 2. **Gaussian Noise** (Post-normalization):
+
    - Adds small amounts of Gaussian noise to fully normalized expression data
    - Uses a small standard deviation (typically 1e-4) appropriate for normalized data scale
    - Helps prevent overfitting and improves generalization
 
 3. **Soft Labels**:
+
    - Uses continuous labels in [0,1] instead of binary {0,1} labels
    - Computed from clone size ratios using sigmoid scaling
    - Formula: ``sigmoid(soft_loss_beta * (clone_size_ratio - 1.5))``
    - Helps with label noise and improves model calibration
 
 **Important Notes:**
+
   - During **inference**, no augmentations are applied - only the core preprocessing pipeline runs
   - Gene statistics (μ, σ) for z-score normalization are **precomputed once** from clean training data (without masking or noise) and reused for all inference
   - Genes from training that are missing in inference data are filled with zeros and normalized using their training statistics
