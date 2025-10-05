@@ -17,7 +17,7 @@ The ``X`` matrix contains the gene expression data for all cells:
 * **Preprocessing**: The framework expects raw counts and applies its own preprocessing pipeline
 
   * Raw counts are processed according to the data preprocessing configuration
-  * Pre-normalized or log-transformed data is not supported
+  * Normalized or log-transformed data is not supported
 
 Gene Annotations (var)
 ----------------------
