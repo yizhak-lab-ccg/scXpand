@@ -5,6 +5,9 @@
     <a href="https://github.com/yizhak-lab-ccg/scXpand/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/yizhak-lab-ccg/scXpand/test.yml?branch=main&label=tests" alt="Tests" /></a>
     <a href="https://scxpand.readthedocs.io/en/latest/"><img src="https://img.shields.io/readthedocs/scxpand?branch=main" alt="Documentation" /></a>
     <a href="https://pepy.tech/project/scxpand"><img src="https://static.pepy.tech/badge/scxpand" alt="Downloads" /></a>
+    <a href="https://scverse.org/"><img src="https://img.shields.io/badge/scverse_ecosystem_package-purple" alt="scverse ecosystem package" />
+</a>
+
   </p>
 </div>
 
