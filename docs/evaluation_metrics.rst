@@ -83,10 +83,10 @@ Detailed Performance Metrics
       \text{RMSE} = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{p}_i)^2}
 
 **Positive Rate**
-   Fraction of cells predicted as expanded (dataset balance indicator):
+   Fraction of cells labeled as expanded (dataset balance indicator):
 
    .. math::
-      \text{Positive Rate} = \frac{\text{Predicted Positives}}{\text{Total Cells}}
+      \text{Positive Rate} = \frac{\text{Labeled Positives}}{\text{Total Cells}}
 
 Stratified Evaluation
 ---------------------
