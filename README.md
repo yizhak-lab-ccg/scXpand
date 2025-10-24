@@ -90,7 +90,7 @@ See the [Installation Guide](https://scxpand.readthedocs.io/en/latest/installati
 ```python
 import scxpand
 # Make sure that "your_data.h5ad" includes only T cells for the results to be meaningful
-# scXpand requires raw UMI counts, normalized or log-transformed data is not supported
+# scXpand requires raw UMI counts. Normalized or log-transformed data is not supported
 # Ensure that "your_data.var_names" are provided as Ensembl IDs (as the pre-trained models were trained using this gene representation)
 # Please refer to our documentation for more information
 
