@@ -31,42 +31,13 @@ Features
 * **Scalable Processing**: Handles millions of cells with memory-efficient data streaming
 * **Hyperparameter Optimization**: Built-in hyperparameter search for model tuning
 
+Installation
+------------
+
+For complete installation instructions including prerequisites, package installation, and development setup, please see our :doc:`installation` guide.
+
 Quick Start
 -----------
-
-**Installation (Published Package):**
-
-**Windows users**: First install `Microsoft C++ Build Tools <https://visualstudio.microsoft.com/visual-cpp-build-tools/>`_ if not already installed (required for compiling certain Python packages).
-
-If you have an NVIDIA GPU with CUDA support:
-
-With plain *pip* (add CUDA index):
-
-.. code-block:: bash
-
-   pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128
-
-With **uv**:
-
-.. code-block:: bash
-
-   uv pip install --upgrade scxpand-cuda --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
-
-Otherwise (CPU, Apple Silicon, or non-CUDA GPUs):
-
-With plain *pip*:
-
-.. code-block:: bash
-
-   pip install --upgrade scxpand
-
-With **uv**:
-
-.. code-block:: bash
-
-   uv pip install --upgrade scxpand
-
-See the :doc:`installation` for local development setup and other options.
 
 .. code-block:: python
 
