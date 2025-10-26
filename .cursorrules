@@ -1,0 +1,21 @@
+---
+description: Project-specific rules for scXpand
+alwaysApply: false
+---
+
+# Project Rules for scXpand
+
+## Project-Specific Guidelines
+
+(Add any scXpand-specific rules here as needed)
+
+## Jupyter Notebook Editing
+
+**CRITICAL**: When editing Jupyter notebooks (`.ipynb` files), you MUST use the `edit_notebook` tool.
+- NEVER use `search_replace`, `write`, or any other file editing tools on `.ipynb` files
+- The `edit_notebook` tool is designed specifically for notebook manipulation and preserves the JSON structure
+- For reference: See [cursor-notebook-mcp documentation](https://github.com/jbeno/cursor-notebook-mcp)
+
+---
+
+**Note**: General rules for Context7 and Jupyter Notebook MCP are configured globally in `~/.cursor/.cursorrules`

@@ -217,3 +217,79 @@ def download_model(model_name: str, cache_dir: Path | None = None) -> Path:
 
     # Download the model
     return download_pretrained_model(model_name=model_name, cache_dir=cache_dir)
+
+
+def download_zenodo_dataset(
+    zenodo_record_id: str,
+    filename: str,
+    extract_dir: Path,
+    cache_dir: Path | None = None,
+) -> Path:
+    """Download and extract a dataset from Zenodo.
+
+    Uses Pooch for caching, integrity checking, and progress tracking.
+    Downloads are cached to avoid re-downloading on subsequent runs.
+
+    Args:
+        zenodo_record_id: Zenodo record ID (e.g., "10672442")
+        filename: Name of the file to download from the record (e.g., "Raw_files.zip")
+        extract_dir: Directory where the files should be extracted
+        cache_dir: Custom cache directory (uses `.zenodo_cache` in extract_dir if None)
+
+    Returns:
+        Path to the extracted dataset directory
+
+    Raises:
+        FileNotFoundError: If download fails or extracted files not found
+
+    Examples:
+        >>> # Download brain tumor dataset
+        >>> data_path = download_zenodo_dataset(
+        ...     zenodo_record_id="10672442",
+        ...     filename="Raw_files.zip",
+        ...     extract_dir=Path("data/demo")
+        ... )
+    """
+    # Construct Zenodo download URL
+    zenodo_url = f"https://zenodo.org/records/{zenodo_record_id}/files/{filename}"
+
+    # Set up cache directory
+    if cache_dir is None:
+        cache_dir = extract_dir / ".zenodo_cache"
+
+    cache_dir.mkdir(exist_ok=True, parents=True)
+    extract_dir.mkdir(exist_ok=True, parents=True)
+
+    logger.info(
+        f"Downloading Zenodo dataset (record {zenodo_record_id}) to cache: {cache_dir}"
+    )
+
+    # Download and extract using Pooch
+    try:
+        downloaded_files = pooch.retrieve(
+            url=zenodo_url,
+            known_hash=None,  # Let Pooch compute hash automatically
+            path=str(cache_dir),
+            progressbar=True,
+            processor=pooch.Untar(extract_dir=str(extract_dir))
+            if filename.endswith((".tar", ".tar.gz", ".tgz"))
+            else pooch.Unzip(extract_dir=str(extract_dir)),
+        )
+    except Exception as e:
+        raise FileNotFoundError(
+            f"Failed to download dataset from {zenodo_url}. "
+            f"Please manually download from https://zenodo.org/records/{zenodo_record_id} "
+            f"and extract to {extract_dir}. Error: {e}"
+        ) from e
+
+    # Handle case where Pooch returns a list of extracted files
+    if isinstance(downloaded_files, list):
+        result_path = Path(downloaded_files[0]).parent
+    else:
+        result_path = Path(downloaded_files)
+        if result_path.is_file():
+            result_path = result_path.parent
+
+    logger.info(f"Dataset extracted to: {result_path}")
+
+    return result_path
