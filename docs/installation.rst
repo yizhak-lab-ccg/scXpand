@@ -25,8 +25,18 @@ Option 1: Using Virtual Environment with pip
 
 .. code-block:: bash
 
-   python3.13 -m venv scxpand-env  # or use python3.12 or python3.11
-   source scxpand-env/bin/activate  # On Windows: scxpand-env\Scripts\activate
+   # Create virtual environment (use python3.13, python3.12, or python3.11)
+   python3.13 -m venv scxpand-env
+
+   # Activate it:
+   # On macOS/Linux:
+   source scxpand-env/bin/activate
+
+   # On Windows (Command Prompt):
+   # scxpand-env\Scripts\activate.bat
+
+   # On Windows (PowerShell):
+   # scxpand-env\Scripts\Activate.ps1
 
 **2. Install scXpand**
 
@@ -51,7 +61,10 @@ Option 2: Using Conda with pip
 
 .. code-block:: bash
 
-   conda create -n scxpand-env python=3.13  # or python=3.12 or python=3.11
+   # Create conda environment (use python=3.13, python=3.12, or python=3.11)
+   conda create -n scxpand-env python=3.13
+
+   # Activate it:
    conda activate scxpand-env
 
 **2. Install scXpand**
@@ -83,8 +96,18 @@ Option 3: Using the `uv <https://docs.astral.sh/uv/>`_ package manager
 
 .. code-block:: bash
 
-   uv venv --python 3.13  # or --python 3.12 or --python 3.11
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   # Create virtual environment (use --python 3.13, 3.12, or 3.11)
+   uv venv --python 3.13
+
+   # Activate it:
+   # On macOS/Linux:
+   source .venv/bin/activate
+
+   # On Windows (Command Prompt):
+   # .venv\Scripts\activate.bat
+
+   # On Windows (PowerShell):
+   # .venv\Scripts\Activate.ps1
 
 **3. Install scXpand**
 
@@ -172,8 +195,11 @@ Then activate the environment:
 
 .. code-block:: bash
 
-    # macOS/Linux:
+    # On macOS/Linux:
     source .venv/bin/activate
 
-    # Windows Command Prompt:
-    .\.venv\Scripts\activate
+    # On Windows (Command Prompt):
+    .venv\Scripts\activate.bat
+
+    # On Windows (PowerShell):
+    .venv\Scripts\Activate.ps1
