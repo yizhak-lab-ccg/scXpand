@@ -13,10 +13,11 @@ Installation Guide
 Installing the Published scXpand Package
 --------------------------------
 
-- **Windows users**: First install `Microsoft C++ Build Tools <https://visualstudio.microsoft.com/visual-cpp-build-tools/>`_ if not already installed (required for compiling certain Python packages).
 
 Prerequisites
 ~~~~~~~~~~~~~
+
+- **Windows users**: First install `Microsoft C++ Build Tools <https://visualstudio.microsoft.com/visual-cpp-build-tools/>`_ if not already installed (required for compiling certain Python packages).
 
 Option 1: Using Virtual Environment with pip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
