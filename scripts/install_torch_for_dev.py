@@ -5,8 +5,6 @@ Verify PyTorch installation and print backend information.
 This script checks what PyTorch backend is available after uv sync has completed.
 It does NOT attempt to install torch; installation is handled via pyproject.toml
 configuration and `uv sync` in the main install script.
-
-This mirrors the simplified verification script used in clono_spot.
 """
 
 import sys
