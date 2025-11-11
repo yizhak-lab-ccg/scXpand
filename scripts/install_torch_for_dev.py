@@ -1,77 +1,21 @@
-import os
-import subprocess
+#!/usr/bin/env python3
+"""
+Verify PyTorch installation and print backend information.
+
+This script checks what PyTorch backend is available after uv sync has completed.
+It does NOT attempt to install torch; installation is handled via pyproject.toml
+configuration and `uv sync` in the main install script.
+
+This mirrors the simplified verification script used in clono_spot.
+"""
+
 import sys
 
-# Add the project root to Python path to allow importing from scripts module
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
 
-from scripts.constants import CUDA_VERSION
-
-PYTORCH_CUDA_INDEX_URL = f"https://download.pytorch.org/whl/{CUDA_VERSION}"
-
-
-def is_in_virtual_environment():
-    """Check if we're running in a virtual environment."""
-    return hasattr(sys, "real_prefix") or (
-        hasattr(sys, "base_prefix")
-        and sys.base_prefix != sys.prefix
-        and os.path.exists(os.path.join(sys.prefix, "pyvenv.cfg"))
-    )
-
-
-def install_torch_with_optimal_backend():
-    """Install torch with optimal backend using uv's auto backend selection."""
-    print("Installing PyTorch with auto backend selection...")
-
-    try:
-        # Use uv's auto backend selection with reinstall to override existing installation
-        # Set environment variable as documented in the uv PyTorch guide
-        env = os.environ.copy()
-        env["UV_TORCH_BACKEND"] = "auto"
-
-        subprocess.check_call(
-            [
-                "uv",
-                "pip",
-                "install",
-                "torch",
-                "--torch-backend=auto",
-                "--reinstall-package",
-                "torch",
-            ],
-            env=env,
-        )
-        print("✓ PyTorch installation completed with auto backend selection.")
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Failed to install PyTorch with auto backend: {e}")
-        print("Trying CPU-only installation as fallback...")
-        try:
-            # Fallback to CPU-only torch
-            subprocess.check_call(
-                ["uv", "pip", "install", "torch", "--reinstall-package", "torch"]
-            )
-            print("✓ PyTorch installed with CPU backend (fallback).")
-        except subprocess.CalledProcessError as e2:
-            print(f"❌ Failed to install PyTorch with fallback method: {e2}")
-            return False
-
-    # Update lock file to reflect the installation
-    print("Updating lock file to include torch installation...")
-    try:
-        subprocess.check_call(["uv", "lock"])
-        print("✓ Lock file updated successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"⚠ Warning: Failed to update lock file: {e}")
-
-    return True
-
-
-def check_torch_backend():
+def check_torch_backend() -> bool:
     """Check if torch is installed and what backend is available."""
     try:
-        import torch  # type: ignore # noqa: PLC0415
+        import torch  # type: ignore
 
         print(f"PyTorch version: {torch.__version__}")
 
@@ -94,64 +38,29 @@ def check_torch_backend():
         return False
 
 
-def print_torch_backend():
-    """Print information about the PyTorch backend in use."""
+def print_torch_info() -> None:
+    """Print detailed PyTorch environment information."""
     try:
-        import torch  # type: ignore # noqa: PLC0415
+        import torch
     except ImportError:
         print(
             "Error: torch is not installed. Please run 'uv sync' to install dependencies."
         )
         return
 
-    print(f"PyTorch version: {torch.__version__}")
-
-    backend = getattr(torch, "backend", None)
-    if backend is not None:
-        print(f"Torch backend in use: {backend}")
-
-    # Check for various backends in order of preference
-    if torch.cuda.is_available():
-        device_name = torch.cuda.get_device_name(torch.cuda.current_device())
-        device_count = torch.cuda.device_count()
-        cuda_version = torch.version.cuda
-        print(f"Torch is using CUDA (GPU): {device_name}")
-        print(f"Number of CUDA devices available: {device_count}")
-        print(f"CUDA version: {cuda_version}")
-
-        # Check for CUDA 12.x support
-        if cuda_version and "12." in cuda_version:
-            print(
-                f"✓ CUDA 12.x detected - compatible with latest PyTorch features (targeting {CUDA_VERSION})"
-            )
-        else:
-            print(
-                f"⚠ Older CUDA version detected - consider upgrading for optimal performance (targeting {CUDA_VERSION})"
-            )
-
-    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-        print("Torch is using MPS (Metal Performance Shaders) backend")
-        print("Running on Apple Silicon with GPU acceleration")
-
-    else:
-        print("Torch is using CPU backend")
-
-    python_version = sys.version_info
-    print(
-        f"Python version: {python_version.major}.{python_version.minor}.{python_version.micro}"
-    )
+    print(f"\nPyTorch version: {torch.__version__}")
+    print(f"CUDA version in torch: {torch.version.cuda}")
+    print(f"CUDA available: {torch.cuda.is_available()}")
+    print(f"Python executable: {sys.executable}")
 
 
 if __name__ == "__main__":
-    # Install torch with optimal backend
-    if install_torch_with_optimal_backend():
-        # Check if installation was successful
-        if check_torch_backend():
-            # Print detailed backend info
-            print_torch_backend()
-        else:
-            print(
-                "❌ Torch installation failed. Please check the error messages above."
-            )
+    print("Verifying PyTorch installation...\n")
+
+    if check_torch_backend():
+        print_torch_info()
+        print("\n✓ PyTorch verification complete.")
+        sys.exit(0)
     else:
-        print("❌ Failed to install torch. Please check the error messages above.")
+        print("\n❌ PyTorch verification failed.")
+        sys.exit(1)
