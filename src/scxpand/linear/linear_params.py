@@ -55,7 +55,9 @@ class LinearClassifierParam(BaseParams):
     # Learning rate and optimizer parameters for SGD - aligned with scikit-learn defaults
     init_learning_rate: float = 0.0001
     learning_rate: str = "optimal"  # scikit-learn default for classification
-    eta0: float = 0.0  # scikit-learn default
+    eta0: float = (
+        0.01  # Initial learning rate (must be > 0.0, even when learning_rate='optimal')
+    )
     power_t: float = 0.5  # scikit-learn default
 
     # Learning rate scheduler parameters
