@@ -11,8 +11,22 @@ except ImportError:
 
 
 # Polyfill trapz for NumPy 2.0+ compatibility in tests
+import pandas as pd
+import pytest
+from scipy.integrate import trapezoid
+
+# Polyfill for numpy.trapz (removed in NumPy 2.0)
 if not hasattr(np, "trapz"):
     np.trapz = trapezoid
+
+# Polyfill for numpy.in1d (removed in NumPy 2.0, replaced by isin)
+if not hasattr(np, "in1d"):
+    np.in1d = np.isin
+
+# Disable Pandas Copy-on-Write to prevent "ValueError: sort array is read-only"
+# This occurs because .to_numpy() returns read-only views when CoW is enabled,
+# breaking in-place sorts in data_splitter.py.
+pd.options.mode.copy_on_write = False
 
 # Apply global patch for anndata.read_h5ad to avoid backed="r" issues
 # This is necessary because source code calls backed="r" which crashes on Python 3.13
