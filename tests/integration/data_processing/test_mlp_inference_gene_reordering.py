@@ -441,7 +441,7 @@ class TestMLPInferenceGeneReordering:
             row_inds_train = np.arange(50)  # Some training indices
 
             # Load AnnData (like what happens in actual usage)
-            adata = ad.read_h5ad(training_file, backed="r")
+            adata = ad.read_h5ad(training_file)
 
             # This is what the user wants to do for SHAP analysis
             X_train = load_and_preprocess_data_numpy(

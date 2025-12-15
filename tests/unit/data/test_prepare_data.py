@@ -153,7 +153,7 @@ class TestPrepareDataForTraining:
             ctx.register_adata(result_integrated.adata)
 
             # Method 2: Use separated methods manually
-            adata_loaded = ad.read_h5ad(data_file, backed="r")
+            adata_loaded = ad.read_h5ad(data_file)
             ctx.register_adata(adata_loaded)
 
             row_inds_train, row_inds_dev = split_data(

@@ -316,7 +316,8 @@ def mock_dataset(mock_adata: AnnData, tmp_path: Path) -> CellsDataset:
     )
 
     # Use data_path parameter for more efficient processing
-    adata_loaded = ad.read_h5ad(raw_file, backed="r")
+    # Note: Don't use backed="r" mode as it causes compatibility issues with Python 3.13
+    adata_loaded = ad.read_h5ad(raw_file)
 
     new_adata = data_format.create_data_format(
         data_path=raw_file,
@@ -732,7 +733,7 @@ class TestCellsDataset:
             use_log_transform=False,
             aux_categorical_types=["tissue_type", "imputed_labels"],
         )
-        adata_loaded_append = ad.read_h5ad(raw_file_append, backed="r")
+        adata_loaded_append = ad.read_h5ad(raw_file_append)
         data_format_append.create_data_format(
             data_path=raw_file_append,
             adata=adata_loaded_append,
@@ -745,7 +746,7 @@ class TestCellsDataset:
             use_log_transform=False,
             aux_categorical_types=["tissue_type", "imputed_labels"],
         )
-        adata_loaded_obsm = ad.read_h5ad(raw_file_obsm, backed="r")
+        adata_loaded_obsm = ad.read_h5ad(raw_file_obsm)
         data_format_obsm.create_data_format(
             data_path=raw_file_obsm,
             adata=adata_loaded_obsm,
@@ -811,7 +812,7 @@ class TestCellsDataset:
         row_inds = np.arange(len(mock_adata.obs))
         raw_file = tmp_path / "raw_adata_obsm.h5ad"
         mock_adata.write_h5ad(raw_file)
-        adata_loaded = ad.read_h5ad(raw_file, backed="r")
+        adata_loaded = ad.read_h5ad(raw_file)
         data_format.create_data_format(
             data_path=raw_file,
             adata=adata_loaded,
@@ -915,7 +916,7 @@ class TestCellsDataset:
             use_log_transform=True,
             aux_categorical_types=["tissue_type", "imputed_labels"],
         )
-        adata_loaded = ad.read_h5ad(raw_file, backed="r")
+        adata_loaded = ad.read_h5ad(raw_file)
         data_format.create_data_format(
             data_path=raw_file,
             adata=adata_loaded,
@@ -1006,7 +1007,7 @@ class TestCellsDataset:
             use_log_transform=False,
             aux_categorical_types=["tissue_type", "imputed_labels"],
         )
-        adata_loaded = ad.read_h5ad(raw_file, backed="r")
+        adata_loaded = ad.read_h5ad(raw_file)
         data_format.create_data_format(
             data_path=raw_file,
             adata=adata_loaded,
@@ -1044,7 +1045,7 @@ class TestCellsDataset:
             x_genes = batch["x"][:, : dataset.n_genes].detach().cpu().numpy()
 
             # Load raw data from file to get the original values
-            raw_adata = ad.read_h5ad(processed_file, backed="r")
+            raw_adata = ad.read_h5ad(processed_file)
             try:
                 X_raw = raw_adata.X[batch_indices, :].toarray()
                 X_tensor = torch.from_numpy(X_raw).float()
@@ -1095,7 +1096,7 @@ class TestCellsDataset:
             use_log_transform=True,
             aux_categorical_types=["tissue_type", "imputed_labels"],
         )
-        adata_loaded_combined = ad.read_h5ad(raw_file, backed="r")
+        adata_loaded_combined = ad.read_h5ad(raw_file)
         data_format_combined.create_data_format(
             data_path=raw_file,
             adata=adata_loaded_combined,
@@ -1110,7 +1111,7 @@ class TestCellsDataset:
             use_log_transform=True,
             aux_categorical_types=["tissue_type", "imputed_labels"],
         )
-        adata_loaded_separated = ad.read_h5ad(raw_file, backed="r")
+        adata_loaded_separated = ad.read_h5ad(raw_file)
         data_format_separated.create_data_format(
             data_path=raw_file,
             adata=adata_loaded_separated,
