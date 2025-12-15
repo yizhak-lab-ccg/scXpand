@@ -64,11 +64,17 @@ def pytest_configure(config):
         "markers", f"torch_version: PyTorch {torch.__version__} is available"
     )
 
-    # Disable Pandas Copy-on-Write and chained assignment warnings globally for all tests/workers
+
+@pytest.fixture(autouse=True)
+def setup_pandas_options():
+    """Ensure Pandas options are set correctly for all tests."""
     import pandas as pd
 
+    # Disable Copy-on-Write to prevent "sort array is read-only" errors
+    # This must be set before data is loaded/created
     pd.options.mode.copy_on_write = False
     pd.options.mode.chained_assignment = None
+    return
 
 
 import numpy as np
