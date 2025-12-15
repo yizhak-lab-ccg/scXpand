@@ -1,9 +1,6 @@
 [build-system]
 build-backend = "hatchling.build"
-requires = [
-  "hatch-vcs",
-  "hatchling",
-]
+requires = ["hatch-vcs", "hatchling"]
 
 [project]
 name = "scxpand"
@@ -34,12 +31,10 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
   "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
-dynamic = [
-  "version",
-]
+dynamic = ["version"]
 dependencies = [
   "anndata>=0.11.4",
-  "bbknn>=1.6",
+
   "fire>=0.7",
   "igraph>=0.11.4",
   "lightgbm>=4.6",
@@ -51,7 +46,7 @@ dependencies = [
   "scanpy>=1.11.1",
   "scikit-learn>=1.7.1",
   "scirpy>=0.9.3",
-  "scrublet>=0.2.3",
+
   "seaborn>=0.13.2",
   "shap>=0.48",
   "structlog>=24",
@@ -96,7 +91,7 @@ urls.Repository = "https://github.com/yizhak-lab-ccg/scXpand"
 scripts.scxpand = "scxpand.main:main"
 
 [tool.hatch.build.targets.wheel]
-packages = [ "src/scxpand" ]
+packages = ["src/scxpand"]
 
 [tool.hatch.version]
 source = "vcs"
@@ -106,32 +101,34 @@ local_scheme = "no-local-version"
 
 [tool.hatch.envs.default]
 installer = "uv"
-features = [ "dev" ]
+features = ["dev"]
 
 [tool.hatch.envs.docs]
-features = [ "docs" ]
+features = ["docs"]
 scripts.build = "sphinx-build -M html docs docs/_build {args}"
 scripts.open = "python -m webbrowser -t docs/_build/html/index.html"
 scripts.clean = "git clean -fdX -- {args:docs}"
 
 # Test environments for different Python versions
 [[tool.hatch.envs.hatch-test.matrix]]
-deps = [ "stable" ]
-python = [ "3.11", "3.12", "3.13" ]
+deps = ["stable"]
+python = ["3.11", "3.12", "3.13"]
 
 # Test with pre-release dependencies
 [[tool.hatch.envs.hatch-test.matrix]]
-deps = [ "pre" ]
-python = [ "3.13" ]
+deps = ["pre"]
+python = ["3.13"]
 
 [tool.hatch.envs.hatch-test]
-features = [ "dev" ]
+features = ["dev"]
 
 [tool.hatch.envs.hatch-test.overrides]
 # If the matrix variable `deps` is set to "pre",
 # set the environment variable `UV_PRERELEASE` to "allow".
 matrix.deps.env-vars = [
-  { key = "UV_PRERELEASE", value = "allow", if = [ "pre" ] },
+  { key = "UV_PRERELEASE", value = "allow", if = [
+    "pre",
+  ] },
 ]
 
 [tool.hatch.envs.hatch-test.scripts]
@@ -163,12 +160,16 @@ lint.ignore = [
   "E501", # line too long, handled by ruff format
   "F841", # local variable assigned but never used
 ]
-lint.per-file-ignores."*.ipynb" = [ "E402" ] # notebooks often have imports after other code
-lint.per-file-ignores."__init__.py" = [ "F401" ]
-lint.per-file-ignores."tests/**" = [ "F841" ] # test files often have unused variables
+lint.per-file-ignores."*.ipynb" = [
+  "E402",
+] # notebooks often have imports after other code
+lint.per-file-ignores."__init__.py" = ["F401"]
+lint.per-file-ignores."tests/**" = [
+  "F841",
+] # test files often have unused variables
 
 [tool.pytest.ini_options]
-testpaths = [ "tests" ]
+testpaths = ["tests"]
 addopts = [
   "--strict-markers",
   "--strict-config",
@@ -190,13 +191,8 @@ filterwarnings = [
 ]
 
 [tool.coverage.run]
-source = [ "src/scxpand" ]
-omit = [
-  "*/tests/*",
-  "*/test_*",
-  "*/__pycache__/*",
-  "*/.*",
-]
+source = ["src/scxpand"]
+omit = ["*/tests/*", "*/test_*", "*/__pycache__/*", "*/.*"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -213,12 +209,7 @@ exclude_lines = [
 ]
 
 [tool.uv]
-conflicts = [
-  [
-    { extra = "cpu" },
-    { extra = "cuda" },
-  ],
-]
+conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
