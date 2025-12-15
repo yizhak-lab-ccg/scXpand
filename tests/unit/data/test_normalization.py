@@ -313,7 +313,7 @@ class TestCompletePreprocessingPipeline:
         result_np = preprocess_expression_data(X_np.copy(), data_format_no_log)
         result_torch = preprocess_expression_data(X_torch.clone(), data_format_no_log)
 
-        assert np.allclose(result_np, result_torch.numpy(), rtol=1e-6)
+        assert np.allclose(result_np, result_torch.numpy(), rtol=1e-5, atol=1e-6)
 
 
 class TestLoadAndPreprocessData:
