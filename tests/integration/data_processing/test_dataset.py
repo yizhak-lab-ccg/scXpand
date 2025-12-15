@@ -1140,11 +1140,8 @@ class TestCellsDataset:
         assert adata_combined.n_vars == adata_separated.n_vars
         assert adata_combined.var_names.tolist() == adata_separated.var_names.tolist()
 
-        # With batch loading, the underlying data format should be the same
-        # Verify that both are backed (data loaded from disk for efficiency)
-        assert adata_combined.isbacked == adata_separated.isbacked
-        assert adata_combined.isbacked
-        assert adata_separated.isbacked
+        # Note: We no longer use backed="r" mode as it causes compatibility
+        # issues with Python 3.13 (backed_csr_matrix._validate_indices error)
 
     def test_cells_dataset_with_missing_columns(self, tmp_path: Path) -> None:
         """Test that CellsDataset handles missing columns gracefully for inference."""
