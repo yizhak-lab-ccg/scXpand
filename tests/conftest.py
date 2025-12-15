@@ -1,7 +1,10 @@
 import anndata
 import numpy as np
+import pandas as pd
+import pytest
 import torch
 
+# Polyfill for numpy.trapz (removed in NumPy 2.0)
 try:
     from scipy.integrate import trapezoid
 except ImportError:
@@ -10,12 +13,6 @@ except ImportError:
         return np.sum(y * dx, axis=axis)  # fallback
 
 
-# Polyfill trapz for NumPy 2.0+ compatibility in tests
-import pandas as pd
-import pytest
-from scipy.integrate import trapezoid
-
-# Polyfill for numpy.trapz (removed in NumPy 2.0)
 if not hasattr(np, "trapz"):
     np.trapz = trapezoid
 

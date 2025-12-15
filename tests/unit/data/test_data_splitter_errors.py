@@ -2,6 +2,8 @@
 
 import numpy as np
 import pandas as pd
+
+pd.options.mode.copy_on_write = False
 import pytest
 from anndata import AnnData
 

@@ -13,6 +13,19 @@ import pytest
 
 from tests.test_utils import safe_context_manager
 
+REPO_ROOT = os.getcwd()
+
+
+def run_cli_command(cmd, **kwargs):
+    """Run CLI command with correct PYTHONPATH."""
+    env = os.environ.copy()
+    src_dir = os.path.join(REPO_ROOT, "src")
+    env["PYTHONPATH"] = src_dir + os.pathsep + env.get("PYTHONPATH", "")
+    if "env" in kwargs:
+        env.update(kwargs["env"])
+    kwargs["env"] = env
+    return subprocess.run(cmd, **kwargs)
+
 
 class TestCLIIntegration:
     """Slow integration tests using actual subprocess calls."""
@@ -27,7 +40,7 @@ class TestCLIIntegration:
     @pytest.mark.slow
     def test_cli_help_command_integration(self):
         """Test that CLI shows help information via subprocess."""
-        result = subprocess.run(
+        result = run_cli_command(
             [sys.executable, "-m", "scxpand.main", "--help"],
             check=False,
             capture_output=True,
@@ -51,7 +64,7 @@ class TestCLIIntegration:
     @pytest.mark.slow
     def test_cli_train_help_integration(self):
         """Test train command help via subprocess."""
-        result = subprocess.run(
+        result = run_cli_command(
             [sys.executable, "-m", "scxpand.main", "train", "--help"],
             check=False,
             capture_output=True,
@@ -70,7 +83,7 @@ class TestCLIIntegration:
     @pytest.mark.slow
     def test_cli_inference_help_integration(self):
         """Test inference command help via subprocess."""
-        result = subprocess.run(
+        result = run_cli_command(
             [sys.executable, "-m", "scxpand.main", "inference", "--help"],
             check=False,
             capture_output=True,
@@ -89,7 +102,7 @@ class TestCLIIntegration:
     @pytest.mark.slow
     def test_cli_invalid_command_integration(self):
         """Test invalid command handling via subprocess."""
-        result = subprocess.run(
+        result = run_cli_command(
             [sys.executable, "-m", "scxpand.main", "invalid-command"],
             check=False,
             capture_output=True,
@@ -105,7 +118,7 @@ class TestCLIIntegration:
     @pytest.mark.slow
     def test_cli_missing_required_args_integration(self):
         """Test missing required arguments via subprocess."""
-        result = subprocess.run(
+        result = run_cli_command(
             [sys.executable, "-m", "scxpand.main", "train"],
             check=False,
             capture_output=True,
@@ -119,7 +132,7 @@ class TestCLIIntegration:
     @pytest.mark.slow
     def test_cli_invalid_model_type_integration(self):
         """Test invalid model type via subprocess."""
-        result = subprocess.run(
+        result = run_cli_command(
             [
                 sys.executable,
                 "-m",
@@ -140,7 +153,7 @@ class TestCLIIntegration:
     @pytest.mark.slow
     def test_cli_nonexistent_data_file_integration(self):
         """Test nonexistent data file via subprocess."""
-        result = subprocess.run(
+        result = run_cli_command(
             [
                 sys.executable,
                 "-m",
@@ -163,7 +176,7 @@ class TestCLIIntegration:
     @pytest.mark.slow
     def test_cli_list_models_integration(self):
         """Test list-models command via subprocess."""
-        result = subprocess.run(
+        result = run_cli_command(
             [sys.executable, "-m", "scxpand.main", "list-models"],
             check=False,
             capture_output=True,
@@ -200,7 +213,7 @@ class TestCLIEndToEnd:
         ]
 
         for cmd in commands:
-            result = subprocess.run(
+            result = run_cli_command(
                 cmd,
                 check=False,
                 capture_output=True,
@@ -224,7 +237,7 @@ class TestCLIEndToEnd:
         ]
 
         for cmd in error_commands:
-            result = subprocess.run(
+            result = run_cli_command(
                 cmd,
                 check=False,
                 capture_output=True,
@@ -243,7 +256,7 @@ class TestCLIEndToEnd:
         """Benchmark CLI performance for common operations."""
         # Test help command performance
         start_time = time.time()
-        result = subprocess.run(
+        result = run_cli_command(
             [sys.executable, "-m", "scxpand.main", "--help"],
             check=False,
             capture_output=True,
@@ -271,7 +284,7 @@ class TestCLIEnvironment:
     @pytest.mark.slow
     def test_cli_with_different_python_versions(self):
         """Test CLI works with different Python versions."""
-        result = subprocess.run(
+        result = run_cli_command(
             [sys.executable, "-m", "scxpand.main", "--help"],
             check=False,
             capture_output=True,
@@ -291,7 +304,7 @@ class TestCLIEnvironment:
             try:
                 os.chdir(ctx.temp_dir)
 
-                result = subprocess.run(
+                result = run_cli_command(
                     [sys.executable, "-m", "scxpand.main", "--help"],
                     check=False,
                     capture_output=True,

@@ -9,6 +9,9 @@ from scxpand.data_util.data_splitter import (
     split_data,
 )
 
+# Explicitly disable Copy-on-Write for this test file to ensure writable arrays
+pd.options.mode.copy_on_write = False
+
 
 @pytest.fixture
 def mock_adata():

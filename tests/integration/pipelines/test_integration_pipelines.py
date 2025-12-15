@@ -6,6 +6,8 @@ from unittest.mock import patch
 import anndata
 import numpy as np
 import pandas as pd
+
+pd.options.mode.copy_on_write = False
 import torch
 from scipy.sparse import csr_matrix
 
