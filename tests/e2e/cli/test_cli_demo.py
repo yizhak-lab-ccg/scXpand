@@ -16,8 +16,22 @@ class TestCLICoverage:
     def run_cli_test(self, command: list[str], _description: str) -> bool:
         """Run a CLI test and return success status."""
         try:
+            # Prepare environment with PYTHONPATH including src
+            import os
+
+            env = os.environ.copy()
+            root_dir = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), "../../../src")
+            )
+            env["PYTHONPATH"] = root_dir + os.pathsep + env.get("PYTHONPATH", "")
+
             result = subprocess.run(
-                command, check=False, capture_output=True, text=True, timeout=30
+                command,
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                env=env,
             )
             if result.returncode != 0:
                 print(f"CLI command failed: {command}")
