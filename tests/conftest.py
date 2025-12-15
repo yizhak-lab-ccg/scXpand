@@ -1,4 +1,8 @@
+import anndata
 import torch
+
+# Enable writing nullable string arrays to HDF5 files (required for pandas StringDtype)
+anndata.settings.allow_write_nullable_strings = True
 
 
 # This dummy test ensures at least one test always passes
@@ -15,7 +19,6 @@ def pytest_configure(config):
     )
 
 
-import anndata
 import numpy as np
 import pytest
 from scipy.sparse import csr_matrix
