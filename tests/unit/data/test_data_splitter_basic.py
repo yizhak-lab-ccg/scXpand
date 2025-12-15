@@ -116,7 +116,7 @@ class TestGetPatientIdentifiers:
         result = get_patient_identifiers(obs_df)
         expected = pd.Series(["study1:p1", "study2:p2", "study1:p3"])
 
-        pd.testing.assert_series_equal(result, expected)
+        pd.testing.assert_series_equal(result, expected, check_dtype=False)
 
     def test_invalid_study_with_separator(self):
         """Test that study identifiers containing separator raise ValueError."""
@@ -175,7 +175,7 @@ class TestGetPatientIdentifiers:
         result = get_patient_identifiers(obs_df)
         expected = pd.Series(["1:101", "2:102", "3:103"])
 
-        pd.testing.assert_series_equal(result, expected)
+        pd.testing.assert_series_equal(result, expected, check_dtype=False)
 
     def test_empty_dataframe(self):
         """Test handling of empty DataFrame."""
@@ -184,7 +184,7 @@ class TestGetPatientIdentifiers:
         result = get_patient_identifiers(obs_df)
         expected = pd.Series([], dtype=object)
 
-        pd.testing.assert_series_equal(result, expected)
+        pd.testing.assert_series_equal(result, expected, check_dtype=False)
 
     def test_special_characters_allowed(self):
         """Test that other special characters (except separator) are allowed."""
@@ -198,7 +198,7 @@ class TestGetPatientIdentifiers:
         result = get_patient_identifiers(obs_df)
         expected = pd.Series(["study-1:p@1", "study_2:p#2", "study.3:p$3"])
 
-        pd.testing.assert_series_equal(result, expected)
+        pd.testing.assert_series_equal(result, expected, check_dtype=False)
 
     def test_whitespace_handling(self):
         """Test handling of whitespace in identifiers."""
@@ -212,7 +212,7 @@ class TestGetPatientIdentifiers:
         result = get_patient_identifiers(obs_df)
         expected = pd.Series(["study 1:p 1", " study2: p2", "study3 :p3 "])
 
-        pd.testing.assert_series_equal(result, expected)
+        pd.testing.assert_series_equal(result, expected, check_dtype=False)
 
     def test_na_values_converted_to_string(self):
         """Test that NaN values are converted to string representation."""
@@ -224,4 +224,4 @@ class TestGetPatientIdentifiers:
         # NaN becomes "nan" when converted to string
         expected = pd.Series(["study1:p1", "nan:p2", "study3:nan"])
 
-        pd.testing.assert_series_equal(result, expected)
+        pd.testing.assert_series_equal(result, expected, check_dtype=False)

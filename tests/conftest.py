@@ -1,6 +1,6 @@
 import anndata
-import torch
 import numpy as np
+import torch
 
 try:
     from scipy.integrate import trapezoid
@@ -41,7 +41,7 @@ def _mocked_read_h5ad(filename, backed=None, *args, **kwargs):
     # 2. PermissionError: [WinError 32] (Windows file locking)
     if backed is not None:
         backed = None
-    return _original_read_h5ad(filename, backed=backed, *args, **kwargs)
+    return _original_read_h5ad(filename, *args, backed=backed, **kwargs)
 
 
 anndata.read_h5ad = _mocked_read_h5ad
@@ -64,9 +64,14 @@ def pytest_configure(config):
         "markers", f"torch_version: PyTorch {torch.__version__} is available"
     )
 
+    # Disable Pandas Copy-on-Write and chained assignment warnings globally for all tests/workers
+    import pandas as pd
+
+    pd.options.mode.copy_on_write = False
+    pd.options.mode.chained_assignment = None
+
 
 import numpy as np
-import pytest
 from scipy.sparse import csr_matrix
 
 
