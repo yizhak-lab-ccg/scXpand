@@ -1,5 +1,37 @@
 import anndata
 import torch
+import numpy as np
+
+try:
+    from scipy.integrate import trapezoid
+except ImportError:
+
+    def trapezoid(y, x=None, dx=1.0, axis=-1):
+        return np.sum(y * dx, axis=axis)  # fallback
+
+
+# Polyfill trapz for NumPy 2.0+ compatibility in tests
+if not hasattr(np, "trapz"):
+    np.trapz = trapezoid
+
+# Apply global patch for anndata.read_h5ad to avoid backed="r" issues
+# This is necessary because source code calls backed="r" which crashes on Python 3.13
+# and causes PermissionError on Windows during cleanup.
+# We patch it at the anndata module level to affect all imports.
+_original_read_h5ad = anndata.read_h5ad
+
+
+def _mocked_read_h5ad(filename, backed=None, *args, **kwargs):
+    # Force backed=None to avoid:
+    # 1. AttributeError: 'backed_csr_matrix' object has no attribute '_validate_indices' (Py3.13)
+    # 2. PermissionError: [WinError 32] (Windows file locking)
+    if backed is not None:
+        backed = None
+    return _original_read_h5ad(filename, backed=backed, *args, **kwargs)
+
+
+anndata.read_h5ad = _mocked_read_h5ad
+
 
 # Enable writing nullable string arrays to HDF5 files (required for pandas StringDtype)
 anndata.settings.allow_write_nullable_strings = True
