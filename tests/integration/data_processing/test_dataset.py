@@ -1,4 +1,5 @@
 import os
+import sys
 import tempfile
 from functools import partial
 from pathlib import Path
@@ -1061,6 +1062,10 @@ class TestCellsDataset:
                 raw_adata.file.close()
 
     @pytest.mark.slow
+    @pytest.mark.skipif(
+        sys.platform == "win32" and sys.version_info >= (3, 13),
+        reason="Backed AnnData multiprocessing broken on Windows+Python 3.13",
+    )
     def test_dataloader_multiple_workers(self, mock_dataset: CellsDataset) -> None:
         if os.cpu_count() is None or os.cpu_count() < 2:
             pytest.skip("Not enough CPU cores available for multiple worker test")
