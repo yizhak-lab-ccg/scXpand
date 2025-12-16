@@ -47,31 +47,6 @@ anndata.read_h5ad = _patched_read_h5ad
 # Enable writing nullable string arrays to HDF5 files (required for pandas StringDtype)
 anndata.settings.allow_write_nullable_strings = True
 
-# =============================================================================
-# Pandas/NumPy Read-Only Array Fix (ROOT CAUSE FIX)
-# =============================================================================
-
-# Patch split_data to return writable arrays
-# This fixes: ValueError: sort array is read-only
-# Root cause: Pandas 3.0+ with CoW returns read-only arrays from to_numpy()
-# The source code does `array.sort()` which fails on read-only arrays
-from scxpand.data_util import data_splitter
-
-_original_split_data = data_splitter.split_data
-
-
-def _patched_split_data(*args, **kwargs):
-    """Wrapper that ensures split_data returns writable arrays."""
-    train_inds, dev_inds = _original_split_data(*args, **kwargs)
-    # Force writable copies if arrays are read-only
-    if not train_inds.flags.writeable:
-        train_inds = train_inds.copy()
-    if not dev_inds.flags.writeable:
-        dev_inds = dev_inds.copy()
-    return train_inds, dev_inds
-
-
-data_splitter.split_data = _patched_split_data
 
 # =============================================================================
 # Pytest Configuration
