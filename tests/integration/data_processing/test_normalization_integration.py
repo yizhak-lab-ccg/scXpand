@@ -296,7 +296,7 @@ class TestDatasetIntegration:
 
             # Method 2: Direct preprocessing
             # Load raw data
-            adata_loaded = ad.read_h5ad(data_file, backed="r")
+            adata_loaded = ad.read_h5ad(data_file)
             X_raw = adata_loaded.X[row_inds]
             if hasattr(X_raw, "toarray"):
                 X_raw = X_raw.toarray()

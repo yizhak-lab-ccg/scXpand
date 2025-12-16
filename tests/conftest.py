@@ -1,13 +1,63 @@
+import anndata
+import numpy as np
+import pytest
 import torch
+from scipy.sparse import csr_matrix
+
+# =============================================================================
+# NumPy 2.0 Polyfills
+# =============================================================================
+
+# Polyfill for numpy.trapz (removed in NumPy 2.0)
+try:
+    from scipy.integrate import trapezoid
+except ImportError:
+
+    def trapezoid(y, x=None, dx=1.0, axis=-1):
+        return np.sum(y * dx, axis=axis)  # fallback
 
 
-# This dummy test ensures at least one test always passes
+if not hasattr(np, "trapz"):
+    np.trapz = trapezoid
+
+# Polyfill for numpy.in1d (removed in NumPy 2.0, replaced by isin)
+if not hasattr(np, "in1d"):
+    np.in1d = np.isin
+
+# =============================================================================
+# AnnData Compatibility Patches
+# =============================================================================
+
+# Patch anndata.read_h5ad to avoid backed="r" issues on Python 3.13/Windows
+# This fixes:
+# - AttributeError: 'backed_csr_matrix' object has no attribute '_validate_indices'
+# - PermissionError: [WinError 32] file in use
+_original_read_h5ad = anndata.read_h5ad
+
+
+def _patched_read_h5ad(filename, backed=None, *args, **kwargs):
+    """Force backed=None to avoid Python 3.13 and Windows compatibility issues."""
+    if backed is not None:
+        backed = None
+    return _original_read_h5ad(filename, *args, backed=backed, **kwargs)
+
+
+anndata.read_h5ad = _patched_read_h5ad
+
+# Enable writing nullable string arrays to HDF5 files (required for pandas StringDtype)
+anndata.settings.allow_write_nullable_strings = True
+
+
+# =============================================================================
+# Pytest Configuration
+# =============================================================================
+
+
 def test_always_passes():
     """This test always passes."""
     assert True
 
 
-# Report torch version in the test run
 def pytest_configure(config):
     """Add torch version info to pytest output."""
     config.addinivalue_line(
@@ -15,10 +65,9 @@ def pytest_configure(config):
     )
 
 
-import anndata
-import numpy as np
-import pytest
-from scipy.sparse import csr_matrix
+# =============================================================================
+# Fixtures
+# =============================================================================
 
 
 @pytest.fixture

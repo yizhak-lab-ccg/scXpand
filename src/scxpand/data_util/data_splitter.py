@@ -285,8 +285,9 @@ def split_data(
         save_patient_ids(save_path, train_patient_ids, dev_patient_ids)
 
     # Extract and sort row indices for efficient data loading
-    row_inds_train = train_obs_df["original_row_idx"].to_numpy()
-    row_inds_dev = dev_obs_df["original_row_idx"].to_numpy()
+    # Note: .copy() ensures arrays are writable (Pandas 3.0+ CoW returns read-only views)
+    row_inds_train = train_obs_df["original_row_idx"].to_numpy().copy()
+    row_inds_dev = dev_obs_df["original_row_idx"].to_numpy().copy()
 
     row_inds_train.sort()
     row_inds_dev.sort()

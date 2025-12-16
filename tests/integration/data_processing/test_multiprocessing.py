@@ -24,6 +24,12 @@ class PicklableCollateFn:
         return cells_collate_fn(batch_indices, self.dataset)
 
 
+# Skip multiprocessing tests on Windows+Python 3.13 due to backed AnnData incompatibility
+# The backed_csr_matrix._validate_indices method is missing on Python 3.13
+@pytest.mark.skipif(
+    sys.platform == "win32" and sys.version_info >= (3, 13),
+    reason="Backed AnnData multiprocessing broken on Windows+Python 3.13",
+)
 class TestMultiprocessingLoading:
     """Test class for multiprocessing functionality with HDF5 files."""
 
