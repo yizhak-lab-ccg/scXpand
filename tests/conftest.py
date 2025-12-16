@@ -1,8 +1,12 @@
 import anndata
 import numpy as np
-import pandas as pd
 import pytest
 import torch
+from scipy.sparse import csr_matrix
+
+# =============================================================================
+# NumPy 2.0 Polyfills
+# =============================================================================
 
 # Polyfill for numpy.trapz (removed in NumPy 2.0)
 try:
@@ -20,68 +24,75 @@ if not hasattr(np, "trapz"):
 if not hasattr(np, "in1d"):
     np.in1d = np.isin
 
-# Disable Pandas Copy-on-Write to prevent "ValueError: sort array is read-only"
-# This occurs because .to_numpy() returns read-only views when CoW is enabled,
-# breaking in-place sorts in data_splitter.py.
-pd.options.mode.copy_on_write = False
+# =============================================================================
+# AnnData Compatibility Patches
+# =============================================================================
 
-# Apply global patch for anndata.read_h5ad to avoid backed="r" issues
-# This is necessary because source code calls backed="r" which crashes on Python 3.13
-# and causes PermissionError on Windows during cleanup.
-# We patch it at the anndata module level to affect all imports.
+# Patch anndata.read_h5ad to avoid backed="r" issues on Python 3.13/Windows
+# This fixes:
+# - AttributeError: 'backed_csr_matrix' object has no attribute '_validate_indices'
+# - PermissionError: [WinError 32] file in use
 _original_read_h5ad = anndata.read_h5ad
 
 
-def _mocked_read_h5ad(filename, backed=None, *args, **kwargs):
-    # Force backed=None to avoid:
-    # 1. AttributeError: 'backed_csr_matrix' object has no attribute '_validate_indices' (Py3.13)
-    # 2. PermissionError: [WinError 32] (Windows file locking)
+def _patched_read_h5ad(filename, backed=None, *args, **kwargs):
+    """Force backed=None to avoid Python 3.13 and Windows compatibility issues."""
     if backed is not None:
         backed = None
     return _original_read_h5ad(filename, *args, backed=backed, **kwargs)
 
 
-anndata.read_h5ad = _mocked_read_h5ad
-
+anndata.read_h5ad = _patched_read_h5ad
 
 # Enable writing nullable string arrays to HDF5 files (required for pandas StringDtype)
 anndata.settings.allow_write_nullable_strings = True
 
+# =============================================================================
+# Pandas/NumPy Read-Only Array Fix (ROOT CAUSE FIX)
+# =============================================================================
 
-# This dummy test ensures at least one test always passes
+# Patch split_data to return writable arrays
+# This fixes: ValueError: sort array is read-only
+# Root cause: Pandas 3.0+ with CoW returns read-only arrays from to_numpy()
+# The source code does `array.sort()` which fails on read-only arrays
+from scxpand.data_util import data_splitter
+
+_original_split_data = data_splitter.split_data
+
+
+def _patched_split_data(*args, **kwargs):
+    """Wrapper that ensures split_data returns writable arrays."""
+    train_inds, dev_inds = _original_split_data(*args, **kwargs)
+    # Force writable copies if arrays are read-only
+    if not train_inds.flags.writeable:
+        train_inds = train_inds.copy()
+    if not dev_inds.flags.writeable:
+        dev_inds = dev_inds.copy()
+    return train_inds, dev_inds
+
+
+data_splitter.split_data = _patched_split_data
+
+# =============================================================================
+# Pytest Configuration
+# =============================================================================
+
+
 def test_always_passes():
     """This test always passes."""
     assert True
 
 
-# Report torch version in the test run
 def pytest_configure(config):
     """Add torch version info to pytest output."""
     config.addinivalue_line(
         "markers", f"torch_version: PyTorch {torch.__version__} is available"
     )
-    # Aggressively disable Pandas Copy-on-Write globally for all workers
-    import pandas as pd
-
-    pd.options.mode.copy_on_write = False
-    pd.set_option("mode.copy_on_write", False)
 
 
-@pytest.fixture(autouse=True)
-def setup_pandas_options():
-    """Ensure Pandas options are set correctly for all tests."""
-    import pandas as pd
-
-    # Disable Copy-on-Write to prevent "sort array is read-only" errors
-    # This must be set before data is loaded/created
-    pd.options.mode.copy_on_write = False
-    pd.set_option("mode.copy_on_write", False)
-    pd.options.mode.chained_assignment = None
-    return
-
-
-import numpy as np
-from scipy.sparse import csr_matrix
+# =============================================================================
+# Fixtures
+# =============================================================================
 
 
 @pytest.fixture

@@ -11,8 +11,6 @@ import anndata as ad
 import numpy as np
 import optuna
 import pandas as pd
-
-pd.options.mode.copy_on_write = False
 import pytest  # ty:ignore[unresolved-import]
 
 from scxpand.data_util.data_format import DataFormat

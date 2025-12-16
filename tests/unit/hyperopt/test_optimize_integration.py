@@ -2,11 +2,7 @@
 
 from unittest.mock import patch
 
-import pandas as pd
-
 from scxpand.main import optimize, optimize_all
-
-pd.options.mode.copy_on_write = False
 from tests.test_utils import create_temp_h5ad_file, safe_context_manager
 
 

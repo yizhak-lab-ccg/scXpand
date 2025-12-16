@@ -6,8 +6,6 @@ from pathlib import Path
 import anndata as ad
 import numpy as np
 import pandas as pd
-
-pd.options.mode.copy_on_write = False
 import pytest
 import torch
 from scipy.sparse import csr_matrix
