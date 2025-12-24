@@ -1,0 +1,42 @@
+{
+  "template": "https://github.com/scverse/cookiecutter-scverse",
+  "commit": "6ff5b92b5d44ea6d8a88e47538475718d467db95",
+  "checkout": "v0.7.0",
+  "context": {
+    "cookiecutter": {
+      "project_name": "scXpand",
+      "package_name": "scxpand",
+      "project_description": "Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing",
+      "author_full_name": "Ron Amit, Ofir Shorer",
+      "author_email": "ronamit@ef.technion.ac.il",
+      "github_user": "yizhak-lab-ccg",
+      "github_repo": "scXpand",
+      "license": "MIT License",
+      "ide_integration": true,
+      "_copy_without_render": [
+        ".github/workflows/build.yaml",
+        ".github/workflows/test.yaml",
+        "docs/_templates/autosummary/**.rst"
+      ],
+      "_exclude_on_template_update": [
+        "LICENSE",
+        "README.md",
+        "docs/api.md",
+        "docs/index.md",
+        "docs/notebooks/example.ipynb",
+        "docs/references.bib",
+        "docs/references.md",
+        "src/**",
+        "tests/**"
+      ],
+      "_render_devdocs": false,
+      "_jinja2_env_vars": {
+        "lstrip_blocks": true,
+        "trim_blocks": true
+      },
+      "_template": "https://github.com/scverse/cookiecutter-scverse",
+      "_commit": "6ff5b92b5d44ea6d8a88e47538475718d467db95"
+    }
+  },
+  "directory": null
+}
