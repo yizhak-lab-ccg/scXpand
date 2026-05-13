@@ -104,7 +104,6 @@ class LinearClassifierParam(BaseParams):
             init_learning_rate=self.init_learning_rate,
         )
 
-    @classmethod
-    def get_model_type(cls) -> ModelType:
+    def get_model_type(self) -> ModelType:
         """Return the model type identifier for this parameter class."""
-        return cls().model_type
+        return self.model_type
