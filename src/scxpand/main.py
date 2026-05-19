@@ -99,6 +99,11 @@ def train(
         param_class=model_spec.param_class, config_path=config_path, **kwargs
     )
 
+    # For linear models (logistic/svm), the params class is shared and defaults to logistic.
+    # Sync the CLI model_type into prm so the correct SGD loss function is selected.
+    if hasattr(prm, "model_type") and prm.model_type != model_type_enum:
+        prm.model_type = model_type_enum
+
     # Run training
     call_training_function(
         model_type=model_type_enum,

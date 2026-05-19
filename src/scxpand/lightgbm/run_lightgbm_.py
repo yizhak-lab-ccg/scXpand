@@ -18,7 +18,7 @@ from scxpand.data_util.transforms import (
 )
 from scxpand.lightgbm.lightgbm_params import LightGBMParams
 from scxpand.util.classes import ModelType
-from scxpand.util.general_util import save_params, set_seed
+from scxpand.util.general_util import enum_value, save_params, set_seed
 from scxpand.util.logger import get_logger
 from scxpand.util.model_constants import SKLEARN_MODEL_FILE
 
@@ -163,8 +163,8 @@ def run_lightgbm_training(
         bagging_fraction=prm.bagging_fraction,
         min_split_gain=prm.min_split_gain,
         min_child_weight=prm.min_child_weight,
-        boosting_type=prm.boosting_type.value,
-        objective=prm.objective.value,
+        boosting_type=enum_value(prm.boosting_type),
+        objective=enum_value(prm.objective),
         verbose=prm.verbose,
     )
     model.fit(

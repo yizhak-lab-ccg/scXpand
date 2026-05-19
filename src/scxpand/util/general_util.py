@@ -43,6 +43,15 @@ def convert_enums_to_values(obj: Any) -> Any:
         return obj
 
 
+def enum_value(val: Any) -> Any:
+    """Return the .value of an enum, or the value itself if already a plain type.
+
+    Handles the case where a field typed as an Enum was deserialized as a plain
+    string (e.g., loaded from JSON), so callers don't need to branch on the type.
+    """
+    return val.value if isinstance(val, Enum) else val
+
+
 def save_json_data(data: dict[str, Any], save_path: Path | str):
     """Save arbitrary dictionary data to a JSON file.
 
@@ -87,7 +96,7 @@ def save_params(params: BaseParams, save_dir: Path | str):
     # Get model type from parameter object
     try:
         model_type = params.get_model_type()
-        save_model_type(model_type.value, save_dir)
+        save_model_type(enum_value(model_type), save_dir)
     except AttributeError:
         logger.warning(
             f"Parameter object {type(params)} does not have get_model_type method"
