@@ -100,11 +100,11 @@ If you use scXpand in your research, please cite our paper:
 .. code-block:: bibtex
 
    @article{shorer2026scxpand,
-      title={scXpand: Pan-cancer detection of T cell clonal expansion from single-cell RNA sequencing without paired single-cell TCR sequencing},
-      author={Shorer, Ofir and Amit, Ron and Yizhak, Keren},
-      year={2026},
-      journal={Cell Genomics},
-      doi={https://doi.org/10.1016/j.xgen.2026.101328}
+     title={scXpand: Pan-cancer detection of T cell clonal expansion from single-cell RNA sequencing without paired single-cell TCR sequencing},
+     author={Shorer, Ofir and Amit, Ron and Yizhak, Keren},
+     year={2026},
+     journal={Cell Genomics},
+     doi={https://doi.org/10.1016/j.xgen.2026.101328}
    }
 
 .. raw:: html
