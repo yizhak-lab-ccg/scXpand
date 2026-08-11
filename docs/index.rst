@@ -5,7 +5,7 @@ scXpand is a framework for predicting T-cell clonal expansion from single-cell R
 
 **GitHub Repository:** `https://github.com/yizhak-lab-ccg/scXpand <https://github.com/yizhak-lab-ccg/scXpand>`_
 
-**Preprint:** `https://www.biorxiv.org/content/10.1101/2025.09.14.676069v1 <https://www.biorxiv.org/content/10.1101/2025.09.14.676069v1>`_
+**Paper:** `https://www.cell.com/cell-genomics/fulltext/S2666-979X(26)00190-4 <https://www.cell.com/cell-genomics/fulltext/S2666-979X(26)00190-4>`_
 
 .. image:: _static/images/scXpand_datasets.jpeg
    :width: 100%
@@ -90,7 +90,7 @@ If you use scXpand in your research, please cite our paper:
 
 .. code-block:: text
 
-   Shorer, O., Amit, R., and Yizhak, K. (2025). scXpand: Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing without paired single-cell TCR sequencing. Preprint at bioRxiv, https://doi.org/10.1101/2025.09.14.676069.
+   Shorer, O., Amit, R., and Yizhak, K. (2026). scXpand: Pan-cancer detection of T cell clonal expansion from single-cell RNA sequencing without paired single-cell TCR sequencing. Cell Genomics 6, https://doi.org/10.1016/j.xgen.2026.101328.
 
 .. raw:: html
 
@@ -99,12 +99,12 @@ If you use scXpand in your research, please cite our paper:
 
 .. code-block:: bibtex
 
-   @article{shorer2025scxpand,
-     title={scXpand: Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing without paired single-cell TCR sequencing},
-     author={Shorer, Ofir and Amit, Ron and Yizhak, Keren},
-     year={2025},
-     journal={bioRxiv},
-     doi={https://doi.org/10.1101/2025.09.14.676069}
+   @article{shorer2026scxpand,
+   title={scXpand: Pan-cancer detection of T cell clonal expansion from single-cell RNA sequencing without paired single-cell TCR sequencing},
+   author={Shorer, Ofir and Amit, Ron and Yizhak, Keren},
+   year={2026},
+   journal={Cell Genomics},
+   doi={https://doi.org/10.1016/j.xgen.2026.101328}
    }
 
 .. raw:: html

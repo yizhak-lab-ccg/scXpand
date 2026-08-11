@@ -1,5 +1,6 @@
-<div align="left">
+<div align="center">
   <p style="margin: 0 0 20px 0;">
+    <a href="https://www.cell.com/cell-genomics/fulltext/S2666-979X(26)00190-4"><img src="https://img.shields.io/badge/Published-Cell_Genomics-blue" alt="Published in Cell Genomics" /></a>    
     <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/v/scxpand?color=FF6F00&logo=python&logoColor=white&style=flat" alt="PyPI version" /></a>
     <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/pyversions/scxpand" alt="Python versions" /></a>
     <a href="https://github.com/yizhak-lab-ccg/scXpand/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/yizhak-lab-ccg/scXpand/test.yml?branch=main&label=tests" alt="Tests" /></a>
@@ -22,7 +23,7 @@
   </p>
 
   <p style="margin: 0; text-align: center;">
-    <a href="https://www.biorxiv.org/content/10.1101/2025.09.14.676069v1" style="margin: 0 8px;">Preprint</a> •
+    <a href="https://www.cell.com/cell-genomics/fulltext/S2666-979X(26)00190-4" style="margin: 0 8px;">Paper</a> •
     <a href="https://scxpand.readthedocs.io/en/latest/" style="margin: 0 8px;">Documentation</a> •
     <a href="#installation" style="margin: 0 8px;">Installation</a> •
     <a href="#quick-start" style="margin: 0 8px;">Quick Start</a> •
@@ -37,7 +38,7 @@
 
 A framework for predicting T-cell clonal expansion from single-cell RNA sequencing data.
 
-**[Read the preprint](https://www.biorxiv.org/content/10.1101/2025.09.14.676069v1)** | **[View full documentation](https://scxpand.readthedocs.io/en/latest/)** for comprehensive guides and API reference.
+**[Read the paper](https://www.cell.com/cell-genomics/fulltext/S2666-979X(26)00190-4)** | **[View full documentation](https://scxpand.readthedocs.io/en/latest/)** for comprehensive guides and API reference.
 
 ---
 
@@ -116,19 +117,19 @@ This project is licensed under the MIT License – see the [LICENSE](LICENSE) fi
 
 If you use scXpand in your research, please cite:
 
-> Shorer, O., Amit, R., and Yizhak, K. (2025). scXpand: Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing without paired single-cell TCR sequencing.
-> Preprint at bioRxiv, https://doi.org/10.1101/2025.09.14.676069.
+> Shorer, O., Amit, R., and Yizhak, K. (2026). scXpand: Pan-cancer detection of T cell clonal expansion from single-cell RNA sequencing without paired single-cell TCR sequencing.
+> Cell Genomics 6, https://doi.org/10.1016/j.xgen.2026.101328.
 
 <details>
 <summary><b>BibTeX</b></summary>
 
 ```bibtex
-@article{shorer2025scxpand,
-  title={scXpand: Pan-cancer detection of T-cell clonal expansion from single-cell RNA sequencing without paired single-cell TCR sequencing},
+@article{shorer2026scxpand,
+  title={scXpand: Pan-cancer detection of T cell clonal expansion from single-cell RNA sequencing without paired single-cell TCR sequencing},
   author={Shorer, Ofir and Amit, Ron and Yizhak, Keren},
-  year={2025},
-  journal={bioRxiv},
-  doi={https://doi.org/10.1101/2025.09.14.676069}
+  year={2026},
+  journal={Cell Genomics},
+  doi={https://doi.org/10.1016/j.xgen.2026.101328}
 }
 ```
 </details>
