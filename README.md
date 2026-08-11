@@ -1,6 +1,6 @@
 <div align="center">
   <p style="margin: 0 0 20px 0;">
-    <a href="https://www.cell.com/cell-genomics/fulltext/S2666-979X(26)00190-4"><img src="https://img.shields.io/badge/Published-Cell_Genomics-blue" alt="Published in Cell Genomics" /></a>    
+    <a href="https://www.cell.com/cell-genomics/fulltext/S2666-979X(26)00190-4"><img src="https://img.shields.io/badge/Published-Cell_Genomics-blue" alt="Published in Cell Genomics" /></a>
     <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/v/scxpand?color=FF6F00&logo=python&logoColor=white&style=flat" alt="PyPI version" /></a>
     <a href="https://pypi.org/project/scxpand"><img src="https://img.shields.io/pypi/pyversions/scxpand" alt="Python versions" /></a>
     <a href="https://github.com/yizhak-lab-ccg/scXpand/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/yizhak-lab-ccg/scXpand/test.yml?branch=main&label=tests" alt="Tests" /></a>
